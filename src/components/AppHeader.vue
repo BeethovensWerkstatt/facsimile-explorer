@@ -7,7 +7,7 @@
       <a href="..." class="btn btn-link">GitHub</a>-->
     </section>
     <section class="navbar-section">
-
+      <button class="btn btn-link" @click="testData()">test data</button>
       <GitMenu/>
       <!--<div class="input-group input-inline">
         <input class="form-input" type="text" placeholder="search">
@@ -26,7 +26,11 @@ export default {
   components: {
     GitMenu
   },
-  props: {
+  methods: {
+    testData () {
+      console.log('retrieving testdata')
+      this.$store.dispatch('getTestData')
+    }
   }
 }
 </script>
