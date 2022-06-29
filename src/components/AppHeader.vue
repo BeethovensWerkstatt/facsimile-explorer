@@ -3,6 +3,7 @@
   <header class="navbar appHeader">
     <section class="navbar-section">
       <span class="navbar-brand mr-2">Facsimile Explorer</span>
+      <span class="docTitle">{{docTitle}}</span>
       <!--<a href="..." class="btn btn-link">Docs</a>
       <a href="..." class="btn btn-link">GitHub</a>-->
     </section>
@@ -31,6 +32,18 @@ export default {
       console.log('retrieving testdata')
       this.$store.dispatch('getTestData')
     }
+  },
+  computed: {
+    docTitle () {
+      const title = this.$store.getters.title
+      const page = this.$store.getters.currentPageOneBased
+
+      if (title !== '' && page !== -1) {
+        return title + ', page ' + page
+      } else {
+        return ''
+      }
+    }
   }
 }
 </script>
@@ -45,5 +58,11 @@ export default {
   color: $lightFontColor;
   font-weight: 100;
   padding: 0 1rem 0 1rem;
+
+  .docTitle {
+    font-size: .7rem;
+    font-weight: 700;
+    padding-top: .2rem;
+  }
 }
 </style>

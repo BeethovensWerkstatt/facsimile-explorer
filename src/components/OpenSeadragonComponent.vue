@@ -25,19 +25,21 @@ export default {
       zoomInButton: 'zoomIn',
       zoomOutButton: 'zoomOut',
       previousButton: 'pageLeft',
-      nextButton: 'pageRight',
-      tileSources: [
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000001.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000002.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000003.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000004.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000005.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000006.jp2/info.json',
-        'https://libimages1.princeton.edu/loris/pudl0001%2F4609321%2Fs42%2F00000007.jp2/info.json'
-      ]
+      nextButton: 'pageRight'
     })
 
-    console.log(this.viewer)
+    this.viewer.addHandler('page', (data) => {
+      this.$store.dispatch('setCurrentPage', data.page)
+    })
+
+    this.unwatch = this.$store.watch((state, getters) => getters.pageArray,
+      (newArr, oldArr) => {
+        this.viewer.open(newArr)
+        this.$store.dispatch('setCurrentPage', 0)
+      })
+  },
+  beforeUnmount () {
+    this.unwatch()
   }
 }
 </script>
