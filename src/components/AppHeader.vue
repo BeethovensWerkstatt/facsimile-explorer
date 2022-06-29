@@ -1,12 +1,31 @@
 <template>
-  <div class="appHeader">
-    Hallo
-  </div>
+
+  <header class="navbar appHeader">
+    <section class="navbar-section">
+      <span class="navbar-brand mr-2">Facsimile Explorer</span>
+      <!--<a href="..." class="btn btn-link">Docs</a>
+      <a href="..." class="btn btn-link">GitHub</a>-->
+    </section>
+    <section class="navbar-section">
+
+      <GitMenu/>
+      <!--<div class="input-group input-inline">
+        <input class="form-input" type="text" placeholder="search">
+        <button class="btn input-group-btn">Search</button>
+      </div>-->
+    </section>
+  </header>
+
 </template>
 
 <script>
+import GitMenu from '@/components/GitMenu.vue'
+
 export default {
   name: 'AppHeader',
+  components: {
+    GitMenu
+  },
   props: {
   }
 }
@@ -18,5 +37,9 @@ export default {
 
 .appHeader {
   height: $appHeaderHeight;
+  background: linear-gradient(to bottom, $darkBackgroundColor, darken($darkBackgroundColor, 20%));
+  color: $lightFontColor;
+  font-weight: 100;
+  padding: 0 1rem 0 1rem;
 }
 </style>

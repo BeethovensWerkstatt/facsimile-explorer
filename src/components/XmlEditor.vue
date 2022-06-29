@@ -46,7 +46,7 @@ export default {
     }
   }, */
   setup () {
-    const code = this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
+    const code = 'hallo 2' // this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
     const extensions = [] // [javascript(), oneDark]
 
     return {
