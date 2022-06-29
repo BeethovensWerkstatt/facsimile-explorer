@@ -28,8 +28,11 @@ export default {
   components: {
     Codemirror
   },
+  data: () => ({ // only to allow `log(...)` in @functions in 11-14
+    log: console.log
+  }),
   methods: {
-    codeChange: (val) => {
+    codeChange (val) {
       console.log('hallo hier????')
       console.log(val)
       this.$store.dispatch('setXmlCode', val)
@@ -45,8 +48,8 @@ export default {
       }
     }
   }, */
-  setup () {
-    const code = 'hallo 2' // this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
+  created () {
+    const code = this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
     const extensions = [] // [javascript(), oneDark]
 
     return {
