@@ -9,7 +9,7 @@
       :tab-size="2"
       :extensions="extensions"
       @ready="log('ready', $event)"
-      @change="codeChange($event)"
+      @change="log('change', $event)"
       @focus="log('focus', $event)"
       @blur="log('blur', $event)"
     />
@@ -19,7 +19,8 @@
 <script>
 import { Codemirror } from 'vue-codemirror'
 // import { javascript } from '@codemirror/lang-javascript'
-// import { oneDark } from '@codemirror/theme-one-dark'
+import { xml } from '@codemirror/lang-xml'
+import { oneDark } from '@codemirror/theme-one-dark'
 
 // import { EditorState } from '@codemirror/state'
 
@@ -32,25 +33,20 @@ export default {
     log: console.log
   }),
   methods: {
-    codeChange (val) {
-      console.log('hallo hier????')
-      console.log(val)
-      this.$store.dispatch('setXmlCode', val)
-    }
   },
-  /* computed: {
+  computed: {
     code: {
-      get: function () {
-        this.$store.getters.xmlCode
+      get () {
+        return this.$store.getters.xmlCode
       },
-      set: function (val) {
+      set (val) {
         this.$store.dispatch('setXmlCode', val)
       }
     }
-  }, */
+  },
   created () {
     const code = this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
-    const extensions = [] // [javascript(), oneDark]
+    const extensions = [xml(), oneDark]
 
     return {
       code,
