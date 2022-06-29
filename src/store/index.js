@@ -1,14 +1,24 @@
 import { createStore } from 'vuex'
 
 export default createStore({
-  state: {
+  modules: {
   },
-  getters: {
+  state: {
+    xmlCode: ''
   },
   mutations: {
+    SET_XML_CODE (state, val) {
+      state.xmlCode = val
+    }
   },
   actions: {
+    setXmlCode ({ commit }, val) {
+      commit('SET_XML_CODE', val)
+    }
   },
-  modules: {
+  getters: {
+    xmlCode: state => {
+      return state.xmlCode
+    }
   }
 })

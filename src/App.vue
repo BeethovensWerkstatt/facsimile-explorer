@@ -10,7 +10,7 @@
           <ExplorerForm/>
         </pane>
         <pane>
-          Ich bin das XML…
+          <XmlEditor/>
         </pane>
       </splitpanes>
     </pane>
@@ -21,6 +21,7 @@
 import AppHeader from '@/components/AppHeader.vue'
 import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
 import ExplorerForm from '@/components/ExplorerForm.vue'
+import XmlEditor from '@/components/XmlEditor.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -31,6 +32,7 @@ export default {
     AppHeader,
     ExplorerForm,
     OpenSeadragonComponent,
+    XmlEditor,
     Splitpanes,
     Pane
   }
