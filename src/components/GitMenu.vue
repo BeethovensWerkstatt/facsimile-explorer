@@ -11,9 +11,6 @@
           <a class="menu-badge" href="#">
             Logout
           </a>
-          <!--<div class="menu-badge">
-            <i class="icon icon-people"></i>Logout
-          </div>-->
         </div>
       </li>
       <li class="menu-item">
@@ -25,16 +22,25 @@
       <li class="menu-item">
         <a href="#">
           BeethovensWerkstatt
+          <!-- the repo – we could hard-code some of this… -->
         </a>
       </li>
       <li class="menu-item">
         <a href="#">
           data
+          <!-- the repo -->
         </a>
       </li>
       <li class="menu-item">
         <a href="#">
           dev
+          <!-- the branch -->
+        </a>
+      </li>
+      <li class="menu-item">
+        <a href="#">
+          D-BNba_HCB_Mh_60.xml
+          <!-- a click could open a filepicker component within that repo -->
         </a>
       </li>
 
