@@ -114,42 +114,42 @@
         <body xml:id="a9f2f93d4-688e-41c4-87c4-3463a6c96a84">
             <mdiv xml:id="a1dc7497c-0a71-4fdd-9ff4-692d8ba77ffd">
                 <pages xml:id="ae3041669-5a89-4d3a-a995-06f1737e3d3e" type="transcription">
-                    <page position="absolute"
+                    <page n="1" position="absolute"
                        page.width="4696"
                        page.height="6340"
                        page.leftmar="0"
                        page.rightmar="0" ppu="1">
                        Test page 1 (content on last page)
                     </page>
-                    <page position="absolute"
+                    <page n="2" position="absolute"
                        page.width="4752"
                        page.height="6356"
                        page.leftmar="0"
                        page.rightmar="0" ppu="1">
                        Skipping to page 6 should replace the XML editor content
                     </page>
-                    <page position="absolute"
+                    <page n="3" position="absolute"
                        page.width="4832"
                        page.height="6356"
                        page.leftmar="0"
                        page.rightmar="0" ppu="1">
                        A bit boring, I know
                     </page>
-                    <page position="absolute"
+                    <page n="4" position="absolute"
                        page.width="4712"
                        page.height="6427"
                        page.leftmar="0"
                        page.rightmar="0" ppu="1">
                        Just trying to see how performant this is…
                     </page>
-                    <page position="absolute"
+                    <page n="5" position="absolute"
                        page.width="2968"
                        page.height="4429"
                        page.leftmar="0"
                        page.rightmar="0" ppu="1">
                        <!-- One last test :) -->
                     </page>
-                    <page xml:id="a14f4f2a5-8cc9-4a08-b985-f621426f65e5"
+                    <page n="6" xml:id="a14f4f2a5-8cc9-4a08-b985-f621426f65e5"
                      position="absolute"
                      page.width="3727"
                      page.height="3021"
@@ -157,7 +157,7 @@
                      page.rightmar="0" ppu="1">
 
                         <!-- Staff 1 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2416">
+                        <system system.leftmar="0" system.rightmar="0" uly="2704">
                             <scoreDef>
                                 <staffGrp symbol="none">
                                     <staffDef xml:id="af2785b38-00e7-4d93-9eb1-d376e1188aad"
@@ -208,7 +208,7 @@
                         </system>
 
                         <!-- Staff 2 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2214">
+                        <system system.leftmar="0" system.rightmar="0" uly="2503">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="2214">
@@ -220,7 +220,7 @@
                         </system>
 
                         <!-- Staff 3 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2009">
+                        <system system.leftmar="0" system.rightmar="0" uly="2298">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="2009">
@@ -302,7 +302,7 @@
                         </system>
 
                         <!-- Staff 4 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1815">
+                        <system system.leftmar="0" system.rightmar="0" uly="2102">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="1815">
@@ -366,7 +366,7 @@
                         </system>
 
                         <!-- Staff 5 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1616">
+                        <system system.leftmar="0" system.rightmar="0" uly="1902">
                             <measure ulx="290" lrx="3491"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="1616">
@@ -426,7 +426,7 @@
                         </system>-->
 
                         <!-- Staff 6 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1421">
+                        <system system.leftmar="0" system.rightmar="0" uly="1708">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="1421">
@@ -472,7 +472,7 @@
                         </system>
 
                         <!-- Staff 7 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1235">
+                        <system system.leftmar="0" system.rightmar="0" uly="1519">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="1235">
@@ -533,7 +533,7 @@
                         </system>
 
                         <!-- Staff 8 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1043">
+                        <system system.leftmar="0" system.rightmar="0" uly="1327">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="1043">
@@ -624,7 +624,7 @@
                         </system>
 
                         <!-- Staff 9 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="848">
+                        <system system.leftmar="0" system.rightmar="0" uly="1132">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="848">
@@ -707,7 +707,7 @@
                         </system>
 
                         <!-- Staff 10 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="659">
+                        <system system.leftmar="0" system.rightmar="0" uly="943">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="659">
@@ -764,7 +764,7 @@
                         </system>
 
                         <!-- Staff 11 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="463">
+                        <system system.leftmar="0" system.rightmar="0" uly="742">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="463">
@@ -777,7 +777,7 @@
                         </system>
 
                         <!-- Staff 12 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="262">
+                        <system system.leftmar="0" system.rightmar="0" uly="544">
                             <measure ulx="290" lrx="3323"
                                 n="1" left="invis" right="invis">
                                 <staff n="1" uly="262">

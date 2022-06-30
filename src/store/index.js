@@ -39,26 +39,53 @@ export default createStore({
   state: {
     currentPage: -1,
     title: '',
-    xmlCode: '',
-    parsedXml: null
+    parsedXml: null,
+    temporaryCode: '',
+    wellformed: false
   },
   mutations: {
-    SET_XML_CODE (state, val) {
-      state.xmlCode = val
-    },
     SET_XML_DOC (state, domDoc) {
       state.parsedXml = domDoc
+    },
+    SET_TEMPORARY_CODE (state, string) {
+      state.temporaryCode = string
     },
     SET_CURRENT_PAGE (state, i) {
       state.currentPage = i
     },
     SET_TITLE (state, title) {
       state.title = title
+    },
+    SET_WELLFORMED (state, bool) {
+      state.wellformed = bool
     }
   },
   actions: {
-    setXmlCode ({ commit }, val) {
-      commit('SET_XML_CODE', val)
+    setXmlByEditor ({ commit, state }, string) {
+      const snippet = parser.parseFromString(string, 'application/xml')
+      console.log('snippet')
+      console.log(snippet)
+      const errorNode = snippet.querySelector('parsererror')
+      if (errorNode) {
+        console.log('error while parsing')
+        commit('SET_WELLFORMED', false)
+        commit('SET_TEMPORARY_CODE', string)
+        return
+      } else {
+        commit('SET_WELLFORMED', true)
+        commit('SET_TEMPORARY_CODE', '')
+      }
+
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      const oldPage = xmlDoc.querySelector(queryString)
+      const newPage = snippet.querySelector('page')
+
+      oldPage.replaceWith(newPage)
+
+      commit('SET_XML_DOC', xmlDoc)
     },
     getTestData ({ commit }) {
       fetch('testfile.xml')
@@ -71,6 +98,7 @@ export default createStore({
           const doc = parser.parseFromString(xml, 'application/xml')
 
           commit('SET_XML_DOC', doc)
+          commit('SET_WELLFORMED', true)
 
           const titleQuery = '//mei:fakeTitle'
           const result = doc.evaluate(titleQuery, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
@@ -79,22 +107,31 @@ export default createStore({
         })
     },
     setCurrentPage ({ commit }, i) {
+      commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)
     }
   },
   getters: {
+    /**
+     * getter for the XML code for the current page
+     * @param  {Object} state               [description]
+     * @return {string}       [description]
+     */
     xmlCode: state => {
       if (state.parsedXml === null || state.currentPage === -1) {
         return ''
       }
 
+      if (!state.wellformed) {
+        return state.temporaryCode
+      }
+
       const pageIndex = state.currentPage + 1
       const queryString = '//mei:page[' + pageIndex + ']'
-      console.log('querying: ' + queryString)
       const xmlDoc = state.parsedXml
+
       const result = xmlDoc.evaluate(queryString, xmlDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-      console.log('got results: ')
-      console.log(result.singleNodeValue)
+
       return serializer.serializeToString(result.singleNodeValue) // state.parsedXml)
       // return state.xmlCode
     },
@@ -123,8 +160,40 @@ export default createStore({
     currentPageOneBased: state => {
       return state.currentPage + 1
     },
+
     title: state => {
       return state.title
+    },
+
+    systemsOnCurrentPage: state => {
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      if (xmlDoc === null) {
+        return []
+      }
+
+      const page = xmlDoc.querySelector(queryString)
+      const pageHeight = page.getAttributeNS('', 'page.height')
+      const pageWidth = page.getAttributeNS('', 'page.width')
+
+      const systems = []
+      page.querySelectorAll('system').forEach(system => {
+        const rawY = pageHeight - system.getAttributeNS('', 'uly')
+        console.log('rawY: ' + rawY + ', pageHeight: ' + pageHeight + ', uly: ' + system.getAttributeNS('', 'uly'))
+        const y = 1 / pageHeight * (rawY)
+        const measure = system.querySelector('measure')
+
+        const x = 1 / pageWidth * measure.getAttributeNS('', 'ulx')
+        const width = 1 / pageWidth * (measure.getAttributeNS('', 'lrx')) - x
+        const height = 0.005
+
+        const obj = { x, y, width, height }
+        systems.push(obj)
+      })
+
+      return systems
     }
   }
 })

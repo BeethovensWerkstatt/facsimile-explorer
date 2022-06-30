@@ -2,16 +2,11 @@
   <div id="xmlContainer">
     <Codemirror
       v-model="code"
-      placeholder="Code goes here..."
-      :style="{ height: '400px' }"
+      placeholder=""
       :autofocus="true"
       :indent-with-tab="true"
       :tab-size="2"
       :extensions="extensions"
-      @ready="log('ready', $event)"
-      @change="log('change', $event)"
-      @focus="log('focus', $event)"
-      @blur="log('blur', $event)"
     />
   </div>
 </template>
@@ -40,7 +35,8 @@ export default {
         return this.$store.getters.xmlCode
       },
       set (val) {
-        this.$store.dispatch('setXmlCode', val)
+        console.log('changing editor to ', val)
+        this.$store.dispatch('setXmlByEditor', val)
       }
     }
   },

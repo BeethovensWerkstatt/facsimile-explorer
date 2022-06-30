@@ -14,9 +14,9 @@ export default {
   mounted: function () {
     this.viewer = OpenSeadragon({
       id: 'osdContainer',
-      preserveViewport: true,
-      visibilityRatio: 1,
-      minZoomLevel: 1,
+      preserveViewport: false,
+      visibilityRatio: 0.8,
+      minZoomLevel: 0.4,
       defaultZoomLevel: 1,
       sequenceMode: true,
       showNavigator: true,
@@ -32,14 +32,29 @@ export default {
       this.$store.dispatch('setCurrentPage', data.page)
     })
 
-    this.unwatch = this.$store.watch((state, getters) => getters.pageArray,
+    this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
         this.viewer.open(newArr)
         this.$store.dispatch('setCurrentPage', 0)
       })
+
+    this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
+      (newArr, oldArr) => {
+        newArr.forEach(system => {
+          console.log(system)
+          const overlay = document.createElement('div')
+          overlay.classList.add('system')
+          this.viewer.addOverlay({
+            element: overlay,
+            placement: OpenSeadragon.Placement.BOTTOM_LEFT,
+            location: new OpenSeadragon.Rect(system.x, system.y, system.width, system.height)
+          })
+        })
+      })
   },
   beforeUnmount () {
-    this.unwatch()
+    this.unwatchPages()
+    this.unwatchSystems()
   }
 }
 </script>
@@ -49,5 +64,9 @@ export default {
 #osdContainer {
   width: 100%;
   height: 100%;
+
+  .system {
+     background-color: #ff000066;
+ }
 }
 </style>
