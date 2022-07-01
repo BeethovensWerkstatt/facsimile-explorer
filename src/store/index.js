@@ -136,6 +136,15 @@ export default createStore({
       // return state.xmlCode
     },
 
+    xmlDocumentCode: state => () => {
+      if (state.parsedXml === null) {
+        return ''
+      }
+      const xmlDoc = state.parsedXml
+      console.log('serialize xml')
+      return serializer.serializeToString(xmlDoc)
+    },
+
     pageArray: state => {
       if (state.parsedXml === null) {
         return []

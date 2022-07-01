@@ -57,7 +57,7 @@
         </a>
       </li>
       <li class="menu-item">
-        <a href="#" @click.prevent="downloadXML">
+        <a :href="xmlDataUrl()" target="_blank" download="dasmei.xml">
           <i class="icon icon-download"></i> Download XML
         </a>
       </li>
@@ -71,8 +71,12 @@ export default {
   props: {
   },
   methods: {
-    downloadXML (e) {
-      console.log(e)
+    xmlDataUrl () {
+      const xml = this.$store.getters.xmlDocumentCode()
+      if (xml) {
+        return 'data:text/xml,' + encodeURIComponent(xml)
+      }
+      return '#'
     }
   }
 }
