@@ -1,12 +1,6 @@
 <template>
   <div id="explorer">
     <OpenSeadragonNavigator/>
-    * Hier oder andernorts: Erzeugen MEI-Datei aus IIIF Manifest <br/>
-    * Importieren des SVG für aktuelle Seite <br/>
-    * "Formular" für einzelne Zeichen <br/>
-    * annotorious-Plugin, um Rechtecke z.B. für Systeme zu erzeugen <br/>
-    * Anbindung XML-Editor <br/>
-    * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
   </div>
 </template>
 

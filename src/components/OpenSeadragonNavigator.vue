@@ -7,8 +7,11 @@
       <div class="osdBtn" id="pageLeft"><i class="icon icon-arrow-left"></i></div>
       <div class="osdBtn" id="pageRight"><i class="icon icon-arrow-right"></i></div>
     </div>
-    <div id="openSeadragonNavigator">
-
+    <div class="osdNavBox">
+      <div id="openSeadragonNavigator"></div>
+    </div>
+    <div class="featureInfos">
+      <div class="feature" :class="{missing: !hasSvg}">SVG</div>
     </div>
   </div>
 </template>
@@ -16,7 +19,11 @@
 <script>
 export default {
   name: 'OpenSeadragonNavigator',
-  props: {
+  computed: {
+    hasSvg () {
+      const svg = this.$store.getters.svgOnCurrentPage
+      return svg !== null
+    }
   }
 }
 </script>
@@ -25,8 +32,11 @@ export default {
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
 
+$navigatorHeight: 125px;
+$navigatorMargin: 5px;
+
 .container {
-  height: 125px;
+  height: $navigatorHeight;
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -35,16 +45,51 @@ export default {
 
   .buttons {
     flex: none;
+    flex-shrink: none;
     width: 40px;
     .osdBtn {
       width: 24px;
     }
   }
 
-  #openSeadragonNavigator {
+  .osdNavBox {
     flex: 1;
-    width: 100%;
-    height: 100%;
+    height: calc($navigatorHeight - ( 2 * $navigatorMargin));
+    margin: $navigatorMargin;
+    position:relative;
+    max-width: calc(100% - 100px);
+
+    #openSeadragonNavigator {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .featureInfos {
+    flex: none;
+    flex-shrink: none;
+    width: 40px;
+
+    .feature {
+      font-weight: 500;
+      color: $darkFontColor;
+      text-align: right;
+      position: relative;
+
+      &.missing {
+         font-weight: 100;
+         cursor: pointer;
+         &:before {
+            content: "";
+            width: 100%;
+            border-bottom: .5px solid #333;
+            position: absolute;
+            bottom: 11px;
+            left: 4px;
+            rotate: -10deg;
+         }
+      }
+    }
   }
 }
 

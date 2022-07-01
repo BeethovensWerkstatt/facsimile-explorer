@@ -8,7 +8,7 @@
       <a href="..." class="btn btn-link">GitHub</a>-->
     </section>
     <section class="navbar-section">
-      <button class="btn btn-link" @click="testData()">test data</button>
+      <div class="loading" v-if="isLoading"></div>
       <GitMenu/>
       <!--<div class="input-group input-inline">
         <input class="form-input" type="text" placeholder="search">
@@ -27,12 +27,6 @@ export default {
   components: {
     GitMenu
   },
-  methods: {
-    testData () {
-      console.log('retrieving testdata')
-      this.$store.dispatch('getTestData')
-    }
-  },
   computed: {
     docTitle () {
       const title = this.$store.getters.title
@@ -43,6 +37,9 @@ export default {
       } else {
         return ''
       }
+    },
+    isLoading () {
+      return this.$store.getters.loading || this.$store.getters.processing
     }
   }
 }
@@ -63,6 +60,16 @@ export default {
     font-size: .7rem;
     font-weight: 700;
     padding-top: .2rem;
+  }
+
+  .loading {
+    margin-right: 1rem;
+    &:after {
+      border-top-color: #e5e5e500;
+      border-right-color: #e5e5e533;
+      border-bottom-color: #e5e5e566;
+      border-left-color: #e5e5e5;
+    }
   }
 }
 </style>

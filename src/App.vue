@@ -1,20 +1,33 @@
 <template>
   <AppHeader/>
-  <splitpanes class="mainSplitter default-theme">
-    <pane size="70" min-size="40" @scroll="doScroll">
-      <OpenSeadragonComponent/>
-    </pane>
-    <pane>
-      <splitpanes horizontal @scroll="doScroll">
-        <pane size="60" min-size="40" max-size="90">
-          <ExplorerForm/>
-        </pane>
-        <pane @scroll="doScroll">
-          <XmlEditor/>
-        </pane>
-      </splitpanes>
-    </pane>
-  </splitpanes>
+  <ModalOverlay/>
+  <template v-if="isReady">
+    <splitpanes class="mainSplitter default-theme">
+      <pane size="70" min-size="40" @scroll="doScroll">
+        <OpenSeadragonComponent/>
+      </pane>
+      <pane>
+        <splitpanes horizontal @scroll="doScroll">
+          <pane size="60" min-size="40" max-size="90">
+            <ExplorerForm/>
+          </pane>
+          <pane @scroll="doScroll">
+            <XmlEditor/>
+          </pane>
+        </splitpanes>
+      </pane>
+    </splitpanes>
+  </template>
+  <template v-if="!isReady">
+     <div class="loadingBack">
+        * Hier oder andernorts: Erzeugen MEI-Datei aus IIIF Manifest <br/>
+        * Importieren des SVG für aktuelle Seite <br/>
+        * "Formular" für einzelne Zeichen <br/>
+        * annotorious-Plugin, um Rechtecke z.B. für Systeme zu erzeugen <br/>
+        * Anbindung XML-Editor <br/>
+        * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
+     </div>
+  </template>
 </template>
 
 <script>
@@ -22,6 +35,7 @@ import AppHeader from '@/components/AppHeader.vue'
 import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
 import ExplorerForm from '@/components/ExplorerForm.vue'
 import XmlEditor from '@/components/XmlEditor.vue'
+import ModalOverlay from '@/components/ModalOverlay.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -33,12 +47,18 @@ export default {
     ExplorerForm,
     OpenSeadragonComponent,
     XmlEditor,
+    ModalOverlay,
     Splitpanes,
     Pane
   },
   methods: {
     doScroll (e) {
       console.log(e)
+    }
+  },
+  computed: {
+    isReady () {
+      return this.$store.getters.isReady
     }
   }
 }
@@ -58,6 +78,13 @@ export default {
 .mainSplitter {
   height: calc(100% - $appHeaderHeight);
   background-color: $mainBackgroundColor;
+}
+
+.loadingBack {
+   width: 100%;
+   height: calc(100% - $appHeaderHeight);
+   padding: 3rem;
+   background: linear-gradient(to bottom, $mainBackgroundColor, darken($mainBackgroundColor, 30%));
 }
 
 </style>
