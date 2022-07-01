@@ -57,7 +57,7 @@
         </a>
       </li>
       <li class="menu-item">
-        <a href="#">
+        <a href="#" @click.prevent="downloadXML">
           <i class="icon icon-download"></i> Download XML
         </a>
       </li>
@@ -69,6 +69,11 @@
 export default {
   name: 'GitMenu',
   props: {
+  },
+  methods: {
+    downloadXML (e) {
+      console.log(e)
+    }
   }
 }
 </script>
