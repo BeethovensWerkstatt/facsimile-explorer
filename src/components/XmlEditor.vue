@@ -24,9 +24,13 @@ export default {
   components: {
     Codemirror
   },
-  data: () => ({ // only to allow `log(...)` in @functions in 11-14
-    log: console.log
-  }),
+  data: () => {
+    const extensions = [xml(), oneDark]
+    return {
+      extensions,
+      log: console.log
+    }
+  },
   methods: {
   },
   computed: {
@@ -38,16 +42,6 @@ export default {
         console.log('changing editor to ', val)
         this.$store.dispatch('setXmlByEditor', val)
       }
-    }
-  },
-  created () {
-    const code = this.$store.getters.xmlCode // ref('console.log(\'Hello, world!\')')
-    const extensions = [xml(), oneDark]
-
-    return {
-      code,
-      extensions,
-      log: console.log
     }
   }
 }

@@ -1,15 +1,15 @@
 <template>
   <AppHeader/>
   <splitpanes class="mainSplitter default-theme">
-    <pane size="70" min-size="40">
+    <pane size="70" min-size="40" @scroll="doScroll">
       <OpenSeadragonComponent/>
     </pane>
     <pane>
-      <splitpanes horizontal>
+      <splitpanes horizontal @scroll="doScroll">
         <pane size="60" min-size="40" max-size="90">
           <ExplorerForm/>
         </pane>
-        <pane>
+        <pane @scroll="doScroll">
           <XmlEditor/>
         </pane>
       </splitpanes>
@@ -35,6 +35,11 @@ export default {
     XmlEditor,
     Splitpanes,
     Pane
+  },
+  methods: {
+    doScroll (e) {
+      console.log(e)
+    }
   }
 }
 </script>
