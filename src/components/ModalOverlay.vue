@@ -26,7 +26,8 @@
            <div>https://content.staatsbibliothek-berlin.de/dc/800412591/manifest.json</div>
          </template>
          <template v-if="type === 'loadxml'">
-            <button class="btn btn-link" @click="testData()">Load test data</button>
+            <button class="btn btn-link" @click="testData()">Load test data</button><br />
+            <input type="file" id="mei-file-input" accept=".xml, .mei" />
          </template>
        </div>
      </div>
@@ -62,6 +63,18 @@ export default {
         const input = document.querySelector('#manifest-uri-input')
         if (input.validity.valid) {
           this.$store.dispatch('importIIIF', input.value)
+        }
+      } else if (modal === 'loadxml') {
+        const input = document.querySelector('#mei-file-input')
+        const [file] = input.files
+        if (file) {
+          const reader = new FileReader()
+          reader.addEventListener('load', () => {
+            console.log(file)
+            this.$store.dispatch('setData', reader.result)
+            this.closeModal()
+          })
+          reader.readAsText(file)
         }
       }
     }

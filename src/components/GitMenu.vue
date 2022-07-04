@@ -67,7 +67,7 @@
        </button>
       </li>
       <li class="menu-item">
-        <a :href="xmlDataUrl()" target="_blank" download="dasmei.xml">
+        <a :href="xmlDataUrl()" target="_blank" :download="xmlFilename">
           <i class="icon icon-download"></i> Download XML
         </a>
       </li>
@@ -79,6 +79,12 @@
 export default {
   name: 'GitMenu',
   props: {
+  },
+  computed: {
+    xmlFilename () {
+      // TODO create filename from signature
+      return 'annotatedMEI.xml'
+    }
   },
   methods: {
     xmlDataUrl () {

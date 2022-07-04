@@ -99,25 +99,26 @@ export default createStore({
 
       commit('SET_XML_DOC', xmlDoc)
     },
-    getTestData ({ commit }) {
+    getTestData ({ commit, dispatch }) {
       fetch('testfile.xml')
         .then(res => {
           return res.text()
         })
-        .then(xml => {
-          console.log('got xml')
+        .then(xml => dispatch('setData', xml))
+    },
+    setData ({ commit }, xml) {
+      console.log('got xml')
 
-          const doc = parser.parseFromString(xml, 'application/xml')
+      const doc = parser.parseFromString(xml, 'application/xml')
 
-          commit('SET_XML_DOC', doc)
-          commit('SET_CURRENT_PAGE', 0)
-          commit('SET_WELLFORMED', true)
+      commit('SET_XML_DOC', doc)
+      commit('SET_CURRENT_PAGE', 0)
+      commit('SET_WELLFORMED', true)
 
-          const titleQuery = '//mei:fakeTitle'
-          const result = doc.evaluate(titleQuery, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          commit('SET_TITLE', result.singleNodeValue.textContent)
-          // commit('SET_XML_CODE', doc)
-        })
+      const titleQuery = '//mei:fakeTitle'
+      const result = doc.evaluate(titleQuery, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+      commit('SET_TITLE', result.singleNodeValue.textContent)
+      // commit('SET_XML_CODE', doc)
     },
     setCurrentPage ({ commit }, i) {
       commit('SET_WELLFORMED', true)
