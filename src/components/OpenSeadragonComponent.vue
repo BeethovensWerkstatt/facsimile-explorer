@@ -35,7 +35,10 @@ export default {
     }
 
     this.viewer.addHandler('page', (data) => {
-      this.$store.dispatch('setCurrentPage', data.page)
+      if (data.page !== this.$store.getters.currentPageZeroBased) {
+        this.$store.dispatch('setCurrentPage', data.page)
+      }
+
       const svg = this.$store.getters.svgOnCurrentPage
 
       if (svg !== null) {
@@ -55,6 +58,11 @@ export default {
         })
       }
     })
+
+    this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
+      (newPage, oldPage) => {
+        this.viewer.goToPage(newPage)
+      })
 
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
@@ -99,7 +107,9 @@ export default {
   },
   beforeUnmount () {
     this.unwatchPages()
+    this.unwatchSVG()
     this.unwatchSystems()
+    this.unwatchCurrentPage()
   }
 }
 </script>

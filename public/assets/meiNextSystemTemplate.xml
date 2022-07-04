@@ -1,0 +1,7 @@
+<system xmlns="http://www.music-encoding.org/ns/mei" system.leftmar="0" system.rightmar="0" uly="…">
+     <measure n="1" coord.x1="…" coord.x2="…">
+        <staff n="1">
+           <layer/>
+        </staff>
+     </measure>
+ </system>

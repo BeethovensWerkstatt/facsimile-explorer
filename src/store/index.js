@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 
 /**
  * nsResolver: A namespace resolver for use with XPath queries inside Javascript
@@ -37,7 +38,9 @@ export default createStore({
   modules: {
   },
   state: {
+    pages: [],
     currentPage: -1,
+    previewPage: -1,
     title: '',
     parsedXml: null,
     temporaryCode: '',
@@ -53,8 +56,15 @@ export default createStore({
     SET_TEMPORARY_CODE (state, string) {
       state.temporaryCode = string
     },
+    SET_PAGES (state, arr) {
+      state.pages = arr
+    },
     SET_CURRENT_PAGE (state, i) {
+      state.previewPage = -1
       state.currentPage = i
+    },
+    SET_PREVIEW_PAGE (state, i) {
+      state.previewPage = i
     },
     SET_TITLE (state, title) {
       state.title = title
@@ -124,6 +134,9 @@ export default createStore({
       commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)
     },
+    setPreviewPage ({ commit }, i) {
+      commit('SET_PREVIEW_PAGE', i)
+    },
     setModal ({ commit }, modal) {
       commit('SET_MODAL', modal)
     },
@@ -141,9 +154,29 @@ export default createStore({
         })
         .then(json => {
           commit('SET_LOADING', false)
-          commit('SET_PROCESSING', false)
+          commit('SET_PROCESSING', true)
           // check if this is a proper IIIF Manifest, then convert to MEI
-          console.log(json)
+          const isManifest = checkIiifManifest(json)
+          console.log('isManifest: ' + isManifest)
+          if (!isManifest) {
+            // do some error handling
+            return false
+          }
+
+          iiifManifest2mei(json, url, parser)
+            .then(mei => {
+              const pageArray = getPageArray(mei)
+              commit('SET_PAGES', pageArray)
+
+              commit('SET_XML_DOC', mei)
+              const title = mei.querySelector('title').textContent
+              commit('SET_TITLE', title)
+
+              commit('SET_CURRENT_PAGE', 0)
+              commit('SET_WELLFORMED', true)
+              commit('SET_PROCESSING', false)
+              commit('SET_MODAL', null)
+            })
         })
         .catch(err => {
           commit('SET_LOADING', false)
@@ -176,13 +209,17 @@ export default createStore({
         return state.temporaryCode
       }
 
+      const xmlDoc = state.parsedXml
       const pageIndex = state.currentPage + 1
-      const queryString = '//mei:page[' + pageIndex + ']'
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(queryString)
+      /* const queryString = '//mei:page[' + pageIndex + ']'
       const xmlDoc = state.parsedXml
 
       const result = xmlDoc.evaluate(queryString, xmlDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+      */
 
-      return serializer.serializeToString(result.singleNodeValue) // state.parsedXml)
+      return serializer.serializeToString(page) // state.parsedXml)
       // return state.xmlCode
     },
 
@@ -196,20 +233,16 @@ export default createStore({
     },
 
     pageArray: state => {
-      if (state.parsedXml === null) {
-        return []
-      }
-
-      const xmlDoc = state.parsedXml
-      const surfaces = xmlDoc.evaluate('//mei:surface/mei:graphic', xmlDoc, nsResolver, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
       const uris = []
+      state.pages.forEach(page => {
+        uris.push(page.uri)
+      })
 
-      for (let i = 0; i < surfaces.snapshotLength; i++) {
-        const surface = surfaces.snapshotItem(i)
-        const target = surface.getAttributeNS('', 'target')
-        uris.push(target)
-      }
       return uris
+    },
+
+    page: state => (i) => {
+      return state.pages[i]
     },
 
     currentPageZeroBased: state => {
@@ -218,6 +251,10 @@ export default createStore({
 
     currentPageOneBased: state => {
       return state.currentPage + 1
+    },
+
+    previewPageZeroBased: state => {
+      return state.previewPage
     },
 
     title: state => {

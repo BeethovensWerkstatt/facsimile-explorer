@@ -22,6 +22,17 @@
 <script>
 import GitMenu from '@/components/GitMenu.vue'
 
+const truncate = function (fullStr, strLen, separator) {
+  if (fullStr.length <= strLen) return fullStr
+  separator = separator || '…'
+  const sepLen = separator.length
+  const charsToShow = strLen - sepLen
+  const frontChars = Math.ceil(charsToShow / 2)
+  const backChars = Math.floor(charsToShow / 2)
+
+  return fullStr.substr(0, frontChars) + separator + fullStr.substr(fullStr.length - backChars)
+}
+
 export default {
   name: 'AppHeader',
   components: {
@@ -30,10 +41,10 @@ export default {
   computed: {
     docTitle () {
       const title = this.$store.getters.title
-      const page = this.$store.getters.currentPageOneBased
+      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased).label
 
       if (title !== '' && page !== -1) {
-        return title + ', page ' + page
+        return truncate(title, 40) + ', page ' + page
       } else {
         return ''
       }

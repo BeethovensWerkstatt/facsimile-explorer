@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mei xmlns="http://www.music-encoding.org/ns/mei"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     meiversion="5.0.0-dev">
+    <meiHead>
+      <fileDesc>
+        <titleStmt>
+           <title></title>
+           <composer>
+             <persName></persName>
+           </composer>
+           <editor>
+             <corpName xml:id="BW" auth.uri="https://beethovens-werkstatt.de">Beethovens Werkstatt</corpName>
+           </editor>
+           <funder>
+             <corpName xml:id="AdW" auth.uri="http://www.adwmainz.de/">Akademie der Wissenschaften und der Literatur Mainz</corpName>
+           </funder>
+        </titleStmt>
+        <pubStmt/>
+        <seriesStmt>
+           <title xml:lang="de" level="s">Skizzenbuchedition</title>
+           <identifier auth.uri="https://beethovens-werkstatt.de/modul-4/">sk</identifier>
+        </seriesStmt>
+        <sourceDesc>
+           <source target="…" targettype="http://iiif.io/api/presentation/2#Manifest"/>
+        </sourceDesc>
+     </fileDesc>
+     <encodingDesc class="#bw_module4_diplomaticTranscript"/>
+     <manifestationList>
+        <manifestation label="…" class="#music.manuscript">
+           <physDesc>
+             <foliaDesc>
+                 <folium n="…" recto="…" verso="…" width="…" height="…" unit="mm" type="music"/>
+             </foliaDesc>
+           </physDesc>
+           <physLoc>
+             <repository>
+                 <identifier auth.uri="http://www.rism.info/" auth="RISM">…</identifier>
+             </repository>
+             <identifier>…</identifier>
+           </physLoc>
+        </manifestation>
+     </manifestationList>
+     <revisionDesc>
+        <change n="1">
+           <respStmt>
+             <persName authURI="https://github.com/kepper">Johannes Kepper</persName>
+             <persName authURI="https://github.com/jpvoigt">Jan-Peter Voigt</persName>
+           </respStmt>
+           <changeDesc>
+             <p>File initially generated from IIIF Manifest available at …</p>
+           </changeDesc>
+           <date isodate="…"/>
+        </change>
+     </revisionDesc>
+    </meiHead>
+    <music meiversion="5.0.0-dev">
+        <facsimile>
+
+        </facsimile>
+        <body>
+            <pages type="transcription"/>
+        </body>
+    </music>
+</mei>

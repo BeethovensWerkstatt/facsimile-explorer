@@ -1,6 +1,8 @@
 <template>
   <AppHeader/>
-  <ModalOverlay/>
+  <IiifModal/>
+  <LoadXmlModal/>
+  <OverviewModal/>
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="70" min-size="40" @scroll="doScroll">
@@ -35,7 +37,9 @@ import AppHeader from '@/components/AppHeader.vue'
 import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
 import ExplorerForm from '@/components/ExplorerForm.vue'
 import XmlEditor from '@/components/XmlEditor.vue'
-import ModalOverlay from '@/components/ModalOverlay.vue'
+import IiifModal from '@/components/IiifModal.vue'
+import LoadXmlModal from '@/components/LoadXmlModal.vue'
+import OverviewModal from '@/components/OverviewModal.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -47,7 +51,9 @@ export default {
     ExplorerForm,
     OpenSeadragonComponent,
     XmlEditor,
-    ModalOverlay,
+    IiifModal,
+    LoadXmlModal,
+    OverviewModal,
     Splitpanes,
     Pane
   },

@@ -1,0 +1,20 @@
+<page xmlns="http://www.music-encoding.org/ns/mei">
+   <mdivb/>
+   <secb/>
+   <score>
+       <scoreDef>
+           <staffGrp symbol="none">
+               <staffDef n="1" lines="5"/>
+           </staffGrp>
+       </scoreDef>
+   </score>
+   <system system.leftmar="0" system.rightmar="0" uly="…">
+       <measure n="1" coord.x1="…" coord.x2="…">
+          <staff n="1">
+             <layer/>
+          </staff>
+       </measure>
+   </system>
+   <msEnd startid="…"/>
+   <msEnd startid="…"/>
+</page>

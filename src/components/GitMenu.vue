@@ -44,7 +44,7 @@
         </a>
       </li>
     -->
-      <li class="divider" data-content="Actions"></li>
+      <li class="divider" data-content="Data"></li>
 
       <!--<li class="menu-item">
         <a href="#">
@@ -71,6 +71,12 @@
           <i class="icon icon-download"></i> Download XML
         </a>
       </li>
+      <li class="divider" data-content="Actions"></li>
+      <li class="menu-item">
+        <button class="customBtn btn btn-link" :disabled=!isReady @click="showOverview()">
+          <i class="icon icon-copy"></i> Document Overview
+       </button>
+      </li>
     </ul>
   </div>
 </template>
@@ -81,6 +87,9 @@ export default {
   props: {
   },
   computed: {
+    isReady () {
+      return this.$store.getters.isReady
+    },
     xmlFilename () {
       // TODO create filename from signature
       return 'annotatedMEI.xml'
@@ -99,6 +108,9 @@ export default {
     },
     loadXML () {
       this.$store.dispatch('setModal', 'loadxml')
+    },
+    showOverview () {
+      this.$store.dispatch('setModal', 'overview')
     }
   }
 }
