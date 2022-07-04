@@ -52,7 +52,7 @@ export default {
       return this.$store.getters.pageArray
     },
     maxRows () {
-      return Math.ceil(this.$store.getters.pageArray.length / 2)
+      return Math.floor(this.$store.getters.pageArray.length / 2) + 1
     },
     previewLabel () {
       const previewNum = this.$store.getters.previewPageZeroBased

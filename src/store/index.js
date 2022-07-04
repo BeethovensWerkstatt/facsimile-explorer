@@ -2,23 +2,6 @@ import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 
 /**
- * nsResolver: A namespace resolver for use with XPath queries inside Javascript
- * See https://developer.mozilla.org/en-US/docs/Web/XPath/Introduction_to_using_XPath_in_JavaScript
- * @param  {string} prefix The namespace prefix
- * @return {string}        The namespace URI
- */
-function nsResolver (prefix) {
-  const ns = {
-    xhtml: 'http://www.w3.org/1999/xhtml',
-    mathml: 'http://www.w3.org/1998/Math/MathML',
-    mei: 'http://www.music-encoding.org/ns/mei',
-    svg: 'http://www.w3.org/2000/svg',
-    tei: 'http://www.tei-c.org/ns/1.0'
-  }
-  return ns[prefix] || null
-}
-
-/**
  * A Parser for reading in the XML Document
  * @type {DOMParser}
  */
@@ -114,21 +97,23 @@ export default createStore({
         .then(res => {
           return res.text()
         })
-        .then(xml => dispatch('setData', xml))
+        .then(xml => {
+          const mei = parser.parseFromString(xml, 'application/xml')
+          dispatch('setData', mei)
+        })
     },
-    setData ({ commit }, xml) {
-      console.log('got xml')
+    setData ({ commit }, mei) {
+      const pageArray = getPageArray(mei)
+      commit('SET_PAGES', pageArray)
 
-      const doc = parser.parseFromString(xml, 'application/xml')
+      commit('SET_XML_DOC', mei)
+      const title = mei.querySelector('title').textContent
+      commit('SET_TITLE', title)
 
-      commit('SET_XML_DOC', doc)
       commit('SET_CURRENT_PAGE', 0)
       commit('SET_WELLFORMED', true)
-
-      const titleQuery = '//mei:fakeTitle'
-      const result = doc.evaluate(titleQuery, doc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-      commit('SET_TITLE', result.singleNodeValue.textContent)
-      // commit('SET_XML_CODE', doc)
+      commit('SET_PROCESSING', false)
+      commit('SET_MODAL', null)
     },
     setCurrentPage ({ commit }, i) {
       commit('SET_WELLFORMED', true)
@@ -146,7 +131,7 @@ export default createStore({
     setProcessing ({ commit }, bool) {
       commit('SET_PROCESSING', bool)
     },
-    importIIIF ({ commit }, url) {
+    importIIIF ({ commit, dispatch }, url) {
       commit('SET_LOADING', true)
       fetch(url)
         .then(res => {
@@ -165,17 +150,7 @@ export default createStore({
 
           iiifManifest2mei(json, url, parser)
             .then(mei => {
-              const pageArray = getPageArray(mei)
-              commit('SET_PAGES', pageArray)
-
-              commit('SET_XML_DOC', mei)
-              const title = mei.querySelector('title').textContent
-              commit('SET_TITLE', title)
-
-              commit('SET_CURRENT_PAGE', 0)
-              commit('SET_WELLFORMED', true)
-              commit('SET_PROCESSING', false)
-              commit('SET_MODAL', null)
+              dispatch('setData', mei)
             })
         })
         .catch(err => {

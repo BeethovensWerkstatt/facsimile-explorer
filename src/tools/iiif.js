@@ -117,8 +117,11 @@ export function checkIiifManifest (json) {
 
 export function getPageArray (mei) {
   const arr = []
-  mei.querySelectorAll('surface').forEach(surface => {
+  mei.querySelectorAll('surface').forEach((surface, n) => {
     const graphic = surface.querySelector('graphic')
+    const i = n + 1
+    const page = mei.querySelector('page:nth-child(' + i + ')')
+
     const obj = {}
     obj.uri = graphic.getAttributeNS('', 'target').trim()
     obj.id = surface.getAttribute('xml:id').trim()
@@ -126,6 +129,10 @@ export function getPageArray (mei) {
     obj.label = surface.getAttributeNS('', 'label').trim()
     obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
     obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
+    obj.hasSvg = surface.querySelector('svg') !== null // exists(svg:svg) inside relevant /surface
+    obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
+
+    obj.systems = page.querySelectorAll('system').length // count(mei:system) inside relevant /page
     arr.push(obj)
   })
   return arr

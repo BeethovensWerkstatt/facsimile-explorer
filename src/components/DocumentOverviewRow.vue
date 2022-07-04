@@ -2,7 +2,18 @@
 
    <div class="row">
      <div class="infoLeft">
-        <div class="pageLabel">{{leftLabel}}</div>
+        <template v-if="hasLeft">
+           <div class="pageLabel">{{ leftPage.label}}</div>
+           <div class="info measureZones" :class="{ unavailable: !leftPage.hasZones }" :title="'Measure Zones' + ((!leftPage.hasZones)? ' unavailable' : '')">
+             <i class="icon icon-apps"></i>
+           </div>
+           <div class="info svgShapes" :class="{ unavailable: !leftPage.hasSvg }" :title="'SVG Shapes' + ((!leftPage.hasSvg)? ' unavailable' : '')">
+             <i class="icon icon-edit"></i>
+           </div>
+           <div class="info transcription" :class="{ unavailable: leftPage.systems === 0 }" :title="'Transcription ' + ((leftPage.systems === 0)? 'un' : '') + 'available'">
+             <span>♫</span>
+           </div>
+        </template>
      </div>
      <div class="pageVerso">
         <img class="previewImage"
@@ -11,7 +22,7 @@
           @click="previewLeft"
           @dblclick="openLeft"
           :src="leftImg"
-          :alt="leftLabel"/>
+          :alt="leftPage.label"/>
      </div>
      <div class="pageRecto">
         <img class="previewImage"
@@ -20,10 +31,21 @@
           @click="previewRight"
           @dblclick="openRight"
           :src="rightImg"
-          :alt="rightLabel"/>
+          :alt="rightPage.label"/>
      </div>
      <div class="infoRight">
-        <div class="pageLabel">{{rightLabel}}</div>
+        <template v-if="hasRight">
+           <div class="pageLabel">{{ rightPage.label }}</div>
+           <div class="info measureZones" :class="{ unavailable: !rightPage.hasZones }" :title="'Measure Zones' + ((!rightPage.hasZones)? ' unavailable' : '')">
+             <i class="icon icon-apps"></i>
+           </div>
+           <div class="info svgShapes" :class="{ unavailable: !rightPage.hasSvg }" :title="'SVG Shapes' + ((!rightPage.hasSvg)? ' unavailable' : '')">
+             <i class="icon icon-edit"></i>
+           </div>
+           <div class="info transcription" :class="{ unavailable: rightPage.systems === 0 }" :title="'Transcription ' + ((rightPage.systems === 0)? 'un' : '') + 'available'">
+             <span>♫</span>
+           </div>
+        </template>
      </div>
    </div>
 
@@ -60,20 +82,24 @@ export default {
     hasLeft () {
       return this.left > -1
     },
-    leftLabel () {
-      return this.$store.getters.page(this.left)?.label || ''
+    leftPage () {
+      return this.$store.getters.page(this.left)
     },
     leftImg () {
-      return this.$store.getters.page(this.left)?.uri + '/full/!110,110/0/default.jpg'
+      const uri = this.$store.getters.page(this.left)?.uri
+      const slash = (uri.endsWith('/')) ? '' : '/'
+      return uri + slash + 'full/!110,110/0/default.jpg'
     },
     hasRight () {
       return this.right < this.$store.getters.pageArray.length
     },
-    rightImg () {
-      return this.$store.getters.page(this.right)?.uri + '/full/!110,110/0/default.jpg'
+    rightPage () {
+      return this.$store.getters.page(this.right)
     },
-    rightLabel () {
-      return this.$store.getters.page(this.right)?.label || ''
+    rightImg () {
+      const uri = this.$store.getters.page(this.right)?.uri
+      const slash = (uri.endsWith('/')) ? '' : '/'
+      return uri + slash + 'full/!110,110/0/default.jpg'
     },
     currentPage () {
       return this.$store.getters.currentPageZeroBased
@@ -129,6 +155,19 @@ export default {
 
    .pageLabel {
       font-weight: 500;
+   }
+
+   .info {
+      font-size: .7rem;
+      font-weight: 300;
+
+      &.transcription {
+         font-size: .9rem;
+      }
+
+      &.unavailable {
+         color: #aaaaaa;
+      }
    }
 
    .previewImage.current {
