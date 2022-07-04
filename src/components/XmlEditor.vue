@@ -50,4 +50,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 
+#xmlContainer {
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+  height: 100%;
+}
+
 </style>
