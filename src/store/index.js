@@ -21,6 +21,7 @@ export default createStore({
   modules: {
   },
   state: {
+    explorerTab: 'systems',
     pages: [],
     currentPage: -1,
     previewPage: -1,
@@ -63,6 +64,9 @@ export default createStore({
     },
     SET_PROCESSING (state, bool) {
       state.processing = bool
+    },
+    SET_EXPLORER_TAB (state, val) {
+      state.explorerTab = val
     }
   },
   actions: {
@@ -130,6 +134,9 @@ export default createStore({
     },
     setProcessing ({ commit }, bool) {
       commit('SET_PROCESSING', bool)
+    },
+    setExplorerTab ({ commit }, val) {
+      commit('SET_EXPLORER_TAB', val)
     },
     importIIIF ({ commit, dispatch }, url) {
       commit('SET_LOADING', true)
@@ -300,6 +307,10 @@ export default createStore({
 
     processing: state => {
       return state.processing
+    },
+
+    explorerTab: state => {
+      return state.explorerTab
     }
   }
 })
