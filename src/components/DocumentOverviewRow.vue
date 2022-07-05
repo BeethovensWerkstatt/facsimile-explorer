@@ -116,6 +116,13 @@ export default {
     maxRows () {
       return Math.ceil(this.$store.getters.pageArray.length / 2)
     } */
+  },
+  watch: {
+    previewPage () {
+      if (this.previewPage === this.left || this.previewPage === this.right) {
+        this.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
   }
 }
 </script>

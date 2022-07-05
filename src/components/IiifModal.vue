@@ -22,7 +22,7 @@
              described by the IIIF Manifest provided.
            </p>
         </div>
-        <div>https://content.staatsbibliothek-berlin.de/dc/800412591/manifest</div>
+        <div @click="useTestUri">{{ testUri }}</div>
        </div>
      </div>
      <div class="modal-footer">
@@ -43,7 +43,13 @@ export default {
   components: {
 
   },
+  data: () => ({
+    testUri: 'https://content.staatsbibliothek-berlin.de/dc/800412591/manifest'
+  }),
   methods: {
+    useTestUri () {
+      this.$el.querySelector('#manifest-uri-input').value = this.testUri
+    },
     closeModal () {
       this.$store.dispatch('setModal', null)
     },

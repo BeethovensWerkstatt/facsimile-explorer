@@ -1,28 +1,49 @@
 <template>
 
-   <div class="modal" :class="{ active }" id="overview-modal">
-   <a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
-   <div class="modal-container">
-     <div class="modal-header">
-       <a href="#close" @click="closeModal()" class="btn btn-clear float-right" aria-label="Close"></a>
-       <div class="modal-title h5">Overview</div>
-     </div>
-     <div class="modal-body">
-       <div class="content">
-         <div>
-           <h1>Pages</h1>
-           <DocumentOverviewRow v-for="r in maxRows" :key="r" :left="((r - 1) * 2 - 1)"  :right="((r - 1) * 2)"/>
-         </div>
-       </div>
-     </div>
-     <div class="modal-footer">
-       <div class="btn-group">
-         <button class="btn" @click="closeModal()">Close</button>
-         <button class="btn btn-primary" :disabled="openPageBlocked" @click="openPage()">Open Page {{previewLabel}}</button>
-       </div>
-     </div>
-   </div>
- </div>
+  <div class="modal" :class="{ active }" id="overview-modal">
+    <a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
+    <div class="modal-container">
+      <div class="modal-header">
+        <a href="#close" @click="closeModal()" class="btn btn-clear float-right" aria-label="Close"></a>
+        <div class="modal-title h5">Overview</div>
+      </div>
+      <div class="modal-body">
+        <div class="content">
+          <div>
+            <h1>Pages</h1>
+            <DocumentOverviewRow
+              v-for="r in maxRows"
+              :key="r"
+              :left="calcRowLeft(r)"
+              :right="calcRowRight(r)"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div v-if="this.$store.getters.previewPageZeroBased >= 0" class="preview-info">
+          <div>
+            Seite {{ previewLabel }}
+          </div>
+          <div>
+            <div class="info measureZones" :class="{ unavailable: !previewPage.hasZones }" :title="'Measure Zones' + ((!previewPage.hasZones) ? ' unavailable' : '')">
+              <i class="icon icon-apps"></i>
+            </div>
+            <div class="info svgShapes" :class="{ unavailable: !previewPage.hasSvg }" :title="'SVG Shapes' + ((!previewPage.hasSvg) ? ' unavailable' : '')">
+              <i class="icon icon-edit"></i> <button v-if="!previewPage.hasSvg" class="btn btn-link" @click="addSVG">SVG laden ...</button>
+            </div>
+            <div class="info transcription" :class="{ unavailable: !previewPage.systems }" :title="'Transcription ' + (( !previewPage.systems ) ? 'un' : '') + 'available'">
+              <span>♫</span>
+            </div>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn" @click="closeModal()">Close</button>
+          <button class="btn btn-primary" :disabled="openPageBlocked" @click="openPage()">Open Page {{previewLabel}}</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </template>
 
@@ -35,6 +56,8 @@ export default {
     DocumentOverviewRow
   },
   methods: {
+    calcRowLeft: (r) => ((r - 1) * 2 - 1),
+    calcRowRight: (r) => ((r - 1) * 2),
     closeModal () {
       this.$store.dispatch('setModal', null)
     },
@@ -42,6 +65,9 @@ export default {
       const previewPage = this.$store.getters.previewPageZeroBased
       this.$store.dispatch('setCurrentPage', previewPage)
       this.$store.dispatch('setModal', null)
+    },
+    addSVG () {
+      console.log('add SVG ...')
     }
   },
   computed: {
@@ -54,14 +80,22 @@ export default {
     maxRows () {
       return Math.floor(this.$store.getters.pageArray.length / 2) + 1
     },
-    previewLabel () {
-      const previewNum = this.$store.getters.previewPageZeroBased
+    previewPageNum () {
+      return this.$store.getters.previewPageZeroBased
+    },
+    previewPage () {
+      const previewNum = this.previewPageNum
 
       if (previewNum === -1) {
-        return ''
+        return {
+          label: ''
+        }
       }
 
-      return this.$store.getters.page(previewNum).label
+      return this.$store.getters.page(previewNum)
+    },
+    previewLabel () {
+      return this.previewPage.label
     },
     openPageBlocked () {
       const previewPage = this.$store.getters.previewPageZeroBased
@@ -135,5 +169,27 @@ export default {
 @import '@/css/_variables.scss';
 .pagesRow {
    border-bottom: $lightBorder;
+}
+
+.modal-footer {
+  .preview-info {
+    display: flex;
+    width: 100%;
+    div {
+      width: 50%;
+      text-align: left;
+
+      font-size: .7rem;
+      font-weight: 300;
+
+      &.transcription {
+         font-size: .9rem;
+      }
+
+      &.unavailable {
+         color: #aaaaaa;
+      }
+    }
+  }
 }
 </style>
