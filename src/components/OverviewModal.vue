@@ -23,14 +23,22 @@
       <div class="modal-footer">
         <div v-if="this.$store.getters.previewPageZeroBased >= 0" class="preview-info">
           <div>
-            Seite {{ previewLabel }}
+            <div>
+              Label: {{ previewLabel }}
+            </div>
+            <div>
+              Width: {{ previewPage.width }}
+            </div>
+            <div>
+              Height: {{ previewPage.height }}
+            </div>
           </div>
           <div>
             <div class="info measureZones" :class="{ unavailable: !previewPage.hasZones }" :title="'Measure Zones' + ((!previewPage.hasZones) ? ' unavailable' : '')">
               <i class="icon icon-apps"></i>
             </div>
             <div class="info svgShapes" :class="{ unavailable: !previewPage.hasSvg }" :title="'SVG Shapes' + ((!previewPage.hasSvg) ? ' unavailable' : '')">
-              <i class="icon icon-edit"></i> <button v-if="!previewPage.hasSvg" class="btn btn-link" @click="addSVG">SVG laden ...</button>
+              <i class="icon icon-edit"></i> <button v-if="!previewPage.hasSvg" class="btn btn-link" @click="addSVG">add shapes ...</button>
             </div>
             <div class="info transcription" :class="{ unavailable: !previewPage.systems }" :title="'Transcription ' + (( !previewPage.systems ) ? 'un' : '') + 'available'">
               <span>♫</span>
