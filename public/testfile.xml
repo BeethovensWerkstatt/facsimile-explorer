@@ -107,7 +107,7 @@
            <surface xml:id="x5dc8608c-05d8-463c-b77e-89e7f47093cf" n="5" ulx="0" uly="0" lrx="2968" lry="4429" rotate="0" label="5">
               <graphic xml:id="x3569b7c2-958c-43fc-82c9-10501c97751c" target="https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/US-NYj_31_B393cp_no.5_errata%2F005.jpg" type="facsimile" width="2968" height="4429"/>
            </surface>
-           <surface xml:id="t28f9001f-c5b4-4c30-a790-853db67fd5b3" n="6" ulx="0" uly="0" lrx="3727" lry="3021" rotate="0" label="6">
+           <surface xml:id="test_t28f9001f-c5b4-4c30-a790-853db67fd5b3" n="6" ulx="0" uly="0" lrx="3727" lry="3021" rotate="0" label="6">
              <graphic xml:id="asd55ebf0-3ba8-465b-a60b-337b5aecefcf" target="https://content.staatsbibliothek-berlin.de/dc/800412591-0013/" type="facsimile" width="3727" height="3021"/>
              <svg xmlns="http://www.w3.org/2000/svg" width="3727px" height="3021px" viewBox="0 0 3727 3021" version="1.1" xml:space="preserve" preserveAspectRatio="xMidYMid meet" zoomAndPan="magnify" contentScriptType="text/ecmascript" contentStyleType="text/css" id="Landsberg-8-1_S.7_overlays" x="0px" y="0px" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><!--SVG prepared on 2022-06-13 by prepareSVGs.xsl, original data prepared by Affinity-->
                      <path id="shape_3fee7fe9-1a08-43e0-813b-86b17fcf8769" opacity="0.4" fill="#af3e3e" d="M711.598,305.853C711.357,306.089 711.196,306.407 711.158,306.765L711.146,306.882C710.922,307.172 710.732,307.53 710.591,307.954C710.457,308.355 710.36,308.825 710.3,309.317C710.272,309.48 710.255,309.652 710.25,309.83C710.192,310.611 710.22,311.402 710.328,312.019C710.354,312.173 710.388,312.318 710.426,312.455C710.31,313.405 710.22,314.475 710.175,315.562C710.083,317.765 710.182,320.032 710.569,321.526C710.712,322.076 710.904,322.542 711.124,322.916C710.832,323.181 710.646,323.559 710.633,323.98C710.633,323.98 710.61,324.729 710.676,325.739C710.607,326.332 710.632,326.985 710.738,327.656C711.045,329.584 711.976,331.683 712.26,332.291C712.255,332.387 712.254,332.482 712.258,332.574C712.27,332.91 712.339,333.22 712.451,333.491C712.438,333.645 712.449,333.803 712.486,333.96C712.486,333.96 712.693,334.825 712.976,335.482C713.036,335.621 713.101,335.751 713.17,335.872L713.573,336.978C713.616,337.099 713.674,337.21 713.743,337.311L713.743,337.502C713.743,339.679 713.571,342.667 713.762,345.375C713.871,346.913 714.104,348.365 714.517,349.575C714.369,350.902 714.246,352.28 714.242,353.442C714.238,354.54 714.347,355.478 714.567,356.114C714.73,356.586 714.962,356.947 715.219,357.205C715.787,357.772 716.029,358.527 716.168,359.384C716.349,360.503 716.337,361.778 716.337,363.141L716.337,374.001C716.313,374.575 716.195,378.229 717.011,379.874C718.406,382.684 718.149,386.786 718.149,390.609C718.149,393.748 717.456,399.63 717.978,403.83C718.231,405.864 718.806,407.541 719.699,408.571C719.699,408.684 719.695,408.877 719.681,409.013C719.638,409.419 719.563,409.858 719.511,410.273C719.438,410.858 719.419,411.41 719.492,411.851C719.563,412.27 719.71,412.624 719.918,412.914C719.934,413.174 719.979,413.989 719.95,414.587C719.882,416.004 719.706,417.559 719.706,418.08C719.706,420.692 719.232,423.983 719.249,426.992C719.262,429.246 719.557,431.352 720.382,433.003C720.417,433.073 720.389,433.16 720.386,433.249C720.379,433.438 720.354,433.636 720.327,433.834C720.261,434.313 720.187,434.793 720.182,435.221C720.171,436.051 720.406,436.745 720.895,437.249C720.905,437.279 720.938,437.382 720.95,437.447C720.983,437.632 720.993,437.84 720.991,438.064C720.986,438.81 720.85,439.691 720.704,440.588C720.504,441.827 720.284,443.09 720.249,444.132C720.217,445.083 720.352,445.891 720.641,446.474C722.246,449.709 721.89,453.522 721.622,457.336C721.314,461.7 721.095,466.066 722.98,469.807C723.352,470.546 724.255,470.844 724.994,470.471C725.734,470.099 726.031,469.196 725.659,468.457C724.012,465.189 724.346,461.36 724.614,457.547C724.921,453.185 725.164,448.84 723.329,445.141C723.181,444.844 723.228,444.398 723.266,443.888C723.357,442.669 723.669,441.2 723.846,439.87C723.989,438.803 724.043,437.81 723.922,437.033C723.813,436.325 723.559,435.75 723.194,435.32C723.211,435.114 723.263,434.512 723.312,434.146C723.432,433.234 723.406,432.341 723.066,431.662C722.424,430.378 722.259,428.728 722.249,426.975C722.232,423.972 722.706,420.687 722.706,418.08C722.706,417.301 723.088,414.233 722.929,412.721C722.861,412.08 722.663,411.596 722.45,411.284C722.45,411.18 722.452,410.968 722.467,410.823C722.51,410.417 722.585,409.979 722.637,409.564C722.71,408.981 722.731,408.429 722.658,407.988C722.567,407.429 722.337,406.984 722.011,406.656C721.628,406.269 721.403,405.66 721.222,404.939C720.986,404.003 720.867,402.896 720.813,401.712C720.636,397.857 721.149,393.246 721.149,390.609C721.149,386.304 721.269,381.705 719.699,378.54C719.461,378.061 719.384,377.319 719.336,376.609C719.249,375.335 719.333,374.129 719.333,374.129C719.336,374.094 719.337,374.059 719.337,374.024L719.337,363.141C719.337,361.603 719.333,360.167 719.129,358.905C718.934,357.694 718.555,356.629 717.901,355.737C717.961,355.607 718.003,355.466 718.024,355.317C718.024,355.317 718.298,353.369 718.173,351.62C718.148,351.259 718.103,350.906 718.039,350.574L718.039,344.613C718.039,344.584 718.038,344.554 718.034,344.524C718.021,344.178 717.976,343.893 717.906,343.66C717.999,343.306 718.055,342.887 718.054,342.409C718.047,340.44 717.309,336.942 716.819,334.83C716.832,334.758 716.842,334.683 716.851,334.608C716.989,333.447 716.715,332.027 716.715,332.027C716.674,331.823 716.594,331.636 716.482,331.474L716.482,327.655C716.482,327.163 716.245,326.724 715.875,326.45L715.701,324.417C715.67,324.047 715.506,323.719 715.259,323.477C715.19,322.352 715.043,321.11 714.912,320.063C714.922,319.981 714.927,319.918 714.927,319.881C714.927,319.715 715.564,312.8 715.441,310.041C715.397,309.053 715.15,308.394 714.976,308.158L714.975,308.156C715.003,308.059 715.028,307.96 715.052,307.861C715.551,305.772 715.444,303.228 715.444,303.228C715.412,302.491 714.848,301.887 714.115,301.803C713.381,301.72 712.696,302.183 712.5,302.894C712.5,302.894 712.108,304.326 711.598,305.853Z"/>
@@ -782,106 +782,112 @@
            </surface>
         </facsimile>
         <body xml:id="a9f2f93d4-688e-41c4-87c4-3463a6c96a84">
-            <mdiv xml:id="a1dc7497c-0a71-4fdd-9ff4-692d8ba77ffd">
-                <pages xml:id="ae3041669-5a89-4d3a-a995-06f1737e3d3e" type="transcription">
-                    <page n="1" position="absolute"
-                       page.width="4696"
-                       page.height="6340"
-                       page.leftmar="0"
-                       page.rightmar="0" ppu="1">
-                       Test page 1 (content on last page)
-                    </page>
-                    <page n="2" position="absolute"
-                       page.width="4752"
-                       page.height="6356"
-                       page.leftmar="0"
-                       page.rightmar="0" ppu="1">
-                       Skipping to page 6 should replace the XML editor content
-                    </page>
-                    <page n="3" position="absolute"
-                       page.width="4832"
-                       page.height="6356"
-                       page.leftmar="0"
-                       page.rightmar="0" ppu="1">
-                       A bit boring, I know
-                    </page>
-                    <page n="4" position="absolute"
-                       page.width="4712"
-                       page.height="6427"
-                       page.leftmar="0"
-                       page.rightmar="0" ppu="1">
-                       Just trying to see how performant this is…
-                    </page>
-                    <page n="5" position="absolute"
-                       page.width="2968"
-                       page.height="4429"
-                       page.leftmar="0"
-                       page.rightmar="0" ppu="1">
-                       <!-- One last test :) -->
-                    </page>
-                    <page n="6" xml:id="a14f4f2a5-8cc9-4a08-b985-f621426f65e5"
-                     position="absolute"
+            <pages xml:id="ae3041669-5a89-4d3a-a995-06f1737e3d3e" type="transcription">
+               <page
+                 page.width="4696"
+                 page.height="6340"
+                 page.leftmar="0"
+                 page.rightmar="0"
+                 surface="#x3a88cc3a-9b72-4cf8-8aa7-efa1e38004c9">
+                 <!-- page 1 -->
+               </page>
+               <page
+                 page.width="4752"
+                 page.height="6356"
+                 page.leftmar="0"
+                 page.rightmar="0"
+                 surface="#xbdb83095-1669-45da-b9aa-10cdd7e793c8">
+                 <!-- page 2 -->
+               </page>
+               <page
+                 page.width="4832"
+                 page.height="6340"
+                 page.leftmar="0"
+                 page.rightmar="0"
+                 surface="#x9310558f-db05-4889-aa52-ec2b7000be0e">
+                 <!-- page 3 -->
+               </page>
+               <page
+                 page.width="4712"
+                 page.height="6427"
+                 page.leftmar="0"
+                 page.rightmar="0"
+                 surface="#xcbf59f65-c207-4cab-8d80-debed9997f0c">
+                 <!-- page 4 -->
+               </page>
+               <page
+                 page.width="2968"
+                 page.height="4429"
+                 page.leftmar="0"
+                 page.rightmar="0"
+                 surface="#x5dc8608c-05d8-463c-b77e-89e7f47093cf">
+                 <!-- page 5 -->
+               </page>
+               <page xml:id="a14f4f2a5-8cc9-4a08-b985-f621426f65e5"
                      page.width="3727"
                      page.height="3021"
                      page.leftmar="0"
-                     page.rightmar="0" ppu="1">
+                     page.rightmar="0" >
 
-                        <!-- Staff 1 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2704">
+                        <mdivb xml:id="t4dc4385a-11fc-4e90-abe5-19884a5387ed"/>
+                        <secb xml:id="t1e993ebe-3542-4619-8937-957fac2ecd42"/>
+                        <score>
                             <scoreDef>
                                 <staffGrp symbol="none">
                                     <staffDef xml:id="af2785b38-00e7-4d93-9eb1-d376e1188aad"
-                                     n="1"
-                                     lines="5"
-                                     clef.line="2" clef.shape="G"
-                                     />
+                                        n="1"
+                                        lines="5"
+                                    />
                                 </staffGrp>
                             </scoreDef>
+                        </score>
+                        <!-- Staff 1 -->
+                        <system system.leftmar="0" system.rightmar="0" uly="2711">
 
-                            <measure ulx="290" lrx="3323"
+
+                            <measure coord.x1="290" coord.x2="3323"
                               n="1">
-                                <staff n="1" uly="2416">
+                                <staff n="1" coord.y1="2416">
                                     <layer>
-                                        <clef line="2" shape="G"/>
-                                        <note loc="13" stem.dir="down" dur="4" ulx="665"/>
-                                        <note loc="-1" stem.dir="down" stem.mod="2slash" dur="2" ulx="662"/>
+                                        <note loc="13" stem.dir="down" dur="4" coord.x1="665"/>
+                                        <note loc="-1" stem.dir="down" stem.mod="2slash" dur="2" coord.x1="662"/>
 
-                                        <barLine form="single" ulx="717"/>
+                                        <barLine form="single" coord.x1="717"/>
 
-                                        <note loc="10" stem.dir="down" dur="4" ulx="758"/>
-                                        <note loc="8" stem.dir="down" dur="4" ulx="818"/>
-                                        <note loc="6" stem.dir="down" dur="4" ulx="868"/>
+                                        <note loc="10" stem.dir="down" dur="4" coord.x1="758"/>
+                                        <note loc="8" stem.dir="down" dur="4" coord.x1="818"/>
+                                        <note loc="6" stem.dir="down" dur="4" coord.x1="868"/>
                                         <beam>
-                                            <note loc="3" stem.dir="down" dur="4" ulx="914"/>
-                                            <note loc="1" stem.dir="down" dur="4" ulx="939"/>
+                                            <note loc="3" stem.dir="down" dur="4" coord.x1="914"/>
+                                            <note loc="1" stem.dir="down" dur="4" coord.x1="939"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="971"/>
+                                        <barLine form="single" coord.x1="971"/>
 
-                                        <note loc="-1" stem.dir="down" dur="4" ulx="1002"/>
+                                        <note loc="-1" stem.dir="down" dur="4" coord.x1="1002"/>
 
-                                        <barLine form="single" ulx="1131"/>
+                                        <barLine form="single" coord.x1="1131"/>
 
-                                        <note loc="13" stem.dir="down" dur="4" ulx="1233"/>
-                                        <note loc="10" stem.dir="down" dur="4" ulx="1302"/>
-                                        <note loc="8" stem.dir="down" dur="4" ulx="1349"/>
-                                        <note loc="6" stem.dir="down" dur="4" ulx="1403"/>
-                                        <note loc="3" stem.dir="down" dur="4" ulx="1441"/>
+                                        <note loc="13" stem.dir="down" dur="4" coord.x1="1233"/>
+                                        <note loc="10" stem.dir="down" dur="4" coord.x1="1302"/>
+                                        <note loc="8" stem.dir="down" dur="4" coord.x1="1349"/>
+                                        <note loc="6" stem.dir="down" dur="4" coord.x1="1403"/>
+                                        <note loc="3" stem.dir="down" dur="4" coord.x1="1441"/>
 
-                                        <accid loc="-1" accid="s" ulx="1656"/>
-                                        <note loc="-2" stem.dir="up" dur="4" ulx="1718" xml:id="t50b97b66-e935-47dd-ac44-dceee8e4d7f7"/>
+                                        <accid loc="-1" accid="s" coord.x1="1656"/>
+                                        <note loc="-2" stem.dir="up" dur="4" coord.x1="1718" xml:id="t50b97b66-e935-47dd-ac44-dceee8e4d7f7"/>
 
                                     </layer>
                                 </staff>
-                                <dir staff="1" place="below" startid="#t50b97b66-e935-47dd-ac44-dceee8e4d7f7" ulx="1580">cis</dir>
+                                <dir staff="1" place="below" startid="#t50b97b66-e935-47dd-ac44-dceee8e4d7f7" coord.x1="1580">cis</dir>
                             </measure>
                         </system>
 
                         <!-- Staff 2 -->
                         <system system.leftmar="0" system.rightmar="0" uly="2503">
-                            <measure ulx="290" lrx="3323"
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="2214">
+                                <staff n="1" coord.y1="2214">
                                     <layer>
                                         <mSpace/>
                                     </layer>
@@ -890,251 +896,251 @@
                         </system>
 
                         <!-- Staff 3 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2298">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="2300">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="2009">
+                                <staff n="1" coord.y1="2009">
                                     <layer>
-                                        <note loc="6" stem.dir="down" dur="4" ulx="752" xml:id="t3c433037-4219-4f01-ad54-53a92fa88d1e"/>
+                                        <note loc="6" stem.dir="down" dur="4" coord.x1="752" xml:id="t3c433037-4219-4f01-ad54-53a92fa88d1e"/>
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="821" xml:id="t94636add-b463-433f-8fee-4ddfa8d11579"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="861"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="905"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="939"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="821" xml:id="t94636add-b463-433f-8fee-4ddfa8d11579"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="861"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="905"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="939"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="995"/>
+                                        <barLine form="single" coord.x1="995"/>
 
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1103"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1142"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="1185"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="1233"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1103"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1142"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="1185"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="1233"/>
                                         </beam>
                                         <beam>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1398"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1439"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1489"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="1531"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1398"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1439"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1489"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="1531"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1609"/>
-
-                                        <beam>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1679"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1731"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1777"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1804"/>
-                                        </beam>
-                                        <beam>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1919"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1964"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1995"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2034"/>
-                                        </beam>
-
-                                        <barLine form="single" ulx="2091"/>
+                                        <barLine form="single" coord.x1="1609"/>
 
                                         <beam>
-                                            <note loc="15" stem.dir="down" dur="16" ulx="2223"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="2277"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2313"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="2346"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1679"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1731"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1777"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1804"/>
                                         </beam>
-                                        <note loc="15" stem.dir="down" dur="4" ulx="2477"/>
-
-                                        <note loc="17" stem.dir="down" dur="4" ulx="2586"/>
-                                        <note loc="17" stem.dir="down" dur="4" ulx="2733"/>
                                         <beam>
-                                            <note loc="15" stem.dir="down" dur="8" ulx="2816"/>
-                                            <note loc="15" stem.dir="down" dur="8" ulx="2854"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1919"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1964"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1995"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2034"/>
                                         </beam>
-                                        <note loc="17" stem.dir="down" dur="4" ulx="2922"/>
+
+                                        <barLine form="single" coord.x1="2091"/>
+
+                                        <beam>
+                                            <note loc="15" stem.dir="down" dur="16" coord.x1="2223"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="2277"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2313"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="2346"/>
+                                        </beam>
+                                        <note loc="15" stem.dir="down" dur="4" coord.x1="2477"/>
+
+                                        <note loc="17" stem.dir="down" dur="4" coord.x1="2586"/>
+                                        <note loc="17" stem.dir="down" dur="4" coord.x1="2733"/>
+                                        <beam>
+                                            <note loc="15" stem.dir="down" dur="8" coord.x1="2816"/>
+                                            <note loc="15" stem.dir="down" dur="8" coord.x1="2854"/>
+                                        </beam>
+                                        <note loc="17" stem.dir="down" dur="4" coord.x1="2922"/>
                                         <!-- Auswischung: -->
-                                        <note loc="15" stem.dir="down" dur="4" ulx="2972"/>
-                                        <note loc="15" stem.dir="down" dur="4" ulx="3032"/>
+                                        <note loc="15" stem.dir="down" dur="4" coord.x1="2972"/>
+                                        <note loc="15" stem.dir="down" dur="4" coord.x1="3032"/>
 
-                                        <note loc="10" stem.dir="down" dur="4" ulx="3142" xml:id="t3acb9b7f-b467-4e48-8929-c921b86a8d26"/>
-                                        <note loc="8" stem.dir="down" dur="4" ulx="3184"/>
+                                        <note loc="10" stem.dir="down" dur="4" coord.x1="3142" xml:id="t3acb9b7f-b467-4e48-8929-c921b86a8d26"/>
+                                        <note loc="8" stem.dir="down" dur="4" coord.x1="3184"/>
                                         <beam>
-                                            <note loc="10" stem.dir="down" dur="4" ulx="3210"/>
-                                            <note loc="8" stem.dir="down" dur="4" ulx="3219"/>
+                                            <note loc="10" stem.dir="down" dur="4" coord.x1="3210"/>
+                                            <note loc="8" stem.dir="down" dur="4" coord.x1="3219"/>
                                         </beam>
-                                        <note loc="8" stem.dir="down" dur="4" ulx="3232"/>
-                                        <note loc="6" stem.dir="down" dur="4" ulx="3250"/>
-                                        <note loc="3" stem.dir="down" dur="4" ulx="3263"/>
-                                        <note loc="1" stem.dir="down" dur="4" ulx="3291"/>
+                                        <note loc="8" stem.dir="down" dur="4" coord.x1="3232"/>
+                                        <note loc="6" stem.dir="down" dur="4" coord.x1="3250"/>
+                                        <note loc="3" stem.dir="down" dur="4" coord.x1="3263"/>
+                                        <note loc="1" stem.dir="down" dur="4" coord.x1="3291"/>
                                     </layer>
                                 </staff>
                                 <slur startid="#t3c433037-4219-4f01-ad54-53a92fa88d1e" endid="#t94636add-b463-433f-8fee-4ddfa8d11579" curvedir="above"/>
-                                <dynam ulx="3066" staff="1" place="below" startid="#t3acb9b7f-b467-4e48-8929-c921b86a8d26">Dimin</dynam>
+                                <dynam coord.x1="3066" staff="1" place="below" startid="#t3acb9b7f-b467-4e48-8929-c921b86a8d26">Dimin</dynam>
                             </measure>
                         </system>
 
                         <!-- Staff 4 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="2102">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="2105">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="1815">
+                                <staff n="1" coord.y1="1815">
                                     <layer>
-                                        <note loc="-1" stem.dir="down" dur="4" ulx="735" xml:id="t770d12a6-8947-4490-a6d9-03e89aee4543"/>
+                                        <note loc="-1" stem.dir="down" dur="4" coord.x1="735" xml:id="t770d12a6-8947-4490-a6d9-03e89aee4543"/>
                                         <beam>
-                                            <note loc="-1" stem.dir="down" dur="16" ulx="884" xml:id="ta2219545-420f-4713-ae40-96f502a99bc1"/>
-                                            <note loc="1" stem.dir="down" dur="16" ulx="915"/>
-                                            <note loc="0" stem.dir="down" dur="16" ulx="950"/>
-                                            <note loc="-1" stem.dir="down" dur="16" ulx="975"/>
+                                            <note loc="-1" stem.dir="down" dur="16" coord.x1="884" xml:id="ta2219545-420f-4713-ae40-96f502a99bc1"/>
+                                            <note loc="1" stem.dir="down" dur="16" coord.x1="915"/>
+                                            <note loc="0" stem.dir="down" dur="16" coord.x1="950"/>
+                                            <note loc="-1" stem.dir="down" dur="16" coord.x1="975"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1065"/>
+                                        <barLine form="single" coord.x1="1065"/>
 
-                                        <note loc="-2" stem.dir="up" dur="4" ulx="1116" xml:id="tf9fae9b7-f7b2-44ea-af9a-f38f7363e42e"/>
+                                        <note loc="-2" stem.dir="up" dur="4" coord.x1="1116" xml:id="tf9fae9b7-f7b2-44ea-af9a-f38f7363e42e"/>
                                         <beam>
-                                            <note loc="1" stem.dir="down" dur="16" ulx="1188" xml:id="t961f9b76-5274-4fa1-86bb-39fdc888e17f"/>
-                                            <note loc="4" stem.dir="down" dur="16" ulx="1212"/>
-                                            <note loc="3" stem.dir="down" dur="16" ulx="1236"/>
-                                            <note loc="2" stem.dir="down" dur="16" ulx="1250"/>
+                                            <note loc="1" stem.dir="down" dur="16" coord.x1="1188" xml:id="t961f9b76-5274-4fa1-86bb-39fdc888e17f"/>
+                                            <note loc="4" stem.dir="down" dur="16" coord.x1="1212"/>
+                                            <note loc="3" stem.dir="down" dur="16" coord.x1="1236"/>
+                                            <note loc="2" stem.dir="down" dur="16" coord.x1="1250"/>
                                         </beam>
 
-                                        <barLine form="rptend" ulx="1394"/>
+                                        <barLine form="rptend" coord.x1="1394"/>
 
                                         <beam>
-                                            <note loc="-1" stem.dir="down" dur="16" stem.mod="1slash" ulx="1560" xml:id="t28f9270d-0b05-41f4-9385-090eca644872"/>
-                                            <note loc="1" stem.dir="down" dur="16" stem.mod="1slash" ulx="1612"/>
-                                            <note loc="0" stem.dir="down" dur="16" stem.mod="1slash" ulx="1652" xml:id="t2d58bdb1-12e2-4552-a5be-8fcfb7732731"/>
-                                            <note loc="0" stem.dir="down" dur="16" stem.mod="1slash" ulx="1700"/>
+                                            <note loc="-1" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1560" xml:id="t28f9270d-0b05-41f4-9385-090eca644872"/>
+                                            <note loc="1" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1612"/>
+                                            <note loc="0" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1652" xml:id="t2d58bdb1-12e2-4552-a5be-8fcfb7732731"/>
+                                            <note loc="0" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1700"/>
                                         </beam>
                                         <beam>
-                                            <note loc="2" stem.dir="down" dur="16" stem.mod="1slash" ulx="1791"/>
-                                            <note loc="4" stem.dir="down" dur="16" stem.mod="1slash" ulx="1826"/>
-                                            <note loc="3" stem.dir="down" dur="16" stem.mod="1slash" ulx="1868"/>
-                                            <note loc="3" stem.dir="down" dur="16" stem.mod="1slash" ulx="1898"/>
+                                            <note loc="2" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1791"/>
+                                            <note loc="4" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1826"/>
+                                            <note loc="3" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1868"/>
+                                            <note loc="3" stem.dir="down" dur="16" stem.mod="1slash" coord.x1="1898"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1994"/>
+                                        <barLine form="single" coord.x1="1994"/>
 
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="32" ulx="2046"/>
-                                            <note loc="8" stem.dir="down" dur="32" ulx="2099"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2155"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2190"/>
+                                            <note loc="6" stem.dir="down" dur="32" coord.x1="2046"/>
+                                            <note loc="8" stem.dir="down" dur="32" coord.x1="2099"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2155"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2190"/>
                                         </beam>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2304"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2383"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="2436"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2497"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2304"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2383"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="2436"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2497"/>
                                         </beam>
                                     </layer>
                                 </staff>
                                 <slur startid="#t770d12a6-8947-4490-a6d9-03e89aee4543" endid="#ta2219545-420f-4713-ae40-96f502a99bc1" curvedir="above"/>
-                                <dynam ulx="676" startid="#t770d12a6-8947-4490-a6d9-03e89aee4543" staff="1" place="below">pi</dynam>
+                                <dynam coord.x1="676" startid="#t770d12a6-8947-4490-a6d9-03e89aee4543" staff="1" place="below">pi</dynam>
                                 <slur startid="#tf9fae9b7-f7b2-44ea-af9a-f38f7363e42e" endid="#t961f9b76-5274-4fa1-86bb-39fdc888e17f" curvedir="above"/>
-                                <dynam ulx="1627" startid="#t2d58bdb1-12e2-4552-a5be-8fcfb7732731" staff="1" place="below">cres:</dynam>
+                                <dynam coord.x1="1627" startid="#t2d58bdb1-12e2-4552-a5be-8fcfb7732731" staff="1" place="below">cres:</dynam>
                                 <octave startid="#t28f9270d-0b05-41f4-9385-090eca644872" dis="8" dis.place="above">8 va</octave>
 
                             </measure>
                         </system>
 
                         <!-- Staff 5 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1902">
-                            <measure ulx="290" lrx="3491"
+                        <system system.leftmar="0" system.rightmar="0" uly="1906">
+                            <measure coord.x1="290" coord.x2="3491"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="1616">
+                                <staff n="1" coord.y1="1616">
                                     <layer>
-                                        <note loc="6" stem.dir="down" dur="8" ulx="2584"/>
-                                        <rest loc="7" dur="8" ulx="2635"/>
-                                        <accid loc="5" accid="s" ulx="2692"/>
+                                        <note loc="6" stem.dir="down" dur="8" coord.x1="2584"/>
+                                        <rest loc="7" dur="8" coord.x1="2635"/>
+                                        <accid loc="5" accid="s" coord.x1="2692"/>
                                         <beam>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2723"/>
-                                            <note loc="5" stem.dir="down" dur="32" ulx="2748"/>
-                                            <note loc="5" stem.dir="down" dur="32" ulx="2776"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2723"/>
+                                            <note loc="5" stem.dir="down" dur="32" coord.x1="2748"/>
+                                            <note loc="5" stem.dir="down" dur="32" coord.x1="2776"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="2818"/>
+                                        <barLine form="single" coord.x1="2818"/>
 
-                                        <note loc="6" stem.dir="down" dur="8" ulx="2855"/>
-                                        <rest loc="6" dur="8" ulx="2897"/>
+                                        <note loc="6" stem.dir="down" dur="8" coord.x1="2855"/>
+                                        <rest loc="6" dur="8" coord.x1="2897"/>
                                         <beam>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2942"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2971"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2942"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2971"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="3013"/>
+                                        <barLine form="single" coord.x1="3013"/>
 
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="8" ulx="3058"/>
-                                            <note loc="5" stem.dir="down" dur="8" ulx="3085"/>
-                                            <note loc="6" stem.dir="down" dur="8" ulx="3121"/>
-                                            <note loc="5" stem.dir="down" dur="8" ulx="3149"/>
+                                            <note loc="6" stem.dir="down" dur="8" coord.x1="3058"/>
+                                            <note loc="5" stem.dir="down" dur="8" coord.x1="3085"/>
+                                            <note loc="6" stem.dir="down" dur="8" coord.x1="3121"/>
+                                            <note loc="5" stem.dir="down" dur="8" coord.x1="3149"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="3155"/>
+                                        <barLine form="single" coord.x1="3155"/>
 
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="8" ulx="3201"/>
-                                            <note loc="5" stem.dir="down" dur="8" ulx="3230"/>
-                                            <note loc="6" stem.dir="down" dur="8" ulx="3260"/>
-                                            <note loc="5" stem.dir="down" dur="8" ulx="3278"/>
+                                            <note loc="6" stem.dir="down" dur="8" coord.x1="3201"/>
+                                            <note loc="5" stem.dir="down" dur="8" coord.x1="3230"/>
+                                            <note loc="6" stem.dir="down" dur="8" coord.x1="3260"/>
+                                            <note loc="5" stem.dir="down" dur="8" coord.x1="3278"/>
                                         </beam>
 
-                                        <note loc="6" stem.dir="down" dur="8" ulx="3310"/>
-                                        <rest loc="9" dur="8" ulx="3331"/>
-                                        <chord stem.dir="down" dur="8" ulx="3357">
+                                        <note loc="6" stem.dir="down" dur="8" coord.x1="3310"/>
+                                        <rest loc="9" dur="8" coord.x1="3331"/>
+                                        <chord stem.dir="down" dur="8" coord.x1="3357">
                                             <note loc="-1"/>
                                             <note loc="3"/>
                                             <note loc="17"/>
                                         </chord>
-                                        <rest loc="6" dur="8" ulx="3399"/>
+                                        <rest loc="6" dur="8" coord.x1="3399"/>
                                     </layer>
                                 </staff>
                             </measure>
                         </system>
                         <!-- Staff 5 addendum -->
 
-                        <!--<system system.leftmar="0" system.rightmar="0" uly="1616">
+                        <!--<system system.leftmar="0" system.rightmar="0" uly="1713">
 
                         </system>-->
 
                         <!-- Staff 6 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1708">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="1713">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="1421">
+                                <staff n="1" coord.y1="1421">
                                     <layer>
-                                        <note loc="0" stem.dir="down" dur="8" ulx="705"/>
-                                        <rest loc="3" dur="8" ulx="786"/>
-                                        <note loc="-1" stem.dir="down" dur="8" ulx="853"/>
-                                        <rest loc="2" dur="8" ulx="909"/>
+                                        <note loc="0" stem.dir="down" dur="8" coord.x1="705"/>
+                                        <rest loc="3" dur="8" coord.x1="786"/>
+                                        <note loc="-1" stem.dir="down" dur="8" coord.x1="853"/>
+                                        <rest loc="2" dur="8" coord.x1="909"/>
 
-                                        <barLine form="rptstart" ulx="1021"/>
+                                        <barLine form="rptstart" coord.x1="1021"/>
 
                                         <beam>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1453"/>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="1524"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1579"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1637"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1453"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="1524"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1579"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1637"/>
                                         </beam>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1742"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1792"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="1837"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="1877"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1742"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1792"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="1837"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="1877"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1982"/>
+                                        <barLine form="single" coord.x1="1982"/>
 
                                         <beam>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2009"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2053"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2106"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2174"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2009"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2053"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2106"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2174"/>
                                         </beam>
-                                        <accid accid="s" loc="9" ulx="2272"/>
+                                        <accid accid="s" loc="9" coord.x1="2272"/>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2330"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2386"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2423"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="2491"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2330"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2386"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2423"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="2491"/>
                                         </beam>
                                     </layer>
                                 </staff>
@@ -1142,60 +1148,60 @@
                         </system>
 
                         <!-- Staff 7 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1519">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="1521">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="1235">
+                                <staff n="1" coord.y1="1235">
                                     <layer>
                                         <beam>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1580"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1657"/>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="1701"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1754"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1580"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1657"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="1701"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1754"/>
                                         </beam>
                                         <beam>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1862"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1901"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1923"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="1944"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1862"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1901"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1923"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="1944"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1989"/>
+                                        <barLine form="single" coord.x1="1989"/>
 
                                         <beam>
-                                            <chord stem.dir="down" dur="16" ulx="2142">
+                                            <chord stem.dir="down" dur="16" coord.x1="2142">
                                                 <note loc="2"/>
                                                 <note loc="5"/>
                                                 <note loc="6"/>
                                             </chord>
                                             <!-- correction? -->
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2217"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2291"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2345"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2217"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2291"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2345"/>
                                         </beam>
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2471"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2509"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2548"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2588"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2471"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2509"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2548"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2588"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="2663"/>
+                                        <barLine form="single" coord.x1="2663"/>
 
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2774"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="2818"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2855"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2888"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2774"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="2818"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2855"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2888"/>
                                         </beam>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2974"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="3040"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="3093"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="3164"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2974"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="3040"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="3093"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="3164"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="3233"/>
+                                        <barLine form="single" coord.x1="3233"/>
                                     </layer>
                                 </staff>
 
@@ -1203,173 +1209,173 @@
                         </system>
 
                         <!-- Staff 8 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1327">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="1332">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="1043">
+                                <staff n="1" coord.y1="1043">
                                     <layer>
 
-                                        <accid accid="s" loc="12" ulx="552"/>
+                                        <accid accid="s" loc="12" coord.x1="552"/>
 
                                         <beam>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="647"/>
-                                            <note loc="14" stem.dir="down" dur="16" ulx="722"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="794"/>
-                                            <note loc="14" stem.dir="down" dur="16" ulx="863"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="647"/>
+                                            <note loc="14" stem.dir="down" dur="16" coord.x1="722"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="794"/>
+                                            <note loc="14" stem.dir="down" dur="16" coord.x1="863"/>
                                         </beam>
                                         <beam>
-                                            <note loc="15" stem.dir="down" dur="16" ulx="1023"/>
-                                            <note loc="17" stem.dir="down" dur="16" ulx="1099"/>
-                                            <note loc="15" stem.dir="down" dur="16" ulx="1167"/>
-                                            <note loc="14" stem.dir="down" dur="16" ulx="1232"/>
+                                            <note loc="15" stem.dir="down" dur="16" coord.x1="1023"/>
+                                            <note loc="17" stem.dir="down" dur="16" coord.x1="1099"/>
+                                            <note loc="15" stem.dir="down" dur="16" coord.x1="1167"/>
+                                            <note loc="14" stem.dir="down" dur="16" coord.x1="1232"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1433"/>
+                                        <barLine form="single" coord.x1="1433"/>
 
                                         <beam>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1565"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1599"/>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="1634"/>
-                                            <note loc="15" stem.dir="down" dur="16" ulx="1712"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1565"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1599"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="1634"/>
+                                            <note loc="15" stem.dir="down" dur="16" coord.x1="1712"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1759"/>
+                                        <barLine form="single" coord.x1="1759"/>
 
                                         <beam>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1942"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2001"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2061"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2093"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1942"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2001"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2061"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2093"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="2185"/>
+                                        <barLine form="single" coord.x1="2185"/>
 
                                         <beam>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="2330"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2377"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2409"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2447"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="2330"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2377"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2409"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2447"/>
                                         </beam>
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2529"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="2562"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2604"/>
-                                            <note loc="3" stem.dir="down" dur="16" ulx="2622"/>
-                                        </beam>
-
-                                        <barLine form="single" ulx="2712"/>
-
-                                        <beam>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="2802"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2842"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="2884"/>
-                                            <note loc="3" stem.dir="down" dur="16" ulx="2914"/>
-                                        </beam>
-                                        <beam>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="2998"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="3041"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="3105"/>
-                                            <note loc="3" stem.dir="down" dur="16" ulx="3127"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2529"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="2562"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2604"/>
+                                            <note loc="3" stem.dir="down" dur="16" coord.x1="2622"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="3159"/>
+                                        <barLine form="single" coord.x1="2712"/>
 
                                         <beam>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="3206"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="3221"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="3246"/>
-                                            <note loc="3" stem.dir="down" dur="16" ulx="3254"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="2802"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2842"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="2884"/>
+                                            <note loc="3" stem.dir="down" dur="16" coord.x1="2914"/>
                                         </beam>
                                         <beam>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="3277" xml:id="tf9a7dbd3-ef8d-4432-ba87-5f8a40e4d4de"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="3291"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="3308"/>
-                                            <note loc="2" stem.dir="down" dur="16" ulx="3316" xml:id="t5bf11c4b-e056-4ec1-b91c-6d70468563f0"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="2998"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="3041"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="3105"/>
+                                            <note loc="3" stem.dir="down" dur="16" coord.x1="3127"/>
+                                        </beam>
+
+                                        <barLine form="single" coord.x1="3159"/>
+
+                                        <beam>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="3206"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="3221"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="3246"/>
+                                            <note loc="3" stem.dir="down" dur="16" coord.x1="3254"/>
+                                        </beam>
+                                        <beam>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="3277" xml:id="tf9a7dbd3-ef8d-4432-ba87-5f8a40e4d4de"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="3291"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="3308"/>
+                                            <note loc="2" stem.dir="down" dur="16" coord.x1="3316" xml:id="t5bf11c4b-e056-4ec1-b91c-6d70468563f0"/>
                                         </beam>
 
                                     </layer>
                                 </staff>
-                                <hairpin form="dim" ulx="3293" startid="#tf9a7dbd3-ef8d-4432-ba87-5f8a40e4d4de" x="3293" x2="3316"/>
+                                <hairpin form="dim" coord.x1="3293" startid="#tf9a7dbd3-ef8d-4432-ba87-5f8a40e4d4de" x="3293" x2="3316"/>
                             </measure>
                         </system>
 
                         <!-- Staff 9 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="1132">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="1136">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="848">
+                                <staff n="1" coord.y1="848">
                                     <layer>
 
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="408"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="432"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="481"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="510"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="408"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="432"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="481"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="510"/>
                                         </beam>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="621"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="658"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="714"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="731"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="621"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="658"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="714"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="731"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="856"/>
-
-                                        <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="961"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1000"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1066"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="1083"/>
-                                        </beam>
-                                        <beam>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1204"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="1239"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1292"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1340"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="1349"/>
-                                        </beam>
-
-                                        <barLine form="single" ulx="1404"/>
+                                        <barLine form="single" coord.x1="856"/>
 
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1538"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1581"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1662"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1704"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="961"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1000"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1066"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="1083"/>
                                         </beam>
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1825"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="1875"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="1961"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1984"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1204"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="1239"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1292"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1340"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="1349"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="2112"/>
+                                        <barLine form="single" coord.x1="1404"/>
 
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2312"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="2356"/>
-                                            <note loc="13" stem.dir="down" dur="16" ulx="2432"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="2453"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1538"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1581"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1662"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1704"/>
                                         </beam>
                                         <beam>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="2585"/>
-                                            <note loc="10" stem.dir="down" dur="16" ulx="2655"/>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="2739"/>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2759"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1825"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="1875"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="1961"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1984"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="2851"/>
+                                        <barLine form="single" coord.x1="2112"/>
 
-                                        <note loc="9" stem.dir="down" dur="16" ulx="2904"/>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="2972"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="2995"/>
-                                            <note loc="12" stem.dir="down" dur="16" ulx="3041"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="3081"/>
-                                            <note loc="6" stem.dir="down" dur="16" ulx="3085"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2312"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="2356"/>
+                                            <note loc="13" stem.dir="down" dur="16" coord.x1="2432"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="2453"/>
                                         </beam>
-                                        <note loc="9" stem.dir="down" dur="16" ulx="3198"/>
+                                        <beam>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="2585"/>
+                                            <note loc="10" stem.dir="down" dur="16" coord.x1="2655"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="2739"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2759"/>
+                                        </beam>
+
+                                        <barLine form="single" coord.x1="2851"/>
+
+                                        <note loc="9" stem.dir="down" dur="16" coord.x1="2904"/>
+                                        <beam>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="2972"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="2995"/>
+                                            <note loc="12" stem.dir="down" dur="16" coord.x1="3041"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="3081"/>
+                                            <note loc="6" stem.dir="down" dur="16" coord.x1="3085"/>
+                                        </beam>
+                                        <note loc="9" stem.dir="down" dur="16" coord.x1="3198"/>
                                     </layer>
                                 </staff>
 
@@ -1377,56 +1383,56 @@
                         </system>
 
                         <!-- Staff 10 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="943">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="944">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="659">
+                                <staff n="1" coord.y1="659">
                                     <layer>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="492"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="527"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="581"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="625"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="492"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="527"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="581"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="625"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="795"/>
+                                        <barLine form="single" coord.x1="795"/>
 
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="930"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="979"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1036"/>
-                                            <note loc="7" stem.dir="down" dur="16" ulx="1063"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="930"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="979"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1036"/>
+                                            <note loc="7" stem.dir="down" dur="16" coord.x1="1063"/>
                                         </beam>
                                         <beam>
-                                            <note loc="9" stem.dir="down" dur="16" ulx="1218"/>
-                                            <note loc="8" stem.dir="down" dur="16" ulx="1257"/>
-                                            <note loc="11" stem.dir="down" dur="16" ulx="1334"/>
-                                            <note loc="5" stem.dir="down" dur="16" ulx="1362"/>
+                                            <note loc="9" stem.dir="down" dur="16" coord.x1="1218"/>
+                                            <note loc="8" stem.dir="down" dur="16" coord.x1="1257"/>
+                                            <note loc="11" stem.dir="down" dur="16" coord.x1="1334"/>
+                                            <note loc="5" stem.dir="down" dur="16" coord.x1="1362"/>
                                         </beam>
 
-                                        <barLine form="single" ulx="1478"/>
+                                        <barLine form="single" coord.x1="1478"/>
 
-                                        <note loc="17" stem.dir="down" dur="8" ulx="1611"/>
-                                        <note loc="-1" stem.dir="down" dur="8" ulx="1763"/>
-                                        <rest loc="8" dur="8" ulx="1797"/>
-                                        <rest loc="" dur="4" ulx="1926"/>
+                                        <note loc="17" stem.dir="down" dur="8" coord.x1="1611"/>
+                                        <note loc="-1" stem.dir="down" dur="8" coord.x1="1763"/>
+                                        <rest loc="8" dur="8" coord.x1="1797"/>
+                                        <rest loc="3" dur="4" coord.x1="1926"/>
 
-                                        <barLine form="single" ulx="2168"/>
+                                        <barLine form="single" coord.x1="2168"/>
 
-                                        <chord stem.dir="down" dur="8" ulx="2300">
+                                        <chord stem.dir="down" dur="8" coord.x1="2300">
                                             <note loc="-1"/>
                                             <note loc="3"/>
                                             <note loc="17"/>
                                         </chord>
-                                        <rest dur="8" loc="9" ulx="2557"/>
-                                        <rest dur="4" loc="6" ulx="2701"/>
+                                        <rest dur="8" loc="9" coord.x1="2557"/>
+                                        <rest dur="4" loc="6" coord.x1="2701"/>
 
-                                        <barLine form="single" ulx="2900"/>
+                                        <barLine form="single" coord.x1="2900"/>
 
-                                        <note loc="-1" stem.dir="up" dur="4" ulx="3022" xml:id="td5fd3316-d3f4-4edd-a062-707ca36ca503"/>
-                                        <rest loc="6" dur="8" ulx="3155" xml:id="te0c8137e-5592-4bf1-8c20-8a7067b5559c"/>
+                                        <note loc="-1" stem.dir="up" dur="4" coord.x1="3022" xml:id="td5fd3316-d3f4-4edd-a062-707ca36ca503"/>
+                                        <rest loc="6" dur="8" coord.x1="3155" xml:id="te0c8137e-5592-4bf1-8c20-8a7067b5559c"/>
 
-                                        <barLine form="end" ulx="3195"/>
+                                        <barLine form="end" coord.x1="3195"/>
                                     </layer>
                                 </staff>
                                 <slur startid="#td5fd3316-d3f4-4edd-a062-707ca36ca503" endid="#te0c8137e-5592-4bf1-8c20-8a7067b5559c" curvedir="above"/>
@@ -1434,10 +1440,10 @@
                         </system>
 
                         <!-- Staff 11 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="742">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0" uly="753">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="463">
+                                <staff n="1" coord.y1="463">
                                     <layer>
                                         <mSpace/>
                                     </layer>
@@ -1447,40 +1453,42 @@
                         </system>
 
                         <!-- Staff 12 -->
-                        <system system.leftmar="0" system.rightmar="0" uly="544">
-                            <measure ulx="290" lrx="3323"
+                        <system system.leftmar="0" system.rightmar="0"  uly="552">
+                            <measure coord.x1="290" coord.x2="3323"
                                 n="1" left="invis" right="invis">
-                                <staff n="1" uly="262">
+                                <staff n="1" coord.y1="262">
                                     <layer>
-                                        <note loc="4" stem.dir="down" dur="8" ulx="1264"/>
-                                        <note loc="17" stem.dir="down" dur="8" ulx="1320"/>
-                                        <rest loc="6" dur="8" ulx="1333"/>
-                                        <rest loc="4" dur="4" ulx="1398"/>
+                                        <note loc="4" stem.dir="down" dur="8" coord.x1="1264"/>
+                                        <note loc="17" stem.dir="down" dur="8" coord.x1="1320"/>
+                                        <rest loc="6" dur="8" coord.x1="1333"/>
+                                        <rest loc="4" dur="4" coord.x1="1398"/>
 
-                                        <barLine form="single" ulx="1490"/>
+                                        <barLine form="single" coord.x1="1490"/>
 
-                                        <chord stem.dir="down" dur="8" ulx="1612">
+                                        <chord stem.dir="down" dur="8" coord.x1="1612">
                                             <note loc="3"/>
                                             <note loc="10"/>
                                             <note loc="17"/>
                                         </chord>
-                                        <rest loc="8" dur="8" ulx="1712"/>
-                                        <rest loc="6" dur="4" ulx="1846"/>
+                                        <rest loc="8" dur="8" coord.x1="1712"/>
+                                        <rest loc="6" dur="4" coord.x1="1846"/>
 
-                                        <barLine form="single" ulx="2005"/>
+                                        <barLine form="single" coord.x1="2005"/>
 
                                         <!-- komisch -->
-                                        <note loc="-1" stem.dir="down" dur="8" ulx="2138"/>
+                                        <note loc="-1" stem.dir="down" dur="8" coord.x1="2138"/>
                                     </layer>
                                 </staff>
 
                             </measure>
                         </system>
 
+                    <msEnd startid="#t4dc4385a-11fc-4e90-abe5-19884a5387ed"/>
+                    <msEnd startid="#t1e993ebe-3542-4619-8937-957fac2ecd42"/>
+
 
                     </page>
-                </pages>
-            </mdiv>
+            </pages>
         </body>
-    </music>
+  </music>
 </mei>

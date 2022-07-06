@@ -5,12 +5,12 @@
   <OverviewModal/>
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
-      <pane size="70" min-size="40" @scroll="doScroll">
+      <pane size="55" min-size="30" @scroll="doScroll">
         <OpenSeadragonComponent/>
       </pane>
       <pane>
         <splitpanes horizontal @scroll="doScroll">
-          <pane size="60" min-size="40" max-size="90">
+          <pane size="70" min-size="30" max-size="90">
             <ExplorerForm/>
           </pane>
           <pane @scroll="doScroll">

@@ -1,6 +1,17 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 
+/* function nsResolver (prefix) {
+  const ns = {
+    xhtml: 'http://www.w3.org/1999/xhtml',
+    mathml: 'http://www.w3.org/1998/Math/MathML',
+    mei: 'http://www.music-encoding.org/ns/mei',
+    svg: 'http://www.w3.org/2000/svg',
+    tei: 'http://www.tei-c.org/ns/1.0'
+  }
+  return ns[prefix] || null
+} */
+
 /**
  * A Parser for reading in the XML Document
  * @type {DOMParser}
@@ -31,7 +42,11 @@ export default createStore({
     wellformed: false,
     modal: null,
     loading: false,
-    processing: false
+    processing: false,
+    selectionRectEnabled: false,
+    selectionRect: null,
+    selectedSystemOnCurrentPage: -1,
+    editingSystemOnCurrentPage: -1
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
@@ -67,13 +82,26 @@ export default createStore({
     },
     SET_EXPLORER_TAB (state, val) {
       state.explorerTab = val
+    },
+    SET_SELECTION_RECT_ENABLED (state, bool) {
+      state.selectionRectEnabled = bool
+      state.selectionRect = null
+    },
+    SET_SELECTION_RECT (state, rect) {
+      state.selectionRect = rect
+    },
+    SET_SELECTED_SYSTEM_ON_CURRENT_PAGE (state, i) {
+      state.selectedSystemOnCurrentPage = i
+    },
+    SET_EDITING_SYSTEM_ON_CURRENT_PAGE (state, i) {
+      state.editingSystemOnCurrentPage = i
     }
+
   },
   actions: {
     setXmlByEditor ({ commit, state }, string) {
       const snippet = parser.parseFromString(string, 'application/xml')
-      console.log('snippet')
-      console.log(snippet)
+
       const errorNode = snippet.querySelector('parsererror')
       if (errorNode) {
         console.log('error while parsing')
@@ -96,14 +124,20 @@ export default createStore({
 
       commit('SET_XML_DOC', xmlDoc)
     },
-    getTestData ({ commit, dispatch }) {
+    getTestData ({ commit, dispatch, state }) {
       fetch('testfile.xml')
         .then(res => {
           return res.text()
         })
         .then(xml => {
           const mei = parser.parseFromString(xml, 'application/xml')
+
+          console.log('test1')
+          const svg = mei.querySelector('svg')
+          console.log(svg)
+
           dispatch('setData', mei)
+          console.log(state.parsedXml.querySelector('surface:nth-child(6) svg'))
         })
     },
     setData ({ commit }, mei) {
@@ -137,6 +171,18 @@ export default createStore({
     },
     setExplorerTab ({ commit }, val) {
       commit('SET_EXPLORER_TAB', val)
+    },
+    setSelectionRectEnabled ({ commit }, bool) {
+      commit('SET_SELECTION_RECT_ENABLED', bool)
+    },
+    setSelectionRect ({ commit }, rect) {
+      commit('SET_SELECTION_RECT', rect)
+    },
+    selectSystemOnCurrentPage ({ commit }, i) {
+      commit('SET_SELECTED_SYSTEM_ON_CURRENT_PAGE', parseInt(i))
+    },
+    editSystemOnCurrentPage ({ commit }, i) {
+      commit('SET_EDITING_SYSTEM_ON_CURRENT_PAGE', parseInt(i))
     },
     importIIIF ({ commit, dispatch }, url) {
       commit('SET_LOADING', true)
@@ -195,12 +241,15 @@ export default createStore({
       const pageIndex = state.currentPage + 1
       const queryString = 'page:nth-child(' + pageIndex + ')'
       const page = xmlDoc.querySelector(queryString)
-      /* const queryString = '//mei:page[' + pageIndex + ']'
+
+      /* const pageIndex = state.currentPage + 1
+      const queryString = '//mei:surface[' + pageIndex + ']'
       const xmlDoc = state.parsedXml
-
+      console.log('123')
       const result = xmlDoc.evaluate(queryString, xmlDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-      */
-
+      // console.log(result.singleNodeValue.textContent)
+      console.log(result)
+      return serializer.serializeToString(result.singleNodeValue) */
       return serializer.serializeToString(page) // state.parsedXml)
       // return state.xmlCode
     },
@@ -210,7 +259,6 @@ export default createStore({
         return null
       }
       const xmlDoc = state.parsedXml
-      console.log('serialize xml')
       return serializer.serializeToString(xmlDoc)
     },
 
@@ -221,6 +269,21 @@ export default createStore({
       })
 
       return uris
+    },
+
+    pageArrayOSD: state => {
+      const arr = []
+      state.pages.forEach(page => {
+        const obj = {
+          tileSource: page.uri,
+          width: page.width,
+          x: 0,
+          y: 0
+        }
+        arr.push(obj)
+      })
+
+      return arr
     },
 
     page: state => (i) => {
@@ -259,38 +322,42 @@ export default createStore({
 
       const page = xmlDoc.querySelector(queryString)
       const pageHeight = page.getAttributeNS('', 'page.height')
-      const pageWidth = page.getAttributeNS('', 'page.width')
+      // const pageWidth = page.getAttributeNS('', 'page.width')
 
       const systems = []
       page.querySelectorAll('system').forEach(system => {
-        const rawY = pageHeight - system.getAttributeNS('', 'uly')
-        console.log('rawY: ' + rawY + ', pageHeight: ' + pageHeight + ', uly: ' + system.getAttributeNS('', 'uly'))
-        const y = 1 / pageHeight * (rawY)
+        const top = parseInt(pageHeight - system.getAttributeNS('', 'uly'))
+        // console.log('rawY: ' + rawY + ', pageHeight: ' + pageHeight + ', uly: ' + system.getAttributeNS('', 'uly'))
+
         const measure = system.querySelector('measure')
 
-        const x = 1 / pageWidth * measure.getAttributeNS('', 'ulx')
-        const width = 1 / pageWidth * (measure.getAttributeNS('', 'lrx')) - x
-        const height = 0.005
+        const left = parseInt(measure.getAttributeNS('', 'coord.x1'))
+        const right = parseInt(measure.getAttributeNS('', 'coord.x2'))
 
-        const obj = { x, y, width, height }
+        const obj = { top, left, right }
         systems.push(obj)
       })
 
-      return systems
+      return systems.sort((a, b) => a.top - b.top)
     },
 
     svgOnCurrentPage: state => {
       const pageIndex = state.currentPage + 1
-      const queryString = 'surface:nth-child(' + pageIndex + ') svg'
+      const queryString = 'surface:nth-child(' + pageIndex + ')'
       const xmlDoc = state.parsedXml
 
-      if (xmlDoc === null) {
+      const page = xmlDoc.querySelector(queryString)
+
+      if (page === null) {
         return null
       }
 
-      const svg = xmlDoc.querySelector(queryString)
+      const svg = xmlDoc.querySelector('svg')
 
       if (svg === null) {
+        console.log('no svg on page ' + pageIndex + ' - ' + page.getAttribute('xml:id'))
+        console.log(page)
+        console.log(state.parsedXml.querySelector('svg'))
         return null
       }
 
@@ -311,6 +378,22 @@ export default createStore({
 
     explorerTab: state => {
       return state.explorerTab
+    },
+
+    selectionRectEnabled: state => {
+      return state.selectionRectEnabled
+    },
+
+    selectionRect: state => {
+      return state.selectionRect
+    },
+
+    selectedSystemOnCurrentPage: state => {
+      return state.selectedSystemOnCurrentPage
+    },
+
+    editingSystemOnCurrentPage: state => {
+      return state.editingSystemOnCurrentPage
     }
   }
 })
