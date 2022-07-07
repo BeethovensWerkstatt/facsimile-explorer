@@ -14,15 +14,23 @@ export default {
   props: {
   },
   methods: {
-    clickSystemListener (e) {
+    systemClickListener (e) {
       const n = e.target.getAttribute('data-n')
       console.log('clicked system ' + n)
       this.$store.dispatch('selectSystemOnCurrentPage', n)
     },
-    doubleClickSystemListener (e) {
+    systemDoubleClickListener (e) {
       const n = e.target.getAttribute('data-n')
       console.log('doubleClicked system ' + n)
       this.$store.dispatch('editSystemOnCurrentPage', n)
+    },
+    svgClickListener (e) {
+      console.log('clicked shape')
+      console.log(e)
+    },
+    svgDoubleClickListener (e) {
+      console.log('clicked shape')
+      console.log(e)
     },
     renderShapes () {
       const svg = this.$store.getters.svgOnCurrentPage
@@ -32,39 +40,17 @@ export default {
       if (this.viewer === undefined) {
         return null
       }
-      console.log('rendering shapes')
-      this.viewer.addOverlay({
-        element: svg,
-        x: 0,
-        y: 0,
-        width: page.width,
-        height: page.height
-      })
-      /* if (svg !== null) {
-        const width = 3727
-        const height = 3021
-        const factor = width / height
-
-        const element = document.createElement('div')
-        element.classList.add('fullSizeOverlay')
-        element.appendChild(svg)
-        this.viewer.addOverlay({
-          element,
-          px: 0,
-          py: 0,
-          width: 1,
-          height: 1 / factor
-        })
-      }
-      const world = this.viewer.world
-
-      if (world.getItemCount() > 0) {
+      if (svg !== null) {
         this.viewer.addOverlay({
           element: svg,
-          placement: OpenSeadragon.Placement.TOP_LEFT,
-          location: this.viewer.world.getItemAt(0).getBounds()
+          x: 0,
+          y: 0,
+          width: page.width,
+          height: page.height
         })
-     } */
+        svg.addEventListener('click', this.svgClickListener)
+        svg.addEventListener('dblclick', this.svgDoubleClickListener)
+      }
     },
     renderSystems () {
       const systems = this.$store.getters.systemsOnCurrentPage
@@ -100,8 +86,8 @@ export default {
         overlay.classList.add('system')
         overlay.setAttribute('title', i + 1)
         overlay.setAttribute('data-n', i)
-        overlay.addEventListener('click', this.clickSystemListener)
-        overlay.addEventListener('dblclick', this.doubleClickSystemListener)
+        overlay.addEventListener('click', this.systemClickListener)
+        overlay.addEventListener('dblclick', this.systemDoubleClickListener)
         this.viewer.addOverlay({
           element: overlay,
           x: system.left,
@@ -173,8 +159,13 @@ export default {
     this.viewer.addHandler('page', (data) => {
       // remove listeners
       document.querySelectorAll('#osdContainer .system').forEach(system => {
-        system.removeEventListener('click', this.clickSystemListener)
-        system.removeEventListener('dbllick', this.doubleClickSystemListener)
+        system.removeEventListener('click', this.systemClickListener)
+        system.removeEventListener('dblclick', this.systemDoubleClickListener)
+      })
+
+      document.querySelectorAll('#osdContainer svg').forEach(svg => {
+        svg.removeEventListener('click', this.svgClickListener)
+        svg.removeEventListener('click', this.svgDoubleClickListener)
       })
 
       if (data.page !== this.$store.getters.currentPageZeroBased) {

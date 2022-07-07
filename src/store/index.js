@@ -46,11 +46,19 @@ export default createStore({
     selectionRectEnabled: false,
     selectionRect: null,
     selectedSystemOnCurrentPage: -1,
-    editingSystemOnCurrentPage: -1
+    editingSystemOnCurrentPage: -1,
+    pageSVGs: []
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
       state.parsedXml = domDoc
+
+      const surfaces = domDoc.querySelectorAll('surface')
+      surfaces.forEach((surface, i) => {
+        const svg = surface.querySelector('svg')
+        state.pageSVGs[i] = svg
+      })
+      //
     },
     SET_TEMPORARY_CODE (state, string) {
       state.temporaryCode = string
@@ -124,20 +132,14 @@ export default createStore({
 
       commit('SET_XML_DOC', xmlDoc)
     },
-    getTestData ({ commit, dispatch, state }) {
+    getTestData ({ commit, dispatch, state, getters }) {
       fetch('testfile.xml')
         .then(res => {
           return res.text()
         })
         .then(xml => {
           const mei = parser.parseFromString(xml, 'application/xml')
-
-          console.log('test1')
-          const svg = mei.querySelector('svg')
-          console.log(svg)
-
           dispatch('setData', mei)
-          console.log(state.parsedXml.querySelector('surface:nth-child(6) svg'))
         })
     },
     setData ({ commit }, mei) {
@@ -255,6 +257,7 @@ export default createStore({
     },
 
     xmlDocumentCode: state => () => {
+      // TODO: We may need to reintegrate the SVG files…
       if (state.parsedXml === null) {
         return null
       }
@@ -342,25 +345,7 @@ export default createStore({
     },
 
     svgOnCurrentPage: state => {
-      const pageIndex = state.currentPage + 1
-      const queryString = 'surface:nth-child(' + pageIndex + ')'
-      const xmlDoc = state.parsedXml
-
-      const page = xmlDoc.querySelector(queryString)
-
-      if (page === null) {
-        return null
-      }
-
-      const svg = xmlDoc.querySelector('svg')
-
-      if (svg === null) {
-        console.log('no svg on page ' + pageIndex + ' - ' + page.getAttribute('xml:id'))
-        console.log(page)
-        console.log(state.parsedXml.querySelector('svg'))
-        return null
-      }
-
+      const svg = state.pageSVGs[state.currentPage]
       return svg
     },
 
