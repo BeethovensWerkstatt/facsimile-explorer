@@ -38,7 +38,8 @@
               <i class="icon icon-apps"></i>
             </div>
             <div class="info svgShapes" :class="{ unavailable: !previewPage.hasSvg }" :title="'SVG Shapes' + ((!previewPage.hasSvg) ? ' unavailable' : '')">
-              <i class="icon icon-edit"></i> <button v-if="!previewPage.hasSvg" class="btn btn-link" @click="addSVG">add shapes ...</button>
+              <i class="icon icon-edit"></i>
+              <button v-if="!previewPage.hasSvg" class="btn btn-link" @click="addSVG">add shapes ...</button>
             </div>
             <div class="info transcription" :class="{ unavailable: !previewPage.systems }" :title="'Transcription ' + (( !previewPage.systems ) ? 'un' : '') + 'available'">
               <span>♫</span>
@@ -76,6 +77,23 @@ export default {
     },
     addSVG () {
       console.log('add SVG ...')
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.svg'
+      input.onchange = _this => {
+        const [file] = Array.from(input.files)
+        if (file) {
+          const reader = new FileReader()
+          reader.addEventListener('load', () => {
+            this.$store.dispatch('addSVGshapes', {
+              svg: reader.result,
+              page: this.previewPageNum
+            })
+          })
+          reader.readAsText(file)
+        }
+      }
+      input.click()
     }
   },
   computed: {

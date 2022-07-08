@@ -213,6 +213,10 @@ export default createStore({
           console.log(err)
           // add some error message
         })
+    },
+    addSVGshapes ({ commit, dispatch }, { svg, page }) {
+      const svgdom = parser.parseFromString(svg, 'image/svg+xml')
+      console.log(page, svgdom)
     }
   },
   getters: {
