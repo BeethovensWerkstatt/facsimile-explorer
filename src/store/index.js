@@ -268,7 +268,7 @@ export default createStore({
       if (state.parsedXml === null) {
         return null
       }
-      const xmlDoc = state.parsedXml
+      const xmlDoc = state.parsedXml.cloneNode(true)
       const surfaces = xmlDoc.querySelectorAll('surface')
       surfaces.forEach((surface, i) => {
         const svg = state.pageSVGs[i]?.cloneNode(true)
