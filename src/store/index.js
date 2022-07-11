@@ -51,20 +51,22 @@ export default createStore({
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
-      state.parsedXml = domDoc
-
       const surfaces = domDoc.querySelectorAll('surface')
       surfaces.forEach((surface, i) => {
         const svg = surface.querySelector('svg')
-        state.pageSVGs[i] = svg
+        state.pageSVGs[i] = svg // shall we svg.clone(true) ?
+        if (svg) svg.remove()
       })
-      //
+      state.parsedXml = domDoc
     },
     SET_TEMPORARY_CODE (state, string) {
       state.temporaryCode = string
     },
     SET_PAGES (state, arr) {
       state.pages = arr
+    },
+    SET_PAGE_SVG (state, { i, svg }) {
+      state.pageSVGs[i] = svg
     },
     SET_CURRENT_PAGE (state, i) {
       state.previewPage = -1
@@ -104,7 +106,6 @@ export default createStore({
     SET_EDITING_SYSTEM_ON_CURRENT_PAGE (state, i) {
       state.editingSystemOnCurrentPage = i
     }
-
   },
   actions: {
     setXmlByEditor ({ commit, state }, string) {
@@ -214,9 +215,11 @@ export default createStore({
           // add some error message
         })
     },
-    addSVGshapes ({ commit, dispatch }, { svg, page }) {
-      const svgdom = parser.parseFromString(svg, 'image/svg+xml')
-      console.log(page, svgdom)
+    addSVGshapes ({ commit, getters }, { svgstr, page }) {
+      const svgdom = parser.parseFromString(svgstr, 'image/svg+xml')
+      const svg = svgdom?.documentElement
+      console.log(page, svg)
+      commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
     }
   },
   getters: {
@@ -266,6 +269,13 @@ export default createStore({
         return null
       }
       const xmlDoc = state.parsedXml
+      const surfaces = xmlDoc.querySelectorAll('surface')
+      surfaces.forEach((surface, i) => {
+        const svg = state.pageSVGs[i]?.cloneNode(true)
+        if (svg) {
+          surface.appendChild(svg)
+        }
+      })
       return serializer.serializeToString(xmlDoc)
     },
 
