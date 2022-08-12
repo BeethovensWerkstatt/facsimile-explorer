@@ -86,13 +86,13 @@ export async function iiifManifest2mei (json, url, parser) {
 
       const metadata = json.metadata
 
-      const shelfmark = metadata.find(entry => { return entry.label === 'Signatur' }).value
+      const shelfmark = metadata.find(entry => { return entry.label === 'Signatur' })?.value
       file.querySelector('physLoc > identifier').textContent = shelfmark
 
       // const persistentIdentifier = metadata.find(entry => {entry.label = 'Persistente URL'}).value
       // file.querySelector('title').textContent = json.label
 
-      const composer = metadata.find(entry => { return entry.label === 'Autor' }).value
+      const composer = metadata.find(entry => { return entry.label === 'Autor' })?.value
       file.querySelector('composer persName').textContent = composer
 
       // handle pages

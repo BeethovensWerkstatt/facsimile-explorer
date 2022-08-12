@@ -62,6 +62,7 @@ export default {
     },
     renderSystems () {
       const systems = this.$store.getters.systemsOnCurrentPage
+      const editedSystem = this.$store.getters.editingSystemOnCurrentPage
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
 
       // only relevant before component is mounted
@@ -76,25 +77,65 @@ export default {
       })
 
       systems.forEach((system, i) => {
-        // console.log(system)
-        const overlay = document.createElement('div')
-        overlay.classList.add('system')
-        overlay.classList.add('overlay')
-        overlay.setAttribute('title', i + 1)
-        overlay.setAttribute('data-n', i)
+        if (i !== editedSystem) {
+          const overlay = document.createElement('div')
+          overlay.classList.add('system')
+          overlay.classList.add('overlay')
+          overlay.setAttribute('title', i + 1)
+          overlay.setAttribute('data-n', i)
 
-        this.viewer.addOverlay({
-          element: overlay,
-          x: system.left,
-          y: system.top,
-          width: system.right - system.left,
-          height: page.height / 30
-        })
+          this.viewer.addOverlay({
+            element: overlay,
+            x: system.left,
+            y: system.top,
+            width: system.right - system.left,
+            height: page.height / 30
+          })
 
-        overlay.addEventListener('click', this.systemClickListener)
-        overlay.addEventListener('dblclick', this.systemDoubleClickListener)
+          overlay.addEventListener('click', this.systemClickListener)
+          overlay.addEventListener('dblclick', this.systemDoubleClickListener)
+        }
       })
+    },
+    generateSelectionFromZone () {
+      const systems = this.$store.getters.systemsOnCurrentPage
+      const index = this.$store.getters.editingSystemOnCurrentPage
+      const system = systems[index]
+      if (index === -1 || system === undefined || system === null) {
+        return false
+      }
+
+      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
+      const imageUri = this.$store.getters.pageArray[this.$store.getters.currentPageZeroBased]
+      const xywh = 'xywh=pixel:' + system.left + ',' + system.top + ',' + parseInt(system.right - system.left) + ',' + Math.round(page.height / 30)
+
+      const anno = {
+        type: 'Annotation',
+        body: [{
+          type: 'TextualBody',
+          purpose: 'tagging',
+          value: ''
+        }
+        ],
+        target: {
+          source: imageUri,
+          selector: {
+            type: 'FragmentSelector',
+            conformsTo: 'http://www.w3.org/TR/media-frags/',
+            value: xywh
+          }
+        },
+        '@context': 'http://www.w3.org/ns/anno.jsonld',
+        id: 'system_' + index
+      }
+      console.log('anno', anno)
+
+      this.anno.setAnnotations([anno])
+      this.anno.selectAnnotation(anno)
+      console.log('still there?')
+      console.log(this.anno)
     }
+
   },
   mounted: function () {
     this.viewer = OpenSeadragon({
@@ -108,7 +149,11 @@ export default {
       zoomInButton: 'zoomIn',
       zoomOutButton: 'zoomOut',
       previousButton: 'pageLeft',
-      nextButton: 'pageRight'
+      nextButton: 'pageRight',
+      gestureSettingsMouse: {
+        clickToZoom: false
+      },
+      silenceMultiImageWarnings: true
     })
 
     const annotoriousConfig = {
@@ -132,6 +177,7 @@ export default {
       this.anno.saveSelected()
     })
 
+    // automatically triggered through createSelection
     this.anno.on('createAnnotation', async (annotation) => {
       // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
       const raw = annotation.target.selector.value.substr(11).split(',')
@@ -148,6 +194,9 @@ export default {
 
     // Listener for changing selections
     this.anno.on('changeSelectionTarget', (a) => {
+      console.log('changeSelectionTarget')
+      console.log(a)
+
       // console.log('changed selection:', a)
       const raw = a.selector.value.substr(11).split(',')
       const xywh = {
@@ -157,6 +206,12 @@ export default {
         h: Math.round(raw[3])
       }
       this.$store.dispatch('setSelectionRect', xywh)
+    })
+
+    this.anno.on('updateAnnotation', (annotation) => {
+      // The users has selected an existing annotation
+      console.log('updateAnnotation')
+      console.log(annotation)
     })
 
     const pages = this.$store.getters.pageArrayOSD
@@ -185,18 +240,15 @@ export default {
         this.renderShapes()
       }
     })
-
     this.unwatchSelectionRectEnabled = this.$store.watch((state, getters) => getters.selectionRectEnabled,
       (newBool, oldBool) => {
         this.anno.setVisible(newBool)
         this.anno.readOnly = !newBool
       })
-
     this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
       (newPage, oldPage) => {
         this.viewer.goToPage(newPage)
       })
-
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
         this.viewer.open(newArr)
@@ -204,7 +256,6 @@ export default {
         this.renderSystems()
         this.renderShapes()
       })
-
     this.unwatchSVG = this.$store.watch((state, getters) => getters.svgOnCurrentPage,
       (svg) => {
         if (svg !== null) {
@@ -212,11 +263,19 @@ export default {
         }
         // this.viewer.open(newArr)
       })
-
     // const svg = this.$store.getters.svgOnCurrentPage
     this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderSystems()
+      })
+    this.unwatchEditingSystem = this.$store.watch((state, getters) => getters.editingSystemOnCurrentPage,
+      (newIndex, oldIndex) => {
+        if (newIndex !== oldIndex) {
+          this.renderSystems()
+        }
+        if (newIndex !== -1) {
+          this.generateSelectionFromZone()
+        }
       })
   },
   beforeUnmount () {
@@ -225,6 +284,7 @@ export default {
     this.unwatchSystems()
     this.unwatchCurrentPage()
     this.unwatchSelectionRectEnabled()
+    this.unwatchEditingSystem()
   }
 }
 </script>
@@ -236,7 +296,7 @@ export default {
   height: 100%;
 
   .system {
-     background-color: #ffffff33;
+     background-color: rgba(57, 6, 238, 0.2);
   }
 
   .fullSizeOverlay {
