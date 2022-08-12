@@ -15,20 +15,28 @@ export default {
   },
   methods: {
     systemClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
       const n = e.target.getAttribute('data-n')
       console.log('clicked system ' + n)
       this.$store.dispatch('selectSystemOnCurrentPage', n)
     },
     systemDoubleClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
       const n = e.target.getAttribute('data-n')
       console.log('doubleClicked system ' + n)
       this.$store.dispatch('editSystemOnCurrentPage', n)
     },
     svgClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
       console.log('clicked shape')
       console.log(e)
     },
     svgDoubleClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
       console.log('clicked shape')
       console.log(e)
     },
@@ -61,33 +69,20 @@ export default {
         return null
       }
 
-      // const width = page.width
-      // const height = page.height
-      // const factor = height / width
-
-      /* 3021
-
-      310  2711
-      518  2503
-      721  2300
-      916  2105
-      1115 1906
-      1308 1713
-      1500 1521
-      1689 1332
-      1885 1136
-      2077 944
-      2268 753
-      2469 552 */
+      document.querySelectorAll('.system.overlay').forEach(overlay => {
+        overlay.removeEventListener('click', this.systemClickListener)
+        overlay.removeEventListener('dblclick', this.systemDoubleClickListener)
+        this.viewer.removeOverlay(overlay)
+      })
 
       systems.forEach((system, i) => {
-        console.log(system)
+        // console.log(system)
         const overlay = document.createElement('div')
         overlay.classList.add('system')
+        overlay.classList.add('overlay')
         overlay.setAttribute('title', i + 1)
         overlay.setAttribute('data-n', i)
-        overlay.addEventListener('click', this.systemClickListener)
-        overlay.addEventListener('dblclick', this.systemDoubleClickListener)
+
         this.viewer.addOverlay({
           element: overlay,
           x: system.left,
@@ -95,6 +90,9 @@ export default {
           width: system.right - system.left,
           height: page.height / 30
         })
+
+        overlay.addEventListener('click', this.systemClickListener)
+        overlay.addEventListener('dblclick', this.systemDoubleClickListener)
       })
     }
   },
@@ -122,17 +120,30 @@ export default {
     this.anno.readOnly = true
 
     // Listener for new Selections
-    this.anno.on('createSelection', (a) => {
-      // console.log('created selection:', a)
+    this.anno.on('createSelection', async (selection) => {
+      // console.log('created selection:', selection)
+      selection.body = [{
+        type: 'TextualBody',
+        purpose: 'tagging',
+        value: ''
+      }]
+
+      await this.anno.updateSelected(selection)
+      this.anno.saveSelected()
+    })
+
+    this.anno.on('createAnnotation', async (annotation) => {
       // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
-      const raw = a.target.selector.value.substr(11).split(',')
+      const raw = annotation.target.selector.value.substr(11).split(',')
       const xywh = {
-        x: Math.round(raw[0]),
-        y: Math.round(raw[1]),
+        x: Math.max(Math.round(raw[0]), 0),
+        y: Math.max(Math.round(raw[1]), 0),
         w: Math.round(raw[2]),
         h: Math.round(raw[3])
       }
-      this.$store.dispatch('setSelectionRect', xywh)
+      this.$store.dispatch('createSystem', xywh)
+      this.anno.clearAnnotations()
+      this.renderSystems()
     })
 
     // Listener for changing selections
@@ -203,7 +214,6 @@ export default {
       })
 
     // const svg = this.$store.getters.svgOnCurrentPage
-
     this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderSystems()

@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
+import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -98,13 +99,67 @@ export default createStore({
       state.selectionRect = null
     },
     SET_SELECTION_RECT (state, rect) {
+      // todo: check if needed
       state.selectionRect = rect
+    },
+    CREATE_SYSTEM (state, rect) {
+      const xmlDoc = state.parsedXml.cloneNode(true)
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const pageHeight = parseInt(page.getAttribute('page.height'))
+      const newSystemUly = pageHeight - rect.y
+      const left = rect.x
+      const right = rect.w + rect.x
+
+      const existingSystems = page.querySelectorAll('system')
+      let i = 0
+
+      while (existingSystems.length > i && parseInt(existingSystems[i].getAttribute('uly')) > newSystemUly) {
+        i++
+      }
+      const newSystem = generateSystemFromRect(newSystemUly, left, right)
+
+      if (existingSystems.length === 0) {
+        initializePageIfNecessary(page)
+        insertSystem(page, newSystem, null)
+      } else {
+        const followingSystem = existingSystems[i]
+        insertSystem(page, newSystem, followingSystem)
+      }
+
+      state.parsedXml = xmlDoc
     },
     SET_SELECTED_SYSTEM_ON_CURRENT_PAGE (state, i) {
       state.selectedSystemOnCurrentPage = i
     },
     SET_EDITING_SYSTEM_ON_CURRENT_PAGE (state, i) {
+      console.log('working here ' + i)
+      // if (state.selectionRectEnabled) {
       state.editingSystemOnCurrentPage = i
+
+      const xmlDoc = state.parsedXml
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const systemIndex = i + 1
+      const systemQueryString = 'system:nth-of-type(' + systemIndex + ')'
+      const system = page.querySelector(systemQueryString)
+      const measure = page.querySelector('measure')
+
+      const pageHeight = state.pages[state.currentPage].height
+
+      console.log(system)
+
+      const x = parseInt(measure.getAttribute('coord.x1'))
+      const y = parseInt(pageHeight - parseInt(system.getAttribute('uly')))
+      const w = parseInt(measure.getAttribute('coord.x2') - x)
+      const h = parseInt(Math.round(pageHeight / 30))
+
+      console.log('xywh:', x, y, w, h)
+      // }
     }
   },
   actions: {
@@ -179,7 +234,11 @@ export default createStore({
       commit('SET_SELECTION_RECT_ENABLED', bool)
     },
     setSelectionRect ({ commit }, rect) {
+      // check if needed
       commit('SET_SELECTION_RECT', rect)
+    },
+    createSystem ({ commit }, rect) {
+      commit('CREATE_SYSTEM', rect)
     },
     selectSystemOnCurrentPage ({ commit }, i) {
       commit('SET_SELECTED_SYSTEM_ON_CURRENT_PAGE', parseInt(i))
