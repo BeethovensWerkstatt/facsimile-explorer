@@ -788,7 +788,7 @@
                  page.height="6340"
                  page.leftmar="0"
                  page.rightmar="0"
-                 surface="#x3a88cc3a-9b72-4cf8-8aa7-efa1e38004c9">
+                 surface="#x3a88cc3a-9b72-4cf8-8aa7-efa1e38004c9" ppu="2.5">
                  <!-- page 1 -->
                </page>
                <page
@@ -796,7 +796,7 @@
                  page.height="6356"
                  page.leftmar="0"
                  page.rightmar="0"
-                 surface="#xbdb83095-1669-45da-b9aa-10cdd7e793c8">
+                 surface="#xbdb83095-1669-45da-b9aa-10cdd7e793c8" ppu="2.5">
                  <!-- page 2 -->
                </page>
                <page
@@ -804,7 +804,7 @@
                  page.height="6340"
                  page.leftmar="0"
                  page.rightmar="0"
-                 surface="#x9310558f-db05-4889-aa52-ec2b7000be0e">
+                 surface="#x9310558f-db05-4889-aa52-ec2b7000be0e" ppu="2.5">
                  <!-- page 3 -->
                </page>
                <page
@@ -812,7 +812,7 @@
                  page.height="6427"
                  page.leftmar="0"
                  page.rightmar="0"
-                 surface="#xcbf59f65-c207-4cab-8d80-debed9997f0c">
+                 surface="#xcbf59f65-c207-4cab-8d80-debed9997f0c" ppu="2.5">
                  <!-- page 4 -->
                </page>
                <page
@@ -820,14 +820,14 @@
                  page.height="4429"
                  page.leftmar="0"
                  page.rightmar="0"
-                 surface="#x5dc8608c-05d8-463c-b77e-89e7f47093cf">
+                 surface="#x5dc8608c-05d8-463c-b77e-89e7f47093cf" ppu="2.5">
                  <!-- page 5 -->
                </page>
                <page xml:id="a14f4f2a5-8cc9-4a08-b985-f621426f65e5"
                      page.width="3727"
                      page.height="3021"
                      page.leftmar="0"
-                     page.rightmar="0" >
+                     page.rightmar="0" ppu="2.5">
 
                         <mdivb xml:id="t4dc4385a-11fc-4e90-abe5-19884a5387ed"/>
                         <secb xml:id="t1e993ebe-3542-4619-8937-957fac2ecd42"/>

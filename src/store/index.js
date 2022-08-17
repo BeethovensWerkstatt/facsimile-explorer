@@ -56,7 +56,9 @@ export default createStore({
       surfaces.forEach((surface, i) => {
         const svg = surface.querySelector('svg')
         state.pageSVGs[i] = svg // shall we svg.clone(true) ?
-        if (svg) svg.remove()
+        if (svg) {
+          svg.remove()
+        }
       })
       state.parsedXml = domDoc
     },
@@ -98,9 +100,39 @@ export default createStore({
       state.selectionRectEnabled = bool
       state.selectionRect = null
     },
-    SET_SELECTION_RECT (state, rect) {
+    UPDATE_SYSTEM_COORDINATES (state, sys) {
       // todo: check if needed
-      state.selectionRect = rect
+      // state.selectionRect = rect
+      const index = sys.i
+      console.log('need to fix system ' + index)
+      console.log(sys)
+
+      const xmlDoc = state.parsedXml.cloneNode(true)
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const pageHeight = parseInt(page.getAttribute('page.height'))
+      const uly = pageHeight - sys.rect.y
+      const left = sys.rect.x
+      const right = sys.rect.w + sys.rect.x
+
+      const system = page.querySelectorAll('system')[index]
+      const measure = system.querySelector('measure')
+
+      system.setAttribute('uly', uly)
+      measure.setAttribute('coord.x1', left)
+      measure.setAttribute('coord.x2', right)
+
+      console.log(measure)
+      console.log('sucker!')
+      console.log(xmlDoc.querySelectorAll('system'))
+      state.parsedXml = null
+
+      state.parsedXml = xmlDoc
+
+      console.log(state.parsedXml.querySelectorAll('system')[1])
+      state.editingSystemOnCurrentPage = -1
     },
     CREATE_SYSTEM (state, rect) {
       const xmlDoc = state.parsedXml.cloneNode(true)
@@ -179,7 +211,7 @@ export default createStore({
 
       const pageIndex = state.currentPage + 1
       const queryString = 'page:nth-child(' + pageIndex + ')'
-      const xmlDoc = state.parsedXml
+      const xmlDoc = state.parsedXml.cloneNode(true)
 
       const oldPage = xmlDoc.querySelector(queryString)
       const newPage = snippet.querySelector('page')
@@ -233,9 +265,8 @@ export default createStore({
     setSelectionRectEnabled ({ commit }, bool) {
       commit('SET_SELECTION_RECT_ENABLED', bool)
     },
-    setSelectionRect ({ commit }, rect) {
-      // check if needed
-      commit('SET_SELECTION_RECT', rect)
+    updateSystemCoordinates ({ commit }, system) {
+      commit('UPDATE_SYSTEM_COORDINATES', system)
     },
     createSystem ({ commit }, rect) {
       commit('CREATE_SYSTEM', rect)
@@ -310,16 +341,7 @@ export default createStore({
       const queryString = 'page:nth-child(' + pageIndex + ')'
       const page = xmlDoc.querySelector(queryString)
 
-      /* const pageIndex = state.currentPage + 1
-      const queryString = '//mei:surface[' + pageIndex + ']'
-      const xmlDoc = state.parsedXml
-      console.log('123')
-      const result = xmlDoc.evaluate(queryString, xmlDoc, nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-      // console.log(result.singleNodeValue.textContent)
-      console.log(result)
-      return serializer.serializeToString(result.singleNodeValue) */
-      return serializer.serializeToString(page) // state.parsedXml)
-      // return state.xmlCode
+      return serializer.serializeToString(page)
     },
 
     xmlDocumentCode: state => () => {
@@ -379,7 +401,12 @@ export default createStore({
     },
 
     title: state => {
-      return state.title
+      if (state.parsedXml === null) {
+        return ''
+      }
+
+      const title = state.parsedXml.querySelector('title').textContent
+      return title
     },
 
     /**

@@ -1,5 +1,5 @@
 <template>
-  <div id="osdContainer">
+  <div id="osdContainer" :class="currentTab">
 
   </div>
 </template>
@@ -8,10 +8,26 @@
 import OpenSeadragon from 'openseadragon'
 import * as Annotorious from '@recogito/annotorious-openseadragon'
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css'
+import verovio from 'verovio'
+
+const verovioOptions = {
+  scale: 30,
+  breaks: 'none',
+  openControlEvents: true,
+  svgBoundingBoxes: true,
+  svgRemoveXlink: true,
+  header: 'none',
+  footer: 'none'
+}
 
 export default {
   name: 'OpenSeadragonComponent',
   props: {
+  },
+  computed: {
+    currentTab () {
+      return this.$store.getters.explorerTab
+    }
   },
   methods: {
     systemClickListener (e) {
@@ -126,18 +142,54 @@ export default {
           }
         },
         '@context': 'http://www.w3.org/ns/anno.jsonld',
-        id: 'system_' + index
+        id: 'prefix' + index
       }
-      console.log('anno', anno)
 
       this.anno.setAnnotations([anno])
       this.anno.selectAnnotation(anno)
-      console.log('still there?')
-      console.log(this.anno)
-    }
+    },
+    renderVerovioOverlay () {
+      document.querySelectorAll('.verovio.overlay').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      })
 
+      if (this.$store.getters.systemsOnCurrentPage.length === 0) {
+        return false
+      }
+
+      const prefix = '<music meiversion="5.0.0-dev"><body><pages type="transcription">'
+      const pageCode = this.$store.getters.xmlCode
+      const postfix = '</pages></body></music>'
+
+      const mei = prefix + pageCode + postfix
+      this.vrvToolkit.loadData(mei)
+      const svg = this.vrvToolkit.renderToSVG(1, {})
+
+      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
+
+      const overlay = document.createElement('div')
+      overlay.classList.add('verovio')
+      overlay.classList.add('overlay')
+      overlay.innerHTML = svg
+
+      this.viewer.addOverlay({
+        element: overlay,
+        x: 0,
+        y: 0,
+        width: page.width,
+        height: page.height
+      })
+
+      console.log(overlay)
+    }
   },
   mounted: function () {
+    this.vrvToolkit = new verovio.toolkit()
+    this.vrvToolkit.setOptions(verovioOptions)
+
+    console.log('verovio is there now')
+    console.log(this.vrvToolkit)
+
     this.viewer = OpenSeadragon({
       id: 'osdContainer',
       preserveViewport: false,
@@ -161,8 +213,8 @@ export default {
     }
     // Initialize the Annotorious plugin
     this.anno = Annotorious(this.viewer, annotoriousConfig)
-    this.anno.setVisible(false)
-    this.anno.readOnly = true
+    // this.anno.setVisible(false)
+    // this.anno.readOnly = true
 
     // Listener for new Selections
     this.anno.on('createSelection', async (selection) => {
@@ -193,7 +245,7 @@ export default {
     })
 
     // Listener for changing selections
-    this.anno.on('changeSelectionTarget', (a) => {
+    /* this.anno.on('changeSelectionTarget', (a) => {
       console.log('changeSelectionTarget')
       console.log(a)
 
@@ -206,12 +258,28 @@ export default {
         h: Math.round(raw[3])
       }
       this.$store.dispatch('setSelectionRect', xywh)
-    })
+    }) */
 
     this.anno.on('updateAnnotation', (annotation) => {
       // The users has selected an existing annotation
       console.log('updateAnnotation')
       console.log(annotation)
+
+      const raw = annotation.target.selector.value.substr(11).split(',')
+      const xywh = {
+        x: Math.round(raw[0]),
+        y: Math.round(raw[1]),
+        w: Math.round(raw[2]),
+        h: Math.round(raw[3])
+      }
+      const system = {
+        i: annotation.id.substring(6),
+        rect: xywh
+      }
+
+      this.$store.dispatch('updateSystemCoordinates', system)
+      this.anno.clearAnnotations()
+      this.renderSystems()
     })
 
     const pages = this.$store.getters.pageArrayOSD
@@ -240,11 +308,7 @@ export default {
         this.renderShapes()
       }
     })
-    this.unwatchSelectionRectEnabled = this.$store.watch((state, getters) => getters.selectionRectEnabled,
-      (newBool, oldBool) => {
-        this.anno.setVisible(newBool)
-        this.anno.readOnly = !newBool
-      })
+
     this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
       (newPage, oldPage) => {
         this.viewer.goToPage(newPage)
@@ -277,14 +341,19 @@ export default {
           this.generateSelectionFromZone()
         }
       })
+    this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
+      (newCode, oldCode) => {
+        console.log('RENDER NOW')
+        this.renderVerovioOverlay()
+      })
   },
   beforeUnmount () {
     this.unwatchPages()
     this.unwatchSVG()
     this.unwatchSystems()
     this.unwatchCurrentPage()
-    this.unwatchSelectionRectEnabled()
     this.unwatchEditingSystem()
+    this.unwatchPageXML()
   }
 }
 </script>
@@ -295,8 +364,27 @@ export default {
   width: 100%;
   height: 100%;
 
-  .system {
-     background-color: rgba(57, 6, 238, 0.2);
+  .system.overlay {
+    z-index: -1
+  }
+
+  &.systems .system.overlay {
+    z-index: 5;
+    background-color: rgba(57, 6, 238, 0.2);
+  }
+
+  .verovio.overlay {
+    z-index: -1;
+  }
+
+  &.rendering .verovio.overlay {
+    z-index: 0;
+    background-color: rgba(255,255,255,.3);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .fullSizeOverlay {

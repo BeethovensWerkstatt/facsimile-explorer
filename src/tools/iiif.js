@@ -6,11 +6,16 @@ function uuidv4 () {
   })
 }
 
-function addPage (canvas, n, file, meiPageTemplate, meiSurfaceTemplate) {
+function addPage (canvas, infoJson, n, file, meiPageTemplate, meiSurfaceTemplate) {
+  // console.log(n, infoJson)
   const label = canvas.label
-  const height = canvas.height
-  const width = canvas.width
-  const uri = canvas?.images[0]?.resource?.service['@id']
+  const height = infoJson.height
+  const width = infoJson.width
+  let uri = canvas?.images[0]?.resource?.service['@id']
+
+  if (uri.startsWith('https://gallica.bnf.fr/iiif/')) {
+    uri += '/info.json'
+  }
 
   const surfaceId = 's' + uuidv4()
   const graphicId = 'g' + uuidv4()
@@ -24,6 +29,7 @@ function addPage (canvas, n, file, meiPageTemplate, meiSurfaceTemplate) {
   page.setAttribute('page.width', width)
   page.setAttribute('page.height', height)
   page.setAttribute('surface', '#' + surfaceId)
+  page.setAttribute('ppu', 2.5)
   const comment = document.createComment('page ' + label)
   page.appendChild(comment)
   // page.querySelector('mdivb').setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', mdivId)
@@ -54,6 +60,26 @@ export async function iiifManifest2mei (json, url, parser) {
   let meiFileTemplate
   let meiPageTemplate
   let meiSurfaceTemplate
+
+  const imageData = []
+  const imageLinks = []
+
+  json.sequences[0].canvases.forEach((canvas, i) => {
+    const uri = canvas?.images[0]?.resource?.service['@id']
+    imageLinks.push(uri)
+  })
+
+  imageLinks.forEach((uri, i) => {
+    if (uri.startsWith('https://gallica.bnf.fr/iiif/')) {
+      uri += '/info.json'
+    }
+
+    promises.push(
+      fetch(uri)
+        .then(res => res.json())
+        .then(json => { imageData[i] = json })
+    )
+  })
 
   promises.push(
     fetch('./assets/meiFileTemplate.xml')
@@ -97,7 +123,7 @@ export async function iiifManifest2mei (json, url, parser) {
 
       // handle pages
       json.sequences[0].canvases.forEach((canvas, i) => {
-        addPage(canvas, i + 1, file, meiPageTemplate, meiSurfaceTemplate)
+        addPage(canvas, imageData[i], i + 1, file, meiPageTemplate, meiSurfaceTemplate)
       })
 
       return file

@@ -19,6 +19,7 @@ export function initializePageIfNecessary (page) {
     staffGrp.append(document.createTextNode('\n      '))
     staffDef.setAttribute('xml:id', 'a' + uuid())
     staffDef.setAttribute('n', 1)
+    staffDef.setAttribute('lines', 5)
     page.prepend(score)
     page.prepend(document.createTextNode('\n  '))
   }

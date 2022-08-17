@@ -39,7 +39,7 @@ export default {
         return this.$store.getters.xmlCode
       },
       set (val) {
-        console.log('changing editor to ', val)
+        // console.log('changing editor to ', val)
         this.$store.dispatch('setXmlByEditor', val)
       }
     }
