@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
+import octokit from '@/store/octokit'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -31,6 +32,7 @@ const serializer = new XMLSerializer()
  */
 export default createStore({
   modules: {
+    octokit
   },
   state: {
     explorerTab: 'systems',

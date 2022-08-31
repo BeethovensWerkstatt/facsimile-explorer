@@ -184,6 +184,7 @@ export default {
     }
   },
   mounted: function () {
+    // eslint-disable-next-line
     this.vrvToolkit = new verovio.toolkit()
     this.vrvToolkit.setOptions(verovioOptions)
 
