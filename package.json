@@ -21,6 +21,8 @@
     "verovio": "^3.11.0",
     "vue": "^3.2.13",
     "vue-codemirror": "^6.0.0",
+    "vue-cookies": "^1.8.1",
+    "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
@@ -28,6 +30,7 @@
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-standard": "^6.1.0",
