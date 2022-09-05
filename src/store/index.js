@@ -346,6 +346,8 @@ export default createStore({
       return serializer.serializeToString(page)
     },
 
+    hasXML: state => !!state.parsedXml,
+
     xmlDocumentCode: state => () => {
       // TODO: We may need to reintegrate the SVG files…
       if (state.parsedXml === null) {

@@ -3,11 +3,9 @@
 </template>
 
 <script>
+
 export default {
-  name: 'FacsimileExplorer',
-  mounted () {
-    console.log(this.$cookies)
-  }
+  name: 'FacsimileExplorer'
 }
 </script>
 

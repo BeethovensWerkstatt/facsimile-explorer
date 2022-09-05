@@ -5,9 +5,11 @@
     </button>
     <ul class="menu gitMenu">
       <li class="menu-item">
-        <div class="tile tile-centered" v-if="ghUserName">
-          <div class="tile-icon"><img class="avatar" :src="ghUserAvatar" :alt="ghUserName"></div>
-          <div class="tile-content">{{ ghUserName }}</div>
+        <div v-if="ghUserName">
+          <div class="tile tile-centered">
+            <div class="tile-icon"><img class="avatar" :src="ghUserAvatar" :alt="ghUserName"></div>
+            <div class="tile-content">{{ ghUserName }}</div>
+          </div>
           <button @click="logout()" class="customBtn btn btn-link">
             Logout
           </button>
@@ -71,7 +73,7 @@
         </button>
       </li>
       <li class="menu-item">
-        <button class="customBtn btn btn-link" @click="downloadXML()">
+        <button class="customBtn btn btn-link" :disabled=!hasXML @click="downloadXML()">
           <i class="icon icon-download"></i> Download XML
         </button>
       </li>
@@ -88,13 +90,24 @@
 <script>
 import { mapGetters } from 'vuex'
 import fileDownload from 'js-file-download'
+import { GH_ACCESS_TOKEN } from '@/store/octokit'
 
 export default {
   name: 'GitMenu',
   props: {
   },
+  mounted () {
+    console.log(document.cookie)
+    if (!this.isAuthenticated) {
+      const auth = this.$cookies.get(GH_ACCESS_TOKEN)
+      if (auth) {
+        console.log(GH_ACCESS_TOKEN, auth)
+        this.$store.commit('SET_ACCESS_TOKEN', { auth })
+      }
+    }
+  },
   computed: {
-    ...mapGetters(['isReady', 'gh_user']),
+    ...mapGetters(['isReady', 'hasXML', 'xmlDocumentCode', 'gh_user', 'isAuthenticated']),
     ghUserName () {
       return this.gh_user?.login
     },
@@ -107,13 +120,6 @@ export default {
     }
   },
   methods: {
-    xmlDataUrl () {
-      const xml = this.$store.getters.xmlDocumentCode()
-      if (xml !== null) {
-        return 'data:text/xml,' + encodeURIComponent(xml)
-      }
-      return '#'
-    },
     importIIIF () {
       this.$store.dispatch('setModal', 'iiif')
     },
@@ -121,7 +127,7 @@ export default {
       this.$store.dispatch('setModal', 'loadxml')
     },
     downloadXML () {
-      const xml = this.$store.getters.xmlDocumentCode()
+      const xml = this.xmlDocumentCode()
       if (xml !== null) {
         const data = new Blob([xml], {
           type: 'text/xml'
@@ -133,10 +139,17 @@ export default {
       this.$store.dispatch('setModal', 'overview')
     },
     login () {
-      console.log('login ...')
+      // this page will open /authorize?code=<GH_CODE> on success
+      window.open('https://github.com/login/oauth/authorize?client_id=a0ef5b62f2004a3c3b4e', '_self')
     },
     logout () {
-      console.log('logout ...')
+      this.$store.dispatch('logout', {
+        remove: () => {
+          console.log('remove ' + GH_ACCESS_TOKEN)
+          this.$cookies.remove(GH_ACCESS_TOKEN, '/')
+          window.location.reload(true)
+        }
+      })
     }
   }
 }
