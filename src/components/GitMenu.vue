@@ -68,12 +68,12 @@
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="loadXML()">
           <i class="icon icon-upload"></i> Load XML
-       </button>
+        </button>
       </li>
       <li class="menu-item">
-        <a :href="xmlDataUrl()" target="_blank" :download="xmlFilename">
+        <button class="customBtn btn btn-link" @click="downloadXML()">
           <i class="icon icon-download"></i> Download XML
-        </a>
+        </button>
       </li>
       <li class="divider" data-content="Actions"></li>
       <li class="menu-item">
@@ -87,6 +87,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import fileDownload from 'js-file-download'
 
 export default {
   name: 'GitMenu',
@@ -118,6 +119,15 @@ export default {
     },
     loadXML () {
       this.$store.dispatch('setModal', 'loadxml')
+    },
+    downloadXML () {
+      const xml = this.$store.getters.xmlDocumentCode()
+      if (xml !== null) {
+        const data = new Blob([xml], {
+          type: 'text/xml'
+        })
+        fileDownload(data, this.xmlFilename)
+      }
     },
     showOverview () {
       this.$store.dispatch('setModal', 'overview')
