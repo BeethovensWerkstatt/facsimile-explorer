@@ -5,7 +5,9 @@ const state = {
   auth: '',
   octokit: new Octokit()
 }
-const getters = {}
+const getters = {
+  gh_user: state => state.user
+}
 const mutations = {
   SET_ACCESS_TOKEN (state, auth) {
     state.auth = auth
@@ -23,6 +25,7 @@ const mutations = {
 }
 const actions = {
   authenticate ({ commit }, code) {
+    // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
     const url = `auth?code=${code}`
     fetch(url).then(resp => resp.json().then(data => {
       const accessToken = data.access_token

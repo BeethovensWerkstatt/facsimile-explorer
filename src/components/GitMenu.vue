@@ -4,19 +4,23 @@
       <!--GitHub --><i class="icon icon-menu"></i>
     </button>
     <ul class="menu gitMenu">
-      <!--<li class="menu-item">
-        <div class="tile tile-centered">
-          <div class="tile-icon"><img class="avatar" src="https://avatars.githubusercontent.com/u/3233358?s=64&v=4" alt="jpvoigt"></div>
-          <div class="tile-content">jpvoigt</div>
-          <a class="menu-badge" href="#">
+      <li class="menu-item">
+        <div class="tile tile-centered" v-if="ghUserName">
+          <div class="tile-icon"><img class="avatar" :src="ghUserAvatar" :alt="ghUserName"></div>
+          <div class="tile-content">{{ ghUserName }}</div>
+          <button @click="logout()" class="customBtn btn btn-link">
             Logout
-          </a>
+          </button>
+        </div>
+        <div class="tile tile-centered" v-else>
+          <div class="tile-icon"><img class="avatar" src="/Octocat.jpg" alt="GitHub"></div>
+          <div class="tile-content"><button @click="login()" class="customBtn btn btn-link">Login</button></div>
         </div>
       </li>
+      <!--
       <li class="menu-item">
 
       </li>
-
       <li class="divider" data-content="Repository"></li>
 
       <li class="menu-item">
@@ -82,13 +86,19 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'GitMenu',
   props: {
   },
   computed: {
-    isReady () {
-      return this.$store.getters.isReady
+    ...mapGetters(['isReady', 'gh_user']),
+    ghUserName () {
+      return this.gh_user?.login
+    },
+    ghUserAvatar () {
+      return this.gh_user?.avatar_url
     },
     xmlFilename () {
       // TODO create filename from signature
@@ -111,6 +121,12 @@ export default {
     },
     showOverview () {
       this.$store.dispatch('setModal', 'overview')
+    },
+    login () {
+      console.log('login ...')
+    },
+    logout () {
+      console.log('logout ...')
     }
   }
 }
