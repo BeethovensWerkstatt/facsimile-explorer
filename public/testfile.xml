@@ -7,13 +7,13 @@
      xmlns:xlink="http://www.w3.org/1999/xlink"
      xml:id="Codierung_op.75.2"
      meiversion="2013"
-     meiversion.num="2.1.1">
+     meiversion.num="5.0.0-dev">
     <meiHead>
         <title>D-BNba_HCB_Mh_60.xml</title>
     </meiHead>
     <music xml:id="a723695f8-67d3-4196-aacb-a69292014144"
           meiversion="2013"
-          meiversion.num="2.1.1">
+          meiversion.num="5.0.0-dev">
           <facsimile xml:id="r7cb7bbab-5d48-40be-a56f-b77402ee3fb9">
            <surface xml:id="x3a88cc3a-9b72-4cf8-8aa7-efa1e38004c9" n="1" ulx="0" uly="0" lrx="4696" lry="6340" rotate="0" label="1">
               <graphic xml:id="x9b700d8f-3c38-448c-90ef-5494f6aa2992" target="https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/US-NYj_31_B393cp_no.5_errata%2F001.jpg" type="facsimile" width="4696" height="6340"/>

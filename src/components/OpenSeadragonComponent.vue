@@ -17,7 +17,8 @@ const verovioOptions = {
   svgBoundingBoxes: true,
   svgRemoveXlink: true,
   header: 'none',
-  footer: 'none'
+  footer: 'none' //,
+  // unit: 18
 }
 
 export default {

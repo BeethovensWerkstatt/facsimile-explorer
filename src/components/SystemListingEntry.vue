@@ -4,7 +4,7 @@
      <td class="top">{{ system.top }}</td>
      <td class="left">{{ system.left }}</td>
      <td class="right">{{ system.right }}</td>
-     <td class="tools">{{ selected }}</td>
+     <!--<td class="tools">{{ selected }}</td>-->
   </tr>
 </template>
 

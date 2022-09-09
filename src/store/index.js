@@ -121,19 +121,15 @@ export default createStore({
 
       const system = page.querySelectorAll('system')[index]
       const measure = system.querySelector('measure')
+      const staff = measure.querySelector('staff')
 
-      system.setAttribute('uly', uly)
+      staff.setAttribute('coord.y1', uly)
       measure.setAttribute('coord.x1', left)
       measure.setAttribute('coord.x2', right)
 
-      console.log(measure)
-      console.log('sucker!')
-      console.log(xmlDoc.querySelectorAll('system'))
       state.parsedXml = null
-
       state.parsedXml = xmlDoc
 
-      console.log(state.parsedXml.querySelectorAll('system')[1])
       state.editingSystemOnCurrentPage = -1
     },
     CREATE_SYSTEM (state, rect) {
@@ -146,6 +142,7 @@ export default createStore({
       const newSystemUly = pageHeight - rect.y
       const left = rect.x
       const right = rect.w + rect.x
+      const height = rect.h
 
       const existingSystems = page.querySelectorAll('system')
       let i = 0
@@ -156,7 +153,7 @@ export default createStore({
       const newSystem = generateSystemFromRect(newSystemUly, left, right)
 
       if (existingSystems.length === 0) {
-        initializePageIfNecessary(page)
+        initializePageIfNecessary(page, height)
         insertSystem(page, newSystem, null)
       } else {
         const followingSystem = existingSystems[i]
@@ -433,10 +430,11 @@ export default createStore({
 
       const systems = []
       page.querySelectorAll('system').forEach(system => {
-        const top = parseInt(pageHeight - system.getAttributeNS('', 'uly'))
         // console.log('rawY: ' + rawY + ', pageHeight: ' + pageHeight + ', uly: ' + system.getAttributeNS('', 'uly'))
 
         const measure = system.querySelector('measure')
+        const staff = measure.querySelector('staff')
+        const top = parseInt(pageHeight - staff.getAttributeNS('', 'coord.y1'))
 
         const left = parseInt(measure.getAttributeNS('', 'coord.x1'))
         const right = parseInt(measure.getAttributeNS('', 'coord.x2'))

@@ -1,8 +1,10 @@
 import { uuid } from '@/tools/uuid.js'
 
-export function initializePageIfNecessary (page) {
+export function initializePageIfNecessary (page, height) {
   const hasScoreDef = page.querySelector('score')
   if (hasScoreDef === null) {
+    const scale = (100 / 80 * height).toFixed(1) + '%'
+
     const score = document.createElementNS('http://www.music-encoding.org/ns/mei', 'score')
     const scoreDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'scoreDef')
     const staffGrp = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffGrp')
@@ -20,6 +22,7 @@ export function initializePageIfNecessary (page) {
     staffDef.setAttribute('xml:id', 'a' + uuid())
     staffDef.setAttribute('n', 1)
     staffDef.setAttribute('lines', 5)
+    staffDef.setAttribute('scale', scale)
     page.prepend(score)
     page.prepend(document.createTextNode('\n  '))
   }
@@ -39,9 +42,6 @@ export function initializePageIfNecessary (page) {
     page.prepend(mdivb)
     page.prepend('\n  ')
   }
-
-  console.log('page:')
-  console.log(page)
 }
 
 export function generateSystemFromRect (uly, left, right) {
@@ -56,7 +56,6 @@ export function generateSystemFromRect (uly, left, right) {
   */
   system.setAttribute('system.leftmar', 0)
   system.setAttribute('system.rightmar', 0)
-  system.setAttribute('uly', uly)
   system.append(document.createTextNode('\n    '))
   system.append(measure)
   system.append(document.createTextNode('\n  '))
@@ -67,6 +66,7 @@ export function generateSystemFromRect (uly, left, right) {
   measure.append(staff)
   measure.append(document.createTextNode('\n    '))
   staff.setAttribute('n', 1)
+  staff.setAttribute('coord.y1', uly)
   staff.append(document.createTextNode('\n        '))
   staff.append(layer)
   staff.append(document.createTextNode('\n      '))
