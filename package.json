@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint --fix"
+    "lint": "vue-cli-service lint --fix",
+    "jsdoc": "jsdoc -a all -c jsdoc.json"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.0.1",
@@ -35,11 +36,15 @@
     "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "@vue/eslint-config-standard": "^6.1.0",
+    "docdash": "^1.2.0",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-vue": "^8.0.3",
+    "jsdoc": "^3.6.11",
+    "jsdoc-to-markdown": "^7.1.1",
+    "jsdoc-vuejs": "^4.0.0",
     "lint-staged": "^11.1.2",
     "path-browserify": "^1.0.1",
     "sass": "^1.32.7",

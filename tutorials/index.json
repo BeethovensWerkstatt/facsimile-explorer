@@ -1,0 +1,10 @@
+{
+  "github": {
+    "title": "Github interaction",
+    "children": {
+      "github-oauth": {
+        "title": "Github OAUTH with NGINX proxy"
+      }
+    }
+  }
+}
