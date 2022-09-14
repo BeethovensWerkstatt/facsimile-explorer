@@ -314,8 +314,8 @@ export default createStore({
   getters: {
     /**
      * whether an XML file is properly loaded or not
-     * @param  {[type]}  state               [description]
-     * @return {Boolean}       [description]
+     * @param  {Object}  state store
+     * @return {Boolean} true if MEI is available
      */
     isReady: state => {
       return state.parsedXml !== null
@@ -323,8 +323,8 @@ export default createStore({
 
     /**
      * getter for the XML code for the current page
-     * @param  {Object} state               [description]
-     * @return {string}       [description]
+     * @param  {Object} state store
+     * @return {string} MEI serialized to string
      */
     xmlCode: state => {
       if (state.parsedXml === null || state.currentPage === -1) {
@@ -412,8 +412,8 @@ export default createStore({
 
     /**
      * A representation of the systems on the current page
-     * @param  {[type]} state               [description]
-     * @return {[type]}       [description]
+     * @param  {Object} state store
+     * @return {Object} systems on the current page
      */
     systemsOnCurrentPage: state => {
       const pageIndex = state.currentPage + 1
