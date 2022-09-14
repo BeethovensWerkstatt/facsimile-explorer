@@ -13,8 +13,10 @@ services:
     depends_on:
       - "webpack"
   webpack:
-    image: node
+    build: node-ghcred
     volumes:
       - ./:/usr/app/
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
     working_dir: /usr/app/
     command: "npm run serve"

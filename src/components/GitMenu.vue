@@ -91,17 +91,19 @@
 import { mapGetters } from 'vuex'
 import fileDownload from 'js-file-download'
 import { GH_ACCESS_TOKEN } from '@/store/octokit'
+import CLIENT_ID from '@/clientID'
 
 export default {
   name: 'GitMenu',
   props: {
   },
   mounted () {
-    console.log(document.cookie)
+    // console.log('CLIENT_ID=' + JSON.stringify(process.env, '', 2))
+    // console.log(document.cookie)
     if (!this.isAuthenticated) {
       const auth = this.$cookies.get(GH_ACCESS_TOKEN)
       if (auth) {
-        console.log(GH_ACCESS_TOKEN, auth)
+        // console.log(GH_ACCESS_TOKEN, auth)
         this.$store.commit('SET_ACCESS_TOKEN', { auth })
       }
     }
@@ -140,7 +142,8 @@ export default {
     },
     login () {
       // this page will open /authorize?code=<GH_CODE> on success
-      window.open('https://github.com/login/oauth/authorize?client_id=a0ef5b62f2004a3c3b4e', '_self')
+      const url = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}`
+      window.open(url, '_self')
     },
     logout () {
       this.$store.dispatch('logout', {
