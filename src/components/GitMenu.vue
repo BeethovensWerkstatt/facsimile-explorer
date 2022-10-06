@@ -128,7 +128,7 @@ export default {
   },
   methods: {
     importGH () {
-      this.$store.dispatch('getContent', {})
+      this.$store.dispatch('loadContent', {})
     },
     importIIIF () {
       this.$store.dispatch('setModal', 'iiif')

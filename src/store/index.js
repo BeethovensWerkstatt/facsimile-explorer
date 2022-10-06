@@ -226,6 +226,7 @@ export default createStore({
         })
         .then(xml => {
           const mei = parser.parseFromString(xml, 'application/xml')
+          commit('SET_GH_FILE', {}) // remove GH link
           dispatch('setData', mei)
         })
     },
@@ -295,6 +296,7 @@ export default createStore({
 
           iiifManifest2mei(json, url, parser)
             .then(mei => {
+              commit('SET_GH_FILE', {}) // remove GH link
               dispatch('setData', mei)
             })
         })

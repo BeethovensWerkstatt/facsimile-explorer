@@ -5,7 +5,9 @@ export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 const state = {
   user: {},
   auth: '',
-  octokit: new Octokit()
+  octokit: new Octokit(),
+  filepath: undefined,
+  filesha: undefined
 }
 const getters = {
   gh_user: state => state.user,
@@ -36,6 +38,10 @@ const mutations = {
       state.user = {}
       if (remove) remove()
     }
+  },
+  SET_GH_FILE (state, { path, sha }) {
+    state.filepath = path
+    state.filesha = sha
   }
 }
 const actions = {
@@ -62,12 +68,14 @@ const actions = {
     commit('SET_ACCESS_TOKEN', { auth: '', remove })
   },
   // TODO select owner, repo, path, branch (ref)
-  getContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
+  loadContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+      console.log(data)
       const txt = atob(data.content)
       const parser = new DOMParser()
       const mei = parser.parseFromString(txt, 'application/xml')
       dispatch('setData', mei)
+      commit('SET_GH_FILE', data)
     })
   }
 }
