@@ -17,7 +17,10 @@ const mutations = {
     state.auth = auth
     console.log('set access token', state.auth)
     try {
-      state.octokit = new Octokit({ auth: state.auth })
+      state.octokit = new Octokit({
+        auth: state.auth,
+        userAgent: 'facsimile-explorer/v0.0.1'
+      })
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
           state.user = data
@@ -57,6 +60,13 @@ const actions = {
   },
   logout ({ commit }, { remove }) {
     commit('SET_ACCESS_TOKEN', { auth: '', remove })
+  },
+  // TODO select owner, repo, path, branch (ref)
+  getContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
+    getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+      const mei = atob(data.content)
+      dispatch('setData', mei)
+    })
   }
 }
 

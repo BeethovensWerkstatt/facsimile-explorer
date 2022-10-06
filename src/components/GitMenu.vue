@@ -63,6 +63,11 @@
         </a>
       </li>-->
       <li class="menu-item">
+        <button class="customBtn btn btn-link" @click="importGH()">
+          <i class="icon icon-upload"></i> Load from Github
+       </button>
+      </li>
+      <li class="menu-item">
         <button class="customBtn btn btn-link" @click="importIIIF()">
           <i class="icon icon-upload"></i> Import IIIF Manifest
        </button>
@@ -122,6 +127,9 @@ export default {
     }
   },
   methods: {
+    importGH () {
+      this.$store.dispatch('getContent', {})
+    },
     importIIIF () {
       this.$store.dispatch('setModal', 'iiif')
     },
