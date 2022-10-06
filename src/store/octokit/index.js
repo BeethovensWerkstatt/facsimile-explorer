@@ -64,7 +64,9 @@ const actions = {
   // TODO select owner, repo, path, branch (ref)
   getContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-      const mei = atob(data.content)
+      const txt = atob(data.content)
+      const parser = new DOMParser()
+      const mei = parser.parseFromString(txt, 'application/xml')
       dispatch('setData', mei)
     })
   }
