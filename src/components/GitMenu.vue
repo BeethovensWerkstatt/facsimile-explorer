@@ -150,7 +150,7 @@ export default {
     },
     login () {
       // this page will open /authorize?code=<GH_CODE> on success
-      const url = `https://github.com/login/oauth/authorize?scopes=repo&client_id=${CLIENT_ID}`
+      const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
       window.open(url, '_self')
     },
     logout () {
