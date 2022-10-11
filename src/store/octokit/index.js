@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest'
+import { Base64 } from 'js-base64'
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 
@@ -71,7 +72,8 @@ const actions = {
   loadContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
       console.log(data)
-      const txt = atob(data.content)
+      const dec = new TextDecoder('utf-8')
+      const txt = dec.decode(Base64.toUint8Array(data.content))
       const parser = new DOMParser()
       const mei = parser.parseFromString(txt, 'application/xml')
       dispatch('setData', mei)
