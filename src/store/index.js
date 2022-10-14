@@ -36,6 +36,7 @@ export default createStore({
   },
   state: {
     explorerTab: 'systems',
+    cataloguerTab: 'notes',
     pages: [],
     currentPage: -1,
     previewPage: -1,
@@ -98,6 +99,9 @@ export default createStore({
     SET_EXPLORER_TAB (state, val) {
       state.explorerTab = val
     },
+    SET_CATALOGUER_TAB (state, val) {
+      state.cataloguerTab = val
+    },
     SET_SELECTION_RECT_ENABLED (state, bool) {
       state.selectionRectEnabled = bool
       state.selectionRect = null
@@ -147,7 +151,7 @@ export default createStore({
       const existingSystems = page.querySelectorAll('system')
       let i = 0
 
-      while (existingSystems.length > i && parseInt(existingSystems[i].getAttribute('uly')) > newSystemUly) {
+      while (existingSystems.length > i && parseInt(existingSystems[i].querySelector('staff').getAttribute('coord.y1')) > newSystemUly) {
         i++
       }
       const newSystem = generateSystemFromRect(newSystemUly, left, right)
@@ -225,11 +229,12 @@ export default createStore({
           return res.text()
         })
         .then(xml => {
-          const mei = parser.parseFromString(xml, 'application/xml')
-          dispatch('setData', mei)
+          dispatch('setData', xml)
         })
     },
-    setData ({ commit }, mei) {
+    setData ({ commit }, input) {
+      const mei = (typeof input === 'string') ? parser.parseFromString(input, 'application/xml') : input
+
       const pageArray = getPageArray(mei)
       commit('SET_PAGES', pageArray)
 
@@ -260,6 +265,9 @@ export default createStore({
     },
     setExplorerTab ({ commit }, val) {
       commit('SET_EXPLORER_TAB', val)
+    },
+    setCataloguerTab ({ commit }, val) {
+      commit('SET_CATALOGUER_TAB', val)
     },
     setSelectionRectEnabled ({ commit }, bool) {
       commit('SET_SELECTION_RECT_ENABLED', bool)
@@ -465,6 +473,10 @@ export default createStore({
 
     explorerTab: state => {
       return state.explorerTab
+    },
+
+    cataloguerTab: state => {
+      return state.cataloguerTab
     },
 
     selectionRectEnabled: state => {

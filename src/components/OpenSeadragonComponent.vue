@@ -48,8 +48,11 @@ export default {
     svgClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
-      console.log('clicked shape')
-      console.log(e)
+      if (e.target.localName === 'path') {
+        console.log('clicked shape')
+        console.log(e)
+        console.log(e.target.getBBox())
+      }
     },
     svgDoubleClickListener (e) {
       e.preventDefault()
@@ -172,6 +175,9 @@ export default {
       overlay.classList.add('verovio')
       overlay.classList.add('overlay')
       overlay.innerHTML = svg
+
+      const compensatedRotation = page.rotation * -1
+      overlay.querySelector('svg').style.transform = 'rotate(' + compensatedRotation + 'deg)'
 
       this.viewer.addOverlay({
         element: overlay,
@@ -368,6 +374,15 @@ export default {
 
   .system.overlay {
     z-index: -1
+  }
+
+  &.transcript {
+    .verovio.overlay {
+      z-index: 5;
+    }
+    .a9s-annotationlayer {
+        z-index: -1;
+     }
   }
 
   &.systems .system.overlay {

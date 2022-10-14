@@ -159,7 +159,7 @@ export function getPageArray (mei) {
     obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
     obj.hasSvg = surface.querySelector('svg') !== null // exists(svg:svg) inside relevant /surface
     obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
-
+    obj.rotation = surface.hasAttribute('rotate') ? parseFloat(surface.getAttribute('rotate')) : 0
     obj.systems = page.querySelectorAll('system').length // count(mei:system) inside relevant /page
     arr.push(obj)
   })
