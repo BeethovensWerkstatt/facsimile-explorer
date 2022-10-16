@@ -64,7 +64,12 @@
       </li>-->
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="importGH()">
-          <i class="icon icon-upload"></i> Load from Github
+          <i class="icon icon-download"></i> Load from Github
+       </button>
+      </li>
+      <li class="menu-item">
+        <button class="customBtn btn btn-link" @click="commitGH()">
+          <i class="icon icon-upload"></i> Save to Github
        </button>
       </li>
       <li class="menu-item">
@@ -129,6 +134,9 @@ export default {
   methods: {
     importGH () {
       this.$store.dispatch('loadContent', {})
+    },
+    commitGH () {
+      this.$store.dispatch('saveContent')
     },
     importIIIF () {
       this.$store.dispatch('setModal', 'iiif')

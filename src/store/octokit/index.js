@@ -7,6 +7,9 @@ const state = {
   user: {},
   auth: '',
   octokit: new Octokit(),
+  filerepo: undefined,
+  fileowner: undefined,
+  fileref: undefined,
   filepath: undefined,
   filesha: undefined
 }
@@ -40,9 +43,13 @@ const mutations = {
       if (remove) remove()
     }
   },
-  SET_GH_FILE (state, { path, sha }) {
+  SET_GH_FILE (state, { repo, owner, ref, path, sha }) {
+    state.filerepo = repo
+    state.fileowner = owner
+    state.fileref = ref
     state.filepath = path
     state.filesha = sha
+    console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
   }
 }
 const actions = {
@@ -69,16 +76,27 @@ const actions = {
     commit('SET_ACCESS_TOKEN', { auth: '', remove })
   },
   // TODO select owner, repo, path, branch (ref)
-  loadContent ({ commit, dispatch, getters }, { owner = 'BeethovensWerkstatt', repo = 'data', path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml', ref = 'dev' }) {
+  loadContent (
+    { commit, dispatch, getters },
+    {
+      owner = 'BeethovensWerkstatt',
+      repo = 'data',
+      path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
+      ref = 'dev'
+    }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-      console.log(data)
       const dec = new TextDecoder('utf-8')
       const txt = dec.decode(Base64.toUint8Array(data.content))
       const parser = new DOMParser()
       const mei = parser.parseFromString(txt, 'application/xml')
       dispatch('setData', mei)
-      commit('SET_GH_FILE', data)
+      commit('SET_GH_FILE', { ...data, owner, repo, ref })
     })
+  },
+  saveContent ({ state, getters }) {
+    const mei = getters.xmlDocumentCode
+    console.log(mei)
+    console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
   }
 }
 
