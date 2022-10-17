@@ -64,12 +64,12 @@
       </li>-->
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="importGH()">
-          <i class="icon icon-download"></i> Load from Github
+          <i class="icon icon-download"></i> Fetch from Github
        </button>
       </li>
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="commitGH()">
-          <i class="icon icon-upload"></i> Save to Github
+          <i class="icon icon-upload"></i> Commit to Github
        </button>
       </li>
       <li class="menu-item">
@@ -136,7 +136,7 @@ export default {
       this.$store.dispatch('loadContent', {})
     },
     commitGH () {
-      this.$store.dispatch('saveContent')
+      this.$store.dispatch('setModal', 'commitmei')
     },
     importIIIF () {
       this.$store.dispatch('setModal', 'iiif')

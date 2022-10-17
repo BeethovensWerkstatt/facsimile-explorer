@@ -16,7 +16,12 @@ const state = {
 const getters = {
   gh_user: state => state.user,
   octokit: state => state.octokit,
-  isAuthenticated: state => (state.auth && state.user?.login)
+  isAuthenticated: state => (state.auth && state.user?.login),
+  filerepo: state => state.filerepo,
+  fileowner: state => state.fileowner,
+  fileref: state => state.fileref,
+  filepath: state => state.filepath,
+  filesha: state => state.filesha
 }
 const mutations = {
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
@@ -93,10 +98,32 @@ const actions = {
       commit('SET_GH_FILE', { ...data, owner, repo, ref })
     })
   },
-  saveContent ({ state, getters }) {
-    const mei = getters.xmlDocumentCode
+  saveContent ({ state, getters }, opts) {
+    const mei = getters.xmlDocumentCode()
     console.log(mei)
-    console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
+    // console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
+    const enc = new TextEncoder('utf-8')
+    const content = Base64.fromUint8Array(enc.encode(mei))
+    const message = opts?.message || `updated '${state.filepath}'`
+    const commit = {
+      owner: state.fileowner,
+      repo: state.filerepo,
+      path: state.filepath,
+      sha: state.filesha,
+      branch: state.fileref,
+      message,
+      content
+    }
+    console.log(commit)
+    if (typeof opts?.callback === 'function') {
+      opts.callback()
+    }
+    /*
+    getters.octokit.repos.createOrUpdateFileContents(commit).then(({ data }) => {
+      console.log(data)
+      commit('SET_GH_FILE', { ...data, owner: state.fileowner, repo: state.filerepo, ref: state.fileref })
+    })
+    */
   }
 }
 

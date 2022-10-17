@@ -3,6 +3,7 @@
   <IiifModal/>
   <LoadXmlModal/>
   <OverviewModal/>
+  <CommitModal/>
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
@@ -40,6 +41,7 @@ import XmlEditor from '@/components/XmlEditor.vue'
 import IiifModal from '@/components/IiifModal.vue'
 import LoadXmlModal from '@/components/LoadXmlModal.vue'
 import OverviewModal from '@/components/OverviewModal.vue'
+import CommitModal from '@/components/CommitModal.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -54,6 +56,7 @@ export default {
     IiifModal,
     LoadXmlModal,
     OverviewModal,
+    CommitModal,
     Splitpanes,
     Pane
   },
