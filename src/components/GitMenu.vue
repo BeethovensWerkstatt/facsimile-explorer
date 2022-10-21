@@ -79,6 +79,11 @@
       </li>
       <li class="divider" data-content="Actions"></li>
       <li class="menu-item">
+        <button class="customBtn btn btn-link">
+          <i class="icon icon-resize-horiz"></i> Align Transcriptions
+       </button>
+      </li>
+      <li class="menu-item">
         <button class="customBtn btn btn-link" :disabled=!isReady @click="showOverview()">
           <i class="icon icon-copy"></i> Document Overview
        </button>
@@ -139,6 +144,9 @@ export default {
     },
     showOverview () {
       this.$store.dispatch('setModal', 'overview')
+    },
+    showAlignmentModal () {
+      this.$store.dispatch('setModal', 'transcriptionAlignment')
     },
     login () {
       // this page will open /authorize?code=<GH_CODE> on success

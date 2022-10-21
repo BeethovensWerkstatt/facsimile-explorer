@@ -81,3 +81,35 @@ export function insertSystem (page, system, followingSystem) {
   page.insertBefore(system, where)
   page.insertBefore(document.createTextNode('\n'), where)
 }
+
+export function createElement (type, system, id) {
+  const layer = system.querySelector('layer')
+
+  let localName
+  switch (type) {
+    case 'notes':
+      localName = 'note'
+      break
+
+    case 'accidental':
+      localName = 'accid'
+      break
+
+    case 'rests':
+    case 'barlines':
+    case 'beams':
+    case 'dynamics':
+    case 'artic':
+    case 'text':
+    case 'other':
+    default:
+      localName = type
+  }
+
+  const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', localName)
+  elem.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', id)
+
+  layer.append(document.createTextNode('\n                                  '))
+  layer.append(elem)
+  layer.append(document.createTextNode('\n                                '))
+}

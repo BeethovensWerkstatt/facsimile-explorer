@@ -1,7 +1,8 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
-import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
+import { initializePageIfNecessary, generateSystemFromRect, insertSystem, createElement } from '@/tools/mei.js'
 import octokit from '@/store/octokit'
+import { uuid } from '@/tools/uuid.js'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -40,6 +41,8 @@ export default createStore({
     pages: [],
     currentPage: -1,
     previewPage: -1,
+    activeSystem: -1,
+    activeElement: null,
     title: '',
     parsedXml: null,
     temporaryCode: '',
@@ -51,7 +54,8 @@ export default createStore({
     selectionRect: null,
     selectedSystemOnCurrentPage: -1,
     editingSystemOnCurrentPage: -1,
-    pageSVGs: []
+    pageSVGs: [],
+    activeSketchArea: null
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
@@ -77,6 +81,10 @@ export default createStore({
     SET_CURRENT_PAGE (state, i) {
       state.previewPage = -1
       state.currentPage = i
+      state.activeSystem = -1
+    },
+    SET_ACTIVE_SYSTEM (state, i) {
+      state.activeSystem = i
     },
     SET_PREVIEW_PAGE (state, i) {
       state.previewPage = i
@@ -195,6 +203,111 @@ export default createStore({
 
       console.log('xywh:', x, y, w, h)
       // }
+    },
+    CREATE_TRANSCRIPTION_ELEMENT (state, { type, system, id }) {
+      console.log('need to create element of type ' + type + ' at system ' + system + ' with id ' + id)
+
+      const xmlDoc = state.parsedXml
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const systemQueryString = 'system:nth-of-type(' + system + ')'
+      const systemElem = page.querySelector(systemQueryString)
+
+      createElement(type, systemElem, id)
+
+      state.parsedXml = null
+      state.parsedXml = xmlDoc
+      state.activeElement = id
+    },
+    ACTIVATE_TRANSCRIPTION_ELEMENT (state, id) {
+      state.activeElement = id
+    },
+    SET_ATTRIBUTE (state, { elemId, attName, attValue }) {
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      const page = xmlDoc.querySelector(queryString)
+
+      const elem = page.querySelector('*[*|id=' + elemId + ']')
+      elem.setAttribute(attName, attValue)
+
+      state.parsedXml = null
+      state.parsedXml = xmlDoc
+    },
+    CLICKED_SHAPE (state, shape) {
+      if (state.parsedXml === null || state.activeElement === null) {
+        return
+      }
+
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      const page = xmlDoc.querySelector(queryString)
+
+      const elem = page.querySelector('*[*|id=' + state.activeElement + ']')
+      if (elem === null) {
+        return
+      }
+
+      if (elem.hasAttribute('facs')) {
+        const refs = elem.getAttribute('facs').replace(/\s+/g, ' ').trim().split(' ')
+        const index = refs.indexOf('#' + shape.id)
+
+        if (index === -1) {
+          refs.push('#' + shape.id)
+          elem.setAttribute('facs', refs.join(' '))
+        } else if (refs.length === 1) {
+          elem.removeAttribute('facs')
+          elem.removeAttribute('coord.x1')
+        } else {
+          refs.splice(index, 1)
+          elem.setAttribute('facs', refs.join(' '))
+        }
+      } else {
+        elem.setAttribute('facs', '#' + shape.id)
+        const bbox = shape.getBBox()
+        const x = parseInt(bbox.x)
+        elem.setAttribute('coord.x1', x)
+      }
+      state.parsedXml = null
+      state.parsedXml = xmlDoc
+    },
+    CREATE_SKETCH_AREA (state, id) {
+      const svg = state.pageSVGs[state.currentPage]
+      if (svg === null || svg === undefined) {
+        console.log('no svg on this page')
+        return null
+      }
+
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      g.setAttribute('id', id)
+      g.classList.add('sketchArea')
+      svg.append(g)
+
+      state.pageSVGs[state.currentPage] = null
+      state.pageSVGs[state.currentPage] = svg
+      state.activeSketchArea = id
+    },
+    ACTIVATE_SKETCH_AREA (state, id) {
+      state.activeSketchArea = id
+    },
+    MOVE_SHAPE_TO_ACTIVE_SKETCH_AREA (state, shapeId) {
+      const svg = state.pageSVGs[state.currentPage]
+      if (svg === null || svg === undefined) {
+        console.log('no svg on this page')
+        return null
+      }
+
+      const shape = svg.querySelector('#' + shapeId)
+      const g = svg.querySelector('#' + state.activeSketchArea)
+      g.append(shape)
+
+      state.pageSVGs[state.currentPage] = null
+      state.pageSVGs[state.currentPage] = svg
     }
   },
   actions: {
@@ -254,6 +367,9 @@ export default createStore({
     setPreviewPage ({ commit }, i) {
       commit('SET_PREVIEW_PAGE', i)
     },
+    setActiveSystem ({ commit }, i) {
+      commit('SET_ACTIVE_SYSTEM', i)
+    },
     setModal ({ commit }, modal) {
       commit('SET_MODAL', modal)
     },
@@ -265,6 +381,8 @@ export default createStore({
     },
     setExplorerTab ({ commit }, val) {
       commit('SET_EXPLORER_TAB', val)
+      commit('ACTIVATE_SKETCH_AREA', null)
+      commit('ACTIVATE_TRANSCRIPTION_ELEMENT', null)
     },
     setCataloguerTab ({ commit }, val) {
       commit('SET_CATALOGUER_TAB', val)
@@ -317,6 +435,33 @@ export default createStore({
       const svg = svgdom?.documentElement
       console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
+    },
+    createTranscriptionElement ({ commit }, { type, system }) {
+      const id = type.substring(0, 1) + uuid()
+      commit('CREATE_TRANSCRIPTION_ELEMENT', { type, system, id })
+    },
+    activateTranscriptionElement ({ commit }, id) {
+      commit('ACTIVATE_TRANSCRIPTION_ELEMENT', id)
+    },
+    setAttribute ({ commit }, { elemId, attName, attValue }) {
+      commit('SET_ATTRIBUTE', { elemId, attName, attValue })
+    },
+    clickedShape ({ commit, state }, shape) {
+      if (state.explorerTab === 'sketchGroups' && state.activeSketchArea !== null) {
+        commit('MOVE_SHAPE_TO_ACTIVE_SKETCH_AREA', shape.id)
+      } else {
+        commit('CLICKED_SHAPE', shape)
+      }
+    },
+    createSketchArea ({ commit }) {
+      const id = 'g' + uuid()
+      commit('CREATE_SKETCH_AREA', id)
+    },
+    activateSketchArea ({ commit }, id) {
+      commit('ACTIVATE_SKETCH_AREA', id)
+    },
+    moveShapeToActiveSketchArea ({ commit }, shapeId) {
+      commit('MOVE_SHAPE_TO_ACTIVE_SKETCH_AREA', shapeId)
     }
   },
   getters: {
@@ -493,6 +638,96 @@ export default createStore({
 
     editingSystemOnCurrentPage: state => {
       return state.editingSystemOnCurrentPage
+    },
+
+    activeSystem: state => {
+      return state.activeSystem
+    },
+
+    activeElementId: state => {
+      return state.activeElement
+    },
+
+    activeElement: state => {
+      if (state.parsedXml === null || state.activeElement === null) {
+        return null
+      }
+
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      const page = xmlDoc.querySelector(queryString)
+
+      return page.querySelector('*[*|id=' + state.activeElement + ']')
+    },
+
+    activeElementAttribute: state => (att) => {
+      if (state.parsedXml === null || state.activeElement === null) {
+        return null
+      }
+
+      const pageIndex = state.currentPage + 1
+      const queryString = 'page:nth-child(' + pageIndex + ')'
+      const page = state.parsedXml.querySelector(queryString)
+
+      const elem = page.querySelector('*[*|id=' + state.activeElement + ']')
+
+      if (elem === null || !elem.hasAttribute(att)) {
+        return null
+      } else {
+        return elem.getAttribute(att)
+      }
+    },
+    relevantElementsByActiveSystem: state => {
+      if (state.parsedXml === null || state.activeSystem === -1) {
+        return []
+      }
+
+      const pageIndex = state.currentPage + 1
+      const pageQuery = 'page:nth-child(' + pageIndex + ')'
+      const page = state.parsedXml.querySelector(pageQuery)
+
+      const systemQuery = 'system:nth-of-type(' + state.activeSystem + ')'
+      const system = page.querySelector(systemQuery)
+
+      let elementQuery
+      if (state.cataloguerTab === 'notes') {
+        elementQuery = 'note'
+      }
+      if (state.cataloguerTab === 'accidental') {
+        elementQuery = 'accid'
+      }
+
+      const elements = system.querySelectorAll(elementQuery)
+      return [...elements]
+    },
+    sketchAreasOnCurrentPage: state => {
+      const svg = state.pageSVGs[state.currentPage]
+
+      if (svg === null || svg === undefined) {
+        return []
+      }
+
+      const page = state.pages[state.currentPage]
+
+      const arr = []
+      svg.querySelectorAll('g.sketchArea').forEach(g => {
+        const bbox = g.getBBox()
+        const shapes = g.querySelectorAll('path').length
+        arr.push({
+          id: g.id,
+          x: parseInt(100 / page.width * bbox.x) + '%',
+          y: parseInt(100 / page.height * bbox.y) + '%',
+          w: parseInt(100 / page.width * bbox.width) + '%',
+          h: parseInt(100 / page.height * bbox.height) + '%',
+          shapes
+        })
+      })
+      return arr
+    },
+    activeSketchArea: state => {
+      return state.activeSketchArea
     }
   }
 })

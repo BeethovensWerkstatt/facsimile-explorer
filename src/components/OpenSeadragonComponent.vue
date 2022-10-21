@@ -49,10 +49,9 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       if (e.target.localName === 'path') {
-        console.log('clicked shape')
-        console.log(e)
-        console.log(e.target.getBBox())
+        this.$store.dispatch('clickedShape', e.target)
       }
+      this.adjustShapeHighlights(this.$store.getters.activeElement, null)
     },
     svgDoubleClickListener (e) {
       e.preventDefault()
@@ -69,6 +68,7 @@ export default {
         return null
       }
       if (svg !== null) {
+        svg.classList.add('shapeOverlay')
         this.viewer.addOverlay({
           element: svg,
           x: 0,
@@ -156,7 +156,7 @@ export default {
       document.querySelectorAll('.verovio.overlay').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
-
+      console.log('doing the overlay…')
       if (this.$store.getters.systemsOnCurrentPage.length === 0) {
         return false
       }
@@ -187,7 +187,22 @@ export default {
         height: page.height
       })
 
-      console.log(overlay)
+      // console.log(overlay)
+    },
+    adjustShapeHighlights (newElem, oldElem) {
+      console.log('adjusting highlights')
+      if (oldElem !== null && oldElem.hasAttribute('facs')) {
+        const oldShapes = oldElem.getAttribute('facs').replace(/\s+g/, ' ').trim().split(' ')
+        document.querySelectorAll(oldShapes.join(', ')).forEach(shape => {
+          shape.classList.remove('activeElem')
+        })
+      }
+      if (newElem !== null && newElem.hasAttribute('facs')) {
+        const newShapes = newElem.getAttribute('facs').replace(/\s+g/, ' ').trim().split(' ')
+        document.querySelectorAll(newShapes.join(', ')).forEach(shape => {
+          shape.classList.add('activeElem')
+        })
+      }
     }
   },
   mounted: function () {
@@ -296,6 +311,7 @@ export default {
       this.$store.dispatch('setCurrentPage', 0)
       this.renderSystems()
       this.renderShapes()
+      this.renderVerovioOverlay()
     }
 
     this.viewer.addHandler('page', (data) => {
@@ -314,6 +330,7 @@ export default {
         this.$store.dispatch('setCurrentPage', data.page)
         this.renderSystems()
         this.renderShapes()
+        this.renderVerovioOverlay()
       }
     })
 
@@ -327,6 +344,7 @@ export default {
         this.$store.dispatch('setCurrentPage', 0)
         this.renderSystems()
         this.renderShapes()
+        this.renderVerovioOverlay()
       })
     this.unwatchSVG = this.$store.watch((state, getters) => getters.svgOnCurrentPage,
       (svg) => {
@@ -351,8 +369,20 @@ export default {
       })
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
-        console.log('RENDER NOW')
         this.renderVerovioOverlay()
+      })
+    this.unwatchActiveElement = this.$store.watch((state, getters) => getters.activeElement,
+      (newElem, oldElem) => {
+        this.adjustShapeHighlights(newElem, oldElem)
+      })
+    this.unwatchActiveSketchArea = this.$store.watch((state, getters) => getters.activeSketchArea,
+      (newId, oldId) => {
+        if (oldId !== null) {
+          document.querySelector('#' + oldId).classList.remove('activeGroup')
+        }
+        if (newId !== null) {
+          document.querySelector('#' + newId).classList.add('activeGroup')
+        }
       })
   },
   beforeUnmount () {
@@ -362,12 +392,16 @@ export default {
     this.unwatchCurrentPage()
     this.unwatchEditingSystem()
     this.unwatchPageXML()
+    this.unwatchActiveElement()
+    this.unwatchActiveSketchArea()
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
+@import '@/css/_variables.scss';
+
 #osdContainer {
   width: 100%;
   height: 100%;
@@ -376,9 +410,53 @@ export default {
     z-index: -1
   }
 
+  g.sketchArea {
+    path {
+      fill: rgb(67, 158, 3);
+      stroke: rgb(67, 158, 3);
+      opacity: .3;
+    }
+    &.activeGroup path {
+      fill: rgb(156, 217, 43);
+      stroke: rgb(156, 217, 43);
+      opacity: .5;
+    }
+    &:hover path {
+      opacity: .6;
+    }
+  }
+
+  &.sketchGroups {
+    .shapeOverlay {
+      z-index: 10;
+    }
+  }
+
   &.transcript {
+    .shapeOverlay {
+      z-index: 10;
+
+      path {
+         opacity: .2;
+         &:hover {
+            opacity: .8;
+         }
+
+         &.activeElem {
+            stroke: $activeHighlightColor;
+            fill: $activeHighlightColor;
+            opacity: .6;
+         }
+      }
+    }
     .verovio.overlay {
       z-index: 5;
+      opacity: .5;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
     }
     .a9s-annotationlayer {
         z-index: -1;

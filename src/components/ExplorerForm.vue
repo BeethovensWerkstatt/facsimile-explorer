@@ -2,6 +2,9 @@
   <div>
     <OpenSeadragonNavigator/>
     <ul class="tab">
+      <li class="tab-item" :class="{ active: currentTab === 'sketchGroups'}" @click="switchTab('sketchGroups')">
+        <a href="#" class="btn btn-link">Sketch Areas</a>
+      </li>
       <li class="tab-item" :class="{ active: currentTab === 'systems'}" @click="switchTab('systems')">
         <a href="#" class="btn btn-link"><i class="icon icon-menu"></i> Systems</a>
       </li>
@@ -13,6 +16,9 @@
       </li>
     </ul>
     <div class="container">
+      <div id="tab_sketchGroups" class="tabContent" :class="{ active: currentTab === 'sketchGroups'}">
+         <SketchAreaEditor/>
+      </div>
       <div id="tab_systems" class="tabContent" :class="{ active: currentTab === 'systems'}">
          <SystemCartographer/>
       </div>
@@ -30,13 +36,15 @@
 import OpenSeadragonNavigator from '@/components/OpenSeadragonNavigator.vue'
 import SystemCartographer from '@/components/SystemCartographer.vue'
 import ShapeCataloguer from '@/components/ShapeCataloguer.vue'
+import SketchAreaEditor from '@/components/SketchAreaEditor.vue'
 
 export default {
   name: 'ExplorerForm',
   components: {
     OpenSeadragonNavigator,
     SystemCartographer,
-    ShapeCataloguer
+    ShapeCataloguer,
+    SketchAreaEditor
   },
   methods: {
     switchTab (val) {

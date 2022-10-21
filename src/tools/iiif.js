@@ -145,6 +145,7 @@ export function checkIiifManifest (json) {
 
 export function getPageArray (mei) {
   const arr = []
+  console.log(mei)
   mei.querySelectorAll('surface').forEach((surface, n) => {
     const graphic = surface.querySelector('graphic')
     const i = n + 1
