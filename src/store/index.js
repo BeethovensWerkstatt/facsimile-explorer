@@ -55,7 +55,21 @@ export default createStore({
     selectedSystemOnCurrentPage: -1,
     editingSystemOnCurrentPage: -1,
     pageSVGs: [],
-    activeSketchArea: null
+    activeSketchArea: null,
+    // TEMP
+    alignment: {
+      mode: 'ref',
+      ref: {
+        diplomatic: null,
+        annotated: null
+      },
+      offset: {
+        x: 0,
+        y: 0
+      },
+      temp: null,
+      alignedPairs: []
+    }
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
@@ -308,6 +322,64 @@ export default createStore({
 
       state.pageSVGs[state.currentPage] = null
       state.pageSVGs[state.currentPage] = svg
+    },
+    // TEMP
+    SET_ALIGNMENT_MODE (state, mode) {
+      state.alignment.mode = mode
+    },
+    CLICK_ALIGNMENT_SHAPE (state, { shape, file }) {
+      /*
+      alignment: {
+        mode: 'ref',
+        ref: {
+          diplomatic: null,
+          annotated: null
+        },
+        offset: {
+          x: 0,
+          y: 0
+        },
+        temp: null,
+        alignedPairs: []
+      }
+      */
+
+      if (state.alignment.mode === 'ref') {
+        if (file === 'annotated') {
+          state.alignment.ref.annotated = shape
+        } else {
+          state.alignment.ref.diplomatic = shape
+        }
+        if (state.alignment.ref.annotated !== null && state.alignment.ref.diplomatic !== null) {
+          const annotUse = state.alignment.ref.annotated.querySelector('use')
+          const diploUse = state.alignment.ref.diplomatic.querySelector('use')
+          state.alignment.offset.x = diploUse.getAttribute('x') - annotUse.getAttribute('x')
+          state.alignment.offset.y = diploUse.getAttribute('y') - annotUse.getAttribute('y')
+          state.alignment.mode = 'align'
+        }
+      } else if (state.alignment.offset.x !== null) {
+        if (file === 'annotated') {
+          state.alignment.temp = shape
+        } else if (state.alignment.temp !== null) {
+          // state.alignment.
+          const annotUse = state.alignment.temp.querySelector('use')
+          const diploUse = shape.querySelector('use')
+          const offX = state.alignment.offset.x
+          const offY = state.alignment.offset.y
+
+          state.alignment.alignedPairs.push({
+            id: state.alignment.temp.id,
+            x: annotUse.getAttribute('x'),
+            y: annotUse.getAttribute('y'),
+            dx: diploUse.getAttribute('x') - offX,
+            dy: diploUse.getAttribute('y') - offY,
+            diploX: diploUse.getAttribute('x'),
+            diploY: diploUse.getAttribute('y'),
+            dipl: shape.id
+          })
+          state.alignment.temp = null
+        }
+      }
     }
   },
   actions: {
@@ -462,6 +534,13 @@ export default createStore({
     },
     moveShapeToActiveSketchArea ({ commit }, shapeId) {
       commit('MOVE_SHAPE_TO_ACTIVE_SKETCH_AREA', shapeId)
+    },
+    // TEMP
+    setAlignmentMode ({ commit }, mode) {
+      commit('SET_ALIGNMENT_MODE', mode)
+    },
+    clickAlignmentShape ({ commit, state }, { shape, file }) {
+      commit('CLICK_ALIGNMENT_SHAPE', { shape, file })
     }
   },
   getters: {
@@ -728,6 +807,46 @@ export default createStore({
     },
     activeSketchArea: state => {
       return state.activeSketchArea
+    },
+    // TEMP
+    /* alignment: {
+     mode: 'ref',
+     ref: {
+        diplomatic: null,
+        annotated: null
+     },
+     offset: {
+        x: 0,
+        y: 0
+     },
+     temp: null,
+     alignedPairs: []
+    } */
+    alignmentMode: state => {
+      return state.alignment.mode
+    },
+    alignmentTemp: state => {
+      return state.alignment.temp?.id
+    },
+    alignedPairs: state => {
+      return state.alignment.alignedPairs
+    },
+    alignmentRefDiplo: state => {
+      return state.alignment.ref.diplomatic?.id
+    },
+    alignmentRefAnnot: state => {
+      return state.alignment.ref.annotated?.id
+    },
+    alignmentOffset: state => {
+      return state.alignment.offset
+    },
+    alignmentCovered: state => {
+      const obj = {}
+      state.alignment.alignedPairs.forEach(entry => {
+        obj[entry.id] = null
+        obj[entry.dipl] = null
+      })
+      return Object.keys(obj)
     }
   }
 })

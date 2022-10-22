@@ -1,6 +1,5 @@
 <template>
-
-  <div class="modal modal-lg" :class="{ active }" id="overview-modal">
+  <div class="modal modal-lg" :class="{ active }" id="transcriptionAlignment-modal">
     <a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
     <div class="modal-container">
       <div class="modal-header">
@@ -674,7 +673,7 @@
               </div>
               <h1>Diplomatic Transcript</h1>
               <div class="diplomatic transcript">
-                 <svg width="2313.6px" height="1800px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mei="http://www.music-encoding.org/ns/mei" overflow="visible" style="transform: rotate(-0.5deg);">
+                 <svg width="2313.6px" height="1800px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mei="http://www.music-encoding.org/ns/mei" overflow="visible">
                   <desc>Engraved by Verovio 3.11.0-e2d6db8</desc>
                   <defs>
                      <symbol id="E0A3-1f5wks1" viewBox="0 0 1000 1000" overflow="inherit">
@@ -1583,10 +1582,34 @@
               </div>
             </pane>
             <pane>
-               Rechts
+               <h1>Appears</h1>
+               Offsets: x={{alignmentOffset.x}} | y={{alignmentOffset.y}}
+               <table class="table table-striped">
+                  <thead>
+                     <tr>
+                        <th>x</th>
+                        <th>y</th>
+                        <th>dx</th>
+                        <th>dy</th>
+                        <th>diplo x</th>
+                        <th>diplo y</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr v-for="(p, i) in alignedPairs" :key="i" :title="p.id">
+                        <td>{{p.x}}</td>
+                        <td>{{p.y}}</td>
+                        <td>{{p.dx}}</td>
+                        <td>{{p.dy}}</td>
+                        <td>{{p.diploX}}</td>
+                        <td>{{p.diploY}}</td>
+                     </tr>
+                  </tbody>
+               </table>
             </pane>
           </splitpanes>
         </div>
+        <div>{{gsap}}</div>
       </div>
       <div class="modal-footer">
         <div class="btn-group">
@@ -1601,18 +1624,21 @@
 <script>
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import createVerovioModule from 'verovio/wasm'
-import { VerovioToolkit } from 'verovio/esm'
+// import createVerovioModule from 'verovio/wasm'
+// import { VerovioToolkit } from 'verovio/esm'
+import verovio from 'verovio'
 
 const verovioOptions = {
-  scale: 61,
+  scale: 30,
   breaks: 'none',
   openControlEvents: true,
   svgBoundingBoxes: true,
   svgRemoveXlink: true,
   header: 'none',
-  footer: 'none' //,
-  // unit: 18
+  footer: 'none',
+  pageWidth: 3800,
+  pageHeight: 800,
+  unit: 17
 }
 
 export default {
@@ -1624,31 +1650,103 @@ export default {
   methods: {
     closeModal () {
       this.$store.dispatch('setModal', null)
+    },
+    shapeClick (e, file) {
+      const t = e.target.closest('.note, .accid, .keyAccid')
+      if (t !== null) {
+        const x = t.getBBox().x
+        console.log('clicked on ' + t.id + ' in file ' + file + ' at x=' + x)
+        this.$store.dispatch('clickAlignmentShape', { shape: t, file })
+      } else {
+        console.log('clicked on something wrong')
+      }
     }
   },
   computed: {
     active () {
       return this.$store.getters.modal === 'transcriptionAlignment'
+    },
+    alignmentMode () {
+      return this.$store.getters.alignmentMode
+    },
+    alignmentTemp () {
+      return this.$store.getters.alignmentTemp
+    },
+    alignedPairs () {
+      return this.$store.getters.alignedPairs
+    },
+    alignmentOffset () {
+      return this.$store.getters.alignmentOffset
+    },
+    gsap () {
+      const pairs = this.$store.getters.alignedPairs
+      // https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/D-BNba_HCB_Mh_60%2FHCB_Mh_60_05.jpg/500,3100,4024,1100/3000,/0/default.jpg
+
+      let str = 'const tl = gsap.timeline({repeat: 2, repeatDelay: 1}) \n tl.from(".supplied", { opacity: 0, duration: 2}, 0)\n'
+      pairs.forEach(item => {
+        const diffX = item.dx - parseInt(item.x)
+        const diffY = item.dy - parseInt(item.y)
+
+        if (diffX !== 0 && diffY !== 0) {
+          str += 'tl.from("#' + item.id + '", { x: ' + diffX + ', y: ' + diffY + ', duration: 2}, 0)\n'
+        } else if (diffX !== 0) {
+          str += 'tl.from("#' + item.id + '", { x: ' + diffX + ', duration: 2}, 0)\n'
+        } else if (diffY !== 0) {
+          str += 'tl.from("#' + item.id + '", { y: ' + diffY + ', duration: 2}, 0)\n'
+        }
+      })
+      return str
     }
   },
   mounted () {
-    console.log('me here')
-    createVerovioModule()
-      .then(VerovioModule => {
-        this.vrvToolkit = new VerovioToolkit(VerovioModule)
-        console.log(1)
-        this.vrvToolkit.setOptions(verovioOptions)
-        console.log(2)
-        fetch('./assets/annotatedTranscript.mei')
-          .then(res => res.text())
-          .then(mei => {
-            console.log('received MEI')
-            this.vrvToolkit.loadData(mei)
-            const svg = this.vrvToolkit.renderToSVG(1, {})
-            const container = document.querySelector('.annotated.transcript')
+    const diplomatic = document.querySelector('.diplomatic.transcript svg')
+    const diplFunc = (e) => {
+      this.shapeClick(e, 'diplomatic')
+    }
+    diplomatic.addEventListener('click', diplFunc)
 
-            container.innerHTML = svg
-          })
+    setTimeout(() => {
+      // eslint-disable-next-line
+      this.vrvToolkit = new verovio.toolkit()
+      this.vrvToolkit.setOptions(verovioOptions)
+
+      fetch('./assets/annotatedTranscript.mei')
+        .then(res => res.text())
+        .then(mei => {
+          console.log('received MEI')
+          this.vrvToolkit.loadData(mei)
+          const svg = this.vrvToolkit.renderToSVG(1, {})
+          const container = document.querySelector('.annotated.transcript')
+
+          container.innerHTML = svg
+
+          const annotFunc = (e) => {
+            this.shapeClick(e, 'annotated')
+          }
+          container.querySelector('svg').addEventListener('click', annotFunc)
+        })
+    }, 1000)
+
+    this.$store.watch((state, getters) => getters.alignmentRefDiplo,
+      (newId, oldId) => {
+        document.querySelectorAll('#' + oldId).forEach(shape => shape.classList.remove('ref'))
+        document.querySelectorAll('#' + newId).forEach(shape => shape.classList.add('ref'))
+      })
+    this.$store.watch((state, getters) => getters.alignmentRefAnnot,
+      (newId, oldId) => {
+        document.querySelectorAll('#' + oldId).forEach(shape => shape.classList.remove('ref'))
+        document.querySelectorAll('#' + newId).forEach(shape => shape.classList.add('ref'))
+      })
+    this.$store.watch((state, getters) => getters.alignmentTemp,
+      (newId, oldId) => {
+        document.querySelectorAll('#' + oldId).forEach(shape => shape.classList.remove('temp'))
+        document.querySelectorAll('#' + newId).forEach(shape => shape.classList.add('temp'))
+      })
+    this.$store.watch((state, getters) => getters.alignmentCovered,
+      (newArr, oldArr) => {
+        newArr.forEach(newId => {
+          document.querySelectorAll('#' + newId).forEach(shape => shape.classList.add('covered'))
+        })
       })
   },
   unmounted () {
@@ -1658,19 +1756,44 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="scss">
+<style lang="scss">
 @import '@/css/_variables.scss';
-.modal.modal-lg .modal-container {
-   max-width: 90vw;
+#transcriptionAlignment-modal .modal-container {
+   max-width: 95vw;
    height: 95vh;
-}
+   max-height: 95vh;
 
-h1 {
-   font-size: 1rem;
-   font-weight: bold;
-}
+   h1 {
+      font-size: 1rem;
+      font-weight: bold;
+   }
 
-.modal-footer {
+   .modal-footer {
 
+   }
+
+   .transcript {
+      overflow: auto;
+   }
+
+   .ref {
+      stroke: red;
+      fill: red;
+   }
+
+   .temp {
+      stroke: blue;
+      fill: blue;
+   }
+
+   .covered {
+      stroke: green;
+      fill: green;
+   }
+
+   .supplied {
+      stroke: #999999;
+      fill: #999999;
+   }
 }
 </style>
