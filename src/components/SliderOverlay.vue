@@ -1,6 +1,6 @@
 <template>
   <div id="sliderContainer">
-    <img src="https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/D-BNba_HCB_Mh_60%2FHCB_Mh_60_05.jpg/700,3100,3400,1100/3000,/0/default.jpg"/>
+    <img src="https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/D-BNba_HCB_Mh_60%2FHCB_Mh_60_05.jpg/600,3000,3400,1100/3000,/0/default.jpg"/>
     <div id="curtain"></div>
     <div id="sliderBox">
       <input id="scrubber" type="range" value="0" min="0" max="1" step="0.01"/>
@@ -39,7 +39,7 @@
            <path transform="scale(1,-1)" d="M136 186v169h17v-164l44 14v-91l-44 -14v-165l44 12v-91l-44 -13v-155h-17v150l-76 -22v-155h-17v149l-43 -13v90l43 14v167l-43 -14v92l43 13v169h17v-163zM60 73v-167l76 22v168z"></path>
         </symbol>
      </defs>
-     <style type="text/css">g.page-margin{font-family:Times;} g.ending, g.fing, g.reh, g.tempo{font-weight:bold;} g.dir, g.dynam, g.mNum{font-style:italic;} g.label{font-weight:normal;}</style>
+     <!--<style type="text/css">g.page-margin{font-family:Times;} g.ending, g.fing, g.reh, g.tempo{font-weight:bold;} g.dir, g.dynam, g.mNum{font-style:italic;} g.label{font-weight:normal;}</style>-->
      <svg class="definition-scale" color="black" viewBox="0 0 20740 8010">
         <g class="page-margin" transform="translate(500, 500)">
            <g id="m13kbkho" class="mdiv pageMilestone">
@@ -382,9 +382,7 @@
                     <path d="M7656 1700 L11769 1700" stroke="currentColor" stroke-width="25"></path>
                     <path d="M7656 2040 L11769 2040" stroke="currentColor" stroke-width="25"></path>
                     <path d="M7656 2380 L11769 2380" stroke="currentColor" stroke-width="25"></path>
-                    <g class="ledgerLines below">
-                       <path d="M9494 2720 L10102 2720" stroke="currentColor" stroke-width="42"></path>
-                    </g>
+
                     <g id="l102gjrs" class="layer">
                        <g id="bbox-l102gjrs" class="layer bounding-box"></g>
                        <g id="n1l6cnm9" class="note covered" fill="#000000">
@@ -450,6 +448,9 @@
                           </g>
                        </g>
                        <g id="nx7ru" class="note covered" fill="#000000">
+                          <g class="ledgerLines below">
+                            <path d="M9494 2720 L10102 2720" stroke="currentColor" stroke-width="42"></path>
+                          </g>
                           <g id="bbox-nx7ru" class="note bounding-box" fill="#000000">
                              <rect x="9585" y="2539" height="361" width="427" fill="transparent"></rect>
                           </g>
@@ -635,10 +636,6 @@
                     <path d="M11769 1700 L16097 1700" stroke="currentColor" stroke-width="25"></path>
                     <path d="M11769 2040 L16097 2040" stroke="currentColor" stroke-width="25"></path>
                     <path d="M11769 2380 L16097 2380" stroke="currentColor" stroke-width="25"></path>
-                    <g class="ledgerLines below">
-                       <path d="M13822 2720 L14430 2720" stroke="currentColor" stroke-width="42"></path>
-                       <path d="M15016 2720 L15624 2720" stroke="currentColor" stroke-width="42"></path>
-                    </g>
                     <g id="l1561hyu" class="layer">
                        <g id="bbox-l1561hyu" class="layer bounding-box"></g>
                        <g id="n1329ed5" class="note covered" fill="#000000">
@@ -705,6 +702,9 @@
                           </g>
                        </g>
                        <g id="n1vy59rq" class="note covered" fill="#000000">
+                          <g class="ledgerLines below">
+                            <path d="M13822 2720 L14430 2720" stroke="currentColor" stroke-width="42"></path>
+                         </g>
                           <g id="bbox-n1vy59rq" class="note bounding-box" fill="#000000">
                              <rect x="13913" y="2709" height="361" width="427" fill="transparent"></rect>
                           </g>
@@ -719,6 +719,9 @@
                           </g>
                        </g>
                        <g id="n34c1de" class="note covered" fill="#000000">
+                          <g class="ledgerLines below">
+                            <path d="M15016 2720 L15624 2720" stroke="currentColor" stroke-width="42"></path>
+                         </g>
                           <g id="bbox-n34c1de" class="note bounding-box" fill="#000000">
                              <rect x="15107" y="2539" height="361" width="427" fill="transparent"></rect>
                           </g>
@@ -886,12 +889,7 @@
                     <path d="M16097 1700 L19747 1700" stroke="currentColor" stroke-width="25"></path>
                     <path d="M16097 2040 L19747 2040" stroke="currentColor" stroke-width="25"></path>
                     <path d="M16097 2380 L19747 2380" stroke="currentColor" stroke-width="25"></path>
-                    <g class="ledgerLines below">
-                       <path d="M16346 2720 L16954 2720" stroke="currentColor" stroke-width="42"></path>
-                       <path d="M17916 2720 L18456 2720" stroke="currentColor" stroke-width="42"></path>
-                       <path d="M18513 2720 L19053 2720" stroke="currentColor" stroke-width="42"></path>
-                       <path d="M17916 3060 L18456 3060" stroke="currentColor" stroke-width="42"></path>
-                    </g>
+
                     <g id="l1q1gpxb" class="layer">
                        <g id="bbox-l1q1gpxb" class="layer bounding-box"></g>
                        <g id="n14f6mny" class="note covered" fill="#000000">
@@ -967,6 +965,9 @@
                     <g id="l1knxtf0" class="layer">
                        <g id="bbox-l1knxtf0" class="layer bounding-box"></g>
                        <g id="naputvs" class="note covered" fill="#000000">
+                          <g class="ledgerLines below">
+                            <path d="M16346 2720 L16954 2720" stroke="currentColor" stroke-width="42"></path>
+                         </g>
                           <g id="bbox-naputvs" class="note bounding-box" fill="#000000">
                              <rect x="16437" y="2709" height="361" width="427" fill="transparent"></rect>
                           </g>
@@ -986,6 +987,10 @@
                           </g>
                           <polygon points="17973,3995 18604,3910 18604,3740 17973,3825 "></polygon>
                           <g id="nlrzmlg" class="note covered" fill="#000000">
+                             <g class="ledgerLines below">
+                               <path d="M17916 2720 L18456 2720" stroke="currentColor" stroke-width="42"></path>
+                               <path d="M18513 2720 L19053 2720" stroke="currentColor" stroke-width="42"></path>
+                            </g>
                              <g id="bbox-nlrzmlg" class="note bounding-box" fill="#000000">
                                 <rect x="17973" y="2879" height="361" width="427" fill="transparent"></rect>
                              </g>
@@ -1006,6 +1011,9 @@
                              </g>
                           </g>
                           <g id="n1k6ka6c" class="note covered" fill="#000000">
+                             <g class="ledgerLines below">
+                               <path d="M17916 3060 L18456 3060" stroke="currentColor" stroke-width="42"></path>
+                            </g>
                              <g id="bbox-n1k6ka6c" class="note bounding-box" fill="#000000">
                                 <rect x="18570" y="2709" height="361" width="427" fill="transparent"></rect>
                              </g>
@@ -1144,9 +1152,10 @@
 
 <script>
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
+import { gsap } from 'gsap'
 
 export default {
-  name: 'SystemListingEntry',
+  name: 'SliderOverlay',
   components: {
 
   },
@@ -1155,6 +1164,79 @@ export default {
     system: Object
   },
   methods: {
+
+  },
+  mounted: function () {
+    const tl = gsap.timeline({ repeat: 2, yoyo: true })
+    tl.timeScale(0.5)
+    const scrubber = document.querySelector('#scrubber')
+    const func = () => {
+      const progress = tl.progress()
+      scrubber.value = progress
+    }
+    const func2 = () => {
+      const progress = scrubber.value
+      tl.progress(progress)
+    }
+    scrubber.addEventListener('input', func2)
+    tl.pause()
+    tl.eventCallback('onUpdate', func, [])
+    tl.from('svg', { opacity: 0, duration: 1 }, 0)
+    tl.from('#curtain', { opacity: 0, duration: 1 }, 1)
+    tl.from('.supplied', { opactiy: 0, duration: 0.5 }, 2.5)
+    tl.from('#n1l6cnm9', { x: 704, duration: 1 }, 2)
+    tl.from('#n13pbmfs', { x: -2297, duration: 1 }, 2)
+    tl.from('#n1p24wxs', { x: -2011, duration: 1 }, 2)
+    tl.from('#n1329ed5', { x: 2386, duration: 1 }, 2)
+    tl.from('#a1xykxf8', { x: 2094, duration: 1 }, 2)
+    tl.from('#nt4om57', { x: 4052, duration: 1 }, 2)
+    tl.from('#n14f6mny', { x: 5715, duration: 1 }, 2)
+    tl.from('#n18v8y0', { x: 6416, duration: 1 }, 2)
+    tl.from('#nu0v6v', { x: 6922, duration: 1 }, 2)
+    tl.from('#nadez6d', { x: -2411, y: 170, duration: 1 }, 2)
+    tl.from('#n8ijgrk', { x: -2560, duration: 1 }, 2)
+    tl.from('#nvx5ig2', { x: -2264, y: 170, duration: 1 }, 2)
+    tl.from('#aovgb10', { x: 272, duration: 1 }, 2)
+    tl.from('#nm4rjcf', { x: -476, duration: 1 }, 2)
+    tl.from('#nx7ru', { x: -253, duration: 1 }, 2)
+    tl.from('#n1h2bwnz', { x: 143, duration: 1 }, 2)
+    tl.from('#n162dh4z', { x: -2831, y: -294, duration: 1 }, 2)
+    tl.from('#ny9pv0d', { x: -1824, y: -464, duration: 1 }, 2)
+    tl.from('#n152k4pc', { x: -2520, y: -464, duration: 1 }, 2)
+    tl.from('#n1ne4hh9', { x: 144, y: -464, duration: 1 }, 2)
+    tl.from('#nnp8w2n', { x: 5895, y: -464, duration: 1 }, 2)
+    tl.from('#n12afhq8', { x: 6686, y: -464, duration: 1 }, 2)
+    tl.from('#n1skfdxx', { x: 6862, y: -464, duration: 1 }, 2)
+    tl.from('#nvtrg4o', { x: 6885, y: -464, duration: 1 }, 2)
+    tl.from('#n19gadoj', { x: 3345, y: -294, duration: 1 }, 2)
+    tl.from('#a1wphum4', { x: 1633, duration: 1 }, 2)
+    tl.from('#n1vy59rq', { x: 3529, duration: 1 }, 2)
+    tl.from('#nbntkd4', { x: 3326, duration: 1 }, 2)
+    tl.from('#n34c1de', { x: 3365, duration: 1 }, 2)
+    tl.from('#naputvs', { x: 6775, duration: 1 }, 2)
+    tl.from('#a1i9ulzd', { x: 6530, duration: 1 }, 2)
+    tl.from('#nlrzmlg', { x: 6659, duration: 1 }, 2)
+    tl.from('#n1k6ka6c', { x: 6902, duration: 1 }, 2)
+    tl.from('#atyndvr', { x: -1939, y: -294, duration: 1 }, 2)
+    tl.from('#ng5055c', { x: -1731, y: -464, duration: 1 }, 2)
+    tl.from('#n1gn7pc', { x: -1827, y: -464, duration: 1 }, 2)
+    tl.from('#a1apdowb', { x: 1176, y: -294, duration: 1 }, 2)
+    tl.from('#n1kaptdt', { x: 1274, y: -294, duration: 1 }, 2)
+    tl.from('#a1h2bz3h', { x: 475, y: -464, duration: 1 }, 2)
+    tl.from('#ndc1cks', { x: 587, y: -464, duration: 1 }, 2)
+    tl.from('#n1p9jgku', { x: 430, y: -464, duration: 1 }, 2)
+    tl.from('#nzleopw', { x: 433, y: -464, duration: 1 }, 2)
+    tl.from('#nu69obi', { x: 2486, y: -294, duration: 1 }, 2)
+    tl.from('#a1dk9zib', { x: 3498, y: -464, duration: 1 }, 2)
+    tl.from('#n3hc88c', { x: 3746, y: -464, duration: 1 }, 2)
+    tl.from('#abe9ml', { x: 2967, y: -464, duration: 1 }, 2)
+    tl.from('#ncvry5w', { x: 3089, y: -464, duration: 1 }, 2)
+    tl.from('#nfd91us', { x: 3422, y: -464, duration: 1 }, 2)
+    tl.from('#ka20knr', { x: -2688, duration: 1 }, 2)
+    tl.from('#k11qge43', { x: -2154, duration: 1 }, 2)
+    tl.from('#k1qwk0ym', { x: -1410, duration: 1 }, 2)
+    tl.from('#ke1y3da', { x: -956, duration: 1 }, 2)
+
     /* switchTab (val) {
     var tl = gsap.timeline({repeat: 2, yoyo: true})
     tl.timeScale(.8)
@@ -1249,15 +1331,23 @@ tl.from("#ke1y3da", { x: -956, duration: 2}, 0)
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 #sliderContainer {
-  position: relative;
-  width: 100%;
+   position: absolute;
+   width: 1000px;
+   height: 310px;
+   top: 100px;
+   left: 30px;
+   border-radius: 10px;
+   box-shadow: 0 .5rem 1rem #00000066;
+   background-color: red;
+   z-index: 10;
+   overflow: hidden;
 }
 
 img {
   position: absolute;
   width: 1020px;
-  top: 20px;
-  left: 90px;
+  top: -10px;
+  left: -10px;
   transform: rotate(0.5deg);
 }
 
@@ -1274,10 +1364,10 @@ img {
 #sliderBox {
   z-index: 10;
   position: absolute;
-  top: 280px;
+  top: 250px;
   left: 300px;
   width: 300px;
-  padding: 1rem 2rem;
+  padding: 15px 2rem 10px;
   border-radius: 10px;
   background-color: #ffffff;
 }
@@ -1289,8 +1379,8 @@ img {
 svg {
   z-index: 5;
   position: absolute;
-  top: 30px;
-  left: -20px;
+  top: 31px;
+  left: -87px;
   opacity: .8
 }
 

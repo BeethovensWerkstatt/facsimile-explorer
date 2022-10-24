@@ -7,6 +7,7 @@
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
+         <SliderOverlay/>
         <OpenSeadragonComponent/>
       </pane>
       <pane>
@@ -42,6 +43,7 @@ import IiifModal from '@/components/IiifModal.vue'
 import LoadXmlModal from '@/components/LoadXmlModal.vue'
 import OverviewModal from '@/components/OverviewModal.vue'
 import TranscriptionAlignmentModal from '@/components/TranscriptionAlignmentModal.vue'
+import SliderOverlay from '@/components/SliderOverlay.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -57,6 +59,7 @@ export default {
     LoadXmlModal,
     OverviewModal,
     TranscriptionAlignmentModal,
+    SliderOverlay,
     Splitpanes,
     Pane
   },
