@@ -45,6 +45,18 @@ export default {
       console.log('doubleClicked system ' + n)
       this.$store.dispatch('editSystemOnCurrentPage', n)
     },
+    writingZoneClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      const n = e.target.getAttribute('data-id')
+      console.log('clicked writing zone ' + n)
+      this.$store.dispatch('showSliderDemo')
+    },
+    writingZoneDoubleClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+
     svgClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
@@ -81,6 +93,7 @@ export default {
       }
     },
     renderSystems () {
+      this.renderWritingZones()
       const systems = this.$store.getters.systemsOnCurrentPage
       const editedSystem = this.$store.getters.editingSystemOnCurrentPage
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
@@ -115,6 +128,38 @@ export default {
           overlay.addEventListener('click', this.systemClickListener)
           overlay.addEventListener('dblclick', this.systemDoubleClickListener)
         }
+      })
+    },
+    renderWritingZones () {
+      const writingZones = this.$store.getters.writingZonesOnCurrentPage
+
+      // only relevant before component is mounted
+      if (this.viewer === undefined) {
+        return null
+      }
+
+      document.querySelectorAll('.writingZone.overlay').forEach(overlay => {
+        overlay.removeEventListener('click', this.writingZoneClickListener)
+        overlay.removeEventListener('dblclick', this.writingZoneDoubleClickListener)
+        this.viewer.removeOverlay(overlay)
+      })
+
+      writingZones.forEach((zone) => {
+        const overlay = document.createElement('div')
+        overlay.classList.add('writingZone')
+        overlay.classList.add('overlay')
+        overlay.setAttribute('data-id', zone.data)
+
+        this.viewer.addOverlay({
+          element: overlay,
+          x: zone.x,
+          y: zone.y,
+          width: zone.width,
+          height: zone.height
+        })
+
+        overlay.addEventListener('click', this.writingZoneClickListener)
+        overlay.addEventListener('dblclick', this.writingZoneDoubleClickListener)
       })
     },
     generateSelectionFromZone () {
@@ -406,7 +451,7 @@ export default {
   width: 100%;
   height: 100%;
 
-  .system.overlay {
+  .system.overlay, .writingZone.overlay {
     z-index: -1
   }
 
@@ -461,6 +506,18 @@ export default {
     .a9s-annotationlayer {
         z-index: -1;
      }
+  }
+
+  &.demo {
+    .writingZone.overlay {
+      background-color: rgba(100, 66, 119, 0.61);
+      z-index: 1;
+
+      &:hover {
+        background-color: rgba(16, 158, 228, 0.21);
+        outline: 5px solid rgba(11, 108, 156, 0.8);
+      }
+    }
   }
 
   &.systems .system.overlay {

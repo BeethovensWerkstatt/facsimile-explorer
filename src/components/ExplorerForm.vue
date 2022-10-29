@@ -14,6 +14,9 @@
       <li class="tab-item" :class="{ active: currentTab === 'rendering'}" @click="switchTab('rendering')">
         <a href="#" class="btn btn-link">Rendering</a>
       </li>
+      <li class="tab-item" :class="{ active: currentTab === 'demo'}" @click="switchTab('demo')">
+        <a href="#" class="btn btn-link">Demo</a>
+      </li>
     </ul>
     <div class="container">
       <div id="tab_sketchGroups" class="tabContent" :class="{ active: currentTab === 'sketchGroups'}">
@@ -27,6 +30,9 @@
       </div>
       <div id="tab_rendering" class="tabContent" :class="{ active: currentTab === 'rendering'}">
          settings for Verovio (if any)
+      </div>
+      <div id="tab_demo" class="tabContent" :class="{ active: currentTab === 'demo'}">
+         <!-- -->
       </div>
     </div>
   </div>

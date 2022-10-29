@@ -3,11 +3,12 @@
   <IiifModal/>
   <LoadXmlModal/>
   <OverviewModal/>
+  <SliderOverlay/>
   <TranscriptionAlignmentModal/>
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
-         <SliderOverlay/>
+         <!--<SliderOverlay/>-->
         <OpenSeadragonComponent/>
       </pane>
       <pane>
@@ -24,12 +25,7 @@
   </template>
   <template v-if="!isReady">
      <div class="loadingBack">
-        * Hier oder andernorts: Erzeugen MEI-Datei aus IIIF Manifest <br/>
-        * Importieren des SVG für aktuelle Seite <br/>
-        * "Formular" für einzelne Zeichen <br/>
-        * annotorious-Plugin, um Rechtecke z.B. für Systeme zu erzeugen <br/>
-        * Anbindung XML-Editor <br/>
-        * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
+        <!-- -->
      </div>
   </template>
 </template>

@@ -322,6 +322,41 @@ export default createStore({
 
       state.pageSVGs[state.currentPage] = null
       state.pageSVGs[state.currentPage] = svg
+
+      const surfaceIndex = state.currentPage + 1
+      const queryString = 'surface:nth-child(' + surfaceIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      const surface = xmlDoc.querySelector(queryString)
+      const existingZone = surface.querySelector('zone[data="#' + state.activeSketchArea + '"]')
+
+      const bbox = g.getBBox()
+      const ulx = parseInt(bbox.x)
+      const uly = parseInt(bbox.y)
+      const lrx = ulx + parseInt(bbox.width)
+      const lry = uly + parseInt(bbox.height)
+
+      if (existingZone !== null) {
+        console.log('schon da')
+        existingZone.setAttribute('ulx', ulx)
+        existingZone.setAttribute('uly', uly)
+        existingZone.setAttribute('lrx', lrx)
+        existingZone.setAttribute('lry', lry)
+      } else {
+        console.log('muss noch')
+        const newZone = document.createElementNS('http://www.music-encoding.org/ns/mei', 'zone')
+        newZone.setAttribute('type', 'writingZone')
+        newZone.setAttribute('data', '#' + state.activeSketchArea)
+        newZone.setAttribute('ulx', ulx)
+        newZone.setAttribute('uly', uly)
+        newZone.setAttribute('lrx', lrx)
+        newZone.setAttribute('lry', lry)
+
+        surface.append(newZone)
+      }
+
+      state.parsedXml = null
+      state.parsedXml = xmlDoc
     },
     // TEMP
     SET_ALIGNMENT_MODE (state, mode) {
@@ -534,6 +569,9 @@ export default createStore({
     },
     moveShapeToActiveSketchArea ({ commit }, shapeId) {
       commit('MOVE_SHAPE_TO_ACTIVE_SKETCH_AREA', shapeId)
+    },
+    showSliderDemo ({ commit }) {
+      commit('SET_MODAL', 'demo')
     },
     // TEMP
     setAlignmentMode ({ commit }, mode) {
@@ -808,6 +846,36 @@ export default createStore({
     activeSketchArea: state => {
       return state.activeSketchArea
     },
+
+    writingZonesOnCurrentPage: state => {
+      const surfaceIndex = state.currentPage + 1
+      const queryString = 'surface:nth-child(' + surfaceIndex + ')'
+      const xmlDoc = state.parsedXml
+
+      if (xmlDoc === null) {
+        return []
+      }
+
+      const surface = xmlDoc.querySelector(queryString)
+
+      const systems = []
+      surface.querySelectorAll('zone[type="writingZone"]').forEach(zone => {
+        // console.log('rawY: ' + rawY + ', pageHeight: ' + pageHeight + ', uly: ' + system.getAttributeNS('', 'uly'))
+
+        const x = parseInt(zone.getAttributeNS('', 'ulx'))
+        const y = parseInt(zone.getAttributeNS('', 'uly'))
+        const width = parseInt(zone.getAttributeNS('', 'lrx')) - x
+        const height = parseInt(zone.getAttributeNS('', 'lry')) - y
+
+        const data = zone.getAttributeNS('', 'data').replace('#', '')
+
+        const obj = { x, y, width, height, data }
+        systems.push(obj)
+      })
+
+      return systems
+    },
+
     // TEMP
     /* alignment: {
      mode: 'ref',
