@@ -68,7 +68,9 @@ export default createStore({
       state.temporaryCode = string
     },
     SET_PAGES (state, arr) {
-      state.pages = arr
+      // faulty IIIF server
+      state.pages = arr.map(p => ({ ...p, uri: (p.uri?.startsWith('https://gallica.bnf.fr/iiif/') && !p.uri?.endsWith('/info.json')) ? p.uri + '/info.json' : p.uri }))
+      // console.log(state.pages)
     },
     SET_PAGE_SVG (state, { i, svg }) {
       state.pageSVGs[i] = svg
