@@ -72,7 +72,7 @@
           <i class="icon icon-upload"></i> Commit to Github
        </button>
       </li>
-      <li class="menu-item">
+      <!--<li class="menu-item">
         <button class="customBtn btn btn-link" @click="importIIIF()">
           <i class="icon icon-upload"></i> Import IIIF Manifest
        </button>
@@ -81,7 +81,7 @@
         <button class="customBtn btn btn-link" @click="loadXML()">
           <i class="icon icon-upload"></i> Load XML
         </button>
-      </li>
+      </li>-->
       <li class="menu-item">
         <button class="customBtn btn btn-link" :disabled=!hasXML @click="downloadXML()">
           <i class="icon icon-download"></i> Download XML

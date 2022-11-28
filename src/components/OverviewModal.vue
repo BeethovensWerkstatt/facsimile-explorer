@@ -76,7 +76,6 @@ export default {
       this.$store.dispatch('setModal', null)
     },
     addSVG () {
-      console.log('add SVG ...')
       const input = document.createElement('input')
       input.type = 'file'
       input.accept = '.svg'
@@ -85,8 +84,9 @@ export default {
         if (file) {
           const reader = new FileReader()
           reader.addEventListener('load', () => {
+            // console.log('add SVG ...', reader.result)
             this.$store.dispatch('addSVGshapes', {
-              svg: reader.result,
+              svgstr: reader.result,
               page: this.previewPageNum
             })
           })
