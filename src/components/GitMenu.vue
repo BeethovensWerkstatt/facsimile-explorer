@@ -98,7 +98,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { computed, inject, onMounted } from '@vue/runtime-core'
+import { useStore } from 'vuex'
 import fileDownload from 'js-file-download'
 import { GH_ACCESS_TOKEN } from '@/store/octokit'
 import CLIENT_ID from '@/clientID'
@@ -107,68 +108,75 @@ export default {
   name: 'GitMenu',
   props: {
   },
-  mounted () {
-    // console.log('CLIENT_ID=' + JSON.stringify(process.env, '', 2))
-    // console.log(document.cookie)
-    if (!this.isAuthenticated) {
-      const auth = this.$cookies.get(GH_ACCESS_TOKEN)
-      if (auth) {
-        // console.log(GH_ACCESS_TOKEN, auth)
-        this.$store.commit('SET_ACCESS_TOKEN', { auth })
-      }
-    }
-  },
-  computed: {
-    ...mapGetters(['isReady', 'hasXML', 'xmlDocumentCode', 'gh_user', 'isAuthenticated']),
-    ghUserName () {
-      return this.gh_user?.login
-    },
-    ghUserAvatar () {
-      return this.gh_user?.avatar_url
-    },
-    xmlFilename () {
-      // TODO create filename from signature
-      return 'annotatedMEI.xml'
-    }
-  },
-  methods: {
-    importGH () {
-      this.$store.dispatch('loadContent', {})
-    },
-    commitGH () {
-      this.$store.dispatch('setModal', 'commitmei')
-    },
-    importIIIF () {
-      this.$store.dispatch('setModal', 'iiif')
-    },
-    loadXML () {
-      this.$store.dispatch('setModal', 'loadxml')
-    },
-    downloadXML () {
-      const xml = this.xmlDocumentCode()
+  setup (props) {
+    const store = useStore()
+
+    const $cookies = inject('$cookies')
+
+    const isReady = computed(() => store.getters.isReady)
+    const hasXML = computed(() => store.getters.hasXML)
+    const xmlDocumentCode = computed(() => store.getters.xmlDocumentCode)
+    const xmlFilename = computed(() => 'annotatedMEI.xml')
+    // eslint-disable-next-line camelcase
+    const gh_user = computed(() => store.getters.gh_user)
+    const isAuthenticated = computed(() => store.getters.isAuthenticated)
+    const ghUserName = computed(() => gh_user.value?.login)
+    const ghUserAvatar = computed(() => gh_user.value?.avatar_url)
+
+    const importGH = () => store.dispatch('loadContent', {})
+    const commitGH = () => store.dispatch('setModal', 'commitmei')
+    const importIIIF = () => store.dispatch('setModal', 'iiif')
+    const loadXML = () => store.dispatch('setModal', 'loadxml')
+    const downloadXML = () => {
+      const xml = xmlDocumentCode()
       if (xml !== null) {
-        const data = new Blob([xml], {
-          type: 'text/xml'
-        })
-        fileDownload(data, this.xmlFilename)
+        const data = new Blob([xml], { type: 'text/xml' })
+        fileDownload(data, xmlFilename.value)
       }
-    },
-    showOverview () {
-      this.$store.dispatch('setModal', 'overview')
-    },
-    login () {
+    }
+    const showOverview = () => store.dispatch('setModal', 'overview')
+    const login = () => {
       // this page will open /authorize?code=<GH_CODE> on success
       const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
       window.open(url, '_self')
-    },
-    logout () {
-      this.$store.dispatch('logout', {
+    }
+    const logout = () => {
+      store.dispatch('logout', {
         remove: () => {
           console.log('remove ' + GH_ACCESS_TOKEN)
-          this.$cookies.remove(GH_ACCESS_TOKEN, '/')
+          $cookies.remove(GH_ACCESS_TOKEN, '/')
           window.location.reload(true)
         }
       })
+    }
+
+    onMounted(() => {
+      // console.log('CLIENT_ID=' + JSON.stringify(process.env, '', 2))
+      // console.log(document.cookie)
+      if (!isAuthenticated.value) {
+        const auth = $cookies.get(GH_ACCESS_TOKEN)
+        if (auth) {
+          // console.log(GH_ACCESS_TOKEN, auth)
+          store.commit('SET_ACCESS_TOKEN', { auth })
+        }
+      }
+    })
+
+    return {
+      isReady,
+      hasXML,
+      gh_user,
+      isAuthenticated,
+      ghUserName,
+      ghUserAvatar,
+      importGH,
+      commitGH,
+      importIIIF,
+      loadXML,
+      downloadXML,
+      showOverview,
+      login,
+      logout
     }
   }
 }
