@@ -124,6 +124,60 @@ const actions = {
       commit('SET_GH_FILE', { ...data, owner: state.fileowner, repo: state.filerepo, ref: state.fileref })
     })
     */
+  },
+  async createCommit ({ getters }, { owner, repo, branch, message, files }) {
+    const octokit = getters.octokit
+
+    // Get the latest commit SHA for the specified branch
+    const { data: { object: { sha } } } = await octokit.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${branch}`
+    })
+
+    // Create a new tree that contains the specified files
+    const newTree = await Promise.all(files.map(async ({ path, content }) => {
+      // Create a blob for each file
+      const { data: { sha: blobSha } } = await octokit.git.createBlob({
+        owner,
+        repo,
+        content,
+        encoding: 'base64'
+      })
+
+      // Return the path and blob SHA for each file
+      return {
+        path,
+        mode: '100644',
+        type: 'blob',
+        sha: blobSha
+      }
+    }))
+
+    // Create a new tree that references the new blobs
+    const { data: { sha: newTreeSha } } = await octokit.git.createTree({
+      owner,
+      repo,
+      base_tree: sha,
+      tree: newTree
+    })
+
+    // Create a new commit that references the new tree
+    const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
+      owner,
+      repo,
+      message,
+      tree: newTreeSha,
+      parents: [sha]
+    })
+
+    // Update the specified branch to point to the new commit
+    await octokit.git.updateRef({
+      owner,
+      repo,
+      ref: `heads/${branch}`,
+      sha: newCommitSha
+    })
   }
 }
 
