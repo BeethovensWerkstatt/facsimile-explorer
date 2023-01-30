@@ -125,6 +125,17 @@ const actions = {
     })
     */
   },
+  /**
+   * commit multiple files in one commit
+   *
+   * @param {string} owner
+   * @param {string} repo
+   * @param {string} branch
+   * @param {string} message
+   * @param {{ path, content }[]} files - array of file specs with path and content as base64 encoded string
+   *
+   * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
+   */
   async createCommit ({ getters }, { owner, repo, branch, message, files }) {
     const octokit = getters.octokit
 
