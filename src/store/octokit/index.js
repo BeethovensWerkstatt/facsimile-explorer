@@ -90,6 +90,7 @@ const actions = {
       ref = 'dev'
     }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+      console.log(data.download_url)
       const dec = new TextDecoder('utf-8')
       const txt = dec.decode(Base64.toUint8Array(data.content))
       const parser = new DOMParser()
