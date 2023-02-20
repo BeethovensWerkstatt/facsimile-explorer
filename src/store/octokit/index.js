@@ -1,5 +1,8 @@
+import { OctokitRepo } from '@/toolbox/github'
 import { Octokit } from '@octokit/rest'
 import { Base64 } from 'js-base64'
+
+import config from '@/config.json'
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 
@@ -7,9 +10,12 @@ const state = {
   user: {},
   auth: '',
   octokit: new Octokit(),
-  filerepo: undefined,
   fileowner: undefined,
+  filerepo: undefined,
   fileref: undefined,
+
+  sources: [],
+
   filepath: undefined,
   filesha: undefined
 }
@@ -21,7 +27,8 @@ const getters = {
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
   filepath: state => state.filepath,
-  filesha: state => state.filesha
+  filesha: state => state.filesha,
+  sources: state => state.sources
 }
 const mutations = {
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
@@ -55,6 +62,9 @@ const mutations = {
     state.filepath = path
     state.filesha = sha
     console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
+  },
+  SET_SOURCES (state, sources) {
+    state.sources = sources
   }
 }
 const actions = {
@@ -190,6 +200,18 @@ const actions = {
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+  },
+
+  async loadSources ({ commit, getters }) {
+    const repometa = {
+      octokit: getters.octokit,
+      owner: config.repository.owner,
+      repo: config.repository.repo,
+      branch: config.repository.branch
+    }
+    // console.log(repometa)
+    const repo = new OctokitRepo(repometa)
+    repo.folder.then(folder => folder.getFile('data/sources').then(sources => sources.tree.then(tree => commit('SET_SOURCES', tree))))
   }
 }
 

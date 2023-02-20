@@ -9,3 +9,5 @@ import 'spectre.css/dist/spectre-icons.css'
 import 'spectre.css/dist/spectre.css'
 
 createApp(App).use(router).use(store).use(VueCookies).mount('#app')
+
+store.dispatch('loadSources')

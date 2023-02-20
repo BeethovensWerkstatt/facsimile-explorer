@@ -75,6 +75,12 @@
       </li>
 
       <li class="menu-item">
+        <button class="customBtn btn btn-link" @click="checkocto()">
+          <i class="icon icon-arrow-right"></i> test load sources
+       </button>
+      </li>
+
+      <li class="menu-item">
         <button class="customBtn btn btn-link" @click="commitGH()">
           <i class="icon icon-upload"></i> Commit to Github
        </button>
@@ -135,6 +141,7 @@ export default {
     const importIIIF = () => store.dispatch('setModal', 'iiif')
     const loadXML = () => store.dispatch('setModal', 'loadxml')
     const openFile = () => store.dispatch('setModal', 'openfile')
+    const checkocto = () => store.dispatch('loadSources')
     const downloadXML = () => {
       const xml = xmlDocumentCode()
       if (xml !== null) {
@@ -182,6 +189,7 @@ export default {
       importIIIF,
       loadXML,
       openFile,
+      checkocto,
       downloadXML,
       showOverview,
       login,

@@ -16,8 +16,8 @@
              </tr>
            </thead>
            <tbody>
-             <tr v-for="(path, n) in array" :key="n" @click="openDocument(path)">
-               <td>{{path}}</td>
+             <tr v-for="(source, n) in sources" :key="n" @click="openDocument(source.path)">
+               <td>{{ source.name }}</td>
              </tr>
            </tbody>
          </table>
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'OpenFileModal',
@@ -50,6 +51,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['sources']),
     active () {
       return this.$store.getters.modal === 'openfile'
     },

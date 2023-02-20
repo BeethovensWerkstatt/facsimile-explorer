@@ -1,0 +1,8 @@
+{
+  "repository":  {
+    "owner": "BeethovensWerkstatt",
+    "repo": "data",
+    "branch": "dev"
+  },
+  "root": "data/sources"
+}
