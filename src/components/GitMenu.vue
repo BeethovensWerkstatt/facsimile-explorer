@@ -67,6 +67,13 @@
           <i class="icon icon-download"></i> Fetch from Github
        </button>
       </li>
+
+      <li class="menu-item">
+        <button class="customBtn btn btn-link" @click="openFile()">
+          <i class="icon icon-arrow-right"></i> Open Document
+       </button>
+      </li>
+
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="commitGH()">
           <i class="icon icon-upload"></i> Commit to Github
@@ -127,6 +134,7 @@ export default {
     const commitGH = () => store.dispatch('setModal', 'commitmei')
     const importIIIF = () => store.dispatch('setModal', 'iiif')
     const loadXML = () => store.dispatch('setModal', 'loadxml')
+    const openFile = () => store.dispatch('setModal', 'openfile')
     const downloadXML = () => {
       const xml = xmlDocumentCode()
       if (xml !== null) {
@@ -173,6 +181,7 @@ export default {
       commitGH,
       importIIIF,
       loadXML,
+      openFile,
       downloadXML,
       showOverview,
       login,
