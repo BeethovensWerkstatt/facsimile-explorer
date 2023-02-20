@@ -362,6 +362,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss">
+@import '@/css/_variables.scss';
+
 #osdContainer {
   width: 100%;
   height: 100%;
@@ -370,9 +372,80 @@ export default {
     z-index: -1
   }
 
-  &.systems .system.overlay {
-    z-index: 5;
-    background-color: rgba(57, 6, 238, 0.2);
+  g.sketchArea {
+    path {
+      fill: rgb(67, 158, 3);
+      stroke: rgb(67, 158, 3);
+      opacity: .3;
+    }
+    &.activeGroup path {
+      fill: rgb(156, 217, 43);
+      stroke: rgb(156, 217, 43);
+      opacity: .5;
+    }
+    &:hover path {
+      opacity: .6;
+    }
+  }
+
+  &.sketchGroups {
+    .shapeOverlay {
+      z-index: 10;
+    }
+  }
+
+  &.transcript {
+    .shapeOverlay {
+      z-index: 10;
+
+      path {
+         opacity: .2;
+         &:hover {
+            opacity: .8;
+         }
+
+         &.activeElem {
+            stroke: $activeHighlightColor;
+            fill: $activeHighlightColor;
+            opacity: .6;
+         }
+      }
+    }
+    .verovio.overlay {
+      z-index: 5;
+      opacity: .5;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .a9s-annotationlayer {
+        z-index: -1;
+     }
+  }
+
+  &.demo {
+    .writingZone.overlay {
+      background-color: rgba(100, 66, 119, 0.61);
+      z-index: 1;
+
+      &:hover {
+        background-color: rgba(16, 158, 228, 0.21);
+        outline: 5px solid rgba(11, 108, 156, 0.8);
+      }
+    }
+  }
+
+  &.systems {
+     .system.overlay {
+       z-index: 5;
+       background-color: rgba(57, 6, 238, 0.2);
+     }
+
+     .shapeOverlay {
+        z-index: -1;
+     }
   }
 
   .verovio.overlay {
