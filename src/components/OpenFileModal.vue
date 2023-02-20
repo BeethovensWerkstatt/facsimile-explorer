@@ -9,13 +9,23 @@
      </div>
      <div class="modal-body">
        <div class="content">
-         Liste mit erlaubten Dokumenten hier einbinden.
+         <table class="table table-striped table-hover">
+           <thead>
+             <tr>
+               <th>Filename</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr v-for="(path, n) in array" :key="n" @click="openDocument(path)">
+               <td>{{path}}</td>
+             </tr>
+           </tbody>
+         </table>
        </div>
      </div>
      <div class="modal-footer">
        <div class="btn-group">
          <button class="btn" @click="closeModal()">Cancel</button>
-         <button class="btn btn-primary" @click="main()">Open</button>
        </div>
      </div>
    </div>
@@ -34,24 +44,18 @@ export default {
     closeModal () {
       this.$store.dispatch('setModal', null)
     },
-    main () {
-      console.log('Opening File now!')
+    openDocument (path) {
+      console.log('Opening File now: ' + path)
+      this.$store.dispatch('setModal', null)
     }
   },
   computed: {
     active () {
       return this.$store.getters.modal === 'openfile'
+    },
+    array () {
+      return ['D-B_Grasnick_20b', 'D-Mbs 2 Mus.pr. 1326-165', 'F-Pn_Fonds_francais_12.756', 'F-Pn_Ms_57', 'F-Pn_Ms_96', 'Landsberg_8-1']
     }
-    /* isValid () {
-      if (this.$store.getters.modal !== 'loadxml') {
-        return true
-      }
-      const input = document.querySelector('#manifest-uri-input')
-      if (input === null) {
-        return true
-      }
-      return input.validity.valid
-    }, */
   }
 }
 </script>
