@@ -55,9 +55,6 @@ export default {
     ...mapGetters(['sources']),
     active () {
       return this.$store.getters.modal === 'openfile'
-    },
-    array () {
-      return ['D-B_Grasnick_20b', 'D-Mbs 2 Mus.pr. 1326-165', 'F-Pn_Fonds_francais_12.756', 'F-Pn_Ms_57', 'F-Pn_Ms_96', 'Landsberg_8-1']
     }
   }
 }

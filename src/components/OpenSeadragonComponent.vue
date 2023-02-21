@@ -345,7 +345,7 @@ export default {
       })
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
-        console.log('RENDER NOW')
+        // console.log('RENDER NOW')
         this.renderVerovioOverlay()
       })
   },
