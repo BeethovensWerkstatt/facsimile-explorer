@@ -1,10 +1,17 @@
 <template>
   <div class="appTab homeTab">
-    Logging in, selecting documents etc.
+    <div v-if="isAuthenticated">
+
+    </div>
+    <div v-else>
+      Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!
+    </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import CLIENT_ID from '@/clientID'
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
 
 export default {
@@ -16,7 +23,8 @@ export default {
 
   },
   computed: {
-
+    ...mapGetters(['isAuthenticated']),
+    authurl: () => `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
   }
 }
 </script>
