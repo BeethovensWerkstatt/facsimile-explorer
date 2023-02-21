@@ -13,7 +13,13 @@ export default {
 
   },
   methods: {
-
+    loadAnnotTrans () {
+      this.$store.dispatch('getFile', {
+        path: '',
+        callback: (file) => {
+        }
+      })
+    }
   },
   computed: {
 

@@ -1,7 +1,8 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
-import octokit from '@/store/octokit'
+import octokitModule from '@/store/octokit'
+import verovioModule from '@/store/vrv'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -32,7 +33,8 @@ const serializer = new XMLSerializer()
  */
 export default createStore({
   modules: {
-    octokit
+    octokitModule,
+    verovioModule
   },
   state: {
     explorerTab: 'systems',

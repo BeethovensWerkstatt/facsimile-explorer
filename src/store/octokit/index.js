@@ -1,4 +1,4 @@
-import { OctokitRepo } from '@/toolbox/github'
+import { OctokitRepo } from '@/tools/github'
 import { Octokit } from '@octokit/rest'
 import { Base64 } from 'js-base64'
 
@@ -228,6 +228,18 @@ const actions = {
       }
     }
     commit('SET_SOURCES', sourcefiles)
+  },
+
+  async getFile ({ getters }, { path, callback }) {
+    const repometa = {
+      octokit: getters.octokit,
+      owner: config.repository.owner,
+      repo: config.repository.repo,
+      branch: config.repository.branch
+    }
+    const repo = new OctokitRepo(repometa)
+    const root = await repo.folder
+    root.getFile(path).then(file => callback(file))
   }
 }
 
