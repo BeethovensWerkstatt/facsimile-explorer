@@ -1,12 +1,22 @@
 <template>
   <AppHeader/>
+
+  <!-- TODO: Check modals -->
+
   <IiifModal/>
   <LoadXmlModal/>
   <OverviewModal/>
   <CommitModal/>
   <OpenFileModal/>
   <AssignSVGsModal/>
-  <template v-if="isReady">
+
+  <HomeTab v-if="currentTab === 'home'"/>
+  <PagesTab v-if="currentTab === 'pages'"/>
+  <SystemsTab v-if="currentTab === 'systems'"/>
+  <ZonesTab v-if="currentTab === 'zones'"/>
+  <DiploTab v-if="currentTab === 'diplo'"/>
+
+  <template v-if="isReady && !isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
         <OpenSeadragonComponent/>
@@ -23,7 +33,7 @@
       </pane>
     </splitpanes>
   </template>
-  <template v-if="!isReady">
+  <template v-if="!isReady && isReady">
      <div class="loadingBack">
         * Hier oder andernorts: Erzeugen MEI-Datei aus IIIF Manifest <br/>
         * Importieren des SVG für aktuelle Seite <br/>
@@ -47,6 +57,12 @@ import CommitModal from '@/components/CommitModal.vue'
 import OpenFileModal from '@/components/OpenFileModal.vue'
 import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 
+import HomeTab from '@/components/HomeTab.vue'
+import PagesTab from '@/components/PagesTab.vue'
+import ZonesTab from '@/components/ZonesTab.vue'
+import SystemsTab from '@/components/SystemsTab.vue'
+import DiploTab from '@/components/DiploTab.vue'
+
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
@@ -64,7 +80,12 @@ export default {
     OpenFileModal,
     AssignSVGsModal,
     Splitpanes,
-    Pane
+    Pane,
+    HomeTab,
+    PagesTab,
+    ZonesTab,
+    SystemsTab,
+    DiploTab
   },
   methods: {
     doScroll (e) {
@@ -74,6 +95,9 @@ export default {
   computed: {
     isReady () {
       return this.$store.getters.isReady
+    },
+    currentTab () {
+      return this.$store.getters.currentTab
     }
   }
 }

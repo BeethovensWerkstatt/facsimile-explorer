@@ -50,7 +50,8 @@ export default createStore({
     selectionRect: null,
     selectedSystemOnCurrentPage: -1,
     editingSystemOnCurrentPage: -1,
-    pageSVGs: []
+    pageSVGs: [],
+    currentTab: 'home' // allowed values: 'home', 'pages', 'systems', 'zones', 'diplo'
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
@@ -193,6 +194,12 @@ export default createStore({
 
       console.log('xywh:', x, y, w, h)
       // }
+    },
+    OPEN_TAB (state, tab) {
+      const allowedTabs = ['home', 'pages', 'systems', 'zones', 'diplo']
+      if (allowedTabs.indexOf(tab) !== -1) {
+        state.currentTab = tab
+      }
     }
   },
   actions: {
@@ -313,6 +320,9 @@ export default createStore({
       const svg = svgdom?.documentElement
       console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
+    },
+    openTab ({ commit }, tab) {
+      commit('OPEN_TAB', tab)
     }
   },
   getters: {
@@ -485,6 +495,9 @@ export default createStore({
 
     editingSystemOnCurrentPage: state => {
       return state.editingSystemOnCurrentPage
+    },
+    currentTab: state => {
+      return state.currentTab
     }
   }
 })

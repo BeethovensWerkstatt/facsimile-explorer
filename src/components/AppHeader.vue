@@ -19,20 +19,20 @@
     </header>
     <div class="appTabs">
       <ul class="tab">
-        <li class="tab-item">
-          <a href="#"><img class="home" src="/home.png"></a>
+        <li class="tab-item" >
+          <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
         </li>
         <li class="tab-item">
-          <a href="#" class="active">Pages / SVG</a>
+          <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
         </li>
         <li class="tab-item">
-          <a href="#">Systems</a>
+          <a href="#" :class="{active: currentTab === 'systems'}" @click.stop.prevent="openTab('systems')">Systems</a>
         </li>
         <li class="tab-item">
-          <a href="#">Writing Zones</a>
+          <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
         </li>
         <li class="tab-item">
-          <a href="#">Diplomatic Transcripts</a>
+          <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
         </li>
       </ul>
     </div>
@@ -71,6 +71,14 @@ export default {
     },
     isLoading () {
       return this.$store.getters.loading || this.$store.getters.processing
+    },
+    currentTab () {
+      return this.$store.getters.currentTab
+    }
+  },
+  methods: {
+    openTab (tab) {
+      this.$store.dispatch('openTab', tab)
     }
   }
 }
@@ -112,6 +120,7 @@ export default {
 
 .appTabs {
   background: linear-gradient(to bottom, lighten($darkBackgroundColor, 20%), lighten($darkBackgroundColor, 2%));
+  height: $tabBarHeight;
 
   ul.tab {
     margin: 0;
@@ -124,20 +133,27 @@ export default {
 
       &:focus {
         color: unset;
+        outline: none;
       }
 
       &:hover {
         color: #ffffff;
+        outline: none;
       }
 
       &.active {
         background-color: #ffffff;
-        border-bottom-color: #ffffff;
+        border-bottom: 3px solid #ffffff;
         border-radius: 5px 5px 0 0;
         margin-bottom: 0;
         padding-bottom: .2rem;
         color: #333333;
         font-weight: 500;
+        outline: none;
+
+        &:focus {
+          outline: none;
+        }
       }
 
       .home {
