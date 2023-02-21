@@ -1,22 +1,42 @@
 <template>
-
-  <header class="navbar appHeader">
-    <section class="navbar-section">
-      <span class="navbar-brand mr-2">Facsimile Explorer</span>
-      <span class="docTitle">{{docTitle}}</span>
-      <!--<a href="..." class="btn btn-link">Docs</a>
-      <a href="..." class="btn btn-link">GitHub</a>-->
-    </section>
-    <section class="navbar-section">
-      <div class="loading" v-if="isLoading"></div>
-      <GitMenu/>
-      <!--<div class="input-group input-inline">
-        <input class="form-input" type="text" placeholder="search">
-        <button class="btn input-group-btn">Search</button>
-      </div>-->
-    </section>
-  </header>
-
+  <div>
+    <header class="navbar appHeader">
+      <section class="navbar-section">
+        <span class=""><a href="https://beethovens-werkstatt.de" target="_blank" rel="noreferrer nofollow"><img class="bwLogo" src="/bw_logo.png" alt="Beethovens Werkstatt"></a></span>
+        <span class="navbar-brand mr-2">Facsimile Explorer</span>
+        <span class="docTitle">{{docTitle}}</span>
+        <!--<a href="..." class="btn btn-link">Docs</a>
+        <a href="..." class="btn btn-link">GitHub</a>-->
+      </section>
+      <section class="navbar-section">
+        <div class="loading" v-if="isLoading"></div>
+        <GitMenu/>
+        <!--<div class="input-group input-inline">
+          <input class="form-input" type="text" placeholder="search">
+          <button class="btn input-group-btn">Search</button>
+        </div>-->
+      </section>
+    </header>
+    <div class="appTabs">
+      <ul class="tab">
+        <li class="tab-item">
+          <a href="#"><img class="home" src="/home.png"></a>
+        </li>
+        <li class="tab-item">
+          <a href="#" class="active">Pages / SVG</a>
+        </li>
+        <li class="tab-item">
+          <a href="#">Systems</a>
+        </li>
+        <li class="tab-item">
+          <a href="#">Writing Zones</a>
+        </li>
+        <li class="tab-item">
+          <a href="#">Diplomatic Transcripts</a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -67,6 +87,12 @@ export default {
   font-weight: 100;
   padding: 0 1rem 0 1rem;
 
+  .bwLogo {
+    width: 100px;
+    margin-top: 10px;
+    margin-right: 1rem;
+  }
+
   .docTitle {
     font-size: .7rem;
     font-weight: 700;
@@ -80,6 +106,46 @@ export default {
       border-right-color: #e5e5e533;
       border-bottom-color: #e5e5e566;
       border-left-color: #e5e5e5;
+    }
+  }
+}
+
+.appTabs {
+  background: linear-gradient(to bottom, lighten($darkBackgroundColor, 20%), lighten($darkBackgroundColor, 2%));
+
+  ul.tab {
+    margin: 0;
+
+    .tab-item a {
+      background-color: #ffffff66;
+      border-radius: 5px;
+      padding: .2rem .8rem .1rem .8rem;
+      margin: .1rem;
+
+      &:focus {
+        color: unset;
+      }
+
+      &:hover {
+        color: #ffffff;
+      }
+
+      &.active {
+        background-color: #ffffff;
+        border-bottom-color: #ffffff;
+        border-radius: 5px 5px 0 0;
+        margin-bottom: 0;
+        padding-bottom: .2rem;
+        color: #333333;
+        font-weight: 500;
+      }
+
+      .home {
+        height: .8rem;
+        position: relative;
+        top: .15rem;
+      }
+
     }
   }
 }

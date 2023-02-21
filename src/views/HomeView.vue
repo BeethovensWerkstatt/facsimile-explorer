@@ -5,6 +5,7 @@
   <OverviewModal/>
   <CommitModal/>
   <OpenFileModal/>
+  <AssignSVGsModal/>
   <template v-if="isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
@@ -44,6 +45,7 @@ import LoadXmlModal from '@/components/LoadXmlModal.vue'
 import OverviewModal from '@/components/OverviewModal.vue'
 import CommitModal from '@/components/CommitModal.vue'
 import OpenFileModal from '@/components/OpenFileModal.vue'
+import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -60,6 +62,7 @@ export default {
     OverviewModal,
     CommitModal,
     OpenFileModal,
+    AssignSVGsModal,
     Splitpanes,
     Pane
   },

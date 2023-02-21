@@ -112,16 +112,18 @@ export async function iiifManifest2mei (json, url, parser) {
       // add current date
       file.querySelector('change date').setAttribute('isodate', new Date().toISOString().substring(0, 10))
 
-      const metadata = json.metadata
+      if ('metadata' in json) {
+        const metadata = json.metadata
 
-      const shelfmark = metadata.find(entry => { return entry.label === 'Signatur' })?.value
-      file.querySelector('physLoc > identifier').textContent = shelfmark
+        const shelfmark = metadata.find(entry => { return entry.label === 'Signatur' })?.value
+        file.querySelector('physLoc > identifier').textContent = shelfmark
 
-      // const persistentIdentifier = metadata.find(entry => {entry.label = 'Persistente URL'}).value
-      // file.querySelector('title').textContent = json.label
+        // const persistentIdentifier = metadata.find(entry => {entry.label = 'Persistente URL'}).value
+        // file.querySelector('title').textContent = json.label
 
-      const composer = metadata.find(entry => { return entry.label === 'Autor' })?.value
-      file.querySelector('composer persName').textContent = composer
+        const composer = metadata.find(entry => { return entry.label === 'Autor' })?.value
+        file.querySelector('composer persName').textContent = composer
+      }
 
       // handle pages
       json.sequences[0].canvases.forEach((canvas, i) => {
@@ -135,10 +137,17 @@ export async function iiifManifest2mei (json, url, parser) {
 export function checkIiifManifest (json) {
   const claimsIiif2 = json['@context'] === 'http://iiif.io/api/presentation/2/context.json'
   const claimsIiif3 = json['@context'] === 'http://iiif.io/api/presentation/3/context.json'
-  const claimsManifest = json['@type'] === 'sc:Manifest'
+  const claimsManifest = json['@type'] === 'sc:Manifest' || json.type === 'Manifest'
 
-  const hasId = typeof json['@id'] === 'string' && json['@id'].length > 0
+  console.log('json.type: ' + json.type)
+  console.log('json.@type: ' + json['@type'])
+  console.log('claimsManifest: ' + claimsManifest)
+
+  const hasId = (typeof json['@id'] === 'string' && json['@id'].length > 0) || (typeof json.id === 'string' && json.id.length > 0)
   const hasSequences = Array.isArray(json.sequences)
+
+  console.log('hasId: ' + hasId)
+  console.log('hasSequences: ' + hasSequences)
 
   return (claimsIiif2 || claimsIiif3) && claimsManifest && hasId && hasSequences
 }

@@ -44,6 +44,11 @@
           <i class="icon icon-copy"></i> Document Overview
        </button>
       </li>
+      <li class="menu-item">
+        <button class="customBtn btn btn-link" :disabled=!isReady @click="assignSVGs()">
+          <i class="icon icon-copy"></i> Assign SVGs
+       </button>
+      </li>
     </ul>
   </div>
 </template>
@@ -80,6 +85,8 @@ export default {
     const loadXML = () => store.dispatch('setModal', 'loadxml')
     const openFile = () => store.dispatch('setModal', 'openfile')
     const checkocto = () => store.dispatch('loadSources')
+    const assignSVGs = () => store.dispatch('setModal', 'assignSVGs')
+
     const downloadXML = () => {
       const xml = xmlDocumentCode()
       if (xml !== null) {
@@ -128,6 +135,7 @@ export default {
       loadXML,
       openFile,
       checkocto,
+      assignSVGs,
       downloadXML,
       showOverview,
       login,
