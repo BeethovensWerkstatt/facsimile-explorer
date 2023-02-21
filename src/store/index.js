@@ -321,8 +321,10 @@ export default createStore({
       console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
     },
-    openTab ({ commit }, tab) {
-      commit('OPEN_TAB', tab)
+    openTab ({ commit, getters }, tab) {
+      if (getters.isAuthenticated) {
+        commit('OPEN_TAB', tab)
+      }
     }
   },
   getters: {
