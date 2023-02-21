@@ -94,10 +94,10 @@ const actions = {
   loadContent (
     { commit, dispatch, getters },
     {
-      owner = 'BeethovensWerkstatt',
-      repo = 'data',
+      owner = config.repository.owner, // 'BeethovensWerkstatt',
+      repo = config.repository.repo, // 'data',
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
-      ref = 'dev'
+      ref = config.repository.branch // 'dev'
     }) {
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
       console.log(data.download_url)
@@ -210,8 +210,24 @@ const actions = {
       branch: config.repository.branch
     }
     // console.log(repometa)
+    const sourcefiles = []
+
     const repo = new OctokitRepo(repometa)
-    repo.folder.then(folder => folder.getFile('data/sources').then(sources => sources.tree.then(tree => commit('SET_SOURCES', tree))))
+    const root = await repo.folder
+    const folder = await root.getFile(config.root)
+    const sources = await folder.folder
+    for (const source of sources) {
+      if (source.type === 'dir' || source.type === 'tree') {
+        const srcfiles = await source.folder
+        for (const srcfile of srcfiles) {
+          if (srcfile.name.endsWith('.xml')) {
+            console.log(srcfile.path)
+            sourcefiles.push({ name: source.name, path: srcfile.path })
+          }
+        }
+      }
+    }
+    commit('SET_SOURCES', sourcefiles)
   }
 }
 

@@ -47,6 +47,7 @@ export default {
     },
     openDocument (path) {
       console.log('Opening File now: ' + path)
+      this.$store.dispatch('loadContent', { path })
       this.$store.dispatch('setModal', null)
     }
   },
