@@ -19,54 +19,8 @@
           <div class="tile-content"><button @click="login()" class="customBtn btn btn-link">Login</button></div>
         </div>
       </li>
-      <!--
-      <li class="menu-item">
 
-      </li>
-      <li class="divider" data-content="Repository"></li>
-
-      <li class="menu-item">
-        <a href="#">
-          BeethovensWerkstatt
-          <!-/- the repo – we could hard-code some of this… -/->
-        </a>
-      </li>
-      <li class="menu-item">
-        <a href="#">
-          data
-          <!-/- the repo -/->
-        </a>
-      </li>
-      <li class="menu-item">
-        <a href="#">
-          dev
-          <!-/- the branch -/->
-        </a>
-      </li>
-      <li class="menu-item">
-        <a href="#">
-          D-BNba_HCB_Mh_60.xml
-          <!-/- a click could open a filepicker component within that repo -/->
-        </a>
-      </li>
-    -->
       <li class="divider" data-content="Data"></li>
-
-      <!--<li class="menu-item">
-        <a href="#">
-          <i class="icon icon-refresh"></i> Fetch updates
-        </a>
-      </li>
-      <li class="menu-item">
-        <a href="#">
-          <i class="icon icon-upload"></i> Commit changes
-        </a>
-      </li>-->
-      <li class="menu-item">
-        <button class="customBtn btn btn-link" @click="importGH()">
-          <i class="icon icon-download"></i> Fetch from Github
-       </button>
-      </li>
 
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="openFile()">
@@ -75,26 +29,10 @@
       </li>
 
       <li class="menu-item">
-        <button class="customBtn btn btn-link" @click="checkocto()">
-          <i class="icon icon-arrow-right"></i> test load sources
-       </button>
-      </li>
-
-      <li class="menu-item">
         <button class="customBtn btn btn-link" @click="commitGH()">
           <i class="icon icon-upload"></i> Commit to Github
        </button>
       </li>
-      <!--<li class="menu-item">
-        <button class="customBtn btn btn-link" @click="importIIIF()">
-          <i class="icon icon-upload"></i> Import IIIF Manifest
-       </button>
-      </li>
-      <li class="menu-item">
-        <button class="customBtn btn btn-link" @click="loadXML()">
-          <i class="icon icon-upload"></i> Load XML
-        </button>
-      </li>-->
       <li class="menu-item">
         <button class="customBtn btn btn-link" :disabled=!hasXML @click="downloadXML()">
           <i class="icon icon-download"></i> Download XML
