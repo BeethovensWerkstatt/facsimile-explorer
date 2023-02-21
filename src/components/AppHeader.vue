@@ -32,6 +32,9 @@
           <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
         </li>
         <li class="tab-item">
+          <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
+        </li>
+        <li class="tab-item">
           <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
         </li>
       </ul>

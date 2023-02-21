@@ -14,6 +14,7 @@
   <PagesTab v-if="currentTab === 'pages'"/>
   <SystemsTab v-if="currentTab === 'systems'"/>
   <ZonesTab v-if="currentTab === 'zones'"/>
+  <AnnotTab v-if="currentTab === 'annot'"/>
   <DiploTab v-if="currentTab === 'diplo'"/>
 
   <template v-if="isReady && !isReady">
@@ -61,6 +62,7 @@ import HomeTab from '@/components/HomeTab.vue'
 import PagesTab from '@/components/PagesTab.vue'
 import ZonesTab from '@/components/ZonesTab.vue'
 import SystemsTab from '@/components/SystemsTab.vue'
+import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
 
 import { Splitpanes, Pane } from 'splitpanes'
@@ -85,6 +87,7 @@ export default {
     PagesTab,
     ZonesTab,
     SystemsTab,
+    AnnotTab,
     DiploTab
   },
   methods: {
