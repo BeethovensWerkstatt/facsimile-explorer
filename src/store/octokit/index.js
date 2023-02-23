@@ -240,6 +240,15 @@ const actions = {
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
     root.getFile(path).then(file => callback(file))
+  },
+  getXML ({ dispatch }, { path, callback }) {
+    dispatch('getFile', {
+      path,
+      callback (f) {
+        const parser = new DOMParser()
+        callback(parser.parseFromString(f))
+      }
+    })
   }
 }
 

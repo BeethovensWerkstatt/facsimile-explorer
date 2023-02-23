@@ -92,6 +92,27 @@ export class OctokitFile extends OctokitNode {
     })
   }
 
+  getObject (transformator, refresh = false) {
+    return new Promise((resolve, reject) => {
+      this.getContent(refresh).then(content => {
+        try {
+          const obj = transformator(content)
+          if (typeof obj.then === 'function') {
+            if (typeof obj.catch === 'function') {
+              obj.then(cnt => resolve(cnt)).catch(err => reject(err))
+            } else {
+              obj.then(cnt => resolve(cnt))
+            }
+          } else {
+            resolve(obj)
+          }
+        } catch (error) {
+          reject(error)
+        }
+      }).catch(err => reject(err))
+    })
+  }
+
   getFile (path) {
     return this.parent.getFile(path)
   }
