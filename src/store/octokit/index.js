@@ -249,6 +249,14 @@ const actions = {
         callback(parser.parseFromString(f))
       }
     })
+  },
+  getJSON ({ dispatch }, { path, callback }) {
+    dispatch('getFile', {
+      path,
+      callback (f) {
+        callback(JSON.parse(f))
+      }
+    })
   }
 }
 
