@@ -28,6 +28,10 @@ const parser = new DOMParser()
  */
 const serializer = new XMLSerializer()
 
+/**
+ * persist state to localStorage
+ * TODO? use localforage?
+ */
 const vuexLocal = new VuexPersistence({
   storage: window.localStorage,
   reducer: state => ({
