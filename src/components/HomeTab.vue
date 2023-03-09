@@ -1,7 +1,18 @@
 <template>
   <div class="appTab homeTab">
     <div v-if="isAuthenticated">
-
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Filename</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(source, n) in sources" :key="n" @click="openDocument(source)">
+            <td>{{ source.name }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div v-else>
       Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!
@@ -20,10 +31,14 @@ export default {
 
   },
   methods: {
-
+    openDocument (source) {
+      console.log('Opening File now: ' + source.path)
+      this.$store.dispatch('loadContent', { path: source.path })
+      this.$router.push({ name: 'modus', params: { source: source.name, page: 1, modus: 'pages' } })
+    }
   },
   computed: {
-    ...mapGetters(['isAuthenticated']),
+    ...mapGetters(['isAuthenticated', 'sources']),
     authurl: () => `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
   }
 }

@@ -26,9 +26,6 @@
           <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'systems'}" @click.stop.prevent="openTab('systems')">Systems</a>
-        </li>
-        <li class="tab-item">
           <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
         </li>
         <li class="tab-item">
@@ -81,7 +78,8 @@ export default {
   },
   methods: {
     openTab (tab) {
-      this.$store.dispatch('openTab', tab)
+      this.$router.push({ name: 'modus', params: { source: this.$route.params.source, modus: tab } })
+      // this.$store.dispatch('openTab', tab)
     }
   }
 }
