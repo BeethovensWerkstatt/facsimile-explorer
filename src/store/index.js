@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import VuexPersistence from 'vuex-persist'
 import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
 import octokitModule from '@/store/octokit'
@@ -27,6 +28,20 @@ const parser = new DOMParser()
  */
 const serializer = new XMLSerializer()
 
+const vuexLocal = new VuexPersistence({
+  storage: window.localStorage,
+  reducer: state => ({
+    currentTab: state.currentTab,
+    pages: state.pages,
+    fileowner: state.fileowner,
+    filerepo: state.filerepo,
+    fileref: state.fileref,
+    sources: state.sources,
+    filepath: state.filepath,
+    filesha: state.filesha
+  })
+})
+
 /**
  * The Vuex Store of facsimile-explorer
  * @type {Object}
@@ -36,6 +51,7 @@ export default createStore({
     octokitModule,
     verovioModule
   },
+  plugins: [vuexLocal.plugin],
   state: {
     explorerTab: 'systems',
     pages: [],
@@ -53,7 +69,7 @@ export default createStore({
     selectedSystemOnCurrentPage: -1,
     editingSystemOnCurrentPage: -1,
     pageSVGs: [],
-    currentTab: 'home' // allowed values: 'home', 'pages', 'systems', 'zones', 'diplo'
+    currentTab: 'home' // allowed values: 'home', 'pages', 'zones', 'annot', 'diplo'
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {

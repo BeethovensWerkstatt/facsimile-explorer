@@ -103,7 +103,7 @@ export default {
       return this.$store.getters.isReady
     },
     currentTab () {
-      return this.$store.getters.currentTab
+      return this.$route.params.modus // this.$store.getters.currentTab
     }
   }
 }

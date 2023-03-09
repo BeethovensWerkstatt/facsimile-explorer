@@ -20,19 +20,25 @@
     <div class="appTabs">
       <ul class="tab">
         <li class="tab-item" >
-          <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
+          <router-link :to="{ name: 'home' }"><img class="home" src="/home.png"></router-link>
+          <!-- <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a> -->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
+          <tab-link tab="pages">Pages / SVG</tab-link>
+          <!-- <router-link :to="tabLink('pages')">Pages / SVG</router-link> -->
+          <!-- <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a> -->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
+          <tab-link tab="zones">Writing Zones</tab-link>
+          <!-- <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a> -->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
+          <tab-link tab="annot">Annotated Transcripts</tab-link>
+          <!-- <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a> -->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
+          <tab-link tab="diplo">Diplomatic Transcripts</tab-link>
+          <!-- <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a> -->
         </li>
       </ul>
     </div>
@@ -41,6 +47,7 @@
 
 <script>
 import GitMenu from '@/components/GitMenu.vue'
+import TabLink from '@/components/TabLink.vue'
 
 const truncate = function (fullStr, strLen, separator) {
   if (fullStr.length <= strLen) return fullStr
@@ -56,7 +63,8 @@ const truncate = function (fullStr, strLen, separator) {
 export default {
   name: 'AppHeader',
   components: {
-    GitMenu
+    GitMenu,
+    TabLink
   },
   computed: {
     docTitle () {
@@ -73,13 +81,17 @@ export default {
       return this.$store.getters.loading || this.$store.getters.processing
     },
     currentTab () {
-      return this.$store.getters.currentTab
+      return this.$route.params.modus
     }
   },
   methods: {
-    openTab (tab) {
-      this.$router.push({ name: 'modus', params: { source: this.$route.params.source, modus: tab } })
+    openTab (modus) {
+      this.$router.push({ name: 'modus', params: { source: this.$route.params.source, modus } })
       // this.$store.dispatch('openTab', tab)
+    },
+    tabLink (modus) {
+      const source = this.$route.params.source
+      return source ? { name: 'modus', params: { source: source, modus } } : { name: 'home' }
     }
   }
 }
@@ -126,7 +138,7 @@ export default {
   ul.tab {
     margin: 0;
 
-    .tab-item a {
+    .tab-item a,span {
       background-color: #ffffff66;
       border-radius: 5px;
       padding: .2rem .8rem .1rem .8rem;
