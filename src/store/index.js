@@ -33,7 +33,7 @@ const serializer = new XMLSerializer()
  * TODO? use localforage?
  */
 const vuexLocal = new VuexPersistence({
-  storage: window.localStorage,
+  storage: window.sessionStorage,
   reducer: state => ({
     currentTab: state.currentTab,
     pages: state.pages,
