@@ -26,9 +26,6 @@
           <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'systems'}" @click.stop.prevent="openTab('systems')">Systems</a>
-        </li>
-        <li class="tab-item">
           <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
         </li>
         <li class="tab-item">

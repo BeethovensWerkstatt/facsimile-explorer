@@ -1,6 +1,10 @@
 <template>
   <div class="appTab annotTranscriptTab">
-    Annotated Transcript happening here…
+    <p>
+      In diesem Reiter kann man annotierte Transkriptionen hochladen und die zugehörigen Schreibzonen auswählen.
+      Dazu Auswahl nach Seite und dann nach Schreibzone. Evtl. mit Faksimile-Vorschau?! Es sollen Metadaten
+      entstehen, was wie zusammengehört, und die annotTrans soll an definierter Stelle gespeichert werden.
+    </p>
   </div>
 </template>
 

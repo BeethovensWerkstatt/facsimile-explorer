@@ -1,16 +1,22 @@
 <template>
   <div class="appTab pagesTab">
-    Assigning SVG files to pages…
+    <SideBar position="left"/>
+    <TopMenu/>
+    <MainStage/>
   </div>
 </template>
 
 <script>
-// import SystemListingEntry from '@/components/SystemListingEntry.vue'
+import MainStage from '@/components/shared/MainStage.vue'
+import SideBar from '@/components/shared/SideBar.vue'
+import TopMenu from '@/components/shared/TopMenu.vue'
 
 export default {
   name: 'PagesTab',
   components: {
-
+    MainStage,
+    SideBar,
+    TopMenu
   },
   methods: {
 

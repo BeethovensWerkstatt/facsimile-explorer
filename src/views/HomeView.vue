@@ -12,7 +12,6 @@
 
   <HomeTab v-if="currentTab === 'home'"/>
   <PagesTab v-if="currentTab === 'pages'"/>
-  <SystemsTab v-if="currentTab === 'systems'"/>
   <ZonesTab v-if="currentTab === 'zones'"/>
   <AnnotTab v-if="currentTab === 'annot'"/>
   <DiploTab v-if="currentTab === 'diplo'"/>
@@ -61,7 +60,6 @@ import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 import HomeTab from '@/components/HomeTab.vue'
 import PagesTab from '@/components/PagesTab.vue'
 import ZonesTab from '@/components/ZonesTab.vue'
-import SystemsTab from '@/components/SystemsTab.vue'
 import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
 
@@ -86,7 +84,6 @@ export default {
     HomeTab,
     PagesTab,
     ZonesTab,
-    SystemsTab,
     AnnotTab,
     DiploTab
   },
