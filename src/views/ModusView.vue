@@ -61,7 +61,6 @@ import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 import HomeTab from '@/components/HomeTab.vue'
 import PagesTab from '@/components/PagesTab.vue'
 import ZonesTab from '@/components/ZonesTab.vue'
-import SystemsTab from '@/components/SystemsTab.vue'
 import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
 
@@ -86,7 +85,6 @@ export default {
     HomeTab,
     PagesTab,
     ZonesTab,
-    SystemsTab,
     AnnotTab,
     DiploTab
   },

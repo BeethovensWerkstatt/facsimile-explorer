@@ -57,7 +57,7 @@ export default createStore({
   },
   plugins: [vuexLocal.plugin],
   state: {
-    explorerTab: 'systems',
+    explorerTab: 'home',
     pages: [],
     currentPage: -1,
     previewPage: -1,
@@ -218,7 +218,7 @@ export default createStore({
       // }
     },
     OPEN_TAB (state, tab) {
-      const allowedTabs = ['home', 'pages', 'systems', 'zones', 'annot', 'diplo']
+      const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
       if (allowedTabs.indexOf(tab) !== -1) {
         state.currentTab = tab
       }
