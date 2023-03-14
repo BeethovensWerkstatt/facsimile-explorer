@@ -37,12 +37,13 @@ const mutations = {
     try {
       state.octokit = new Octokit({
         auth: state.auth,
-        userAgent: 'facsimile-explorer/v0.0.1'
+        userAgent: 'facsimile-explorer/v0.0.2'
       })
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
           state.user = data
           if (store) store(state.auth)
+          else console.warn('could not set cookie!')
         })
       } else {
         state.user = {}
