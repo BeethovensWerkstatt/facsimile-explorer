@@ -1,6 +1,8 @@
 <template>
-  <div class="sidebar">
-    {{ position }}
+  <div class="sidebar" :style="{ width: width }">
+    <slot>
+      {{ position }}
+    </slot>
   </div>
 </template>
 
@@ -10,7 +12,11 @@
 export default {
   name: 'SideBar',
   props: {
-    position: String
+    position: String,
+    width: {
+      type: String,
+      default: '150px'
+    }
   },
   components: {
 
@@ -28,4 +34,8 @@ export default {
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
 
+.sidebar {
+  float: left;
+  height: 100%;
+}
 </style>

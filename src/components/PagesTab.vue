@@ -1,8 +1,14 @@
 <template>
   <div class="appTab pagesTab">
-    <SideBar position="left"/>
-    <TopMenu/>
-    <MainStage/>
+    <SideBar position="left">
+      <div>list pages ...</div>
+    </SideBar>
+    <TopMenu>
+      <div>toolbar ...</div>
+    </TopMenu>
+    <MainStage>
+      <h1>Hallo Pages</h1>
+    </MainStage>
   </div>
 </template>
 
