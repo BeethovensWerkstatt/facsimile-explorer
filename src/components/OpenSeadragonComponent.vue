@@ -65,7 +65,7 @@ export default {
       if (this.viewer === undefined) {
         return null
       }
-      if (svg !== null) {
+      if (svg) {
         this.viewer.addOverlay({
           element: svg,
           x: 0,

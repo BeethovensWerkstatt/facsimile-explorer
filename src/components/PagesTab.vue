@@ -8,6 +8,7 @@
     </TopMenu>
     <MainStage>
       <OpenSeadragonComponent />
+      <div id="openSeadragonNavigator" />
     </MainStage>
   </div>
 </template>
@@ -26,11 +27,18 @@ export default {
     TopMenu,
     OpenSeadragonComponent
   },
+  watch: {
+    currentPage () {
+      this.$store.commit('SET_CURRENT_PAGE', this.currentPage)
+    }
+  },
   methods: {
 
   },
   computed: {
-
+    currentPage () {
+      return this.$route.params.page || 1
+    }
   }
 }
 </script>

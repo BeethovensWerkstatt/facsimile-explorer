@@ -100,13 +100,14 @@ const actions = {
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
       ref = config.repository.branch // 'dev'
     }) {
+    console.log('load content', path)
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
       console.log(data.download_url)
       const dec = new TextDecoder('utf-8')
       const txt = dec.decode(Base64.toUint8Array(data.content))
       const parser = new DOMParser()
       const mei = parser.parseFromString(txt, 'application/xml')
-      dispatch('setData', mei)
+      dispatch('setData', { mei, path })
       commit('SET_GH_FILE', { ...data, owner, repo, ref })
     })
   },

@@ -46,7 +46,8 @@ export default {
         const reader = new FileReader()
         reader.addEventListener('load', () => {
           console.log(file)
-          this.$store.dispatch('setData', reader.result)
+          const mei = reader.result
+          this.$store.dispatch('setData', { mei, path: file.path })
           this.closeModal()
         })
         reader.readAsText(file)

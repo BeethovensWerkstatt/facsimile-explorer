@@ -158,6 +158,7 @@ export function getPageArray (mei) {
     const graphic = surface.querySelector('graphic')
     const i = n + 1
     const page = mei.querySelector('page:nth-child(' + i + ')')
+    // console.log(mei, page)
 
     const obj = {}
     obj.uri = graphic.getAttributeNS('', 'target').trim()

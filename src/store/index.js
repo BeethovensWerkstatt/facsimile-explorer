@@ -258,10 +258,11 @@ export default createStore({
         .then(xml => {
           const mei = parser.parseFromString(xml, 'application/xml')
           commit('SET_GH_FILE', {}) // remove GH link
-          dispatch('setData', mei)
+          dispatch('setData', { mei, path: 'testfile.xml' })
         })
     },
-    setData ({ commit }, mei) {
+    setData ({ commit }, { mei, path }) {
+      console.log(path)
       const pageArray = getPageArray(mei)
       commit('SET_PAGES', pageArray)
 
@@ -328,7 +329,7 @@ export default createStore({
           iiifManifest2mei(json, url, parser)
             .then(mei => {
               commit('SET_GH_FILE', {}) // remove GH link
-              dispatch('setData', mei)
+              dispatch('setData', { mei, path: url })
             })
         })
         .catch(err => {
