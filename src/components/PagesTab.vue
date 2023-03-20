@@ -8,7 +8,6 @@
     </TopMenu>
     <MainStage>
       <OpenSeadragonComponent />
-      <div id="openSeadragonNavigator" />
     </MainStage>
   </div>
 </template>
@@ -27,7 +26,20 @@ export default {
     TopMenu,
     OpenSeadragonComponent
   },
+  mounted () {
+    const path = this.currentPath
+    if (this.$store.getters.filepath !== path) {
+      this.$store.dispatch('loadContent', path)
+    }
+    this.$store.commit('SET_CURRENT_PAGE', this.currentPage)
+  },
   watch: {
+    currentPath () {
+      const path = this.currentPath
+      if (this.$store.getters.filepath !== path) {
+        this.$store.dispatch('loadContent', path)
+      }
+    },
     currentPage () {
       this.$store.commit('SET_CURRENT_PAGE', this.currentPage)
     }
@@ -38,6 +50,12 @@ export default {
   computed: {
     currentPage () {
       return this.$route.params.page || 1
+    },
+    currentSource () {
+      return this.$route.params.source || ''
+    },
+    currentPath () {
+      return this.$store.getters.getPathByName(this.currentSource) || ''
     }
   }
 }

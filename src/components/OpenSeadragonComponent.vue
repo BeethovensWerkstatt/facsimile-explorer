@@ -8,7 +8,7 @@
 import OpenSeadragon from 'openseadragon'
 import * as Annotorious from '@recogito/annotorious-openseadragon'
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css'
-import verovio from 'verovio'
+// import verovio from 'verovio'
 
 const verovioOptions = {
   scale: 30,
@@ -163,6 +163,7 @@ export default {
       const postfix = '</pages></body></music>'
 
       const mei = prefix + pageCode + postfix
+      // TODO make vrvToolkit a Promise?
       this.vrvToolkit.loadData(mei)
       const svg = this.vrvToolkit.renderToSVG(1, {})
 
@@ -185,12 +186,12 @@ export default {
     }
   },
   mounted: function () {
-    // eslint-disable-next-line
-    this.vrvToolkit = new verovio.toolkit()
-    this.vrvToolkit.setOptions(verovioOptions)
-
-    console.log('verovio is there now')
-    console.log(this.vrvToolkit)
+    this.$store.getters.verovioToolkit.then(toolkit => {
+      this.vrvToolkit = toolkit
+      this.vrvToolkit.setOptions(verovioOptions)
+      console.log('verovio is there now')
+      console.log(this.vrvToolkit)
+    })
 
     this.viewer = OpenSeadragon({
       id: 'osdContainer',
@@ -198,7 +199,7 @@ export default {
       visibilityRatio: 0.8,
       sequenceMode: true,
       showNavigator: true,
-      navigatorId: 'openSeadragonNavigator',
+      // navigatorId: 'openSeadragonNavigator',
       homeButton: 'zoomHome',
       zoomInButton: 'zoomIn',
       zoomOutButton: 'zoomOut',

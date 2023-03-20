@@ -28,7 +28,8 @@ const getters = {
   fileref: state => state.fileref,
   filepath: state => state.filepath,
   filesha: state => state.filesha,
-  sources: state => state.sources
+  sources: state => state.sources,
+  getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path
 }
 const mutations = {
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
