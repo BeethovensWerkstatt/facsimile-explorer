@@ -1,5 +1,6 @@
 <template>
   <div class="appTab pagesTab">
+  <!--
     <SideBar position="left">
       <div class="sidebar">list pages ...</div>
     </SideBar>
@@ -8,22 +9,23 @@
     </TopMenu>
     <MainStage>
       <OpenSeadragonComponent />
-    </MainStage>
+    </MainStage> -->
+    <OpenSeadragonComponent />
   </div>
 </template>
 
 <script>
-import MainStage from '@/components/shared/MainStage.vue'
-import SideBar from '@/components/shared/SideBar.vue'
-import TopMenu from '@/components/shared/TopMenu.vue'
+// import MainStage from '@/components/shared/MainStage.vue'
+// import SideBar from '@/components/shared/SideBar.vue'
+// import TopMenu from '@/components/shared/TopMenu.vue'
 import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
 
 export default {
   name: 'PagesTab',
   components: {
-    MainStage,
-    SideBar,
-    TopMenu,
+    // MainStage,
+    // SideBar,
+    // TopMenu,
     OpenSeadragonComponent
   },
   mounted () {
