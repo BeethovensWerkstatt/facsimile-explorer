@@ -3,6 +3,7 @@ import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
+import guiModule from '@/store/gui'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -34,7 +35,8 @@ const serializer = new XMLSerializer()
 export default createStore({
   modules: {
     octokitModule,
-    verovioModule
+    verovioModule,
+    guiModule
   },
   state: {
     explorerTab: 'home',
