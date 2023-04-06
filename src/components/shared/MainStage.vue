@@ -25,4 +25,8 @@ export default {
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
 
+.mainStage {
+
+}
+
 </style>

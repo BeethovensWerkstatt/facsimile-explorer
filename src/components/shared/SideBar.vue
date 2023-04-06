@@ -1,7 +1,7 @@
 <template>
-  <div class="sidebar" :class="position" :style="{width: pageTabSidebarWidth + 'px'}">
+  <div class="sidebar" :class="position" :style="{width: localWidth + 'px'}">
     <slot/>
-    <div class="closer" @click="closeSidebar"></div>
+    <div class="closer" v-if="closable" @click="closeSidebar"></div>
   </div>
 </template>
 
@@ -20,15 +20,36 @@ export default {
   methods: {
     closeSidebar () {
       if (this.tab === 'pagesTab') {
-        console.log('yikes')
         this.$store.dispatch('togglePageTabSidebar')
+      } else if (this.tab === 'zonesTab' && this.position === 'left') {
+        this.$store.dispatch('toggleZonesTabLeftSidebar')
+      } else if (this.tab === 'annotTab' && this.position === 'left') {
+        this.$store.dispatch('toggleAnnotTabLeftSidebar')
       } else {
         console.error('Unable to close sidebar at ' + this.tab)
       }
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarWidth', 'pageTabSidebarVisible'])
+    ...mapGetters(['pageTabSidebarWidth', 'zonesTabLeftSidebarWidth', 'zonesTabRightSidebarWidth', 'annotTabLeftSidebarWidth', 'annotTabRightSidebarWidth']),
+    localWidth () {
+      if (this.tab === 'pagesTab') {
+        return this.pageTabSidebarWidth
+      } else if (this.tab === 'zonesTab' && this.position === 'left') {
+        return this.zonesTabLeftSidebarWidth
+      } else if (this.tab === 'zonesTab' && this.position === 'right') {
+        return this.zonesTabRightSidebarWidth
+      } else if (this.tab === 'annotTab' && this.position === 'left') {
+        return this.annotTabLeftSidebarWidth
+      } else if (this.tab === 'annotTab' && this.position === 'right') {
+        return this.annotTabRightSidebarWidth
+      } else {
+        return '200'
+      }
+    },
+    closable () {
+      return this.tab === 'pagesTab' || (this.tab === 'zonesTab' && this.position === 'left')
+    }
   }
 }
 </script>
@@ -41,12 +62,14 @@ export default {
   display: inline-block;
   padding: 1rem;
   position: relative;
+  overflow: auto;
 
   .closer {
     position: absolute;
     top: 0; // calc(50% - 1rem);
     height: 100%; // 2rem;
     width: .4rem;
+    z-index: 10;
     cursor: w-resize;
 
     &:hover {

@@ -1,7 +1,7 @@
 <template>
-  <div class="topmenu">
+  <header class="topmenu">
     <slot/>
-  </div>
+  </header>
 </template>
 
 <script>
@@ -28,7 +28,6 @@ export default {
   background: linear-gradient(to bottom, lighten($mainBackgroundColor, 10%), darken($mainBackgroundColor, 1%));
   padding: .2rem .5rem;
   border-bottom: $lightBorder;
-  // flex-grow: 1;
-  height: 1.6rem;
+  height: $topMenuHeight;
 }
 </style>
