@@ -9,12 +9,12 @@
         <!-- menu header text -->
         <li class="divider" data-content="Modern Documents"></li>
         <li class="menu-item" v-for="(doc, d) in availableModernDocuments" :key="d">
-          <a href="#">{{doc.label}}</a>
+          <a href="#" @click.prevent="$store.dispatch('loadContent', doc)">{{doc.label}}</a>
         </li>
 
         <li class="divider" data-content="Reconstructions"></li>
         <li class="menu-item" v-for="(doc, d) in availableReconstructionDocuments" :key="d">
-          <a href="#">{{doc.label}}</a>
+          <a href="#" @click.prevent="$store.dispatch('loadContent', doc)">{{doc.label}}</a>
         </li>
       </ul>
     </div>
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'SourceSelector',
@@ -36,11 +36,24 @@ export default {
 
   },
   computed: {
+    ...mapGetters(['sources', 'filepath']),
     currentDocumentName () {
-      return 'Notirungsbuch K'
+      console.log(this.filepath, this.availableDocuments)
+      const cursrc = this.availableDocuments.filter(s => s.path === this.filepath)
+      if (cursrc.length > 0) return cursrc[0].label
+      return 'N/A'
+    },
+    availableDocuments () {
+      return this.sources.map(s => ({
+        ...s,
+        id: s.name.replaceAll(' ', '_'),
+        label: s.name.replaceAll('_', ' ')
+      }))
     },
     availableModernDocuments () {
       // TODO: Diese IDs sind vorläufig!!!
+      // console.log(this.sources)
+      /*
       return [{ id: 'E', label: 'Engelmann' },
         { id: 'L', label: 'Landsberg 8' },
         { id: 'B', label: 'BSk 21' },
@@ -49,9 +62,12 @@ export default {
         { id: 'Ms96', label: 'Ms. 96' },
         { id: 'Ms57', label: 'Ms. 57(2)' }
       ]
+      */
+      return this.availableDocuments.filter(s => s.id !== 'Notirungsbuch_K')
     },
     availableReconstructionDocuments () {
-      return [{ id: 'NotK', label: 'Notirungsbuch K' }]
+      // return [{ id: 'NotK', label: 'Notirungsbuch K' }]
+      return this.availableDocuments.filter(s => s.id === 'Notirungsbuch_K')
     }
   }
 }

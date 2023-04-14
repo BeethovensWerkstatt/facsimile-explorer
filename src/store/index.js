@@ -381,6 +381,8 @@ export default createStore({
       return serializer.serializeToString(xmlDoc)
     },
 
+    pages: state => state.pages,
+
     pageArray: state => {
       const uris = []
       state.pages.forEach(page => {

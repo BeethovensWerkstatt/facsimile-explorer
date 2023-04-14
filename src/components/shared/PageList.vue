@@ -48,6 +48,15 @@ export default {
   computed: {
     pages () {
       // Info JP: das kann auch das gleiche Objekt sein, falls das einfacher ist…
+      console.log(this.$store.getters.pages)
+      return this.$store.getters.pages.map(p => ({
+        ...p,
+        hasSVG: !!p.hasSVG,
+        hasFragment: !!p.hasFragment,
+        systems: p.systems || 0,
+        zonesCount: p.zonesCount || 0
+      }))
+      /*
       if (this.tab === 'pagesTab') {
         return [{ label: '1', hasSVG: true, systems: 12, hasFragment: true },
           { label: '2', hasSVG: true, systems: 12, hasFragment: true },
@@ -68,6 +77,7 @@ export default {
           { label: '8', zonesCount: 11 }]
       }
       return []
+      */
     },
     activePage () {
       /* INFO JP: Wie wir die aktive Seite identifizieren (Index oder Label) ist egal… */
