@@ -15,8 +15,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}">
-          <td>{{ page.label }}</td>
+        <tr v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
+          <td><sub>{{ i+1 }}</sub> {{ page.label }}</td>
           <template v-if="tab === 'pagesTab'">
             <td><input type="checkbox" :checked="page.hasSVG" disabled/></td>
             <td><input type="checkbox" :checked="page.hasFragment" disabled/></td>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'PageList',
@@ -43,9 +43,10 @@ export default {
 
   },
   methods: {
-
+    ...mapActions(['setCurrentPage'])
   },
   computed: {
+    ...mapGetters(['currentPageZeroBased']),
     pages () {
       // Info JP: das kann auch das gleiche Objekt sein, falls das einfacher ist…
       console.log(this.$store.getters.pages)
@@ -81,7 +82,7 @@ export default {
     },
     activePage () {
       /* INFO JP: Wie wir die aktive Seite identifizieren (Index oder Label) ist egal… */
-      return 5
+      return this.currentPageZeroBased
     }
   }
 }
@@ -97,5 +98,9 @@ td {
 
 tr.active td {
   background-color: lighten($activeHighlightColor, 15%);
+}
+
+sub {
+  color: gray;
 }
 </style>
