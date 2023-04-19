@@ -10,7 +10,6 @@
       <div class="modal-body">
         <div class="content">
           <div>
-            <h1>Load SVG</h1>
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -25,6 +24,8 @@
                 </tr>
               </tbody>
             </table>
+            <!-- <img :src="previewPage.uri + '/full'" /> -->
+            <div id="previewOsdContainer"></div>
           </div>
         </div>
       </div>
@@ -39,12 +40,56 @@
 </template>
 
 <script>
+import OpenSeadragon from 'openseadragon'
+
+const osdOptions = {
+  id: 'previewOsdContainer',
+  preserveViewport: false,
+  visibilityRatio: 0.8,
+  sequenceMode: true,
+  showNavigator: false,
+  // navigatorId: 'openSeadragonNavigator',
+  homeButton: 'zoomHome',
+  zoomInButton: 'zoomIn',
+  zoomOutButton: 'zoomOut',
+  previousButton: 'pageLeft',
+  nextButton: 'pageRight',
+  gestureSettingsMouse: {
+    clickToZoom: false
+  },
+  silenceMultiImageWarnings: true
+}
+
 export default {
   name: 'AssignSVGsModal',
+  data: () => ({
+    viewer: null
+  }),
+  mounted () {
+    this.viewer = new OpenSeadragon(osdOptions)
+    // this.setOSDPreview()
+  },
+  watch: {
+    active () {
+      if (this.active) {
+        this.setOSDPreview()
+      }
+    }
+  },
   components: {
 
   },
   methods: {
+    setOSDPreview () {
+      if (this.ti) {
+        this.ti.destroy()
+        this.ti = null
+      }
+      if (this.previewPage.uri && this.viewer) {
+        console.log(this.previewPage.uri)
+        this.viewer.open([this.previewPage.uri])
+      }
+    },
     addSVG () {
       const input = document.createElement('input')
       input.type = 'file'
@@ -114,6 +159,17 @@ export default {
 @import '@/css/_variables.scss';
 .pagesRow {
    border-bottom: $lightBorder;
+}
+
+.modal-body {
+  img {
+    width: 100%;
+  }
+  #previewOsdContainer {
+    width: 100%;
+    height: 100%;
+    min-height: calc(100vh - 3rem);
+  }
 }
 
 .modal-footer {

@@ -16,7 +16,7 @@
       </thead>
       <tbody>
         <tr v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
-          <td><sub>{{ i+1 }}</sub> {{ page.label }}</td>
+          <td><!-- <sub>{{ i+1 }}</sub> -->{{ page.label }}</td>
           <template v-if="tab === 'pagesTab'">
             <td><input type="checkbox" :checked="page.hasSVG" disabled/></td>
             <td><input type="checkbox" :checked="page.hasFragment" disabled/></td>
