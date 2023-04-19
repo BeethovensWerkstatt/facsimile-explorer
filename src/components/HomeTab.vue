@@ -1,6 +1,16 @@
 <template>
   <div class="appTab homeTab">
+    <div class="externalMessages">
+      <h1>Facsimile-Explorer</h1>
+      <p>
+        Diese Anwendung ist in Entwicklung. Auf den unterschiedlichen Seiten werden
+        die einzelnen Schritte umgesetzt, um aus der Kombination von SVG-Shapes in
+        Kombination mit einer annotierten Transkription eine diplomatische zu erstellen.
+      </p>
+    </div>
     <div v-if="isAuthenticated">
+      <div class="externalMessages"><SourceSelector :table="true" /></div>
+      <!--
       <div class="internalMessages">
         <h1>Hallo Jan-Peter :)</h1>
         <p>
@@ -38,9 +48,10 @@
           Viel Soaß beim Basteln – und diese Absätze können natürlich wieder verschwinden ;-)
         </p>
       </div>
+      -->
     </div>
     <div v-else>
-      Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!
+      <div class="externalMessages">Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!</div>
     </div>
   </div>
 </template>
@@ -48,12 +59,13 @@
 <script>
 import { mapGetters } from 'vuex'
 import CLIENT_ID from '@/clientID'
+import SourceSelector from '@/components/shared/SourceSelector.vue'
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
 
 export default {
   name: 'HomeTab',
   components: {
-
+    SourceSelector
   },
   methods: {
 
@@ -74,8 +86,13 @@ export default {
   height: calc(100vh - $totalHeaderHeight);
 }
 
+.externalMessages {
+  padding: 1rem;
+}
+
 .internalMessages {
   padding: 1rem;
+  font-style: italic;
   h1 {
     font-size: 1.1rem;
     font-weight: 700;

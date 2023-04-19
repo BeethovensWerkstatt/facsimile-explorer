@@ -1,6 +1,6 @@
 <template>
   <div class="sourceSelector">
-    <div class="dropdown">
+    <div :class="{ dropdown: !table }">
       <button class="btn btn-link dropdown-toggle" tabindex="0">
         {{currentDocumentName}} <i class="icon icon-caret"></i>
       </button>
@@ -9,12 +9,12 @@
         <!-- menu header text -->
         <li class="divider" data-content="Modern Documents"></li>
         <li class="menu-item" v-for="(doc, d) in availableModernDocuments" :key="d">
-          <a href="#" @click.prevent="$store.dispatch('loadContent', doc)">{{doc.label}}</a>
+          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
         </li>
 
         <li class="divider" data-content="Reconstructions"></li>
         <li class="menu-item" v-for="(doc, d) in availableReconstructionDocuments" :key="d">
-          <a href="#" @click.prevent="$store.dispatch('loadContent', doc)">{{doc.label}}</a>
+          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
         </li>
       </ul>
     </div>
@@ -27,13 +27,22 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'SourceSelector',
   props: {
-
+    table: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {
 
   },
   methods: {
-
+    openDocument (doc) {
+      this.$store.dispatch('loadContent', doc)
+      console.log(this.table)
+      if (this.table) {
+        this.$store.dispatch('openTab', 'pages')
+      }
+    }
   },
   computed: {
     ...mapGetters(['sources', 'filepath']),
