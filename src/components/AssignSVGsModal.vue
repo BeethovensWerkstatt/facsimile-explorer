@@ -10,20 +10,18 @@
       <div class="modal-body">
         <div class="content">
           <div>
-            <h1>Pages</h1>
+            <h1>Load SVG</h1>
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
                   <th>Page</th>
                   <th>SVG available</th>
-                  <th>release date</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="active">
-                  <td>The Shawshank Redemption</td>
-                  <td>Crime, Drama</td>
-                  <td>14 October 1994</td>
+                  <td>{{ previewLabel }}</td>
+                  <td>{{ previewHasSVG }}</td>
                 </tr>
               </tbody>
             </table>
@@ -76,7 +74,7 @@ export default {
       return this.$store.getters.modal === 'assignSVGs'
     },
     pages () {
-      return this.$store.getters.pageArray
+      return this.$store.getters.pages
     },
     maxRows () {
       return Math.floor(this.$store.getters.pageArray.length / 2) + 1
@@ -97,6 +95,9 @@ export default {
     },
     previewLabel () {
       return this.previewPage.label
+    },
+    previewHasSVG () {
+      return this.previewPage.hasSVG ? 'yes' : 'no'
     },
     openPageBlocked () {
       const previewPage = this.$store.getters.previewPageZeroBased

@@ -71,11 +71,13 @@ export default {
       alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
     },
     importSVG () {
-      alert('Öffnet einen Modal, in dem man eine SVG-Datei für die aktuelle Seite hochladen kann. Evtl. disabled, wenn es für die aktuelle Seite schon ein SVG gibt – dann muss händischersetzt werden, um unbeabsichtigtes Überschreiben zu verhindern.')
+      // alert('Öffnet einen Modal, in dem man eine SVG-Datei für die aktuelle Seite hochladen kann. Evtl. disabled, wenn es für die aktuelle Seite schon ein SVG gibt – dann muss händischersetzt werden, um unbeabsichtigtes Überschreiben zu verhindern.')
+      this.$store.dispatch('setPreviewPage', this.currentPageZeroBased)
+      this.$store.dispatch('setModal', 'assignSVGs')
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarVisible'])
+    ...mapGetters(['pageTabSidebarVisible', 'currentPageZeroBased'])
   }
 }
 </script>
