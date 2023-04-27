@@ -88,7 +88,8 @@ export default {
     DiploTab
   },
   mounted () {
-    this.$store.commit('OPEN_TAB', this.$route.params.modus)
+    this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
+    this.$store.dispatch('openTab', this.$route.params.modus)
   },
   methods: {
     doScroll (e) {

@@ -28,6 +28,7 @@ const getters = {
   fileref: state => state.fileref,
   filepath: state => state.filepath,
   filesha: state => state.filesha,
+  getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   sources: state => state.sources
 }
 const mutations = {
