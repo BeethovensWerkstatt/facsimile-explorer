@@ -29,6 +29,7 @@ const getters = {
   filepath: state => state.filepath,
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
+  getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
   sources: state => state.sources
 }
 const mutations = {
@@ -62,7 +63,7 @@ const mutations = {
     state.fileref = ref
     state.filepath = path
     state.filesha = sha
-    console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
+    // console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
   },
   SET_SOURCES (state, sources) {
     state.sources = sources

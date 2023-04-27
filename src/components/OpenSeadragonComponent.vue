@@ -8,7 +8,6 @@
 import OpenSeadragon from 'openseadragon'
 import * as Annotorious from '@recogito/annotorious-openseadragon'
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css'
-import verovio from 'verovio'
 
 const verovioOptions = {
   scale: 30,
@@ -202,14 +201,15 @@ export default {
       console.log(overlay)
     }
   },
+  created () {
+    this.$store.getters.verovioToolkit().then(tk => {
+      this.vrvToolkit = tk
+      this.vrvToolkit.setOptions(verovioOptions)
+      // console.log('verovio is there now')
+      // console.log(this.vrvToolkit)
+    })
+  },
   mounted: function () {
-    // eslint-disable-next-line
-    this.vrvToolkit = new verovio.toolkit()
-    this.vrvToolkit.setOptions(verovioOptions)
-
-    // console.log('verovio is there now')
-    // console.log(this.vrvToolkit)
-
     this.viewer = OpenSeadragon(osdOptions)
 
     const annotoriousConfig = {

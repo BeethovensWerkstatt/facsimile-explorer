@@ -91,12 +91,26 @@ export default {
     this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
     this.$store.dispatch('openTab', this.$route.params.modus)
   },
+  watch: {
+    fullPath () {
+      // console.log(this.$store.getters.getPathByName(this.$route.params.source), this.$route.params.modus)
+      if (this.$store.getters.filePath !== this.$store.getters.getPathByName(this.$route.params.source)) {
+        this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
+      }
+      if (this.$store.getters.modus !== this.$route.params.modus) {
+        this.$store.dispatch('openTab', this.$route.params.modus)
+      }
+    }
+  },
   methods: {
     doScroll (e) {
       console.log(e)
     }
   },
   computed: {
+    currentPath () {
+      return this.$route.fullPath
+    },
     isReady () {
       return this.$store.getters.isReady
     },

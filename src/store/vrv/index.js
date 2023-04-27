@@ -9,7 +9,8 @@ const verovioModule = {
    * @property {Boolean} vrvInitFinished true if verovio is eventually initialized
    */
   state: {
-    vrvInitFinished: false
+    vrvInitFinished: false,
+    tkqueue: []
   },
   mutations: {
   },
@@ -25,6 +26,7 @@ const verovioModule = {
     async initVerovio ({ state }) {
       verovio.module.onRuntimeInitialized = () => {
         state.vrvInitFinished = true
+        while (state.tkqueue.length > 0) state.tkqueue.shift()()
       }
     }
   },
@@ -32,18 +34,17 @@ const verovioModule = {
    * @namespace store.verovio.getters
    */
   getters: {
-    /**
-     * Verovio toolkit factory method
-     * @memberof store.verovio.getters
-     * @param {Object} state
-     */
-    vrvToolkit: (state) => () => {
-      if (state.vrvInitFinished) {
-        // eslint-disable-next-line new-cap
-        const vrvToolkit = new verovio.toolkit()
-        return vrvToolkit
-      }
-      return null
+    verovioToolkit: (state) => () => {
+      return new Promise((resolve) => {
+        if (state.vrvInitFinished) {
+          while (state.tkqueue.length > 0) state.tkqueue.shift()()
+          // eslint-disable-next-line new-cap
+          resolve(new verovio.toolkit())
+        } else {
+          // eslint-disable-next-line new-cap
+          state.tkqueue.push(() => resolve(new verovio.toolkit()))
+        }
+      })
     }
   }
 }

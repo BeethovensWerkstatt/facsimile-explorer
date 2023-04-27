@@ -9,14 +9,14 @@
         <!-- menu header text -->
         <li class="divider" data-content="Modern Documents"></li>
         <li class="menu-item" v-for="(doc, d) in availableModernDocuments" :key="d">
-          <!-- <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a> -->
-          <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink>
+          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
+          <!-- <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink> -->
         </li>
 
         <li class="divider" data-content="Reconstructions"></li>
         <li class="menu-item" v-for="(doc, d) in availableReconstructionDocuments" :key="d">
-          <!-- <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a> -->
-          <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink>
+          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
+          <!-- <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink> -->
         </li>
       </ul>
     </div>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { RouterLink } from 'vue-router'
+// import { RouterLink } from 'vue-router'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -36,11 +36,13 @@ export default {
     }
   },
   components: {
-    RouterLink
+    // RouterLink
   },
   methods: {
     openDocument (doc) {
       this.$store.dispatch('loadContent', doc)
+      console.log(doc.name, this.$route.params.modus || 'pages')
+      this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' } })
       console.log(this.table)
       if (this.table) {
         this.$store.dispatch('openTab', 'pages')

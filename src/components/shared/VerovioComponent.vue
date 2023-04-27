@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import verovio from 'verovio'
+// import verovio from 'verovio'
 // import { mapGetters } from 'vuex'
 
 const verovioOptions = {
@@ -82,10 +82,12 @@ export default {
   },
   mounted: function () {
     // eslint-disable-next-line
-    this.vrvToolkit = new verovio.toolkit()
-    this.vrvToolkit.setOptions(verovioOptions)
-
-    this.render()
+    // this.vrvToolkit = new verovio.toolkit()
+    this.$store.getters.verovioToolkit().then(tk => {
+      this.vrvToolkit = tk
+      this.vrvToolkit.setOptions(verovioOptions)
+      this.render()
+    })
     /*
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
