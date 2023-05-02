@@ -1,32 +1,86 @@
 <template>
   <div class="appTab annotTranscriptTab">
-    <p>
-      In diesem Reiter kann man annotierte Transkriptionen hochladen und die zugehörigen Schreibzonen auswählen.
-      Dazu Auswahl nach Seite und dann nach Schreibzone. Evtl. mit Faksimile-Vorschau?! Es sollen Metadaten
-      entstehen, was wie zusammengehört, und die annotTrans soll an definierter Stelle gespeichert werden.
-    </p>
+    <TopMenu>
+      <div class="menuItem">
+        <button class="btn" @click="toggleSidebar">
+          <i class="icon" :class="{'icon-arrow-left': annotTabLeftSidebarVisible, 'icon-arrow-right': !annotTabLeftSidebarVisible}"></i>
+        </button>
+      </div>
+    </TopMenu>
+    <div class="flexBox">
+      <div class="showSideBar" v-if="!annotTabLeftSidebarVisible" @click="toggleSidebar"></div>
+      <Transition name="slide-fade">
+        <SideBar class="stageItem sidebarLeft" position="left" tab="annotTab" v-if="annotTabLeftSidebarVisible">
+          <SourceSelector/>
+          <WritingZoneDirectory/>
+        </SideBar>
+      </Transition>
+      <MainStage class="mainStage stageItem">
+        <h1>{{currentAnnotTabFileName}}</h1>
+        <VerovioComponent purpose="proofreading"/>
+      </MainStage>
+      <SideBar class="stageItem sidebarRight" position="right" tab="annotTab" v-if="annotTabRightSidebarVisible">
+        <div class="desc">
+          <h1>Supplied elements</h1>
+          <p>In order to change whether an element is supplied or not, just click on it.
+            All supplied elements cannot be linked to SVG shapes in a diplomatic transcript,
+            and will be displayed in grey.</p>
+          <p><b>@Jan-Peter</b>: Der folgende FilePicker muss natürlich nur gezeigt werden, wenn zur gerade aktiven
+            WritingZone noch keine AnnotTrans im System ist. Und dieser Absatz kann natürlich auch weg ;-)</p>
+        </div>
+        <div class="filePicker">
+          <h1>Add Annotated Transcript</h1>
+          <p>
+            Here, you can upload an MEI-encoded Annotated Transcript.
+          </p>
+          <input type="file"/>
+        </div>
+        <WritingZonesAtAnnotTrans/>
+      </SideBar>
+    </div>
   </div>
 </template>
 
 <script>
-// import SystemListingEntry from '@/components/SystemListingEntry.vue'
+import { mapGetters } from 'vuex'
+
+import MainStage from '@/components/shared/MainStage.vue'
+import SideBar from '@/components/shared/SideBar.vue'
+import TopMenu from '@/components/shared/TopMenu.vue'
+
+import SourceSelector from '@/components/shared/SourceSelector.vue'
+import WritingZoneDirectory from '@/components/WritingZoneDirectory.vue'
+import WritingZonesAtAnnotTrans from '@/components/WritingZonesAtAnnotTrans.vue'
+import VerovioComponent from '@/components/shared/VerovioComponent.vue'
 
 export default {
   name: 'AnnotTab',
   components: {
-
+    MainStage,
+    SideBar,
+    TopMenu,
+    SourceSelector,
+    WritingZoneDirectory,
+    WritingZonesAtAnnotTrans,
+    VerovioComponent
   },
   methods: {
-    loadAnnotTrans () {
+    toggleSidebar () {
+      this.$store.dispatch('toggleAnnotTabLeftSidebar')
+    }
+    /* loadAnnotTrans () {
       this.$store.dispatch('getFile', {
         path: '',
         callback: (file) => {
         }
       })
-    }
+    } */
   },
   computed: {
-
+    ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible']),
+    currentAnnotTabFileName () {
+      return 'NK_p005_wz02_at.xml'
+    }
   }
 }
 </script>
@@ -38,6 +92,136 @@ export default {
 .appTab {
   background: linear-gradient(to bottom, lighten($mainBackgroundColor, 10%), darken($mainBackgroundColor, 2%));
   height: calc(100vh - $totalHeaderHeight);
+
+  .flexBox {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+    // gap: 10px;
+
+    .showSideBar {
+      flex: 0 0 10px;
+      order: 1;
+      height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+    }
+
+    .sidebarLeft {
+      flex: 0 0 auto;
+      order: 1;
+      height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+    }
+
+    .sidebarRight {
+      flex: 0 0 auto;
+      order: 3;
+      height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+    }
+
+    .mainStage {
+      background: linear-gradient( to bottom, $mainBackgroundColor, darken($mainBackgroundColor, 10%));
+      flex: 1 1 auto;
+      order: 2;
+      height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+    }
+  }
+}
+
+.annotTab {
+  position: relative;
+}
+
+.showSideBar {
+  height: 100%;
+  width: 10px;
+  z-index: 10;
+  // display: block;
+  &:hover {
+    cursor: e-resize;
+    background: linear-gradient(to right, darken($mainBackgroundColor, 10%), $mainBackgroundColor);
+  }
+}
+
+.slide-fade-enter-active {
+  transition: all 0.4s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.4s ease-in;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-400px);
+  // opacity: 0;
+}
+
+i.showSidebar {
+  cursor: e-resize;
+}
+
+.menuItem {
+  display: inline-block;
+  margin: 0 .5rem 0 0;
+
+  .btn {
+    height: 1rem;
+    padding: 0 0.2rem;
+    margin: 0 0.2rem 0 0;
+    border-color: $darkFontColor;
+    font-size: .6rem;
+    line-height: 1rem;
+    * {
+      color: $darkFontColor;
+    }
+  }
+
+  .customBtn {
+    display: inline-block;
+    margin: 0 .5rem 0 0;
+    font-weight: 100;
+    cursor: pointer;
+    i {
+      position: relative;
+      top: -2px;
+      margin-right: .2rem;
+    }
+  }
+}
+
+.osdButtons {
+  float: right;
+  display: inline-block;
+
+  .osdButton {
+    display: inline-block;
+    margin: 0 .2rem;
+  }
+}
+
+.mainStage h1 {
+  font-size: .8rem;
+  font-weight: 700;
+  margin: .5rem;
+  padding: 0;
+}
+
+.sidebarRight {
+  font-size: .7rem;
+
+  h1 {
+    font-size: .8rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 0;
+  }
+
+  .filePicker {
+    margin: 0 0 1rem;
+
+    p {
+      margin: 0;
+    }
+  }
 }
 
 </style>

@@ -1,31 +1,55 @@
 <template>
-  <div class="sidebar" :style="{ width: width }">
-    <slot>
-      {{ position }}
-    </slot>
+  <div class="sidebar" :class="position" :style="{width: localWidth + 'px'}">
+    <slot/>
+    <div class="closer" v-if="closable" @click="closeSidebar"></div>
   </div>
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'SideBar',
   props: {
     position: String,
-    width: {
-      type: String,
-      default: '150px'
-    }
+    tab: String
   },
   components: {
 
   },
   methods: {
-
+    closeSidebar () {
+      if (this.tab === 'pagesTab') {
+        this.$store.dispatch('togglePageTabSidebar')
+      } else if (this.tab === 'zonesTab' && this.position === 'left') {
+        this.$store.dispatch('toggleZonesTabLeftSidebar')
+      } else if (this.tab === 'annotTab' && this.position === 'left') {
+        this.$store.dispatch('toggleAnnotTabLeftSidebar')
+      } else {
+        console.error('Unable to close sidebar at ' + this.tab)
+      }
+    }
   },
   computed: {
-
+    ...mapGetters(['pageTabSidebarWidth', 'zonesTabLeftSidebarWidth', 'zonesTabRightSidebarWidth', 'annotTabLeftSidebarWidth', 'annotTabRightSidebarWidth']),
+    localWidth () {
+      if (this.tab === 'pagesTab') {
+        return this.pageTabSidebarWidth
+      } else if (this.tab === 'zonesTab' && this.position === 'left') {
+        return this.zonesTabLeftSidebarWidth
+      } else if (this.tab === 'zonesTab' && this.position === 'right') {
+        return this.zonesTabRightSidebarWidth
+      } else if (this.tab === 'annotTab' && this.position === 'left') {
+        return this.annotTabLeftSidebarWidth
+      } else if (this.tab === 'annotTab' && this.position === 'right') {
+        return this.annotTabRightSidebarWidth
+      } else {
+        return '200'
+      }
+    },
+    closable () {
+      return this.tab === 'pagesTab' || (this.tab === 'zonesTab' && this.position === 'left')
+    }
   }
 }
 </script>
@@ -35,7 +59,41 @@ export default {
 @import '@/css/_variables.scss';
 
 .sidebar {
-  float: left;
-  height: 100%;
+  display: inline-block;
+  padding: 1rem;
+  position: relative;
+  overflow: auto;
+
+  .closer {
+    position: absolute;
+    top: 0; // calc(50% - 1rem);
+    height: 100%; // 2rem;
+    width: .4rem;
+    z-index: 10;
+    cursor: w-resize;
+
+    &:hover {
+      background: linear-gradient(to left, $mainBackgroundColor, #ffffff);
+    }
+  }
+
+  &.left {
+    border-right: $lightBorder;
+    background: lighten($mainBackgroundColor, 10%);
+
+    .closer {
+      right: 0;
+    }
+  }
+
+  &.right {
+    border-left: $lightBorder;
+    background: lighten($mainBackgroundColor, 10%);
+
+    .closer {
+      left: 0;
+    }
+  }
 }
+
 </style>

@@ -8,7 +8,6 @@
 import OpenSeadragon from 'openseadragon'
 import * as Annotorious from '@recogito/annotorious-openseadragon'
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css'
-// import verovio from 'verovio'
 
 const verovioOptions = {
   scale: 30,
@@ -19,6 +18,24 @@ const verovioOptions = {
   header: 'none',
   footer: 'none' //,
   // unit: 18
+}
+
+const osdOptions = {
+  id: 'osdContainer',
+  preserveViewport: false,
+  visibilityRatio: 0.8,
+  sequenceMode: true,
+  showNavigator: false,
+  // navigatorId: 'openSeadragonNavigator',
+  homeButton: 'zoomHome',
+  zoomInButton: 'zoomIn',
+  zoomOutButton: 'zoomOut',
+  previousButton: 'pageLeft',
+  nextButton: 'pageRight',
+  gestureSettingsMouse: {
+    clickToZoom: false
+  },
+  silenceMultiImageWarnings: true
 }
 
 export default {
@@ -185,31 +202,16 @@ export default {
       console.log(overlay)
     }
   },
-  mounted: function () {
-    this.$store.getters.verovioToolkit.then(toolkit => {
-      this.vrvToolkit = toolkit
+  created () {
+    this.$store.getters.verovioToolkit().then(tk => {
+      this.vrvToolkit = tk
       this.vrvToolkit.setOptions(verovioOptions)
-      console.log('verovio is there now')
-      console.log(this.vrvToolkit)
+      // console.log('verovio is there now')
+      // console.log(this.vrvToolkit)
     })
-
-    this.viewer = OpenSeadragon({
-      id: 'osdContainer',
-      preserveViewport: false,
-      visibilityRatio: 0.8,
-      sequenceMode: true,
-      showNavigator: true,
-      // navigatorId: 'openSeadragonNavigator',
-      homeButton: 'zoomHome',
-      zoomInButton: 'zoomIn',
-      zoomOutButton: 'zoomOut',
-      previousButton: 'pageLeft',
-      nextButton: 'pageRight',
-      gestureSettingsMouse: {
-        clickToZoom: false
-      },
-      silenceMultiImageWarnings: true
-    })
+  },
+  mounted: function () {
+    this.viewer = OpenSeadragon(osdOptions)
 
     const annotoriousConfig = {
       disableEditor: true
@@ -285,12 +287,13 @@ export default {
       this.renderSystems()
     })
 
-    const pages = this.$store.getters.pageArrayOSD
+    // TODO: Adjusted to see something for now…
+    const pages = ['https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/D-BNba_HCB_Mh_34%252Ffol5v.jpg'] // this.$store.getters.pageArrayOSD
     if (pages.length > 0) {
       this.viewer.open(pages)
       this.$store.dispatch('setCurrentPage', 0)
-      this.renderSystems()
-      this.renderShapes()
+      // this.renderSystems()
+      // this.renderShapes()
     }
 
     this.viewer.addHandler('page', (data) => {

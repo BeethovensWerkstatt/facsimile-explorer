@@ -17,6 +17,7 @@ const state = {
   sources: [],
 
   filepath: undefined,
+  filename: undefined,
   filesha: undefined
 }
 const getters = {
@@ -27,9 +28,11 @@ const getters = {
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
   filepath: state => state.filepath,
+  filename: state => state.filename,
   filesha: state => state.filesha,
-  sources: state => state.sources,
-  getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path
+  getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
+  getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
+  sources: state => state.sources
 }
 const mutations = {
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
@@ -57,20 +60,21 @@ const mutations = {
       if (remove) remove()
     }
   },
-  SET_GH_FILE (state, { repo, owner, ref, path, sha }) {
+  SET_GH_FILE (state, { repo, owner, ref, path, name, sha }) {
     state.filerepo = repo
     state.fileowner = owner
     state.fileref = ref
     state.filepath = path
+    state.filename = name
     state.filesha = sha
-    console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
+    // console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
   },
   SET_SOURCES (state, sources) {
     state.sources = sources
   }
 }
 const actions = {
-  authenticate ({ commit }, { code, store, remove }) {
+  authenticate ({ commit, dispatch }, { code, store, remove }) {
     // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
     const url = `auth?code=${code}`
     fetch(url).then(resp => {
@@ -83,6 +87,7 @@ const actions = {
           } else {
             console.error('authentication failed', data)
           }
+          dispatch('loadContent', {})
         })
       } else {
         console.error('authentication failed', resp.statusText)
@@ -101,7 +106,7 @@ const actions = {
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
       ref = config.repository.branch // 'dev'
     }) {
-    console.log('load content', path)
+    // TODO Cache
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
       console.log(data.download_url)
       const dec = new TextDecoder('utf-8')

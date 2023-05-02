@@ -1,6 +1,7 @@
 $appHeaderHeight: 50px;
 $tabBarHeight: 37px;
 $totalHeaderHeight: $appHeaderHeight + $tabBarHeight;
+$topMenuHeight: 1.6rem;
 
 $mainBackgroundColor: #e5e5e5;
 $darkBackgroundColor: #444444;
@@ -21,3 +22,5 @@ $highlightColor07: rgb(198, 46, 251);
 $highlightColor08: rgb(251, 46, 163);
 
 $activeHighlightColor: #85b6ff;
+
+$svgSuppliedColor: #999999;

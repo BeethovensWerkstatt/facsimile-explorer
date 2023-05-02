@@ -34,30 +34,17 @@ const verovioModule = {
    * @namespace store.verovio.getters
    */
   getters: {
-    verovioToolkit: (state) => {
+    verovioToolkit: (state) => () => {
       return new Promise((resolve) => {
         if (state.vrvInitFinished) {
+          while (state.tkqueue.length > 0) state.tkqueue.shift()()
           // eslint-disable-next-line new-cap
           resolve(new verovio.toolkit())
-          while (state.tkqueue.length > 0) state.tkqueue.shift()()
         } else {
           // eslint-disable-next-line new-cap
           state.tkqueue.push(() => resolve(new verovio.toolkit()))
         }
       })
-    },
-    /**
-     * Verovio toolkit factory method
-     * @memberof store.verovio.getters
-     * @param {Object} state
-     */
-    vrvToolkit: (state) => () => {
-      if (state.vrvInitFinished) {
-        // eslint-disable-next-line new-cap
-        const vrvToolkit = new verovio.toolkit()
-        return vrvToolkit
-      }
-      return null
     }
   }
 }

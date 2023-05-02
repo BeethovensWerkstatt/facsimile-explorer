@@ -4,6 +4,7 @@ import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
+import guiModule from '@/store/gui'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -53,7 +54,8 @@ const vuexLocal = new VuexPersistence({
 export default createStore({
   modules: {
     octokitModule,
-    verovioModule
+    verovioModule,
+    guiModule
   },
   plugins: [vuexLocal.plugin],
   state: {
@@ -220,6 +222,7 @@ export default createStore({
     OPEN_TAB (state, tab) {
       const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
       if (allowedTabs.indexOf(tab) !== -1) {
+        console.log('open tab', tab)
         state.currentTab = tab
       }
     }
@@ -399,6 +402,8 @@ export default createStore({
       })
       return serializer.serializeToString(xmlDoc)
     },
+
+    pages: state => state.pages,
 
     pageArray: state => {
       const uris = []
