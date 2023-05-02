@@ -88,28 +88,38 @@ export default {
     DiploTab
   },
   mounted () {
-    this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
-    this.$store.dispatch('openTab', this.$route.params.modus)
+    this.reload()
   },
   watch: {
     currentPath () {
-      console.log(this.$store.getters.getPathByName(this.$route.params.source), this.$route.params.modus)
-      if (this.$store.getters.filePath !== this.$store.getters.getPathByName(this.$route.params.source)) {
-        this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
-      }
-      if (this.$store.getters.modus !== this.$route.params.modus) {
-        this.$store.dispatch('openTab', this.$route.params.modus)
-      }
+      this.reload()
+    },
+    docPath () {
+      this.reload()
     }
   },
   methods: {
     doScroll (e) {
       console.log(e)
+    },
+    reload () {
+      const path = this.$store.getters.getPathByName(this.$route.params.source)
+      const modus = this.$route.params.modus
+      console.log(path, modus)
+      if (path && this.$store.getters.filePath !== path) {
+        this.$store.dispatch('loadContent', { path })
+      }
+      if (this.$store.getters.modus !== modus) {
+        this.$store.dispatch('openTab', modus)
+      }
     }
   },
   computed: {
     currentPath () {
       return this.$route.fullPath
+    },
+    docPath () {
+      return this.$store.getters.getPathByName(this.$route.params.source)
     },
     isReady () {
       return this.$store.getters.isReady
