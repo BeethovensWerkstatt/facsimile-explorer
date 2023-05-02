@@ -202,6 +202,7 @@ export default createStore({
     OPEN_TAB (state, tab) {
       const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
       if (allowedTabs.indexOf(tab) !== -1) {
+        console.log('open tab', tab)
         state.currentTab = tab
       }
     }

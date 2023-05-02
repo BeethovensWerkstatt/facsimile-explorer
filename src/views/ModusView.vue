@@ -11,7 +11,7 @@
   <AssignSVGsModal/>
 
   <HomeTab v-if="currentTab === 'home'"/>
-  <PagesTab v-if="$router.push({ name: 'modus', params: { ...$route.params, modus: 'pages' }})"/>
+  <PagesTab v-if="currentTab === 'pages'"/>
   <ZonesTab v-if="currentTab === 'zones'"/>
   <AnnotTab v-if="currentTab === 'annot'"/>
   <DiploTab v-if="currentTab === 'diplo'"/>
