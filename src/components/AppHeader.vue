@@ -77,20 +77,25 @@ export default {
     }
   },
   methods: {
-    openTab (tab) {
+    getTab (modus) {
+      const source = this.$route.params.source || this.$store.getters.getNameByPath(this.$store.getters.filepath)
+      return { name: 'modus', params: { source, modus } }
+    },
+    openTab (modus) {
       // if (tab === this.$store.getters.modus) return
-      if (tab === 'home') {
+      if (modus === 'home') {
         console.log('go home ...')
         this.$router.push({ name: 'home' })
-        this.$store.dispatch('openTab', tab)
+        this.$store.dispatch('openTab', modus)
         return
       }
       const source = this.$route.params.source || this.$store.getters.getNameByPath(this.$store.getters.filepath)
-      console.log(tab, source)
+      console.log('go ' + modus + ' ...', source)
       if (source) {
-        this.$router.push({ name: 'modus', params: { source, modus: tab } })
+        this.$router.push({ name: 'modus', params: { source, modus } })
       } else {
         console.warn('no source selected')
+        this.$router.push({ name: 'home' })
       }
       // this.$store.dispatch('openTab', tab)
     }

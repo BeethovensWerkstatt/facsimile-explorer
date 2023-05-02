@@ -92,8 +92,8 @@ export default {
     this.$store.dispatch('openTab', this.$route.params.modus)
   },
   watch: {
-    fullPath () {
-      // console.log(this.$store.getters.getPathByName(this.$route.params.source), this.$route.params.modus)
+    currentPath () {
+      console.log(this.$store.getters.getPathByName(this.$route.params.source), this.$route.params.modus)
       if (this.$store.getters.filePath !== this.$store.getters.getPathByName(this.$route.params.source)) {
         this.$store.dispatch('loadContent', { path: this.$store.getters.getPathByName(this.$route.params.source) })
       }

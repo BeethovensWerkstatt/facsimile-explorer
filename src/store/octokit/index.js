@@ -17,6 +17,7 @@ const state = {
   sources: [],
 
   filepath: undefined,
+  filename: undefined,
   filesha: undefined
 }
 const getters = {
@@ -27,6 +28,7 @@ const getters = {
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
   filepath: state => state.filepath,
+  filename: state => state.filename,
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
@@ -57,11 +59,12 @@ const mutations = {
       if (remove) remove()
     }
   },
-  SET_GH_FILE (state, { repo, owner, ref, path, sha }) {
+  SET_GH_FILE (state, { repo, owner, ref, path, name, sha }) {
     state.filerepo = repo
     state.fileowner = owner
     state.fileref = ref
     state.filepath = path
+    state.filename = name
     state.filesha = sha
     // console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
   },
@@ -102,6 +105,7 @@ const actions = {
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
       ref = config.repository.branch // 'dev'
     }) {
+    // TODO Cache
     getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
       console.log(data.download_url)
       const dec = new TextDecoder('utf-8')
