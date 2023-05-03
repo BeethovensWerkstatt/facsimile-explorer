@@ -1,0 +1,395 @@
+diff --git a/src/components/AppHeader.vue b/src/components/AppHeader.vue
+index 910aec7..25900cc 100644
+--- a/src/components/AppHeader.vue
++++ b/src/components/AppHeader.vue
+@@ -20,19 +20,25 @@
+     <div class="appTabs">
+       <ul class="tab">
+         <li class="tab-item" >
+-          <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
++          <router-link :to="{ name: 'home' }"><img class="home" src="/home.png"></router-link>
++          <!-- <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a> -->
+         </li>
+         <li class="tab-item">
+-          <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
++          <tab-link tab="pages">Pages / SVG</tab-link>
++          <!-- <router-link :to="tabLink('pages')">Pages / SVG</router-link> -->
++          <!-- <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a> -->
+         </li>
+         <li class="tab-item">
+-          <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
++          <tab-link tab="zones">Writing Zones</tab-link>
++          <!-- <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a> -->
+         </li>
+         <li class="tab-item">
+-          <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
++          <tab-link tab="annot">Annotated Transcripts</tab-link>
++          <!-- <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a> -->
+         </li>
+         <li class="tab-item">
+-          <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
++          <tab-link tab="diplo">Diplomatic Transcripts</tab-link>
++          <!-- <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a> -->
+         </li>
+       </ul>
+     </div>
+@@ -41,6 +47,7 @@
+ 
+ <script>
+ import GitMenu from '@/components/GitMenu.vue'
++import TabLink from '@/components/TabLink.vue'
+ 
+ const truncate = function (fullStr, strLen, separator) {
+   if (fullStr.length <= strLen) return fullStr
+@@ -56,7 +63,8 @@ const truncate = function (fullStr, strLen, separator) {
+ export default {
+   name: 'AppHeader',
+   components: {
+-    GitMenu
++    GitMenu,
++    TabLink
+   },
+   computed: {
+     docTitle () {
+@@ -73,7 +81,7 @@ export default {
+       return this.$store.getters.loading || this.$store.getters.processing
+     },
+     currentTab () {
+-      return this.$store.getters.currentTab
++      return this.$route.params.modus
+     }
+   },
+   methods: {
+@@ -144,7 +152,7 @@ export default {
+   ul.tab {
+     margin: 0;
+ 
+-    .tab-item a {
++    .tab-item a,span {
+       background-color: #ffffff66;
+       border-radius: 5px;
+       padding: .2rem .8rem .1rem .8rem;
+diff --git a/src/components/HomeTab.vue b/src/components/HomeTab.vue
+index 993c1fa..d7db9f5 100644
+--- a/src/components/HomeTab.vue
++++ b/src/components/HomeTab.vue
+@@ -68,10 +68,14 @@ export default {
+     SourceSelector
+   },
+   methods: {
+-
++    openDocument (source) {
++      console.log('Opening File now: ' + source.path)
++      this.$store.dispatch('loadContent', { path: source.path })
++      this.$router.push({ name: 'modus', params: { source: source.name, page: 1, modus: 'pages' } })
++    }
+   },
+   computed: {
+-    ...mapGetters(['isAuthenticated']),
++    ...mapGetters(['isAuthenticated', 'sources']),
+     authurl: () => `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
+   }
+ }
+diff --git a/src/components/LoadXmlModal.vue b/src/components/LoadXmlModal.vue
+index 7ece01d..628ee0c 100644
+--- a/src/components/LoadXmlModal.vue
++++ b/src/components/LoadXmlModal.vue
+@@ -46,7 +46,8 @@ export default {
+         const reader = new FileReader()
+         reader.addEventListener('load', () => {
+           console.log(file)
+-          this.$store.dispatch('setData', reader.result)
++          const mei = reader.result
++          this.$store.dispatch('setData', { mei, path: file.path })
+           this.closeModal()
+         })
+         reader.readAsText(file)
+diff --git a/src/components/OpenSeadragonComponent.vue b/src/components/OpenSeadragonComponent.vue
+index 4b4af78..da7adb3 100644
+--- a/src/components/OpenSeadragonComponent.vue
++++ b/src/components/OpenSeadragonComponent.vue
+@@ -82,7 +82,7 @@ export default {
+       if (this.viewer === undefined) {
+         return null
+       }
+-      if (svg !== null) {
++      if (svg) {
+         this.viewer.addOverlay({
+           element: svg,
+           x: 0,
+@@ -180,6 +180,7 @@ export default {
+       const postfix = '</pages></body></music>'
+ 
+       const mei = prefix + pageCode + postfix
++      // TODO make vrvToolkit a Promise?
+       this.vrvToolkit.loadData(mei)
+       const svg = this.vrvToolkit.renderToSVG(1, {})
+ 
+diff --git a/src/components/PagesTab.vue b/src/components/PagesTab.vue
+index fdee521..d896e4c 100644
+--- a/src/components/PagesTab.vue
++++ b/src/components/PagesTab.vue
+@@ -189,5 +189,10 @@ i.showSidebar {
+     margin: 0 .2rem;
+   }
+ }
+-
++.toolbar {
++  height: 50px;
++}
++.sidebar {
++  height: 100%;
++}
+ </style>
+diff --git a/src/router/index.js b/src/router/index.js
+index 325e3f5..7dccf83 100644
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -16,10 +16,12 @@ const routes = [
+   {
+     path: '/authenticate',
+     name: 'authenticate',
+-    // route level code-splitting
+-    // this generates a separate chunk (authenticate.[hash].js) for this route
+-    // which is lazy-loaded when the route is visited.
+     component: () => import(/* webpackChunkName: "about" */ '../views/AuthGithub.vue')
++  },
++  {
++    path: '/:pathMatch(.*)*',
++    name: 'notfound',
++    component: () => import(/* webpackChunkName: "http404" */ '../views/NotFound.vue')
+   }
+ ]
+ 
+diff --git a/src/store/index.js b/src/store/index.js
+index daf8425..359b8b5 100644
+--- a/src/store/index.js
++++ b/src/store/index.js
+@@ -1,4 +1,5 @@
+ import { createStore } from 'vuex'
++import VuexPersistence from 'vuex-persist'
+ import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
+ import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
+ import octokitModule from '@/store/octokit'
+@@ -28,6 +29,24 @@ const parser = new DOMParser()
+  */
+ const serializer = new XMLSerializer()
+ 
++/**
++ * persist state to localStorage
++ * TODO? use localforage?
++ */
++const vuexLocal = new VuexPersistence({
++  storage: window.sessionStorage,
++  reducer: state => ({
++    currentTab: state.currentTab,
++    pages: state.pages,
++    fileowner: state.fileowner,
++    filerepo: state.filerepo,
++    fileref: state.fileref,
++    sources: state.sources,
++    filepath: state.filepath,
++    filesha: state.filesha
++  })
++})
++
+ /**
+  * The Vuex Store of facsimile-explorer
+  * @type {Object}
+@@ -38,6 +57,7 @@ export default createStore({
+     verovioModule,
+     guiModule
+   },
++  plugins: [vuexLocal.plugin],
+   state: {
+     explorerTab: 'home',
+     pages: [],
+@@ -55,7 +75,7 @@ export default createStore({
+     selectedSystemOnCurrentPage: -1,
+     editingSystemOnCurrentPage: -1,
+     pageSVGs: [],
+-    currentTab: 'home' // allowed values: 'home', 'pages', 'systems', 'zones', 'diplo'
++    currentTab: 'home' // allowed values: 'home', 'pages', 'zones', 'annot', 'diplo'
+   },
+   mutations: {
+     SET_XML_DOC (state, domDoc) {
+@@ -241,10 +261,11 @@ export default createStore({
+         .then(xml => {
+           const mei = parser.parseFromString(xml, 'application/xml')
+           commit('SET_GH_FILE', {}) // remove GH link
+-          dispatch('setData', mei)
++          dispatch('setData', { mei, path: 'testfile.xml' })
+         })
+     },
+-    setData ({ commit }, mei) {
++    setData ({ commit }, { mei, path }) {
++      console.log(path)
+       const pageArray = getPageArray(mei)
+       commit('SET_PAGES', pageArray)
+ 
+@@ -311,7 +332,7 @@ export default createStore({
+           iiifManifest2mei(json, url, parser)
+             .then(mei => {
+               commit('SET_GH_FILE', {}) // remove GH link
+-              dispatch('setData', mei)
++              dispatch('setData', { mei, path: url })
+             })
+         })
+         .catch(err => {
+diff --git a/src/store/octokit/index.js b/src/store/octokit/index.js
+index 737ba2a..eae1571 100644
+--- a/src/store/octokit/index.js
++++ b/src/store/octokit/index.js
+@@ -41,12 +41,13 @@ const mutations = {
+     try {
+       state.octokit = new Octokit({
+         auth: state.auth,
+-        userAgent: 'facsimile-explorer/v0.0.1'
++        userAgent: 'facsimile-explorer/v0.0.2'
+       })
+       if (state.auth) {
+         state.octokit.users.getAuthenticated().then(({ data }) => {
+           state.user = data
+           if (store) store(state.auth)
++          else console.warn('could not set cookie!')
+         })
+       } else {
+         state.user = {}
+@@ -112,7 +113,7 @@ const actions = {
+       const txt = dec.decode(Base64.toUint8Array(data.content))
+       const parser = new DOMParser()
+       const mei = parser.parseFromString(txt, 'application/xml')
+-      dispatch('setData', mei)
++      dispatch('setData', { mei, path })
+       commit('SET_GH_FILE', { ...data, owner, repo, ref })
+     })
+   },
+diff --git a/src/tools/iiif.js b/src/tools/iiif.js
+index 693f1b0..00b993a 100644
+--- a/src/tools/iiif.js
++++ b/src/tools/iiif.js
+@@ -158,6 +158,7 @@ export function getPageArray (mei) {
+     const graphic = surface.querySelector('graphic')
+     const i = n + 1
+     const page = mei.querySelector('page:nth-child(' + i + ')')
++    // console.log(mei, page)
+ 
+     const obj = {}
+     obj.uri = graphic.getAttributeNS('', 'target').trim()
+diff --git a/src/views/HomeView.vue b/src/views/HomeView.vue
+index 425a5f0..1fa584c 100644
+--- a/src/views/HomeView.vue
++++ b/src/views/HomeView.vue
+@@ -3,89 +3,26 @@
+ 
+   <!-- TODO: Check modals -->
+ 
+-  <IiifModal/>
+-  <LoadXmlModal/>
+-  <OverviewModal/>
+-  <CommitModal/>
+   <OpenFileModal/>
+-  <AssignSVGsModal/>
+ 
+-  <HomeTab v-if="currentTab === 'home'"/>
+-  <PagesTab v-if="currentTab === 'pages'"/>
+-  <ZonesTab v-if="currentTab === 'zones'"/>
+-  <AnnotTab v-if="currentTab === 'annot'"/>
+-  <DiploTab v-if="currentTab === 'diplo'"/>
++  <HomeTab />
+ 
+-  <template v-if="isReady && !isReady">
+-    <splitpanes class="mainSplitter default-theme">
+-      <pane size="55" min-size="30" @scroll="doScroll">
+-        <OpenSeadragonComponent/>
+-      </pane>
+-      <pane>
+-        <splitpanes horizontal @scroll="doScroll">
+-          <pane size="70" min-size="30" max-size="90">
+-            <ExplorerForm/>
+-          </pane>
+-          <pane @scroll="doScroll">
+-            <XmlEditor/>
+-          </pane>
+-        </splitpanes>
+-      </pane>
+-    </splitpanes>
+-  </template>
+-  <template v-if="!isReady && isReady">
+-     <div class="loadingBack">
+-        * Hier oder andernorts: Erzeugen MEI-Datei aus IIIF Manifest <br/>
+-        * Importieren des SVG für aktuelle Seite <br/>
+-        * "Formular" für einzelne Zeichen <br/>
+-        * annotorious-Plugin, um Rechtecke z.B. für Systeme zu erzeugen <br/>
+-        * Anbindung XML-Editor <br/>
+-        * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
+-     </div>
+-  </template>
+ </template>
+ 
+ <script>
+ import AppHeader from '@/components/AppHeader.vue'
+-import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+-import ExplorerForm from '@/components/ExplorerForm.vue'
+-import XmlEditor from '@/components/XmlEditor.vue'
+-import IiifModal from '@/components/IiifModal.vue'
+-import LoadXmlModal from '@/components/LoadXmlModal.vue'
+-import OverviewModal from '@/components/OverviewModal.vue'
+-import CommitModal from '@/components/CommitModal.vue'
+ import OpenFileModal from '@/components/OpenFileModal.vue'
+-import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
+ 
+ import HomeTab from '@/components/HomeTab.vue'
+-import PagesTab from '@/components/PagesTab.vue'
+-import ZonesTab from '@/components/ZonesTab.vue'
+-import AnnotTab from '@/components/AnnotTab.vue'
+-import DiploTab from '@/components/DiploTab.vue'
+ 
+-import { Splitpanes, Pane } from 'splitpanes'
+ import 'splitpanes/dist/splitpanes.css'
+ 
+ export default {
+   name: 'App',
+   components: {
+     AppHeader,
+-    ExplorerForm,
+-    OpenSeadragonComponent,
+-    XmlEditor,
+-    IiifModal,
+-    LoadXmlModal,
+-    OverviewModal,
+-    CommitModal,
+     OpenFileModal,
+-    AssignSVGsModal,
+-    Splitpanes,
+-    Pane,
+-    HomeTab,
+-    PagesTab,
+-    ZonesTab,
+-    AnnotTab,
+-    DiploTab
++    HomeTab
+   },
+   methods: {
+     doScroll (e) {
+diff --git a/src/views/ModusView.vue b/src/views/ModusView.vue
+index 5e2ba1a..1c5e3d4 100644
+--- a/src/views/ModusView.vue
++++ b/src/views/ModusView.vue
+@@ -91,11 +91,14 @@ export default {
+     this.reload()
+   },
+   watch: {
+-    currentPath () {
++    $route () {
+       this.reload()
+     },
++    currentPath () {
++      // this.reload()
++    },
+     docPath () {
+-      this.reload()
++      // this.reload()
+     }
+   },
+   methods: {

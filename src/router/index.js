@@ -16,10 +16,12 @@ const routes = [
   {
     path: '/authenticate',
     name: 'authenticate',
-    // route level code-splitting
-    // this generates a separate chunk (authenticate.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/AuthGithub.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'notfound',
+    component: () => import(/* webpackChunkName: "http404" */ '../views/NotFound.vue')
   }
 ]
 

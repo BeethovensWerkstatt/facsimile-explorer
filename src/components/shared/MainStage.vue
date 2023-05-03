@@ -1,5 +1,5 @@
 <template>
-  <div class="mainstage">
+  <div class="mainStage">
     <slot/>
   </div>
 </template>
@@ -26,7 +26,7 @@ export default {
 @import '@/css/_variables.scss';
 
 .mainStage {
-
+  background: linear-gradient(to bottom, $mainBackgroundColor, darken($mainBackgroundColor, 30%));
 }
 
 </style>
