@@ -287,6 +287,7 @@ export default {
     })
 
     // TODO: Adjusted to see something for now…
+    /*
     const pages = ['https://edirom-images.beethovens-werkstatt.de/Scaler/IIIF/D-BNba_HCB_Mh_34%252Ffol5v.jpg'] // this.$store.getters.pageArrayOSD
     if (pages.length > 0) {
       this.viewer.open(pages)
@@ -294,6 +295,7 @@ export default {
       // this.renderSystems()
       // this.renderShapes()
     }
+    */
 
     this.viewer.addHandler('page', (data) => {
       // remove listeners
@@ -320,8 +322,9 @@ export default {
       })
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
-        this.viewer.open(newArr)
-        this.$store.dispatch('setCurrentPage', 0)
+        const page = this.$route.query.page
+        this.viewer.open(newArr, page ? +page - 1 : 0)
+        this.$store.dispatch('setCurrentPage', page ? +page - 1 : 0)
         this.renderSystems()
         this.renderShapes()
       })

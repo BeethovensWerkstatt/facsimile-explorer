@@ -91,6 +91,9 @@ export default {
     this.reload()
   },
   watch: {
+    $route () {
+      this.reload()
+    },
     currentPath () {
       this.reload()
     },
@@ -105,12 +108,17 @@ export default {
     reload () {
       const path = this.$store.getters.getPathByName(this.$route.params.source)
       const modus = this.$route.params.modus
-      console.log(path, modus)
+      const page = this.$route.query.page
+      console.log(path, modus, page)
       if (path && this.$store.getters.filePath !== path) {
         this.$store.dispatch('loadContent', { path })
       }
       if (this.$store.getters.modus !== modus) {
         this.$store.dispatch('openTab', modus)
+      }
+      if (page && this.$store.getters.currentPageOneBased !== page) {
+        console.log('setCurrentPage', +page - 1)
+        this.$store.dispatch('setCurrentPage', +page - 1)
       }
     }
   },

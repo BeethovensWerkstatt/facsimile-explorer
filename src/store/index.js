@@ -4,7 +4,7 @@ import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from 
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
 import guiModule from '@/store/gui'
-import VuexPersistence from 'vuex-persist'
+// import VuexPersistence from 'vuex-persist'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -33,6 +33,7 @@ const serializer = new XMLSerializer()
  * persist state to localStorage
  * TODO? use localforage?
  */
+/*
 const vuexLocal = new VuexPersistence({
   storage: window.sessionStorage,
   reducer: state => ({
@@ -46,6 +47,7 @@ const vuexLocal = new VuexPersistence({
     filesha: state.filesha
   })
 })
+*/
 
 /**
  * The Vuex Store of facsimile-explorer
@@ -57,7 +59,7 @@ export default createStore({
     verovioModule,
     guiModule
   },
-  plugins: [vuexLocal.plugin],
+  // plugins: [vuexLocal.plugin],
   state: {
     explorerTab: 'home',
     pages: [],
