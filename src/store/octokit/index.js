@@ -226,7 +226,7 @@ const actions = {
     })
   },
 
-  async loadSources ({ commit, getters }) {
+  async loadSources ({ commit, dispatch, getters }) {
     const repometa = {
       octokit: getters.octokit,
       owner: config.repository.owner,
@@ -252,6 +252,9 @@ const actions = {
       }
     }
     commit('SET_SOURCES', sourcefiles)
+    for (const source of sourcefiles) {
+      dispatch('loadContent', source)
+    }
   },
 
   async getFile ({ getters }, { path, callback }) {
