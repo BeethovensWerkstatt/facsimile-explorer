@@ -9,17 +9,19 @@ export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 const state = {
   user: {},
   auth: '',
-  octokit: new Octokit(),
+  octokit: new Octokit(), // avoid undefined
   fileowner: undefined,
   filerepo: undefined,
   fileref: undefined,
 
   sources: [],
+  documents: {},
 
   filepath: undefined,
   filename: undefined,
   filesha: undefined
 }
+
 const getters = {
   gh_user: state => state.user,
   octokit: state => state.octokit,
@@ -32,8 +34,10 @@ const getters = {
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
-  sources: state => state.sources
+  sources: state => state.sources,
+  getContentData: state => (path) => state.documents[path]
 }
+
 const mutations = {
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
     state.auth = auth
@@ -70,8 +74,13 @@ const mutations = {
   },
   SET_SOURCES (state, sources) {
     state.sources = sources
+  },
+  SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
+    if (!doc) console.warn(`no document '${path}'`)
+    state.documents[path] = { repo, owner, ref, path, name, sha, doc }
   }
 }
+
 const actions = {
   authenticate ({ commit, dispatch }, { code, store, remove }) {
     // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
@@ -105,16 +114,24 @@ const actions = {
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
       ref = config.repository.branch // 'dev'
     }) {
-    // TODO Cache
-    getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-      console.log(data.download_url)
-      const dec = new TextDecoder('utf-8')
-      const txt = dec.decode(Base64.toUint8Array(data.content))
-      const parser = new DOMParser()
-      const mei = parser.parseFromString(txt, 'application/xml')
-      dispatch('setData', mei)
-      commit('SET_GH_FILE', { ...data, owner, repo, ref })
-    })
+    let contentData = getters.getContentData(path)
+    if (contentData?.doc) {
+      dispatch('setData', contentData.doc)
+      commit('SET_GH_FILE', contentData)
+      console.log(contentData.path, 'loaded from cache')
+    } else {
+      getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+        console.log(data.download_url)
+        const dec = new TextDecoder('utf-8')
+        const txt = dec.decode(Base64.toUint8Array(data.content))
+        const parser = new DOMParser()
+        const mei = parser.parseFromString(txt, 'application/xml')
+        dispatch('setData', mei)
+        contentData = { ...data, owner, repo, ref }
+        commit('SET_GH_FILE', contentData)
+        commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+      })
+    }
   },
   saveContent ({ state, getters }, opts) {
     const mei = getters.xmlDocumentCode()
