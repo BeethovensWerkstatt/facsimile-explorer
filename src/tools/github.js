@@ -1,4 +1,5 @@
 import { Base64 } from 'js-base64'
+import store from '@/store'
 
 export class OctokitNode {
   // orepo: OctokitRepo ... orepo.commit, orepo.revert
@@ -193,8 +194,6 @@ export class OctokitFolder extends OctokitNode {
 }
 
 export class OctokitRepo {
-  // TODO octokit from store
-  _octokit
   _owner
   _repo
   _branch
@@ -203,9 +202,8 @@ export class OctokitRepo {
   _folder
   _modified
 
-  constructor ({ octokit, owner, repo, branch }) {
+  constructor ({ owner, repo, branch }) {
     this._ready = false
-    this._octokit = octokit
     this._owner = owner
     this._repo = repo
     this._branch = branch
@@ -214,7 +212,7 @@ export class OctokitRepo {
     this.refreshFolder()
   }
 
-  get octokit () { return this._octokit }
+  get octokit () { return store.getters.octokit }
 
   get owner () { return this._owner }
 
@@ -261,6 +259,7 @@ export class OctokitRepo {
   }
 
   async commitModified (message = 'github changes') {
+    // TODO check repo for changed HEAD! branch, PR, merge
     const tree = Object.values(this._modified).map(f => ({
       path: f.path,
       sha: f.sha,
@@ -292,5 +291,6 @@ export class OctokitRepo {
     })
 
     console.log(this._modified, newCommitSha)
+    // TODO clear _modified on successful commit
   }
 }
