@@ -112,7 +112,8 @@ const actions = {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
-      ref = config.repository.branch // 'dev'
+      ref = config.repository.branch, // 'dev'
+      callback = null
     }) {
     let contentData = getters.getContentData(path)
     if (contentData?.doc) {
@@ -122,14 +123,30 @@ const actions = {
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
         console.log(data.download_url)
-        const dec = new TextDecoder('utf-8')
-        const txt = dec.decode(Base64.toUint8Array(data.content))
-        const parser = new DOMParser()
-        const mei = parser.parseFromString(txt, 'application/xml')
-        dispatch('setData', mei)
-        contentData = { ...data, owner, repo, ref }
-        commit('SET_GH_FILE', contentData)
-        commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+        try {
+          const dec = new TextDecoder('utf-8')
+          const txt = dec.decode(Base64.toUint8Array(data.content))
+          const parser = new DOMParser()
+          const mei = parser.parseFromString(txt, 'application/xml')
+          if (callback) {
+            const data = { xml: mei }
+            callback(data)
+            callback = null
+          }
+          dispatch('setData', mei) // TODO move to extra function
+          contentData = { ...data, owner, repo, ref }
+          commit('SET_GH_FILE', contentData)
+          commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+        } catch (e) {
+          console.error(e.message)
+          if (callback) {
+            const data = {
+              error: e
+            }
+            callback(data)
+            callback = null
+          }
+        }
       })
     }
   },
@@ -252,9 +269,17 @@ const actions = {
       }
     }
     commit('SET_SOURCES', sourcefiles)
-    for (const source of sourcefiles) {
-      dispatch('loadContent', source)
-    }
+    dispatch('setLoading', true)
+    const sourcePromises = sourcefiles.map(source => new Promise((resolve, reject) => {
+      dispatch('loadContent', { ...source, callback: d => resolve(d) })
+    }))
+    Promise.all(sourcePromises).finally(() => {
+      dispatch('setLoading', false)
+      console.log('all loaded')
+    })
+    // for (const source of sourcefiles) {
+    //   dispatch('loadContent', source)
+    // }
   },
 
   async getFile ({ getters }, { path, callback }) {

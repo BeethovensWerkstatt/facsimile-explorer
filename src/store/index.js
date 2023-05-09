@@ -357,6 +357,8 @@ export default createStore({
       return state.parsedXml !== null
     },
 
+    initComplete: state => !(state.loading || state.processing),
+
     /**
      * TODO: replace this
      * getter for the XML code for the current page
