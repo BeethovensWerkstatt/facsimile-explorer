@@ -34,7 +34,7 @@ const getters = {
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
-  sources: state => state.sources,
+  sources: state => state.sources, // TODO we don't need sources *and* documents, sources should receive the 'doc' attribute
   getContentData: state => (path) => state.documents[path]
 }
 
