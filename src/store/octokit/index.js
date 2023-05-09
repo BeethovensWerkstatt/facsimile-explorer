@@ -252,6 +252,8 @@ const actions = {
       }
     }
     commit('SET_SOURCES', sourcefiles)
+    // TODO: this is a replacement for the commit above. This is in the data module
+    commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     for (const source of sourcefiles) {
       dispatch('loadContent', source)
     }
