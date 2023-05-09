@@ -365,6 +365,7 @@ export default createStore({
     },
 
     /**
+     * TODO: replace this
      * getter for the XML code for the current page
      * @param  {Object} state store
      * @return {string} MEI serialized to string
@@ -382,6 +383,10 @@ export default createStore({
       const pageIndex = state.currentPage + 1
       const queryString = 'page:nth-child(' + pageIndex + ')'
       const page = xmlDoc.querySelector(queryString)
+
+      if (page === null) {
+        return ''
+      }
 
       return serializer.serializeToString(page)
     },
@@ -456,6 +461,7 @@ export default createStore({
     },
 
     /**
+     * TODO: replace this
      * A representation of the systems on the current page
      * @param  {Object} state store
      * @return {Object} systems on the current page
@@ -470,6 +476,11 @@ export default createStore({
       }
 
       const page = xmlDoc.querySelector(queryString)
+
+      if (page === null) {
+        return []
+      }
+
       const pageHeight = page.getAttributeNS('', 'page.height')
       // const pageWidth = page.getAttributeNS('', 'page.width')
 
