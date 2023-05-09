@@ -1,3 +1,5 @@
+import store from '@/store'
+
 function uuidv4 () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = Math.random() * 16 | 0
@@ -153,8 +155,91 @@ export function checkIiifManifest (json) {
 }
 
 export function getPageArray (mei) {
+  // function to build an array of surface links
+  const resolveFoliumLike = (arr, foliumLike) => {
+    const type = foliumLike.localName
+    if (type === undefined) {
+      // this is a textnode
+    } else if (type === 'bifolium') {
+      if (foliumLike.hasAttribute('outer.recto')) {
+        arr.push(foliumLike.getAttribute('outer.recto'))
+      }
+      if (foliumLike.hasAttribute('inner.verso')) {
+        arr.push(foliumLike.getAttribute('inner.verso'))
+      }
+
+      foliumLike.childNodes.forEach(child => {
+        resolveFoliumLike(arr, child)
+      })
+
+      if (foliumLike.hasAttribute('inner.recto')) {
+        arr.push(foliumLike.getAttribute('inner.recto'))
+      }
+      if (foliumLike.hasAttribute('outer.verso')) {
+        arr.push(foliumLike.getAttribute('outer.verso'))
+      }
+    } else if (type === 'folium' || type === 'unknownFoliation') {
+      if (foliumLike.hasAttribute('recto')) {
+        arr.push(foliumLike.getAttribute('recto'))
+      }
+
+      foliumLike.childNodes.forEach(child => {
+        resolveFoliumLike(arr, child)
+      })
+
+      if (foliumLike.hasAttribute('verso')) {
+        arr.push(foliumLike.getAttribute('verso'))
+      }
+    } else {
+      // continue searching for child elements, like when nested inside an add or so
+      foliumLike.childNodes.forEach(child => {
+        resolveFoliumLike(arr, child)
+      })
+    }
+  }
+
+  console.log('\n\n\nSTARTING')
   const arr = []
-  mei.querySelectorAll('surface').forEach((surface, n) => {
+  mei.querySelectorAll('foliaDesc > *').forEach(foliumLike => {
+    resolveFoliumLike(arr, foliumLike)
+  })
+
+  arr.forEach((link, i) => {
+    if (link.startsWith('#')) {
+      arr[i] = mei.querySelector('surface[*|id = "' + link.substring(1) + '"]')
+    } else {
+      const relativePath = link.split('#')[0]
+      const id = link.split('#')[1]
+      const folder = relativePath.split('/')[relativePath.split('/').length - 2]
+
+      const fullPath = store.getters.getPathByName(folder)
+      const file = store.getters.getContentData(fullPath)
+      console.log('got this')
+      console.log(file)
+      arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
+    }
+  })
+
+  arr.forEach((surface, n) => {
+    const graphic = surface.querySelector('graphic[type="facsimile"]')
+    // const i = n + 1
+    // const page = mei.querySelector('page:nth-child(' + i + ')')
+
+    const obj = {}
+    obj.uri = graphic.getAttributeNS('', 'target').trim()
+    obj.id = surface.getAttribute('xml:id').trim()
+    obj.n = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : n
+    obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
+    obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
+    obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
+    obj.hasSvg = surface.querySelector('graphic[type="svg"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+    obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
+
+    obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
+    arr[n] = obj
+  })
+  console.log(arr)
+  /* mei.querySelectorAll('surface').forEach((surface, n) => {
     const graphic = surface.querySelector('graphic')
     const i = n + 1
     const page = mei.querySelector('page:nth-child(' + i + ')')
@@ -171,6 +256,6 @@ export function getPageArray (mei) {
 
     obj.systems = page.querySelectorAll('system').length // count(mei:system) inside relevant /page
     arr.push(obj)
-  })
+  }) */
   return arr
 }
