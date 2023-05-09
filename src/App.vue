@@ -1,5 +1,6 @@
 <template>
-  <router-view/>
+  <router-view v-if="$store.getters.initComplete" />
+  <div v-else class="loading">loading ...</div>
 </template>
 
 <script>

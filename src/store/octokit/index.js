@@ -34,7 +34,7 @@ const getters = {
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
-  sources: state => state.sources,
+  sources: state => state.sources, // TODO we don't need sources *and* documents, sources should receive the 'doc' attribute
   getContentData: state => (path) => state.documents[path]
 }
 
@@ -112,7 +112,8 @@ const actions = {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
       path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
-      ref = config.repository.branch // 'dev'
+      ref = config.repository.branch, // 'dev'
+      callback = null // optional callback to call, when loading is finished
     }) {
     let contentData = getters.getContentData(path)
     if (contentData?.doc) {
@@ -122,14 +123,28 @@ const actions = {
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
         console.log(data.download_url)
-        const dec = new TextDecoder('utf-8')
-        const txt = dec.decode(Base64.toUint8Array(data.content))
-        const parser = new DOMParser()
-        const mei = parser.parseFromString(txt, 'application/xml')
-        dispatch('setData', mei)
-        contentData = { ...data, owner, repo, ref }
-        commit('SET_GH_FILE', contentData)
-        commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+        try {
+          const dec = new TextDecoder('utf-8')
+          const txt = dec.decode(Base64.toUint8Array(data.content))
+          const parser = new DOMParser()
+          const mei = parser.parseFromString(txt, 'application/xml')
+          if (callback) { // TODO if typeof function?
+            const data = { xml: mei }
+            callback(data)
+            callback = null
+          }
+          dispatch('setData', mei) // TODO move to extra function
+          contentData = { ...data, owner, repo, ref }
+          commit('SET_GH_FILE', contentData)
+          commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+        } catch (e) { // TODO if typeof function?
+          console.error(e.message)
+          if (callback) {
+            const data = { error: e }
+            callback(data)
+            callback = null
+          }
+        }
       })
     }
   },
@@ -254,9 +269,20 @@ const actions = {
     commit('SET_SOURCES', sourcefiles)
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
-    for (const source of sourcefiles) {
-      dispatch('loadContent', source)
-    }
+    // build a Promise to wait for loading of all sources
+    dispatch('setLoading', true)
+    const sourcePromises = sourcefiles.map(source => new Promise((resolve, reject) => {
+      // loadContent calls (optional) callback, when loading finished
+      dispatch('loadContent', { ...source, callback: d => resolve(d) })
+    }))
+    // finally if any file fails
+    Promise.all(sourcePromises).finally(() => {
+      dispatch('setLoading', false)
+      console.log('all loaded')
+    })
+    // for (const source of sourcefiles) {
+    //   dispatch('loadContent', source)
+    // }
   },
 
   async getFile ({ getters }, { path, callback }) {

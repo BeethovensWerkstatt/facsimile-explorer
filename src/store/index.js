@@ -38,14 +38,7 @@ const serializer = new XMLSerializer()
 const vuexLocal = new VuexPersistence({
   storage: window.sessionStorage,
   reducer: state => ({
-    currentTab: state.currentTab,
-    pages: state.pages,
-    fileowner: state.fileowner,
-    filerepo: state.filerepo,
-    fileref: state.fileref,
-    sources: state.sources,
-    filepath: state.filepath,
-    filesha: state.filesha
+    currentTab: state.currentTab
   })
 })
 */
@@ -365,6 +358,8 @@ export default createStore({
     isReady: state => {
       return state.parsedXml !== null
     },
+
+    initComplete: state => !(state.loading || state.processing),
 
     /**
      * TODO: replace this
