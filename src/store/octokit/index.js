@@ -10,16 +10,16 @@ const state = {
   user: {},
   auth: '',
   octokit: new Octokit(), // avoid undefined
-  fileowner: undefined,
+  fileowner: undefined, // its the owner of the repo!
   filerepo: undefined,
   fileref: undefined,
 
   sources: [],
   documents: {},
-
-  filepath: undefined,
-  filename: undefined,
-  filesha: undefined
+  // TODO rename / move to store.gui?
+  filepath: undefined, // path of selected file
+  filename: undefined, // name of selected file
+  filesha: undefined // sha of selected file ... this is better placed in store.data
 }
 
 const getters = {

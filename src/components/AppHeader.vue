@@ -78,7 +78,7 @@ export default {
   },
   methods: {
     getTab (modus) {
-      const source = this.$route.params.source || this.$store.getters.getNameByPath(this.$store.getters.filepath)
+      const source = this.$route.params.source || this.$store.getters.filename
       return { name: 'modus', params: { source, modus } }
     },
     openTab (modus) {
@@ -89,7 +89,7 @@ export default {
         this.$store.dispatch('openTab', modus)
         return
       }
-      const source = this.$route.params.source || this.$store.getters.getNameByPath(this.$store.getters.filepath)
+      const source = this.$route.params.source || this.$store.getters.filename
       console.log('go ' + modus + ' ...', source)
       if (source) {
         this.$router.push({ name: 'modus', params: { source, modus } })

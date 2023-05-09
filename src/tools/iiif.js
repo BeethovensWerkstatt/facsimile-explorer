@@ -8,8 +8,10 @@ function uuidv4 () {
   })
 }
 
-function addPage (canvas, infoJson, n, file, meiPageTemplate, meiSurfaceTemplate) {
+// meta now contains a property doc with the parsed XML. Should we change this?
+function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate) {
   // console.log(n, infoJson)
+  const file = meta.doc
   const label = canvas.label
   const height = infoJson.height
   const width = infoJson.width
@@ -40,7 +42,6 @@ function addPage (canvas, infoJson, n, file, meiPageTemplate, meiSurfaceTemplate
   // page.querySelector('secb').setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', sectionId)
   // page.querySelector('msEnd').setAttribute('startid', '#' + mdivId)
   // page.querySelector('msEnd + msEnd').setAttribute('startid', '#' + sectionId)
-
   file.querySelector('pages').appendChild(page)
 
   const surface = meiSurfaceTemplate.querySelector('surface').cloneNode(true)
@@ -213,7 +214,7 @@ export function getPageArray (mei) {
       const folder = relativePath.split('/')[relativePath.split('/').length - 2]
 
       const fullPath = store.getters.getPathByName(folder)
-      const file = store.getters.getContentData(fullPath)
+      const file = store.getters.getContentData(fullPath)?.doc
       console.log('got this')
       console.log(file)
       arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
