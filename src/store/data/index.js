@@ -1,3 +1,5 @@
+import { uuid } from '@/tools/uuid.js'
+
 /**
  * @namespace store.data
  */
@@ -35,6 +37,48 @@ const dataModule = {
      */
     SET_DOCUMENTNAME_PATH_MAPPING (state, arr) {
       state.documentNamePathMapping = arr
+    },
+
+    ADD_SVG_FILE_FOR_SURFACE (state, { surfaceId, svgText }) {
+      let document = null
+      let docPath = null
+
+      Object.entries(state.documents).forEach(doc => {
+        const sf = doc[1].querySelector('#' + surfaceId)
+        if (sf !== null) {
+          document = doc[1]
+          docPath = doc[0]
+        }
+      })
+
+      if (document === null) {
+        console.error('Unable to find XML document containing surfaceId #' + surfaceId)
+        return false
+      }
+
+      const xmlDoc = document.cloneNode(true)
+      const surface = xmlDoc.querySelector('#' + surfaceId)
+
+      const allSurfaces = [...xmlDoc.querySelectorAll('surface')]
+      const surfaceIndex = allSurfaces.indexOf(surface)
+      const paddedSurfaceIndex = String(surfaceIndex).padStart(3, '0')
+
+      const graphic = xmlDoc.createElementNS('http://www.music-encoding.org/ns/mei', 'graphic')
+      graphic.setAttribute('xml:id', 's' + uuid())
+      graphic.setAttribute('type', 'svg')
+
+      const svgFileName = '_surface' + paddedSurfaceIndex + '-shapes.svg'
+      const svgRelativePath = './' + svgFileName
+      const svgFullPath = docPath.replace([...docPath.split('/')].pop(), svgFileName)
+      console.log('TODO: Need to commit SVG file to ' + svgFullPath)
+
+      graphic.setAttribute('target', svgRelativePath)
+      surface.appendChild(graphic)
+
+      // TODO: Check dimensions of SVG
+      // TODO: Upload SVG
+
+      state.documents[docPath] = xmlDoc
     }
   },
 
@@ -180,7 +224,24 @@ const dataModule = {
      * @param  {[type]} path               The path of the document for which the name shall be retrieved
      * @return {[type]}                    The document
      */
-    documentByPath: state => (path) => state.documents[path]
+    documentByPath: state => (path) => state.documents[path],
+
+    /**
+     * retrieves the path of a document by a given surface ID
+     * @memberof store.data.getters
+     * @param  {[type]} state              The vuex state of the current module
+     * @param  {[type]} surfaceId          The ID of a surface contained in the sought document
+     * @return {[type]}                    The path of the document
+     */
+    documentPathBySurfaceId: state => (surfaceId) => {
+      const docs = Object.entries(state.documents)
+      const document = docs.find(doc => {
+        const dom = doc[1]
+        const elem = dom.querySelector('#' + surfaceId)
+        return elem !== null
+      })
+      return document !== undefined ? document[0] : null
+    }
   }
 }
 
