@@ -1,6 +1,18 @@
 import { uuid } from '@/tools/uuid.js'
 
 /**
+ * A Parser for reading in the XML Document
+ * @type {DOMParser}
+ */
+const parser = new DOMParser()
+
+/**
+ * An XML Serializer for converting back to string
+ * @type {XMLSerializer}
+ */
+const serializer = new XMLSerializer()
+
+/**
  * @namespace store.data
  */
 const dataModule = {
@@ -40,46 +52,13 @@ const dataModule = {
       console.log(state.documentNamePathMapping)
     },
 
-    ADD_SVG_FILE_FOR_SURFACE (state, { surfaceId, svgText }) {
-      let document = null
-      let docPath = null
+    ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE (state, { path, modifiedDom }) {
+      // TODO: Check dimensions of svgDom -> JK
 
-      Object.entries(state.documents).forEach(doc => {
-        const sf = doc[1].querySelector('#' + surfaceId)
-        if (sf !== null) {
-          document = doc[1]
-          docPath = doc[0]
-        }
-      })
+      // TODO: Upload svgDom
 
-      if (document === null) {
-        console.error('Unable to find XML document containing surfaceId #' + surfaceId)
-        return false
-      }
-
-      const xmlDoc = document.cloneNode(true)
-      const surface = xmlDoc.querySelector('#' + surfaceId)
-
-      const allSurfaces = [...xmlDoc.querySelectorAll('surface')]
-      const surfaceIndex = allSurfaces.indexOf(surface)
-      const paddedSurfaceIndex = String(surfaceIndex).padStart(3, '0')
-
-      const graphic = xmlDoc.createElementNS('http://www.music-encoding.org/ns/mei', 'graphic')
-      graphic.setAttribute('xml:id', 's' + uuid())
-      graphic.setAttribute('type', 'svg')
-
-      const svgFileName = '_surface' + paddedSurfaceIndex + '-shapes.svg'
-      const svgRelativePath = './' + svgFileName
-      const svgFullPath = docPath.replace([...docPath.split('/')].pop(), svgFileName)
-      console.log('TODO: Need to commit SVG file to ' + svgFullPath)
-
-      graphic.setAttribute('target', svgRelativePath)
-      surface.appendChild(graphic)
-
-      // TODO: Check dimensions of SVG
-      // TODO: Upload SVG
-
-      state.documents[docPath] = xmlDoc
+      state.documents[path] = modifiedDom
+      // TODO: set dirty flag
     }
   },
 
@@ -100,6 +79,61 @@ const dataModule = {
       if (name && path) {
         commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
       }
+    },
+
+    addSvgFileForSurface ({ commit, state, dispatch }, { surfaceId, svgText }) {
+      let oldDom = null
+      let path = null
+
+      Object.entries(state.documents).forEach(doc => {
+        const sf = doc[1].querySelector('surface[*|id="' + surfaceId + '"]')
+        if (sf !== null) {
+          oldDom = doc[1]
+          path = doc[0]
+        }
+      })
+
+      if (oldDom === null) {
+        console.error('Unable to find XML document containing surfaceId #' + surfaceId)
+        return false
+      }
+
+      const modifiedDom = oldDom.cloneNode(true)
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+
+      const allSurfaces = [...modifiedDom.querySelectorAll('surface')]
+      const surfaceIndex = allSurfaces.indexOf(surface)
+      const paddedSurfaceIndex = String(surfaceIndex).padStart(3, '0')
+
+      const graphic = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'graphic')
+      graphic.setAttribute('xml:id', 'g' + uuid())
+      graphic.setAttribute('type', 'svg')
+
+      const svgFileName = '_surface' + paddedSurfaceIndex + '-shapes.svg'
+      const svgRelativePath = './' + svgFileName
+      const meiFileName = path.split('/').pop()
+      const svgFullPath = path.replace(meiFileName, svgFileName)
+      console.log('TODO: Need to commit SVG file to ' + svgFullPath)
+
+      graphic.setAttribute('target', svgRelativePath)
+      surface.appendChild(graphic)
+
+      // TODO: Check dimensions of svgDom -> JK
+      const svgDom = parser.parseFromString(svgText, 'application/xml')
+      console.log('svgDom', svgDom)
+
+      // create array with files to commit
+      const files = []
+      files.push({ path, content: serializer.serializeToString(modifiedDom) })
+      files.push({ path: svgFullPath, content: svgText })
+      /* const message = 'Adding SVG shapes for page ' + surfaceIndex + ' of ' + meiFileName
+
+      const callback = () => {
+        commit('ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE', { path, modifiedDom })
+      } */
+
+      console.log('files', files)
+      // dispatch('createCommit', { message, files, callback })
     }
   },
   /**

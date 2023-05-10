@@ -7,7 +7,7 @@
         </button>
       </div>
       <div class="menuItem fileInput" title="TODO: open a filepicker and load svg">
-        <div class="customBtn" @click="importSVG"><i class="icon icon-upload"></i> Import SVG</div>
+        <div class="customBtn" @click="addSVG"><i class="icon icon-upload"></i> Import SVG</div>
       </div>
       <div class="menuItem mediaFragment" title="">
         <div class="customBtn" @click="setPageMargins"><i class="icon icon-bookmark"></i> Set Page Margins</div>
@@ -69,6 +69,26 @@ export default {
     },
     setPageMargins () {
       alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
+    },
+    addSVG () {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.svg'
+      input.onchange = _this => {
+        const [file] = Array.from(input.files)
+        if (file) {
+          const reader = new FileReader()
+          reader.addEventListener('load', () => {
+            // console.log('add SVG ...', reader.result)
+            this.$store.dispatch('addSvgFileForSurface', {
+              svgText: reader.result,
+              surfaceId: 'x2433e745-3d60-4043-9258-10ab1f1aeb47'
+            })
+          })
+          reader.readAsText(file)
+        }
+      }
+      input.click()
     },
     importSVG () {
       // alert('Öffnet einen Modal, in dem man eine SVG-Datei für die aktuelle Seite hochladen kann. Evtl. disabled, wenn es für die aktuelle Seite schon ein SVG gibt – dann muss händischersetzt werden, um unbeabsichtigtes Überschreiben zu verhindern.')

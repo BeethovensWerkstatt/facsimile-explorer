@@ -153,6 +153,7 @@ const actions = {
       })
     }
   },
+  // alt
   saveContent ({ state, getters }, opts) {
     const mei = getters.xmlDocumentCode()
     console.log(mei)
@@ -191,7 +192,7 @@ const actions = {
    *
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
-  async createCommit ({ getters }, { owner, repo, branch, message, files }) {
+  async createCommit ({ getters }, { message, files, callback, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
     // Get the latest commit SHA for the specified branch
@@ -244,6 +245,8 @@ const actions = {
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+
+    callback()
   },
 
   async loadSources ({ commit, dispatch, getters }) {
