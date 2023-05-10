@@ -132,6 +132,13 @@ const dataModule = {
         commit('ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE', { path, modifiedDom })
       } */
 
+      // TODO: Idee für ein changeLog
+      /* const changesArray = []
+      changesArray.push({ path: 'Engelmann.xml', operation: 'addSVG', param: '1' })
+      changesArray.push({ path: 'Engelmann.xml', operation: 'addSVG', param: '2' })
+      changesArray.push({ path: 'Engelmann.xml', operation: 'setSystem', param: '1' })
+      */
+
       console.log('files', files)
       // dispatch('createCommit', { message, files, callback })
     }
