@@ -195,6 +195,7 @@ const actions = {
   async createCommit ({ getters }, { message, files, callback, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
+    // Check with former SHA!!! Conflict resolution!
     // Get the latest commit SHA for the specified branch
     const { data: { object: { sha } } } = await octokit.git.getRef({
       owner,
@@ -211,7 +212,7 @@ const actions = {
         content,
         encoding: 'base64'
       })
-
+      // console.log('blobSha', blobSha, path)
       // Return the path and blob SHA for each file
       return {
         path,
@@ -228,6 +229,7 @@ const actions = {
       base_tree: sha,
       tree: newTree
     })
+    // console.log('treeSha', newTreeSha)
 
     // Create a new commit that references the new tree
     const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
@@ -237,6 +239,7 @@ const actions = {
       tree: newTreeSha,
       parents: [sha]
     })
+    // console.log('commitSha', newCommitSha)
 
     // Update the specified branch to point to the new commit
     await octokit.git.updateRef({

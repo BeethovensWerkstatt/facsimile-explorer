@@ -126,11 +126,11 @@ const dataModule = {
       const files = []
       files.push({ path, content: serializer.serializeToString(modifiedDom) })
       files.push({ path: svgFullPath, content: svgText })
-      /* const message = 'Adding SVG shapes for page ' + surfaceIndex + ' of ' + meiFileName
+      const message = 'Adding SVG shapes for page ' + surfaceIndex + ' of ' + meiFileName
 
       const callback = () => {
         commit('ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE', { path, modifiedDom })
-      } */
+      }
 
       // TODO: Idee für ein changeLog
       /* const changesArray = []
@@ -140,7 +140,7 @@ const dataModule = {
       */
 
       console.log('files', files)
-      // dispatch('createCommit', { message, files, callback })
+      dispatch('createCommit', { message, files, callback, branch: 'test' })
     }
   },
   /**
