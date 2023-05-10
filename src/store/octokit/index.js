@@ -29,11 +29,12 @@ const getters = {
   filerepo: state => state.filerepo,
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
+  // TODO following moved to store.data!
   filepath: state => state.filepath,
   filename: state => state.filename,
   filesha: state => state.filesha,
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
-  getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
+  // getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
   sources: state => state.sources, // TODO we don't need sources *and* documents, sources should receive the 'doc' attribute
   getContentData: state => (path) => state.documents[path]
 }
@@ -133,7 +134,11 @@ const actions = {
             callback(data)
             callback = null
           }
+          const parr = path.split('/')
+          dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: mei })
+
           dispatch('setData', mei) // TODO move to extra function
+
           contentData = { ...data, owner, repo, ref }
           commit('SET_GH_FILE', contentData)
           commit('SET_CONTENT_DATA', { ...contentData, doc: mei })

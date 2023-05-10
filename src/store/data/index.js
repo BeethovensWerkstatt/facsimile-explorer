@@ -26,7 +26,7 @@ const dataModule = {
      * @param {[type]} dom    The DOM of the document
      */
     LOAD_DOCUMENT_INTO_STORE (state, { path, dom }) {
-      state.documents[path] = dom
+      state.documents[path] = dom // = { ...state.documents, [path]: dom } // reactivity ?
     },
 
     /**
@@ -37,6 +37,7 @@ const dataModule = {
      */
     SET_DOCUMENTNAME_PATH_MAPPING (state, arr) {
       state.documentNamePathMapping = arr
+      console.log(state.documentNamePathMapping)
     },
 
     ADD_SVG_FILE_FOR_SURFACE (state, { surfaceId, svgText }) {
@@ -91,10 +92,14 @@ const dataModule = {
      * @memberof store.data.actions
      * @param  {[type]} commit               The vuex commit function
      * @param  {[type]} path                 The path of the document in the repo
+     * @param  {[type]} name                 The name of the document in the repo
      * @param  {[type]} dom                  The DOM of the document
      */
-    loadDocumentIntoStore ({ commit }, { path, dom }) {
+    loadDocumentIntoStore ({ commit, state }, { path, name, dom }) {
       commit('LOAD_DOCUMENT_INTO_STORE', { path, dom })
+      if (name && path) {
+        commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
+      }
     }
   },
   /**
@@ -206,7 +211,7 @@ const dataModule = {
      * @param  {[type]} name               The name of the document for which the path shall be retrieved
      * @return {[type]}                    The path of the document
      */
-    documentPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
+    documentPathByName: state => (name) => state.documentNamePathMapping[name],
 
     /**
      * retrieves the name of a document by its path
@@ -215,7 +220,7 @@ const dataModule = {
      * @param  {[type]} path               The path of the document for which the name shall be retrieved
      * @return {[type]}                    The name of the document
      */
-    documentNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
+    documentNameByPath: state => (path) => state.documentNamePathMapping[path],
 
     /**
      * retrieves a document by its path

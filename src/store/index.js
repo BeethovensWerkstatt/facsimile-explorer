@@ -4,6 +4,7 @@ import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from 
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
 import guiModule from '@/store/gui'
+import dataModule from '@/store/data'
 // import VuexPersistence from 'vuex-persist'
 
 /* function nsResolver (prefix) {
@@ -49,6 +50,7 @@ const vuexLocal = new VuexPersistence({
 export default createStore({
   modules: {
     octokitModule,
+    dataModule,
     verovioModule,
     guiModule
   },
