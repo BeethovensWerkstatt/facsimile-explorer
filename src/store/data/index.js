@@ -1,4 +1,5 @@
 import { uuid } from '@/tools/uuid.js'
+import { Base64 } from 'js-base64'
 
 /**
  * A Parser for reading in the XML Document
@@ -11,6 +12,25 @@ const parser = new DOMParser()
  * @type {XMLSerializer}
  */
 const serializer = new XMLSerializer()
+
+/**
+ * encode string to utf-8 base64
+ * @param {string} str text to encode
+ * @returns base64 encoded utf-8 coded string
+ */
+const str2base64 = str => {
+  const enc = new TextEncoder('utf-8')
+  return Base64.fromUint8Array(enc.encode(str))
+}
+/**
+ * serialize DOM and convert to utf-8 base64 encoding
+ * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
+ * @returns base64 encoded utf-8 coded serialization of dom
+ */
+const dom2base64 = dom => {
+  const str = serializer.serializeToString(dom)
+  return str2base64(str)
+}
 
 /**
  * @namespace store.data
@@ -124,12 +144,13 @@ const dataModule = {
 
       // create array with files to commit
       const files = []
-      files.push({ path, content: serializer.serializeToString(modifiedDom) })
-      files.push({ path: svgFullPath, content: svgText })
+      files.push({ path, content: dom2base64(modifiedDom) })
+      files.push({ path: svgFullPath, content: str2base64(svgText) })
       const message = 'Adding SVG shapes for page ' + surfaceIndex + ' of ' + meiFileName
 
       const callback = () => {
         commit('ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE', { path, modifiedDom })
+        console.log('commit published: (test)', message, files.map(f => f.path).join(', '))
       }
 
       // TODO: Idee für ein changeLog
