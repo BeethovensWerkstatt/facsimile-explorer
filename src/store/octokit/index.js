@@ -225,6 +225,7 @@ const actions = {
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+    // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
 
     callback()
