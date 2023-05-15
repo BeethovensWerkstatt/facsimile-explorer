@@ -20,20 +20,20 @@
         </div>
       </li>
 
-      <li class="divider" data-content="Data"></li>
+      <!--<li class="divider" data-content="Data"></li>
 
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="openFile()">
           <i class="icon icon-arrow-right"></i> Open Document
        </button>
-      </li>
+     </li>-->
 
       <li class="menu-item">
         <button class="customBtn btn btn-link" @click="commitGH()">
           <i class="icon icon-upload"></i> Commit to Github
        </button>
       </li>
-      <li class="menu-item">
+      <!-- <li class="menu-item">
         <button class="customBtn btn btn-link" :disabled=!hasXML @click="downloadXML()">
           <i class="icon icon-download"></i> Download XML
         </button>
@@ -48,7 +48,7 @@
         <button class="customBtn btn btn-link" :disabled=!isReady @click="assignSVGs()">
           <i class="icon icon-copy"></i> Assign SVGs
        </button>
-      </li>
+     </li> -->
     </ul>
   </div>
 </template>
@@ -56,7 +56,7 @@
 <script>
 import { computed, inject, onMounted } from '@vue/runtime-core'
 import { useStore } from 'vuex'
-import fileDownload from 'js-file-download'
+// import fileDownload from 'js-file-download'
 import { GH_ACCESS_TOKEN } from '@/store/octokit'
 import CLIENT_ID from '@/clientID'
 
@@ -71,8 +71,8 @@ export default {
 
     const isReady = computed(() => store.getters.isReady)
     const hasXML = computed(() => store.getters.hasXML)
-    const xmlDocumentCode = computed(() => store.getters.xmlDocumentCode)
-    const xmlFilename = computed(() => 'annotatedMEI.xml')
+    // const xmlDocumentCode = computed(() => store.getters.xmlDocumentCode)
+    // const xmlFilename = computed(() => 'annotatedMEI.xml')
     // eslint-disable-next-line camelcase
     const gh_user = computed(() => store.getters.gh_user)
     const isAuthenticated = computed(() => store.getters.isAuthenticated)
@@ -81,20 +81,21 @@ export default {
 
     const importGH = () => store.dispatch('loadContent', {})
     const commitGH = () => store.dispatch('setModal', 'commitmei')
-    const importIIIF = () => store.dispatch('setModal', 'iiif')
-    const loadXML = () => store.dispatch('setModal', 'loadxml')
-    const openFile = () => store.dispatch('setModal', 'openfile')
+    // const importIIIF = () => store.dispatch('setModal', 'iiif')
+    // const loadXML = () => store.dispatch('setModal', 'loadxml')
+    // const openFile = () => store.dispatch('setModal', 'openfile')
     const checkocto = () => store.dispatch('loadSources')
-    const assignSVGs = () => store.dispatch('setModal', 'assignSVGs')
+    // const assignSVGs = () => store.dispatch('setModal', 'assignSVGs')
 
-    const downloadXML = () => {
+    /* const downloadXML = () => {
       const xml = xmlDocumentCode()
       if (xml !== null) {
         const data = new Blob([xml], { type: 'text/xml' })
         fileDownload(data, xmlFilename.value)
       }
-    }
-    const showOverview = () => store.dispatch('setModal', 'overview')
+    } */
+
+    // const showOverview = () => store.dispatch('setModal', 'overview')
     const login = () => {
       // this page will open /authorize?code=<GH_CODE> on success
       const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
@@ -131,13 +132,13 @@ export default {
       ghUserAvatar,
       importGH,
       commitGH,
-      importIIIF,
-      loadXML,
-      openFile,
+      // importIIIF,
+      // loadXML,
+      // openFile,
       checkocto,
-      assignSVGs,
-      downloadXML,
-      showOverview,
+      // assignSVGs,
+      // downloadXML,
+      // showOverview,
       login,
       logout
     }

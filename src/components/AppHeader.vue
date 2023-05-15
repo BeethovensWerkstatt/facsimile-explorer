@@ -17,6 +17,7 @@
         </div>-->
       </section>
     </header>
+    <div class="changedIndicator" v-if="changedFiles !== 0" :title="'Commit ' + changedFiles + ' changed files.'"><i class="icon icon-upload" @click="commitGH()"></i></div>
     <div class="appTabs">
       <ul class="tab">
         <li class="tab-item" >
@@ -64,7 +65,7 @@ export default {
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)?.label
 
       if (title !== '' && page !== -1) {
-        return truncate(title, 40) + ', page ' + page
+        return truncate(title, 30) + ', page ' + page
       } else {
         return ''
       }
@@ -74,6 +75,9 @@ export default {
     },
     currentTab () {
       return this.$store.getters.currentTab
+    },
+    changedFiles () {
+      return this.$store.getters.changedFiles.length
     }
   },
   methods: {
@@ -98,6 +102,9 @@ export default {
         this.$router.push({ name: 'home' })
       }
       // this.$store.dispatch('openTab', tab)
+    },
+    commitGH () {
+      this.$store.dispatch('setModal', 'commitmei')
     }
   }
 }
@@ -135,6 +142,14 @@ export default {
       border-left-color: #e5e5e5;
     }
   }
+}
+
+.changedIndicator {
+  float: right;
+  padding: .3rem .5rem;
+  font-size: .7rem;
+  cursor: pointer;
+  color: orange;
 }
 
 .appTabs {

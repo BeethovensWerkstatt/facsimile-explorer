@@ -1,5 +1,5 @@
 import { uuid } from '@/tools/uuid.js'
-import { Base64 } from 'js-base64'
+// import { Base64 } from 'js-base64'
 
 /**
  * A Parser for reading in the XML Document
@@ -11,26 +11,26 @@ const parser = new DOMParser()
  * An XML Serializer for converting back to string
  * @type {XMLSerializer}
  */
-const serializer = new XMLSerializer()
+// const serializer = new XMLSerializer()
 
 /**
  * encode string to utf-8 base64
  * @param {string} str text to encode
  * @returns base64 encoded utf-8 coded string
  */
-const str2base64 = str => {
+/* const str2base64 = str => {
   const enc = new TextEncoder('utf-8')
   return Base64.fromUint8Array(enc.encode(str))
-}
+} */
 /**
  * serialize DOM and convert to utf-8 base64 encoding
  * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
  * @returns base64 encoded utf-8 coded serialization of dom
  */
-const dom2base64 = dom => {
+/* const dom2base64 = dom => {
   const str = serializer.serializeToString(dom)
   return str2base64(str)
-}
+} */
 
 /**
  * @namespace store.data
@@ -101,7 +101,7 @@ const dataModule = {
       }
     },
 
-    addSvgFileForSurface ({ commit, state, dispatch }, { surfaceId, svgText }) {
+    addSvgFileForSurface ({ commit, state, dispatch, getters }, { surfaceId, svgText }) {
       let oldDom = null
       let path = null
 
@@ -122,46 +122,48 @@ const dataModule = {
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
 
       const allSurfaces = [...modifiedDom.querySelectorAll('surface')]
-      const surfaceIndex = allSurfaces.indexOf(surface)
+      const surfaceIndex = allSurfaces.indexOf(surface) + 1
       const paddedSurfaceIndex = String(surfaceIndex).padStart(3, '0')
 
       const graphic = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'graphic')
       graphic.setAttribute('xml:id', 'g' + uuid())
-      graphic.setAttribute('type', 'svg')
+      graphic.setAttribute('type', 'shapes')
 
-      const svgFileName = '_surface' + paddedSurfaceIndex + '-shapes.svg'
+      const docName = getters.documentNameByPath(path)
+      const svgFileName = docName + '_surface' + paddedSurfaceIndex + '-shapes.svg'
       const svgRelativePath = './' + svgFileName
       const meiFileName = path.split('/').pop()
       const svgFullPath = path.replace(meiFileName, svgFileName)
-      console.log('TODO: Need to commit SVG file to ' + svgFullPath)
+      // console.log('TODO: Need to commit SVG file to ' + svgFullPath)
 
       graphic.setAttribute('target', svgRelativePath)
       surface.appendChild(graphic)
 
       // TODO: Check dimensions of svgDom -> JK
       const svgDom = parser.parseFromString(svgText, 'application/xml')
-      console.log('svgDom', svgDom)
 
-      // create array with files to commit
-      const files = []
-      files.push({ path, content: dom2base64(modifiedDom) })
-      files.push({ path: svgFullPath, content: str2base64(svgText) })
-      const message = 'Adding SVG shapes for page ' + surfaceIndex + ' of ' + meiFileName
+      const svgWidth = svgDom.querySelector('svg')?.hasAttribute('width') ? parseInt(svgDom.querySelector('svg').getAttribute('width')) : null
+      const svgHeight = svgDom.querySelector('svg')?.hasAttribute('height') ? parseInt(svgDom.querySelector('svg').getAttribute('height')) : null
 
-      const callback = () => {
-        commit('ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE', { path, modifiedDom })
-        console.log('commit published: (test)', message, files.map(f => f.path).join(', '))
+      const pixelWidth = parseInt(surface.querySelector('graphic[type="facsimile"]').getAttribute('width'))
+      const pixelHeight = parseInt(surface.querySelector('graphic[type="facsimile"]').getAttribute('height'))
+
+      if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
+        dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom })
+        dispatch('loadDocumentIntoStore', { path, dom: modifiedDom })
+
+        // create array with files to commit
+        /* const files = []
+        files.push({ path, content: dom2base64(modifiedDom) })
+        files.push({ path: svgFullPath, content: str2base64(svgText) }) */
+
+        const param = surfaceIndex
+        const baseMessage = 'added SVG for ' + docName + ', p.'
+        dispatch('logChange', { path, baseMessage, param })
+        dispatch('logChange', { path: svgFullPath, baseMessage, param })
+      } else {
+        alert('[ERROR] SVG Dimensions for ' + svgFullPath + ' incorrect: \n\n   pixelWidth: ' + pixelWidth + '\n     svgWidth: ' + svgWidth + '\n  pixelHeight: ' + pixelHeight + '\n    svgHeight: ' + svgHeight + '\n\n Loading SVG file aborted.')
       }
-
-      // TODO: Idee für ein changeLog
-      /* const changesArray = []
-      changesArray.push({ path: 'Engelmann.xml', operation: 'addSVG', param: '1' })
-      changesArray.push({ path: 'Engelmann.xml', operation: 'addSVG', param: '2' })
-      changesArray.push({ path: 'Engelmann.xml', operation: 'setSystem', param: '1' })
-      */
-
-      console.log('files', files)
-      dispatch('createCommit', { message, files, callback, branch: 'test' })
     }
   },
   /**
@@ -223,7 +225,7 @@ const dataModule = {
 
       const arr = []
       const mei = state.documents[path]
-      if (mei === null) {
+      if (!mei) {
         return []
       }
 
@@ -251,15 +253,17 @@ const dataModule = {
         // const page = mei.querySelector('page:nth-child(' + i + ')')
 
         const obj = {}
-        obj.uri = graphic.getAttributeNS('', 'target').trim()
+        const target = graphic.getAttributeNS('', 'target').trim()
+
+        obj.uri = target
         obj.id = surface.getAttribute('xml:id').trim()
         obj.n = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : n
         obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
         obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
         obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
-        obj.hasSvg = surface.querySelector('graphic[type="svg"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+        obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
         obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
-
+        obj.hasFragment = target.indexOf('#xywh=') !== -1
         obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
         arr[n] = obj
       })
