@@ -274,6 +274,15 @@ export default createStore({
       commit('SET_PROCESSING', false)
       commit('SET_MODAL', null)
     },
+    setDocument ({ dispatch, getters }, path) {
+      const doc = getters.documentByPath(path)
+      console.log(doc)
+      if (doc) {
+        dispatch('setData', doc)
+      } else {
+        console.error(path, 'not found!')
+      }
+    },
     setCurrentPage ({ commit }, i) {
       commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)

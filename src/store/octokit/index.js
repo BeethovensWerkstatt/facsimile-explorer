@@ -13,6 +13,7 @@ const state = {
   fileowner: undefined, // its the owner of the repo!
   filerepo: undefined,
   fileref: undefined,
+  commit: undefined,
 
   sources: [],
   documents: {},
@@ -29,6 +30,7 @@ const getters = {
   filerepo: state => state.filerepo,
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
+  commit: state => state.commit,
   // TODO following moved to store.data!
   filepath: state => state.filepath,
   filename: state => state.filename,
@@ -64,10 +66,14 @@ const mutations = {
       if (remove) remove()
     }
   },
-  SET_GH_FILE (state, { repo, owner, ref, path, name, sha }) {
+  SET_COMMIT (state, commit) {
+    state.commit = commit
+  },
+  SET_GH_FILE (state, { repo, owner, ref, commit, path, name, sha }) {
     state.filerepo = repo
     state.fileowner = owner
     state.fileref = ref
+    state.commit = commit
     state.filepath = path
     state.filename = name
     state.filesha = sha
@@ -137,8 +143,6 @@ const actions = {
           const parr = path.split('/')
           dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: mei })
 
-          dispatch('setData', mei) // TODO move to extra function
-
           contentData = { ...data, owner, repo, ref }
           commit('SET_GH_FILE', contentData)
           commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
@@ -153,34 +157,6 @@ const actions = {
       })
     }
   },
-  // alt
-  saveContent ({ state, getters }, opts) {
-    const mei = getters.xmlDocumentCode()
-    console.log(mei)
-    // console.log(state.filerepo, state.fileowner, state.fileref, state.filepath, state.filesha)
-    const enc = new TextEncoder('utf-8')
-    const content = Base64.fromUint8Array(enc.encode(mei))
-    const message = opts?.message || `updated '${state.filepath}'`
-    const commit = {
-      owner: state.fileowner,
-      repo: state.filerepo,
-      path: state.filepath,
-      sha: state.filesha,
-      branch: state.fileref,
-      message,
-      content
-    }
-    console.log(commit)
-    if (typeof opts?.callback === 'function') {
-      opts.callback()
-    }
-    /*
-    getters.octokit.repos.createOrUpdateFileContents(commit).then(({ data }) => {
-      console.log(data)
-      commit('SET_GH_FILE', { ...data, owner: state.fileowner, repo: state.filerepo, ref: state.fileref })
-    })
-    */
-  },
   /**
    * commit multiple files in one commit
    *
@@ -192,7 +168,7 @@ const actions = {
    *
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
-  async createCommit ({ getters }, { message, files, callback, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+  async createCommit ({ commit, getters }, { message, files, callback, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
     // Check with former SHA!!! Conflict resolution!
@@ -202,6 +178,7 @@ const actions = {
       repo,
       ref: `heads/${branch}`
     })
+    console.log(sha, getters.commit)
 
     // Create a new tree that contains the specified files
     const newTree = await Promise.all(files.map(async ({ path, content }) => {
@@ -248,6 +225,7 @@ const actions = {
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+    commit('SET_COMMIT', newCommitSha)
 
     callback()
   },
@@ -264,6 +242,7 @@ const actions = {
 
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
+    commit('SET_COMMIT', repo.sha)
     const folder = await root.getFile(config.root)
     const sources = await folder.folder
     for (const source of sources) {

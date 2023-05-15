@@ -1,36 +1,11 @@
+import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
-import { Base64 } from 'js-base64'
 
 /**
  * A Parser for reading in the XML Document
  * @type {DOMParser}
  */
 const parser = new DOMParser()
-
-/**
- * An XML Serializer for converting back to string
- * @type {XMLSerializer}
- */
-const serializer = new XMLSerializer()
-
-/**
- * encode string to utf-8 base64
- * @param {string} str text to encode
- * @returns base64 encoded utf-8 coded string
- */
-const str2base64 = str => {
-  const enc = new TextEncoder('utf-8')
-  return Base64.fromUint8Array(enc.encode(str))
-}
-/**
- * serialize DOM and convert to utf-8 base64 encoding
- * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
- * @returns base64 encoded utf-8 coded serialization of dom
- */
-const dom2base64 = dom => {
-  const str = serializer.serializeToString(dom)
-  return str2base64(str)
-}
 
 /**
  * @namespace store.data

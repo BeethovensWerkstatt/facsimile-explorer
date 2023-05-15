@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     openDocument (doc) {
-      this.$store.dispatch('loadContent', doc)
+      this.$store.dispatch('setDocument', doc.path)
       console.log(doc.name, this.$route.params.modus || 'pages')
       this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' } })
       console.log(this.table)

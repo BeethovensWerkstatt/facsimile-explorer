@@ -1,6 +1,31 @@
 import { Base64 } from 'js-base64'
 import store from '@/store'
 
+/**
+ * An XML Serializer for converting back to string
+ * @type {XMLSerializer}
+ */
+const serializer = new XMLSerializer()
+
+/**
+ * encode string to utf-8 base64
+ * @param {string} str text to encode
+ * @returns base64 encoded utf-8 coded string
+ */
+export const str2base64 = str => {
+  const enc = new TextEncoder('utf-8')
+  return Base64.fromUint8Array(enc.encode(str))
+}
+/**
+ * serialize DOM and convert to utf-8 base64 encoding
+ * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
+ * @returns base64 encoded utf-8 coded serialization of dom
+ */
+export const dom2base64 = dom => {
+  const str = serializer.serializeToString(dom)
+  return str2base64(str)
+}
+
 export class OctokitNode {
   // orepo: OctokitRepo ... orepo.commit, orepo.revert
   _repo
