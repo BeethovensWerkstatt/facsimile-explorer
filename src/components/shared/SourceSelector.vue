@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     openDocument (doc) {
-      this.$store.dispatch('setDocument', doc.path)
+      this.$store.dispatch('loadContent', doc)
       console.log(doc.name, this.$route.params.modus || 'pages')
       this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' } })
       console.log(this.table)
@@ -65,22 +65,9 @@ export default {
       }))
     },
     availableModernDocuments () {
-      // TODO: Diese IDs sind vorläufig!!!
-      // console.log(this.sources)
-      /*
-      return [{ id: 'E', label: 'Engelmann' },
-        { id: 'L', label: 'Landsberg 8' },
-        { id: 'B', label: 'BSk 21' },
-        { id: 'G', label: 'Grasnick 20b' },
-        { id: 'F', label: 'BN fond français 12.756' },
-        { id: 'Ms96', label: 'Ms. 96' },
-        { id: 'Ms57', label: 'Ms. 57(2)' }
-      ]
-      */
       return this.availableDocuments.filter(s => s.id !== 'Notirungsbuch_K')
     },
     availableReconstructionDocuments () {
-      // return [{ id: 'NotK', label: 'Notirungsbuch K' }]
       return this.availableDocuments.filter(s => s.id === 'Notirungsbuch_K')
     }
   }

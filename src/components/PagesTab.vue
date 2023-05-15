@@ -80,9 +80,10 @@ export default {
           const reader = new FileReader()
           reader.addEventListener('load', () => {
             // console.log('add SVG ...', reader.result)
+            const page = this.page(this.currentPageZeroBased)
             this.$store.dispatch('addSvgFileForSurface', {
               svgText: reader.result,
-              surfaceId: 'x2433e745-3d60-4043-9258-10ab1f1aeb47'
+              surfaceId: page.id
             })
           })
           reader.readAsText(file)
@@ -97,7 +98,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarVisible', 'currentPageZeroBased'])
+    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased'])
   }
 }
 </script>

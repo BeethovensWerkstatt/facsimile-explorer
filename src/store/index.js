@@ -276,7 +276,7 @@ export default createStore({
     },
     setDocument ({ dispatch, getters }, path) {
       const doc = getters.documentByPath(path)
-      // console.log(doc)
+      console.log(doc)
       if (doc) {
         dispatch('setData', doc)
       } else {
