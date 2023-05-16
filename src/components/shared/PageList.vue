@@ -1,36 +1,15 @@
 <template>
   <div class="pageList">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Page</th>
-          <template v-if="tab === 'pagesTab'">
-            <th>SVG</th>
-            <th title="Image URI has a fragment identifier that specifies the actual physical page">#xywh</th>
-            <th>Systems</th>
-          </template>
-          <template v-if="tab === 'zonesTab'">
-            <th># Zones</th>
-          </template>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
-          <td><!-- <sub>{{ i+1 }}</sub> -->{{ page.label }}</td>
-          <template v-if="tab === 'pagesTab'">
-            <td>
-              <input v-if="page.hasSVG" type="checkbox" checked disabled/>
-              <input v-else type="checkbox" disabled/>
-            </td>
-            <td><input type="checkbox" :checked="page.hasFragment" disabled/></td>
-            <td>{{ page.systems }}</td>
-          </template>
-          <template v-if="tab === 'zonesTab'">
-            <td>{{page.zonesCount}}</td>
-          </template>
-        </tr>
-      </tbody>
-    </table>
+
+    <div class="pageBox" v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
+      <h2>{{ page.label }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document}}: {{page.modernLabel}}</small></h2>
+      <div class="activePageContent" v-if="i === activePage">
+        <span class="svg">SVG: <i class="icon" :class="{'icon-check': page.hasSVG, 'icon-cross': !page.hasSVG}"></i></span>
+        <span class="fragment" title="Image URI has a fragment identifier that specifies the actual physical page">Page Size: <i class="icon" :class="{'icon-check': page.hasFragment, 'icon-cross': !page.hasFragment}"></i></span>
+        <span class="systems">Systems: {{page.systems}}</span>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -51,14 +30,14 @@ export default {
   computed: {
     ...mapGetters(['currentPageZeroBased']),
     pages () {
-      const pages = this.$store.getters.documentPagesForOSD(this.$store.getters.filepath)
+      const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
 
       return pages.map(p => ({
         ...p,
         hasSVG: !!p.hasSvg,
         hasFragment: !!p.hasFragment,
         systems: p.systems || 0,
-        zonesCount: 0
+        zonesCount: p.zonesCount
       }))
 
       /*
@@ -96,15 +75,46 @@ export default {
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
 
-td {
-  padding: .1rem .2rem;
+.pageBox {
+  margin: .1rem 0 .2rem 0;
+
+  h2 {
+    font-size: .8rem;
+    font-weight: 700;
+    margin: 0;
+    padding: .1rem .2rem;
+    border: $lightBorder;
+    border-radius: 3px;
+    background-color: lighten($mainBackgroundColor, 5%);
+    position: relative;
+
+    small {
+      font-size: .7rem;
+      line-height: 1rem;
+      font-weight: 300;
+      float: right;
+    }
+  }
+
+  .activePageContent {
+    font-size: .7rem;
+    padding: 0 0 .3rem 1rem;
+    text-align: right;
+
+    .svg, .fragment {
+      padding-right: .5rem;
+    }
+
+    i {
+      font-size: .6rem;
+      position: relative;
+      top: -1px;
+    }
+  }
+
+  &.active h2 {
+    background-color: lighten($highlightColor06, 30%);
+  }
 }
 
-tr.active td {
-  background-color: lighten($activeHighlightColor, 15%);
-}
-
-sub {
-  color: gray;
-}
 </style>
