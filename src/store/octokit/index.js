@@ -1,8 +1,11 @@
-import { OctokitRepo } from '@/tools/github'
 import { Octokit } from '@octokit/rest'
+// import { createPullRequest } from 'octokit-plugin-create-pull-request'
 import { Base64 } from 'js-base64'
+import { OctokitRepo } from '@/tools/github'
 
 import config from '@/config.json'
+
+// export const OctokitPR = Octokit.plugin(createPullRequest)
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 
@@ -69,7 +72,7 @@ const getters = {
   sources: state => state.sources, // TODO we don't need sources *and* documents, sources should receive the 'doc' attribute
   getContentData: state => (path) => state.documents[path],
   loggedChanges: state => state.changes,
-  changesNeedBranching: state => state.changesNeedsBranching,
+  changesNeedBranching: state => state.changesNeedBranching,
 
   proposedCommitMessage: state => {
     if (state.changes.length === 0) {
@@ -158,7 +161,7 @@ const mutations = {
     state.commitMessage = message
   },
   SET_CHANGES_NEED_BRANCHING (state, bool) {
-    state.changesNeedsBranching = bool
+    state.changesNeedBranching = bool
   }
 }
 
@@ -252,7 +255,22 @@ const actions = {
       repo,
       ref: `heads/${branch}`
     })
-    console.log(sha, getters.commit)
+    if (sha !== getters.commit) {
+      commit('SET_CHANGES_NEED_BRANCHING', true)
+    }
+    const targetBranch = branch
+    const tmpBranch = 'conflict-' + new Date().toISOString() + '-' + getters.gh_user.login
+    console.log(sha, getters.commit, tmpBranch)
+    if (getters.changesNeedBranching) {
+      const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
+        owner,
+        repo,
+        ref: 'refs/heads/' + tmpBranch,
+        sha: getters.commit
+      })
+      branch = tmpBranch
+      console.log(newBranch)
+    }
 
     // Create a new tree that contains the specified files
     const newTree = await Promise.all(files.map(async ({ path, content }) => {
@@ -301,6 +319,33 @@ const actions = {
     })
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
+
+    if (getters.changesNeedBranching) {
+      // create PR ...
+      const PR = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
+        owner,
+        repo,
+        title: tmpBranch,
+        body: message,
+        head: tmpBranch,
+        base: targetBranch
+      })
+      // merge PR
+      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${PR.id}/merge`, {
+        owner,
+        repo,
+        pull_number: PR.id,
+        commit_title: 'merge ' + tmpBranch,
+        commit_message: message,
+        delete_branch_on_merge: true // does this work?
+      })
+      // merged?
+      if (merge.merged) {
+        console.log('merged', tmpBranch)
+      } else {
+        console.warn('merge failed!')
+      }
+    }
 
     commit('SET_COMMIT_MESSAGE', null)
     commit('EMPTY_CHANGELOG')
