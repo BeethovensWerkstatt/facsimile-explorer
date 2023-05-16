@@ -18,7 +18,10 @@
         <tr v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
           <td><!-- <sub>{{ i+1 }}</sub> -->{{ page.label }}</td>
           <template v-if="tab === 'pagesTab'">
-            <td><input type="checkbox" :checked="page.hasSVG" disabled/></td>
+            <td>
+              <input v-if="page.hasSVG" type="checkbox" checked disabled/>
+              <input v-else type="checkbox" disabled/>
+            </td>
             <td><input type="checkbox" :checked="page.hasFragment" disabled/></td>
             <td>{{ page.systems }}</td>
           </template>
@@ -48,15 +51,16 @@ export default {
   computed: {
     ...mapGetters(['currentPageZeroBased']),
     pages () {
-      // Info JP: das kann auch das gleiche Objekt sein, falls das einfacher ist…
-      console.log(this.$store.getters.pages)
-      return this.$store.getters.pages.map(p => ({
+      const pages = this.$store.getters.documentPagesForOSD(this.$store.getters.filepath)
+
+      return pages.map(p => ({
         ...p,
-        hasSVG: !!p.hasSVG,
+        hasSVG: !!p.hasSvg,
         hasFragment: !!p.hasFragment,
         systems: p.systems || 0,
-        zonesCount: p.zonesCount || 0
+        zonesCount: 0
       }))
+
       /*
       if (this.tab === 'pagesTab') {
         return [{ label: '1', hasSVG: true, systems: 12, hasFragment: true },

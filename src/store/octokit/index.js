@@ -6,6 +6,31 @@ import config from '@/config.json'
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 
+/**
+ * An XML Serializer for converting back to string
+ * @type {XMLSerializer}
+ */
+const serializer = new XMLSerializer()
+
+/**
+ * encode string to utf-8 base64
+ * @param {string} str text to encode
+ * @returns base64 encoded utf-8 coded string
+ */
+const str2base64 = str => {
+  const enc = new TextEncoder('utf-8')
+  return Base64.fromUint8Array(enc.encode(str))
+}
+/**
+ * serialize DOM and convert to utf-8 base64 encoding
+ * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
+ * @returns base64 encoded utf-8 coded serialization of dom
+ */
+const dom2base64 = dom => {
+  const str = serializer.serializeToString(dom)
+  return str2base64(str)
+}
+
 const state = {
   user: {},
   auth: '',
@@ -20,7 +45,11 @@ const state = {
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
   filename: undefined, // name of selected file
-  filesha: undefined // sha of selected file ... this is better placed in store.data
+  filesha: undefined, // sha of selected file ... this is better placed in store.data
+
+  changes: [],
+  commitMessage: null,
+  changesNeedBranching: false // TODO: this needs to be checked in preparation of commit
 }
 
 const getters = {
@@ -38,7 +67,40 @@ const getters = {
   getPathByName: state => (name) => state.sources.find(s => s.name === name)?.path,
   // getNameByPath: state => (path) => state.sources.find(s => s.path === path)?.name,
   sources: state => state.sources, // TODO we don't need sources *and* documents, sources should receive the 'doc' attribute
-  getContentData: state => (path) => state.documents[path]
+  getContentData: state => (path) => state.documents[path],
+  loggedChanges: state => state.changes,
+  changesNeedBranching: state => state.changesNeedsBranching,
+
+  proposedCommitMessage: state => {
+    if (state.changes.length === 0) {
+      return ''
+    }
+
+    const baseMessages = new Map()
+    state.changes.forEach(change => {
+      if (baseMessages.has(change.baseMessage)) {
+        baseMessages.get(change.baseMessage).push(change.param)
+      } else {
+        baseMessages.set(change.baseMessage, [change.param])
+      }
+    })
+    const out = []
+
+    baseMessages.forEach((params, baseMessage) => {
+      const uniqueParams = [...new Set(params)]
+      out.push(baseMessage + uniqueParams.join(', '))
+    })
+
+    return '[FX] ' + out.join('; ')
+  },
+  commitMessage: state => state.commitMessage,
+  changedFiles: state => {
+    const paths = []
+    state.changes.forEach(change => {
+      paths.push(change.path)
+    })
+    return [...new Set(paths)]
+  }
 }
 
 const mutations = {
@@ -85,6 +147,18 @@ const mutations = {
   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
     if (!doc) console.warn(`no document '${path}'`)
     state.documents[path] = { repo, owner, ref, path, name, sha, doc }
+  },
+  LOG_CHANGE (state, { path, baseMessage, param }) {
+    state.changes.push({ path, baseMessage, param })
+  },
+  EMPTY_CHANGELOG (state) {
+    state.changes = []
+  },
+  SET_COMMIT_MESSAGE (state, message) {
+    state.commitMessage = message
+  },
+  SET_CHANGES_NEED_BRANCHING (state, bool) {
+    state.changesNeedsBranching = bool
   }
 }
 
@@ -118,7 +192,7 @@ const actions = {
     {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
-      path = 'data/sources/Notirungsbuch K/Notirungsbuch_K.xml',
+      path = 'data/sources/Notirungsbuch_K/Notirungsbuch_K.xml',
       ref = config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
@@ -158,7 +232,7 @@ const actions = {
     }
   },
   /**
-   * commit multiple files in one commit
+   * commit multiple files in one commit. This isn't called directly, but through prepareGitCommit()
    *
    * @param {string} owner
    * @param {string} repo
@@ -168,7 +242,7 @@ const actions = {
    *
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
-  async createCommit ({ commit, getters }, { message, files, callback, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+  async commit2GitHub ({ commit, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
     // Check with former SHA!!! Conflict resolution!
@@ -228,7 +302,55 @@ const actions = {
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
 
-    callback()
+    commit('SET_COMMIT_MESSAGE', null)
+    commit('EMPTY_CHANGELOG')
+    commit('SET_CHANGES_NEED_BRANCHING', false)
+  },
+
+  /**
+   * This is called whenever a file is changed
+   * @param  {[type]} commit                    [description]
+   * @param  {[type]} path                      [description]
+   * @param  {[type]} baseMessage               [description]
+   * @param  {[type]} param                     [description]
+   * @return {[type]}             [description]
+   */
+  logChange ({ commit }, { path, baseMessage, param }) {
+    commit('LOG_CHANGE', { path, baseMessage, param })
+  },
+
+  /**
+   * prepareGitCommit will be triggered when the commit button is clicked.
+   * It collects the proper commit message and takes care of all preparations.
+   * @param  {[type]} commit                 [description]
+   * @param  {[type]} dispatch               [description]
+   * @param  {[type]} getters                [description]
+   * @return {[type]}          [description]
+   */
+  prepareGitCommit ({ commit, dispatch, getters }) {
+    const files = []
+    const baseMessages = []
+    getters.loggedChanges.forEach(change => {
+      const path = change.path
+
+      if (baseMessages.indexOf(change.baseMessage) === -1) {
+        baseMessages.push(change.baseMessage)
+      }
+
+      // TODO: brauchen wir dafür rootgetters? Das ist aus dem data-module…
+      const dom = getters.documentByPath(path)
+      const content = dom2base64(dom)
+
+      files.push({ path, content })
+    })
+
+    const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
+
+    dispatch('commit2GitHub', { message, files, branch: 'test' })
+  },
+
+  setCommitMessage ({ commit }, message) {
+    commit('SET_COMMIT_MESSAGE', message)
   },
 
   async loadSources ({ commit, dispatch, getters }) {

@@ -142,15 +142,15 @@ export function checkIiifManifest (json) {
   const claimsIiif3 = json['@context'] === 'http://iiif.io/api/presentation/3/context.json'
   const claimsManifest = json['@type'] === 'sc:Manifest' || json.type === 'Manifest'
 
-  console.log('json.type: ' + json.type)
-  console.log('json.@type: ' + json['@type'])
-  console.log('claimsManifest: ' + claimsManifest)
+  // console.log('json.type: ' + json.type)
+  // console.log('json.@type: ' + json['@type'])
+  // console.log('claimsManifest: ' + claimsManifest)
 
   const hasId = (typeof json['@id'] === 'string' && json['@id'].length > 0) || (typeof json.id === 'string' && json.id.length > 0)
   const hasSequences = Array.isArray(json.sequences)
 
-  console.log('hasId: ' + hasId)
-  console.log('hasSequences: ' + hasSequences)
+  // console.log('hasId: ' + hasId)
+  // console.log('hasSequences: ' + hasSequences)
 
   return (claimsIiif2 || claimsIiif3) && claimsManifest && hasId && hasSequences
 }
@@ -199,7 +199,6 @@ export function getPageArray (mei) {
     }
   }
 
-  console.log('\n\n\nSTARTING')
   const arr = []
   mei.querySelectorAll('foliaDesc > *').forEach(foliumLike => {
     resolveFoliumLike(arr, foliumLike)
@@ -215,8 +214,6 @@ export function getPageArray (mei) {
 
       const fullPath = store.getters.getPathByName(folder)
       const file = store.getters.getContentData(fullPath)?.doc
-      console.log('got this')
-      console.log(file)
       arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
     }
   })
@@ -233,13 +230,13 @@ export function getPageArray (mei) {
     obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
     obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
     obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
-    obj.hasSvg = surface.querySelector('graphic[type="svg"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+    obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
     obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
 
     obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
     arr[n] = obj
   })
-  console.log(arr)
+  // console.log(arr)
   /* mei.querySelectorAll('surface').forEach((surface, n) => {
     const graphic = surface.querySelector('graphic')
     const i = n + 1
