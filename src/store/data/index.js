@@ -131,10 +131,10 @@ const dataModule = {
       graphic.setAttribute('type', 'shapes')
 
       const docName = getters.documentNameByPath(path)
-      const svgFileName = docName + '_surface' + paddedSurfaceIndex + '-shapes.svg'
-      const svgRelativePath = './' + svgFileName
+      const svgFileName = docName + '_p' + paddedSurfaceIndex + '.svg'
+      const svgRelativePath = './svg/' + svgFileName
       const meiFileName = path.split('/').pop()
-      const svgFullPath = path.replace(meiFileName, svgFileName)
+      const svgFullPath = path.replace(meiFileName, 'svg/' + svgFileName)
       // console.log('TODO: Need to commit SVG file to ' + svgFullPath)
 
       graphic.setAttribute('target', svgRelativePath)
@@ -271,6 +271,111 @@ const dataModule = {
       return arr
     },
 
+    documentPagesForSidebars: (state, getters) => (path) => {
+      const resolveFoliumLike2Surfaces = (arr, foliumLike) => {
+        const type = foliumLike.localName
+        if (type === undefined) {
+          // this is a textnode
+        } else if (type === 'bifolium') {
+          if (foliumLike.hasAttribute('outer.recto')) {
+            arr.push(foliumLike.getAttribute('outer.recto'))
+          }
+          if (foliumLike.hasAttribute('inner.verso')) {
+            arr.push(foliumLike.getAttribute('inner.verso'))
+          }
+
+          foliumLike.childNodes.forEach(child => {
+            resolveFoliumLike2Surfaces(arr, child)
+          })
+
+          if (foliumLike.hasAttribute('inner.recto')) {
+            arr.push(foliumLike.getAttribute('inner.recto'))
+          }
+          if (foliumLike.hasAttribute('outer.verso')) {
+            arr.push(foliumLike.getAttribute('outer.verso'))
+          }
+        } else if (type === 'folium' || type === 'unknownFoliation') {
+          if (foliumLike.hasAttribute('recto')) {
+            arr.push(foliumLike.getAttribute('recto'))
+          }
+
+          foliumLike.childNodes.forEach(child => {
+            resolveFoliumLike2Surfaces(arr, child)
+          })
+
+          if (foliumLike.hasAttribute('verso')) {
+            arr.push(foliumLike.getAttribute('verso'))
+          }
+        } else {
+          // continue searching for child elements, like when nested inside an add or so
+          foliumLike.childNodes.forEach(child => {
+            resolveFoliumLike2Surfaces(arr, child)
+          })
+        }
+      }
+
+      const arr = []
+      const mei = state.documents[path]
+      if (!mei) {
+        return []
+      }
+
+      mei.querySelectorAll('foliaDesc > *').forEach(foliumLike => {
+        resolveFoliumLike2Surfaces(arr, foliumLike)
+      })
+
+      const encodingDescClasses = mei.querySelector('encodingDesc').getAttribute('class').trim().replace(/s+/, ' ').split(' ')
+      const isReconstruction = encodingDescClasses.indexOf('#bw_document_reconstruction') !== -1
+
+      const name = getters.documentNameByPath(path)
+
+      arr.forEach((link, i) => {
+        if (link.startsWith('#')) {
+          arr[i] = { name, surface: mei.querySelector('surface[*|id = "' + link.substring(1) + '"]') }
+        } else {
+          const relativePath = link.split('#')[0]
+          const id = link.split('#')[1]
+          const folder = relativePath.split('/')[relativePath.split('/').length - 2]
+
+          const fullPath = getters.documentPathByName(folder)
+          const file = getters.documentByPath(fullPath)
+          arr[i] = { name: folder, surface: file.querySelector('surface[*|id = "' + id + '"]') }
+        }
+      })
+
+      arr.forEach((page, n) => {
+        const name = page.name
+        const surface = page.surface
+        const graphic = surface.querySelector('graphic[type="facsimile"]')
+        const i = n + 1
+        // const page = mei.querySelector('page:nth-child(' + i + ')')
+
+        const obj = {}
+
+        const target = graphic.getAttributeNS('', 'target').trim()
+        const surfaceN = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : i
+        const surfaceLabel = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : surfaceN
+        const label = isReconstruction ? i : surfaceLabel
+
+        obj.uri = target
+        obj.id = surface.getAttribute('xml:id').trim()
+        obj.label = label
+        obj.modernLabel = isReconstruction ? surfaceLabel : null
+
+        obj.document = name
+
+        obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
+        obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
+
+        obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+        obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
+        obj.hasFragment = target.indexOf('#xywh=') !== -1
+        obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
+        arr[n] = obj
+      })
+      return arr
+    },
+
     /**
      * retrieves the path of a document by its name
      * @memberof store.data.getters
@@ -313,6 +418,27 @@ const dataModule = {
         return elem !== null
       })
       return document !== undefined ? document[0] : null
+    },
+
+    /**
+     * returns the xml:id of the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageId: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const arr = getters.documentPagesForSidebars(path)
+      let out = null
+
+      try {
+        const surface = arr[pageIndex]
+        out = surface.id
+      } catch (err) {
+        // console.log('Unable to find surface: ' + err)
+      }
+      return out
     }
   }
 }
