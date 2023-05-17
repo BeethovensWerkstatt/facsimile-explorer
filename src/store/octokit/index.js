@@ -1,38 +1,12 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
-import { Base64 } from 'js-base64'
-import { OctokitRepo } from '@/tools/github'
+import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
 
 import config from '@/config.json'
 
 // export const OctokitPR = Octokit.plugin(createPullRequest)
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
-
-/**
- * An XML Serializer for converting back to string
- * @type {XMLSerializer}
- */
-const serializer = new XMLSerializer()
-
-/**
- * encode string to utf-8 base64
- * @param {string} str text to encode
- * @returns base64 encoded utf-8 coded string
- */
-const str2base64 = str => {
-  const enc = new TextEncoder('utf-8')
-  return Base64.fromUint8Array(enc.encode(str))
-}
-/**
- * serialize DOM and convert to utf-8 base64 encoding
- * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
- * @returns base64 encoded utf-8 coded serialization of dom
- */
-const dom2base64 = dom => {
-  const str = serializer.serializeToString(dom)
-  return str2base64(str)
-}
 
 const state = {
   user: {},
@@ -208,10 +182,7 @@ const actions = {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
         console.log(data.download_url)
         try {
-          const dec = new TextDecoder('utf-8')
-          const txt = dec.decode(Base64.toUint8Array(data.content))
-          const parser = new DOMParser()
-          const mei = parser.parseFromString(txt, 'application/xml')
+          const mei = base64dom(data.content)
           if (callback) { // TODO if typeof function?
             const data = { xml: mei }
             callback(data)

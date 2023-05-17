@@ -8,6 +8,30 @@ import store from '@/store'
 const serializer = new XMLSerializer()
 
 /**
+ * decode base63 encoded utf-8 string
+ * @param {string} data base64 encoded utf-8 string
+ * @returns decoded text
+ */
+export const base64text = (data) => {
+  const dec = new TextDecoder('utf-8')
+  const txt = dec.decode(Base64.toUint8Array(data))
+  return txt
+}
+
+/**
+ * decode and parse base64 encode utf-8 serialization of XML document
+ * @param {string} data base64 encoded utf-8 serialization of DOM
+ * @param {string='application/xml'} type type of XML
+ * @returns parsed DOM
+ */
+export const base64dom = (data, type = 'application/xml') => {
+  const parser = new DOMParser()
+  const text = base64text(data)
+  const dom = parser.parseFromString(text, type)
+  return dom
+}
+
+/**
  * encode string to utf-8 base64
  * @param {string} str text to encode
  * @returns base64 encoded utf-8 coded string
