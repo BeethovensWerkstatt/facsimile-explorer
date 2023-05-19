@@ -12,7 +12,7 @@ const state = {
   user: {},
   auth: '',
   authenticated: false,
-  octokit: new Octokit(), // avoid undefined
+  octokit: new Octokit(),
   fileowner: undefined, // its the owner of the repo!
   filerepo: undefined,
   fileref: undefined,
@@ -145,7 +145,17 @@ const mutations = {
 
 const actions = {
   checkAuthenticate ({ commit, getters }) {
-    console.log(getters.octokit)
+    getters.octokit.auth().then(auth => {
+      console.log(auth)
+      commit('SET_AUTHENTICATED', auth.type !== 'unauthenticated')
+    })
+  },
+  setAccessToken ({ commit, dispatch, getters }, { auth, store, remove }) {
+    commit('SET_ACCESS_TOKEN', { auth, store, remove })
+    dispatch('checkAuthenticate')
+    if (getters.isAuthenticated) {
+      dispatch('loadSources')
+    }
   },
   authenticate ({ commit, dispatch }, { code, store, remove }) {
     // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
@@ -156,7 +166,7 @@ const actions = {
           const accessToken = data.access_token
           // console.log(data, accessToken)
           if (accessToken) {
-            commit('SET_ACCESS_TOKEN', { auth: accessToken, store, remove })
+            dispatch('setAccessToken', { auth: accessToken, store, remove })
           } else {
             console.error('authentication failed', data)
           }
