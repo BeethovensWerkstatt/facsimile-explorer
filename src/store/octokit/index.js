@@ -110,13 +110,13 @@ const mutations = {
     }
   },
   SET_COMMIT (state, commit) {
+    // console.log('commit', commit)
     state.commit = commit
   },
-  SET_GH_FILE (state, { repo, owner, ref, commit, path, name, sha }) {
+  SET_GH_FILE (state, { repo, owner, ref, path, name, sha }) {
     state.filerepo = repo
     state.fileowner = owner
     state.fileref = ref
-    state.commit = commit
     state.filepath = path
     state.filename = name
     state.filesha = sha
@@ -144,18 +144,16 @@ const mutations = {
 }
 
 const actions = {
-  checkAuthenticate ({ commit, getters }) {
+  checkAuthenticate ({ commit, getters }, opts) {
     getters.octokit.auth().then(auth => {
       console.log(auth)
       commit('SET_AUTHENTICATED', auth.type !== 'unauthenticated')
+      if (opts?.authenticated) opts.authenticated()
     })
   },
-  setAccessToken ({ commit, dispatch, getters }, { auth, store, remove }) {
+  setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
     commit('SET_ACCESS_TOKEN', { auth, store, remove })
-    dispatch('checkAuthenticate')
-    if (getters.isAuthenticated) {
-      dispatch('loadSources')
-    }
+    dispatch('checkAuthenticate', { authenticated: () => dispatch('loadSources') })
   },
   authenticate ({ commit, dispatch }, { code, store, remove }) {
     // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
@@ -244,6 +242,7 @@ const actions = {
       repo,
       ref: `heads/${branch}`
     })
+    console.log(sha, getters.commit)
     if (sha !== getters.commit) {
       commit('SET_CHANGES_NEED_BRANCHING', true)
     }
@@ -396,10 +395,10 @@ const actions = {
     }
     // console.log(repometa)
     const sourcefiles = []
-
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
     commit('SET_COMMIT', repo.sha)
+    console.log('commit', getters.commit)
     const folder = await root.getFile(config.root)
     const sources = await folder.folder
     for (const source of sources) {
@@ -426,6 +425,7 @@ const actions = {
     Promise.all(sourcePromises).finally(() => {
       dispatch('setLoading', false)
       console.log('all loaded')
+      dispatch('loadContent', {})
     })
     // for (const source of sourcefiles) {
     //   dispatch('loadContent', source)

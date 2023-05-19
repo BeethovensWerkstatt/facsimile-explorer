@@ -12,4 +12,6 @@ import { GH_ACCESS_TOKEN } from './store/octokit'
 createApp(App).use(router).use(store).use(VueCookies).mount('#app')
 
 store.dispatch('initVerovio')
-store.dispatch('setAccessToken', VueCookies.get(GH_ACCESS_TOKEN))
+const token = VueCookies.get(GH_ACCESS_TOKEN)
+// console.log(token)
+store.dispatch('setAccessToken', { auth: token })
