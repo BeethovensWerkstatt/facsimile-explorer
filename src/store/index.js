@@ -1,5 +1,5 @@
 import { createStore } from 'vuex'
-import { iiifManifest2mei, checkIiifManifest, getPageArray } from '@/tools/iiif.js'
+import { iiifManifest2mei, checkIiifManifest, getPageArray, fixLink } from '@/tools/iiif.js'
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
@@ -91,7 +91,7 @@ export default createStore({
     },
     SET_PAGES (state, arr) {
       // faulty IIIF server
-      state.pages = arr.map(p => ({ ...p, uri: (p.uri?.startsWith('https://gallica.bnf.fr/iiif/') && !p.uri?.endsWith('/info.json')) ? p.uri + '/info.json' : p.uri }))
+      state.pages = arr.map(p => ({ ...p, uri: fixLink(p.uri) }))
       // console.log(state.pages)
     },
     SET_PAGE_SVG (state, { i, svg }) {

@@ -8,6 +8,8 @@ function uuidv4 () {
   })
 }
 
+export const fixLink = uri => (uri?.startsWith('https://gallica.bnf.fr/iiif/') && !uri?.endsWith('/info.json')) ? uri + '/info.json' : uri
+
 // meta now contains a property doc with the parsed XML. Should we change this?
 function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate) {
   // console.log(n, infoJson)
@@ -15,11 +17,6 @@ function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate
   const label = canvas.label
   const height = infoJson.height
   const width = infoJson.width
-  let uri = canvas?.images[0]?.resource?.service['@id']
-
-  if (uri.startsWith('https://gallica.bnf.fr/iiif/')) {
-    uri += '/info.json'
-  }
 
   const surfaceId = 's' + uuidv4()
   const graphicId = 'g' + uuidv4()
@@ -53,7 +50,7 @@ function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate
 
   const graphic = surface.querySelector('graphic')
   graphic.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', graphicId)
-  graphic.setAttribute('target', uri)
+  graphic.setAttribute('target', fixLink(canvas?.images[0]?.resource?.service['@id']))
   graphic.setAttribute('width', width)
   graphic.setAttribute('height', height)
 
@@ -75,9 +72,7 @@ export async function iiifManifest2mei (json, url, parser) {
   })
 
   imageLinks.forEach((uri, i) => {
-    if (uri.startsWith('https://gallica.bnf.fr/iiif/')) {
-      uri += '/info.json'
-    }
+    uri = fixLink(uri)
 
     promises.push(
       fetch(uri)

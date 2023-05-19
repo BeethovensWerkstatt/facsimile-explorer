@@ -11,6 +11,7 @@ export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 const state = {
   user: {},
   auth: '',
+  authenticated: false,
   octokit: new Octokit(), // avoid undefined
   fileowner: undefined, // its the owner of the repo!
   filerepo: undefined,
@@ -32,7 +33,7 @@ const state = {
 const getters = {
   gh_user: state => state.user,
   octokit: state => state.octokit,
-  isAuthenticated: state => (state.auth && state.user?.login),
+  isAuthenticated: state => state.authenticated, // (state.auth && state.user?.login),
   filerepo: state => state.filerepo,
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
@@ -81,6 +82,9 @@ const getters = {
 }
 
 const mutations = {
+  SET_AUTHENTICATED (state, authenticated) {
+    state.authenticated = authenticated
+  },
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
     state.auth = auth
     console.log('set access token', state.auth)
@@ -140,6 +144,9 @@ const mutations = {
 }
 
 const actions = {
+  checkAuthenticate ({ commit, getters }) {
+    console.log(getters.octokit)
+  },
   authenticate ({ commit, dispatch }, { code, store, remove }) {
     // NGINX has to be configured as a reverse proxy to https://github.com/login/oauth/access_token?code=${code}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}
     const url = `auth?code=${code}`
@@ -153,6 +160,7 @@ const actions = {
           } else {
             console.error('authentication failed', data)
           }
+          commit('SET_AUTHENTICATED', true)
           dispatch('loadContent', {})
         })
       } else {
@@ -362,7 +370,7 @@ const actions = {
 
     const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
 
-    dispatch('commit2GitHub', { message, files, branch: 'test' })
+    dispatch('commit2GitHub', { message, files })
   },
 
   setCommitMessage ({ commit }, message) {
