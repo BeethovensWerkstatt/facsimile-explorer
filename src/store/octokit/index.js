@@ -246,7 +246,9 @@ const actions = {
       commit('SET_CHANGES_NEED_BRANCHING', true)
     }
     const targetBranch = branch
-    const tmpBranch = 'conflict-' + new Date().toISOString() + '-' + getters.gh_user.login
+    const zpad = (o, n = 2, p = '0') => ('' + o).padStart(n, p)
+    const refdate = (date = new Date()) => date.getFullYear() + zpad(date.getMonth() + 1) + zpad(date.getDate()) + zpad(date.getHours()) + zpad(date.getMinutes()) + zpad(date.getSeconds())
+    const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
     console.log(sha, getters.commit, tmpBranch)
     if (getters.changesNeedBranching) {
       const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
