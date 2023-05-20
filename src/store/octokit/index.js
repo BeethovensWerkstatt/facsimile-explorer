@@ -284,7 +284,7 @@ const actions = {
     const { data: { sha: newTreeSha } } = await octokit.git.createTree({
       owner,
       repo,
-      base_tree: sha,
+      base_tree: getters.commit,
       tree: newTree
     })
     // console.log('treeSha', newTreeSha)
@@ -295,7 +295,7 @@ const actions = {
       repo,
       message,
       tree: newTreeSha,
-      parents: [sha]
+      parents: [getters.commit]
     })
     // console.log('commitSha', newCommitSha)
 
