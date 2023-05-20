@@ -242,7 +242,6 @@ const actions = {
       repo,
       ref: `heads/${branch}`
     })
-    console.log(sha, getters.commit)
     if (sha !== getters.commit) {
       commit('SET_CHANGES_NEED_BRANCHING', true)
     }
@@ -309,7 +308,7 @@ const actions = {
     commit('SET_COMMIT', newCommitSha)
 
     if (getters.changesNeedBranching) {
-      // create PR ...
+      // create PR
       const PR = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
         owner,
         repo,
