@@ -1,10 +1,9 @@
 <template>
   <div class="pageList">
-
     <div class="pageBox" v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
       <h2>{{ page.label }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document}}: {{page.modernLabel}}</small></h2>
       <div class="activePageContent" v-if="i === activePage && tab === 'pagesTab'">
-        <span class="svg">SVG: <i class="icon" :class="{'icon-check': page.hasSVG, 'icon-cross': !page.hasSVG}"></i></span>
+        <span class="svg">SVG: <i class="icon" :class="{'icon-check': page.hasSvg, 'icon-cross': !page.hasSvg}"></i></span>
         <span class="fragment" title="Image URI has a fragment identifier that specifies the actual physical page">Page Size: <i class="icon" :class="{'icon-check': page.hasFragment, 'icon-cross': !page.hasFragment}"></i></span>
         <span class="systems">Systems: {{page.systems}}</span>
       </div>
@@ -32,13 +31,7 @@ export default {
     pages () {
       const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
 
-      return pages.map(p => ({
-        ...p,
-        hasSVG: !!p.hasSvg,
-        hasFragment: !!p.hasFragment,
-        systems: p.systems || 0,
-        zonesCount: p.zonesCount
-      }))
+      return pages
 
       /*
       if (this.tab === 'pagesTab') {
