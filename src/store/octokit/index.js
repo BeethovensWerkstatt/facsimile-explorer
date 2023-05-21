@@ -221,6 +221,48 @@ const actions = {
       })
     }
   },
+
+  loadSvgFile (
+    { commit, dispatch, getters },
+    {
+      owner = config.repository.owner, // 'BeethovensWerkstatt',
+      repo = config.repository.repo, // 'data',
+      path = 'data/sources/Notirungsbuch_K/Notirungsbuch_K.xml',
+      ref = config.repository.branch, // 'dev'
+      callback = null // optional callback to call, when loading is finished
+    }) {
+    const contentData = getters.getContentData(path)
+
+    console.log('\n\nYODIYAY')
+    console.log(contentData)
+
+    if (contentData?.doc) {
+      dispatch('setData', contentData.doc)
+      console.log(contentData.path, 'loaded from cache')
+    } else {
+      getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+        console.log(data.download_url)
+        try {
+          const svg = base64dom(data.content)
+          if (callback) { // TODO if typeof function?
+            const data = { xml: svg }
+            callback(data)
+            callback = null
+          }
+          const parr = path.split('/')
+          dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: svg })
+        } catch (e) { // TODO if typeof function?
+          console.error(e.message)
+          if (callback) {
+            const data = { error: e }
+            callback(data)
+            callback = null
+          }
+        }
+      })
+    }
+  },
+
   /**
    * commit multiple files in one commit. This isn't called directly, but through prepareGitCommit()
    *

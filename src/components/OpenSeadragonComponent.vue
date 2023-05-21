@@ -210,7 +210,11 @@ export default {
     })
   },
   mounted: function () {
-    this.viewer = OpenSeadragon(osdOptions)
+    try {
+      this.viewer = OpenSeadragon(osdOptions)
+    } catch (err) {
+      console.warn('WARNING: Unable to init OSD yet…')
+    }
 
     const annotoriousConfig = {
       disableEditor: true

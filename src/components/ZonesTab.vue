@@ -61,6 +61,22 @@ export default {
     },
     createZone () {
       this.$store.dispatch('createNewWritingZone')
+    },
+    verifySvgAvailable () {
+      const svgPath = this.$store.getters.currentSvgPath
+      const svg = this.$store.getters.svgForCurrentPage
+
+      console.log('\n\n\nSHOULD HAVE ' + svgPath)
+      console.log('what I have is')
+      console.log(svg)
+
+      if (svgPath !== null && !svg) {
+        console.log('need to do something about this…')
+        this.$store.dispatch('loadSvgFile', {
+          path: svgPath,
+          ref: 'test'
+        })
+      }
     }
   },
   computed: {
@@ -74,6 +90,17 @@ export default {
     unAssignedShapes () {
       return ['shapeA', 'shapeB', 'shapeC', 'shapeD', 'shapeE', 'shapeF', 'shapeG']
     }
+  },
+  created () {
+    this.unwatchSvgVerification = this.$store.watch((state, getters) => getters.currentSvgPath,
+      (newPath, oldPath) => {
+        this.verifySvgAvailable()
+      })
+
+    this.verifySvgAvailable()
+  },
+  beforeUnmount () {
+    this.unwatchSvgVerification()
   }
 }
 </script>
