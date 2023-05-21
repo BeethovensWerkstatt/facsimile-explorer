@@ -70,7 +70,7 @@ const dataModule = {
      */
     SET_DOCUMENTNAME_PATH_MAPPING (state, arr) {
       state.documentNamePathMapping = arr
-      console.log(state.documentNamePathMapping)
+      // console.log(state.documentNamePathMapping)
     },
 
     ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE (state, { path, modifiedDom }) {
@@ -165,6 +165,10 @@ const dataModule = {
     createNewWritingZone ({ commit, getters, dispatch }) {
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+
+      console.log('test f1')
+      console.log(modifiedSvgDom)
+
       const surfaceId = getters.currentPageId
 
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
@@ -554,6 +558,10 @@ const dataModule = {
       const pages = getters.documentPagesForSidebars(path)
 
       const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+
       const docName = page.document
       const surfaceId = page.id
       const docPath = getters.documentPathByName(docName)
