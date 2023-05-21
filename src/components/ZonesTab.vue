@@ -23,7 +23,7 @@
         <OpenSeadragonComponent/>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="zonesTab" v-if="zonesTabRightSidebarVisible">
-        <h1>Writing Zones</h1>
+        <h1>Writing Zones ({{writingZones.length}})</h1>
         <WritingZoneListEntry v-for="(wz, i) in writingZones" :key="i" :wz="wz" :position="i"/>
         <button id="newZone" class="btn btn-sm" @click="createZone">Start new Writing Zone</button>
         <h1 class="spaced">Unassigned Shapes: {{unAssignedShapes.length}}</h1>
@@ -60,15 +60,16 @@ export default {
       this.$store.dispatch('toggleZonesTabLeftSidebar')
     },
     createZone () {
-      alert('Hiermit wird eine neue WritingZone angelegt, in der halt noch keine Shapes drin sind. Ich hatte überlegt, ob man nur die aktive WritingZone voll anzeigt, und bei den anderen die WritingLayer ausblendet – das können wir aber auch später noch nachrüsten. \n\nGrundsätzlich wählt man hier eine WritingZone aus, und alle Shapes, auf die man dann im OSD klickt, werden dieser WritingZone zugeordnet.')
+      this.$store.dispatch('createNewWritingZone')
     }
   },
   computed: {
     ...mapGetters(['zonesTabLeftSidebarVisible', 'zonesTabRightSidebarVisible']),
     writingZones () {
-      return [{ id: 'asd', totalCount: 73, layers: [{ id: 'asd1', shapes: ['shape1', 'shape2', 'shape3', 'shape4'] }] },
+      return this.$store.getters.writingZonesOnCurrentPage
+      /* return [{ id: 'asd', totalCount: 73, layers: [{ id: 'asd1', shapes: ['shape1', 'shape2', 'shape3', 'shape4'] }] },
         { id: 'sdf', totalCount: 114, layers: [{ id: 'sdf1', shapes: ['shapeX', 'shapeY', 'shapeZ'] }] },
-        { id: 'dfg', totalCount: 82, layers: [{ id: 'dfg1', shapes: ['shapeP', 'shapeQ', 'shapeR', 'shapeS', 'shapeT'] }] }]
+        { id: 'dfg', totalCount: 82, layers: [{ id: 'dfg1', shapes: ['shapeP', 'shapeQ', 'shapeR', 'shapeS', 'shapeT'] }] }] */
     },
     unAssignedShapes () {
       return ['shapeA', 'shapeB', 'shapeC', 'shapeD', 'shapeE', 'shapeF', 'shapeG']

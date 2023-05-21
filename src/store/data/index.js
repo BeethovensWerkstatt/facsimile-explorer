@@ -74,12 +74,7 @@ const dataModule = {
     },
 
     ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE (state, { path, modifiedDom }) {
-      // TODO: Check dimensions of svgDom -> JK
-
-      // TODO: Upload svgDom
-
       state.documents[path] = modifiedDom
-      // TODO: set dirty flag
     }
   },
 
@@ -165,6 +160,74 @@ const dataModule = {
       } else {
         alert('[ERROR] SVG Dimensions for ' + svgFullPath + ' incorrect: \n\n   pixelWidth: ' + pixelWidth + '\n     svgWidth: ' + svgWidth + '\n  pixelHeight: ' + pixelHeight + '\n    svgHeight: ' + svgHeight + '\n\n Loading SVG file aborted.')
       }
+    },
+
+    createNewWritingZone ({ commit, getters, dispatch }) {
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+      const surfaceId = getters.currentPageId
+
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const genDescPage = modifiedDom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+
+      const svgLink = surface.querySelector('graphic[type="shapes"]').getAttribute('target')
+
+      const genDescWzId = 'g' + uuid()
+      const genDescWlId = 'g' + uuid()
+      const zoneId = 'z' + uuid()
+      const gWzId = 'z' + uuid()
+      const gWlId = 'l' + uuid()
+
+      const existingWzCount = genDescPage.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]').length
+      const genDescWzLabel = existingWzCount + 1
+
+      const genDescWz = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'genDesc')
+      genDescWz.setAttribute('xml:id', genDescWzId)
+      genDescWz.setAttribute('class', '#geneticOrder_writingZoneLevel')
+      genDescWz.setAttribute('corresp', svgLink + '#' + gWzId)
+      genDescWz.setAttribute('label', genDescWzLabel)
+
+      const genStateWl = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'genState')
+      genStateWl.setAttribute('xml:id', genDescWlId)
+      genStateWl.setAttribute('class', '#geneticOrder_writingLayerLevel #geneticOrder_finalState')
+      genStateWl.setAttribute('corresp', svgLink + '#' + gWlId)
+      genStateWl.setAttribute('label', '#final')
+
+      genDescWz.appendChild(genStateWl)
+      genDescPage.appendChild(genDescWz)
+
+      const zone = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'zone')
+      zone.setAttribute('xml:id', zoneId)
+      zone.setAttribute('data', '#' + genDescWzId)
+      zone.setAttribute('ulx', 0)
+      zone.setAttribute('uly', 0)
+      zone.setAttribute('lrx', 0)
+      zone.setAttribute('lry', 0)
+
+      surface.appendChild(zone)
+
+      const gWz = modifiedSvgDom.createElementNS('http://www.w3.org/2000/svg', 'g')
+      gWz.setAttribute('id', gWzId)
+      gWz.setAttribute('class', 'writingZone')
+
+      const gWl = modifiedSvgDom.createElementNS('http://www.w3.org/2000/svg', 'g')
+      gWl.setAttribute('id', gWlId)
+      gWl.setAttribute('class', 'writingLayer')
+
+      gWz.appendChild(gWl)
+      modifiedSvgDom.querySelector('svg').appendChild(gWz)
+
+      const docPath = getters.currentDocPath
+      const docName = getters.documentNameByPath(docPath)
+      const svgPath = getters.currentSvgPath
+
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('loadDocumentIntoStore', { path: docPath, dom: modifiedDom })
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'changed writingZones for ' + docName + ', p.'
+      dispatch('logChange', { path: docPath, baseMessage, param })
+      dispatch('logChange', { path: svgPath, baseMessage, param })
     }
   },
   /**
@@ -439,6 +502,227 @@ const dataModule = {
         // console.log('Unable to find surface: ' + err)
       }
       return out
+    },
+
+    /**
+     * returns the index of the current surface in its modern document
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentSurfaceIndexForCurrentDoc: (state, getters) => {
+      try {
+        const doc = getters.documentWithCurrentPage
+        const allSurfaces = [...doc.querySelectorAll('surface')]
+        const surfaceIndex = allSurfaces.findIndex(surface => surface.getAttribute('xml:id') === getters.currentPageId) + 1
+        return surfaceIndex
+      } catch (err) {
+        return -1
+      }
+    },
+
+    /**
+     * retrieves the path for the currently relevant MEI file
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentDocPath: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+      if (pages.length === 0) {
+        return null
+      }
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const docPath = getters.documentPathByName(docName)
+
+      return docPath
+    },
+
+    /**
+     * retrieves the path of the SVG file for currently visible page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentSvgPath: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const surfaceId = page.id
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+
+      const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const svgGraphic = surface.querySelector('graphic[type="shapes"]')
+      if (!svgGraphic) {
+        return null
+      }
+      const svgFileRelativeLink = svgGraphic.getAttribute('target')
+      const svgFilePath = docPath.split(docName + '.xml')[0] + svgFileRelativeLink.substring(2)
+
+      return svgFilePath
+    },
+
+    /**
+     * retrieves the svg file of the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    svgForCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+      if (pages.length === 0) {
+        return null
+      }
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const surfaceId = page.id
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+
+      const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const svgGraphic = surface.querySelector('graphic[type="shapes"]')
+      if (!svgGraphic) {
+        return null
+      }
+      const svgFileRelativeLink = svgGraphic.getAttribute('target')
+      const svgFilePath = docPath.split(docName + '.xml')[0] + svgFileRelativeLink.substring(2)
+      const svgDom = getters.documentByPath(svgFilePath)
+
+      return svgDom
+    },
+
+    /**
+     * retrieves the document with the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    documentWithCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+
+      return dom
+    },
+
+    /**
+     * gets genDesc for current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    genDescForCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const surfaceId = page.id
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+
+      const genDescPage = dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+
+      return genDescPage
+    },
+
+    /**
+     * retrieves the writing zons on the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    writingZonesOnCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      const docName = page.document
+      const surfaceId = page.id
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+
+      const genDescPage = dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+      const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
+
+      if (genDescWzArr.length === 0) {
+        return []
+      }
+
+      const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const svgDom = getters.svgForCurrentPage
+
+      const arr = []
+
+      if (!svgDom) {
+        return arr
+      }
+
+      genDescWzArr.forEach(genDescWz => {
+        const genDescWzId = genDescWz.getAttribute('xml:id')
+
+        const zone = surface.querySelector('zone[data="#' + genDescWzId + '"]')
+        const x = parseInt(zone.getAttribute('ulx'))
+        const y = parseInt(zone.getAttribute('uly'))
+        const w = parseInt(zone.getAttribute('lrx')) - x
+        const h = parseInt(zone.getAttribute('lry')) - y
+
+        let totalCount = 0
+
+        const genDescWlArr = genDescWz.querySelectorAll('genState[class~="#geneticOrder_writingLayerLevel"]')
+        const layers = []
+        genDescWlArr.forEach(genDescWl => {
+          const svgGroupFullLink = genDescWl.getAttribute('corresp')
+          // const svgFileRelativeLink = svgGroupFullLink.split('#')[0]
+          const svgGroupId = svgGroupFullLink.split('#')[1]
+
+          const svgGroup = svgDom.querySelector('g[id="' + svgGroupId + '"')
+          const shapes = []
+          svgGroup.querySelectorAll('path').forEach(path => {
+            shapes.push(path.getAttribute('id'))
+          })
+
+          const wl = {}
+          wl.id = genDescWl.getAttribute('xml:id')
+          wl.label = genDescWl.getAttribute('label')
+          wl.shapes = shapes
+
+          totalCount += shapes.length
+
+          layers.push(wl)
+        })
+
+        const wz = {}
+        wz.id = genDescWzId
+        wz.label = genDescWz.getAttribute('label')
+
+        wz.totalCount = totalCount
+        wz.annotTrans = null
+        wz.xywh = x + ',' + y + ',' + w + ',' + h
+        wz.layers = layers
+
+        arr.push(wz)
+      })
+
+      return arr
     }
   }
 }

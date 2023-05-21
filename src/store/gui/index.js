@@ -21,7 +21,7 @@ const guiModule = {
     pageTabSidebarVisible: true,
     pageTabSidebarWidth: 300,
     zonesTabLeftSidebarVisible: true,
-    zonesTabLeftSidebarWidth: 200,
+    zonesTabLeftSidebarWidth: 300,
     zonesTabRightSidebarVisible: true,
     zonesTabRightSidebarWidth: 250,
     annotTabLeftSidebarVisible: true,
