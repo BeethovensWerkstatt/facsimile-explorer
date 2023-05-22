@@ -199,7 +199,7 @@ const actions = {
       console.log(contentData.path, 'loaded from cache')
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-        console.log(data.download_url)
+        console.log(data.download_url) // , data.content)
         try {
           const mei = base64dom(data.content)
           if (callback) { // TODO if typeof function?
@@ -243,26 +243,40 @@ const actions = {
       // dispatch('setData', contentData.doc) // TODO set SVG?
       console.log(contentData.path, 'loaded from cache')
     } else {
-      getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-        console.log(data.download_url)
-        try {
-          console.log(data)
-          const svg = base64dom(data.content)
-          if (callback) { // TODO if typeof function?
-            const data = { xml: svg }
-            callback(data)
-            callback = null
-          }
-          const parr = path.split('/')
-          dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: svg })
-        } catch (e) {
-          console.error(e.message)
-          if (callback) { // TODO if typeof function?
-            const data = { error: e }
-            callback(data)
-            callback = null
-          }
+      getters.octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+        ref,
+        headers: {
+          Accept: 'application/vnd.github.v3.raw'
         }
+      }).then(({ data }) => {
+        console.log(data.download_url) // , data.content)
+        fetch(data.download_url).then(async resp => { // why is the content not in the first response?
+          try {
+            const svgText = await resp.text()
+            // console.log(svgText)
+            const parser = new DOMParser()
+            const svg = parser.parseFromString(svgText, 'image/svg+xml')
+            const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+            console.log(path, relativePath)
+            dispatch('loadDocumentIntoStore', { path, dom: svg })
+            dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+            if (typeof callback === 'function') {
+              const data = { xml: svg }
+              callback(data)
+              callback = null
+            }
+          } catch (e) {
+            console.error(e.message)
+            if (callback) { // TODO if typeof function?
+              const data = { error: e }
+              callback(data)
+              callback = null
+            }
+          }
+        })
       })
     }
   },

@@ -130,7 +130,6 @@ const dataModule = {
       const svgRelativePath = './svg/' + svgFileName
       const meiFileName = path.split('/').pop()
       const svgFullPath = path.replace(meiFileName, 'svg/' + svgFileName)
-      // console.log('TODO: Need to commit SVG file to ' + svgFullPath)
 
       graphic.setAttribute('target', svgRelativePath)
       surface.appendChild(graphic)
