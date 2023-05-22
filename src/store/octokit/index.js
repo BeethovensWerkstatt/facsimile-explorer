@@ -230,7 +230,7 @@ const actions = {
     {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
-      path = 'data/sources/Notirungsbuch_K/Notirungsbuch_K.xml',
+      path,
       ref = config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
@@ -240,12 +240,13 @@ const actions = {
     console.log(contentData)
 
     if (contentData?.doc) {
-      dispatch('setData', contentData.doc)
+      // dispatch('setData', contentData.doc) // TODO set SVG?
       console.log(contentData.path, 'loaded from cache')
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
         console.log(data.download_url)
         try {
+          console.log(data)
           const svg = base64dom(data.content)
           if (callback) { // TODO if typeof function?
             const data = { xml: svg }
@@ -254,9 +255,9 @@ const actions = {
           }
           const parr = path.split('/')
           dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: svg })
-        } catch (e) { // TODO if typeof function?
+        } catch (e) {
           console.error(e.message)
-          if (callback) {
+          if (callback) { // TODO if typeof function?
             const data = { error: e }
             callback(data)
             callback = null
