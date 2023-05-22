@@ -8,6 +8,9 @@ import config from '@/config.json'
 
 export const GH_ACCESS_TOKEN = 'GH_ACCESS_TOKEN'
 
+const zpad = (o, n = 2, p = '0') => ('' + o).padStart(n, p)
+const refdate = (date = new Date()) => date.getFullYear() + zpad(date.getMonth() + 1) + zpad(date.getDate()) + zpad(date.getHours()) + zpad(date.getMinutes()) + zpad(date.getSeconds())
+
 const state = {
   user: {},
   auth: '',
@@ -237,25 +240,25 @@ const actions = {
 
     // Check with former SHA!!! Conflict resolution!
     // Get the latest commit SHA for the specified branch
-    const { data: { object: { sha } } } = await octokit.git.getRef({
+    const localSHA = getters.commit
+    const { data: { object: { sha: remoteSHA } } } = await octokit.git.getRef({
       owner,
       repo,
       ref: `heads/${branch}`
     })
-    if (sha !== getters.commit) {
+    if (remoteSHA !== localSHA) {
       commit('SET_CHANGES_NEED_BRANCHING', true)
     }
     const targetBranch = branch
-    const zpad = (o, n = 2, p = '0') => ('' + o).padStart(n, p)
-    const refdate = (date = new Date()) => date.getFullYear() + zpad(date.getMonth() + 1) + zpad(date.getDate()) + zpad(date.getHours()) + zpad(date.getMinutes()) + zpad(date.getSeconds())
+
     const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
-    console.log(sha, getters.commit, tmpBranch)
     if (getters.changesNeedBranching) {
+      console.log(remoteSHA, localSHA, tmpBranch)
       const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
         owner,
         repo,
         ref: 'refs/heads/' + tmpBranch,
-        sha: getters.commit
+        sha: localSHA
       })
       branch = tmpBranch
       console.log(newBranch)
@@ -284,7 +287,7 @@ const actions = {
     const { data: { sha: newTreeSha } } = await octokit.git.createTree({
       owner,
       repo,
-      base_tree: getters.commit,
+      base_tree: localSHA,
       tree: newTree
     })
     // console.log('treeSha', newTreeSha)
@@ -295,7 +298,7 @@ const actions = {
       repo,
       message,
       tree: newTreeSha,
-      parents: [getters.commit]
+      parents: [localSHA]
     })
     // console.log('commitSha', newCommitSha)
 
@@ -319,15 +322,17 @@ const actions = {
         head: tmpBranch,
         base: targetBranch
       })
+      console.log('PR', PR)
       // merge PR
       const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${PR.id}/merge`, {
         owner,
         repo,
         pull_number: PR.id,
-        commit_title: 'merge ' + tmpBranch,
+        commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
         commit_message: message,
         delete_branch_on_merge: true // does this work?
       })
+      console.log(merge)
       // merged?
       if (merge.merged) {
         console.log('merged', tmpBranch)
