@@ -249,18 +249,20 @@ const actions = {
         path,
         ref,
         headers: {
-          Accept: 'application/vnd.github.v3.raw'
+          Accept: 'application/json' // 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
-        console.log(data.download_url) // , data.content)
-        fetch(data.download_url).then(async resp => { // why is the content not in the first response?
+        // console.log('\n\nME HERE')
+        // console.log(data)
+        // console.log(data.download_url) // , data.content)
+
+        if (!data.download_url) {
+          // console.debug('svg file directly available, without additional fetch')
           try {
-            const svgText = await resp.text()
-            // console.log(svgText)
             const parser = new DOMParser()
-            const svg = parser.parseFromString(svgText, 'image/svg+xml')
+            const svg = parser.parseFromString(data, 'image/svg+xml')
             const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
-            console.log(path, relativePath)
+            // console.log(path, relativePath)
             dispatch('loadDocumentIntoStore', { path, dom: svg })
             dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
             if (typeof callback === 'function') {
@@ -268,15 +270,36 @@ const actions = {
               callback(data)
               callback = null
             }
-          } catch (e) {
-            console.error(e.message)
-            if (callback) { // TODO if typeof function?
-              const data = { error: e }
-              callback(data)
-              callback = null
-            }
+          } catch (err) {
+            console.error('\n\nyet another problem with getting SVG files: ' + err)
           }
-        })
+        } else {
+          // console.debug('having to download svg file with an additional fetch')
+          fetch(data.download_url).then(async resp => { // why is the content not in the first response?
+            try {
+              const svgText = await resp.text()
+              // console.log(svgText)
+              const parser = new DOMParser()
+              const svg = parser.parseFromString(svgText, 'image/svg+xml')
+              const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+              // console.log(path, relativePath)
+              dispatch('loadDocumentIntoStore', { path, dom: svg })
+              dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+              if (typeof callback === 'function') {
+                const data = { xml: svg }
+                callback(data)
+                callback = null
+              }
+            } catch (e) {
+              console.error(e.message)
+              if (callback) { // TODO if typeof function?
+                const data = { error: e }
+                callback(data)
+                callback = null
+              }
+            }
+          })
+        }
       })
     }
   },
