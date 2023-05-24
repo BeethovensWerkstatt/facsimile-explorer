@@ -252,31 +252,20 @@ const actions = {
           Accept: 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
-        console.log(data.download_url) // , data.content)
-        fetch(data.download_url).then(async resp => { // why is the content not in the first response?
-          try {
-            const svgText = await resp.text()
-            // console.log(svgText)
-            const parser = new DOMParser()
-            const svg = parser.parseFromString(svgText, 'image/svg+xml')
-            const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
-            console.log(path, relativePath)
-            dispatch('loadDocumentIntoStore', { path, dom: svg })
-            dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
-            if (typeof callback === 'function') {
-              const data = { xml: svg }
-              callback(data)
-              callback = null
-            }
-          } catch (e) {
-            console.error(e.message)
-            if (callback) { // TODO if typeof function?
-              const data = { error: e }
-              callback(data)
-              callback = null
-            }
-          }
-        })
+        console.log(data) // , data.content)
+        const svgText = data
+        // console.log(svgText)
+        const parser = new DOMParser()
+        const svg = parser.parseFromString(svgText, 'image/svg+xml')
+        const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+        console.log(path, relativePath)
+        dispatch('loadDocumentIntoStore', { path, dom: svg })
+        dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+        if (typeof callback === 'function') {
+          const data = { xml: svg }
+          callback(data)
+          callback = null
+        }
       })
     }
   },
