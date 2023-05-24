@@ -457,6 +457,7 @@ const actions = {
       branch: config.repository.branch
     }
     // console.log(repometa)
+    dispatch('setLoading', true)
     const sourcefiles = []
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
@@ -479,7 +480,6 @@ const actions = {
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     // build a Promise to wait for loading of all sources
-    dispatch('setLoading', true)
     const sourcePromises = sourcefiles.map(source => new Promise((resolve, reject) => {
       // loadContent calls (optional) callback, when loading finished
       dispatch('loadContent', { ...source, callback: d => resolve(d) })

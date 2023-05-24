@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     authenticated () {
-      console.log('authenticated', this.isAuthenticated)
+      // console.log('authenticated', this.isAuthenticated)
       if (!this.isAuthenticated) {
         this.$store.dispatch('checkAuthenticate')
       }
