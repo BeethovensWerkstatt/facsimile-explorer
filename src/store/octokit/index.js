@@ -149,9 +149,10 @@ const mutations = {
 const actions = {
   checkAuthenticate ({ commit, getters }, opts) {
     getters.octokit.auth().then(auth => {
-      console.log(auth)
-      commit('SET_AUTHENTICATED', auth.type !== 'unauthenticated')
-      if (opts?.authenticated) opts.authenticated()
+      const authenticated = auth.type !== 'unauthenticated'
+      console.log(auth, authenticated)
+      commit('SET_AUTHENTICATED', authenticated)
+      if (authenticated && opts?.authenticated) opts.authenticated()
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
@@ -172,7 +173,6 @@ const actions = {
             console.error('authentication failed', data)
           }
           commit('SET_AUTHENTICATED', true)
-          dispatch('loadContent', {})
         })
       } else {
         console.error('authentication failed', resp.statusText)
@@ -188,7 +188,7 @@ const actions = {
     {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
-      path = 'data/sources/Notirungsbuch_K/Notirungsbuch_K.xml',
+      path = config.repository.default,
       ref = config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
@@ -488,7 +488,7 @@ const actions = {
     Promise.all(sourcePromises).finally(() => {
       dispatch('setLoading', false)
       console.log('all loaded')
-      dispatch('loadContent', {})
+      commit('SET_GH_FILE', {})
     })
     // for (const source of sourcefiles) {
     //   dispatch('loadContent', source)
