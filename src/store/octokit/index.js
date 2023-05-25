@@ -149,9 +149,10 @@ const mutations = {
 const actions = {
   checkAuthenticate ({ commit, getters }, opts) {
     getters.octokit.auth().then(auth => {
-      console.log(auth)
-      commit('SET_AUTHENTICATED', auth.type !== 'unauthenticated')
-      if (opts?.authenticated) opts.authenticated()
+      const authenticated = auth.type !== 'unauthenticated'
+      console.log(auth, authenticated)
+      commit('SET_AUTHENTICATED', authenticated)
+      if (authenticated && opts?.authenticated) opts.authenticated()
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
@@ -172,7 +173,6 @@ const actions = {
             console.error('authentication failed', data)
           }
           commit('SET_AUTHENTICATED', true)
-          dispatch('loadContent', {})
         })
       } else {
         console.error('authentication failed', resp.statusText)
@@ -188,7 +188,7 @@ const actions = {
     {
       owner = config.repository.owner, // 'BeethovensWerkstatt',
       repo = config.repository.repo, // 'data',
-      path = 'data/sources/Notirungsbuch_K/Notirungsbuch_K.xml',
+      path = config.repository.default,
       ref = config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
@@ -249,56 +249,22 @@ const actions = {
         path,
         ref,
         headers: {
-          Accept: 'application/json' // 'application/vnd.github.v3.raw'
+          Accept: 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
-        // console.log('\n\nME HERE')
-        // console.log(data)
-        // console.log(data.download_url) // , data.content)
-
-        if (!data.download_url) {
-          // console.debug('svg file directly available, without additional fetch')
-          try {
-            const parser = new DOMParser()
-            const svg = parser.parseFromString(data, 'image/svg+xml')
-            const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
-            // console.log(path, relativePath)
-            dispatch('loadDocumentIntoStore', { path, dom: svg })
-            dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
-            if (typeof callback === 'function') {
-              const data = { xml: svg }
-              callback(data)
-              callback = null
-            }
-          } catch (err) {
-            console.error('\n\nyet another problem with getting SVG files: ' + err)
-          }
-        } else {
-          // console.debug('having to download svg file with an additional fetch')
-          fetch(data.download_url).then(async resp => { // why is the content not in the first response?
-            try {
-              const svgText = await resp.text()
-              // console.log(svgText)
-              const parser = new DOMParser()
-              const svg = parser.parseFromString(svgText, 'image/svg+xml')
-              const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
-              // console.log(path, relativePath)
-              dispatch('loadDocumentIntoStore', { path, dom: svg })
-              dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
-              if (typeof callback === 'function') {
-                const data = { xml: svg }
-                callback(data)
-                callback = null
-              }
-            } catch (e) {
-              console.error(e.message)
-              if (callback) { // TODO if typeof function?
-                const data = { error: e }
-                callback(data)
-                callback = null
-              }
-            }
-          })
+        console.log(data) // , data.content)
+        const svgText = data
+        // console.log(svgText)
+        const parser = new DOMParser()
+        const svg = parser.parseFromString(svgText, 'image/svg+xml')
+        const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+        console.log(path, relativePath)
+        dispatch('loadDocumentIntoStore', { path, dom: svg })
+        dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+        if (typeof callback === 'function') {
+          const data = { xml: svg }
+          callback(data)
+          callback = null
         }
       })
     }
@@ -480,6 +446,7 @@ const actions = {
       branch: config.repository.branch
     }
     // console.log(repometa)
+    dispatch('setLoading', true)
     const sourcefiles = []
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
@@ -502,7 +469,6 @@ const actions = {
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     // build a Promise to wait for loading of all sources
-    dispatch('setLoading', true)
     const sourcePromises = sourcefiles.map(source => new Promise((resolve, reject) => {
       // loadContent calls (optional) callback, when loading finished
       dispatch('loadContent', { ...source, callback: d => resolve(d) })
@@ -511,7 +477,7 @@ const actions = {
     Promise.all(sourcePromises).finally(() => {
       dispatch('setLoading', false)
       console.log('all loaded')
-      dispatch('loadContent', {})
+      commit('SET_GH_FILE', {})
     })
     // for (const source of sourcefiles) {
     //   dispatch('loadContent', source)
