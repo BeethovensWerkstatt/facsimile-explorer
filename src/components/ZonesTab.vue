@@ -20,7 +20,7 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent/>
+        <OpenSeadragonComponent :svg="true"/>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="zonesTab" v-if="zonesTabRightSidebarVisible">
         <h1>Writing Zones ({{writingZones.length}})</h1>
@@ -60,7 +60,11 @@ export default {
       this.$store.dispatch('toggleZonesTabLeftSidebar')
     },
     createZone () {
-      this.$store.dispatch('createNewWritingZone')
+      console.log(1)
+      if (this.$store.getters.svgForCurrentPage) {
+        console.log(2)
+        this.$store.dispatch('createNewWritingZone')
+      }
     },
     verifySvgAvailable () {
       const svgPath = this.$store.getters.currentSvgPath

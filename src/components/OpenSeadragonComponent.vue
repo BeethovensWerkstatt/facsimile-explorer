@@ -41,6 +41,7 @@ const osdOptions = {
 export default {
   name: 'OpenSeadragonComponent',
   props: {
+    svg: Boolean
   },
   computed: {
     currentTab () {
@@ -75,16 +76,19 @@ export default {
       console.log(e)
     },
     renderShapes () {
-      const svg = this.$store.getters.svgOnCurrentPage
+      const svg = this.$store.getters.svgForCurrentPage
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
-
+      console.log('renderShapes()')
       // only relevant before component is mounted
       if (this.viewer === undefined) {
         return null
       }
       if (svg) {
+        console.log('getting in')
+        const element = svg.querySelector('svg')
+        console.log(element)
         this.viewer.addOverlay({
-          element: svg,
+          element,
           x: 0,
           y: 0,
           width: page.width,
@@ -199,6 +203,17 @@ export default {
       })
 
       console.log(overlay)
+    },
+    removeListeners () {
+      document.querySelectorAll('#osdContainer .system').forEach(system => {
+        system.removeEventListener('click', this.systemClickListener)
+        system.removeEventListener('dblclick', this.systemDoubleClickListener)
+      })
+
+      document.querySelectorAll('#osdContainer svg').forEach(svg => {
+        svg.removeEventListener('click', this.svgClickListener)
+        svg.removeEventListener('click', this.svgDoubleClickListener)
+      })
     }
   },
   created () {
@@ -303,17 +318,12 @@ export default {
 
     this.viewer.addHandler('page', (data) => {
       // remove listeners
-      document.querySelectorAll('#osdContainer .system').forEach(system => {
-        system.removeEventListener('click', this.systemClickListener)
-        system.removeEventListener('dblclick', this.systemDoubleClickListener)
-      })
+      this.removeListeners()
 
-      document.querySelectorAll('#osdContainer svg').forEach(svg => {
-        svg.removeEventListener('click', this.svgClickListener)
-        svg.removeEventListener('click', this.svgDoubleClickListener)
-      })
+      console.log('calling handler page, data.page ', data.page)
 
       if (data.page !== this.$store.getters.currentPageZeroBased) {
+        console.log('going in')
         this.$store.dispatch('setCurrentPage', data.page)
         this.renderSystems()
         this.renderShapes()
@@ -322,7 +332,10 @@ export default {
 
     this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
       (newPage, oldPage) => {
+        console.log('watchCurrentPage listener, calling goToPage(' + newPage + ')')
         this.viewer.goToPage(newPage)
+        this.renderSystems()
+        this.renderShapes()
       })
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
@@ -332,9 +345,9 @@ export default {
         this.renderSystems()
         this.renderShapes()
       })
-    this.unwatchSVG = this.$store.watch((state, getters) => getters.svgOnCurrentPage,
+    this.unwatchSVG = this.$store.watch((state, getters) => getters.svgForCurrentPage,
       (svg) => {
-        if (svg !== null) {
+        if (svg) {
           this.renderShapes()
         }
         // this.viewer.open(newArr)
@@ -358,14 +371,34 @@ export default {
         // console.log('RENDER NOW')
         this.renderVerovioOverlay()
       })
+    /*
+    try {
+      if (this.$store.getters.currentPageZeroBased !== -1) {
+        this.viewer.open(this.$store.getters.documentPagesForOSD, this.$store.getters.currentPageZeroBased)
+        console.log('opening page')
+      }
+    } catch (err) {
+      console.log(err)
+    }
+
+    try {
+      if (this.$store.getters.svgForCurrentPage) {
+        console.log('x')
+        this.renderShapes()
+      }
+    } catch (err) {
+      console.log(err)
+    } */
   },
   beforeUnmount () {
+    console.log('UNMOUNTING OSD')
     this.unwatchPages()
     this.unwatchSVG()
     this.unwatchSystems()
     this.unwatchCurrentPage()
     this.unwatchEditingSystem()
     this.unwatchPageXML()
+    this.removeListeners()
   }
 }
 </script>
