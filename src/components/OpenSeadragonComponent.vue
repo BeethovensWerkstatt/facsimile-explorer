@@ -224,9 +224,13 @@ export default {
       // console.log(this.vrvToolkit)
     })
   },
-  mounted: function () {
+  mounted () {
     try {
       this.viewer = OpenSeadragon(osdOptions)
+      // console.log('viewer', this.viewer)
+      const page = this.$route.query.page
+      console.log('open', this.$store.getters.pageArray, page ? +page - 1 : 0)
+      this.viewer.open(this.$store.getters.pageArray, page ? +page - 1 : 0)
     } catch (err) {
       console.warn('WARNING: Unable to init OSD yet…')
     }
@@ -340,6 +344,7 @@ export default {
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
         const page = this.$route.query.page
+        console.log('open', newArr)
         this.viewer.open(newArr, page ? +page - 1 : 0)
         this.$store.dispatch('setCurrentPage', page ? +page - 1 : 0)
         this.renderSystems()
