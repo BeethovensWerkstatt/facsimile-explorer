@@ -236,8 +236,8 @@ const actions = {
     }) {
     const contentData = getters.getContentData(path)
 
-    console.log('\n\nYODIYAY')
-    console.log(contentData)
+    // console.log('\n\nYODIYAY')
+    // console.log(contentData)
 
     if (contentData?.doc) {
       // dispatch('setData', contentData.doc) // TODO set SVG?
@@ -252,15 +252,18 @@ const actions = {
           Accept: 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
-        console.log(data) // , data.content)
+        // console.log('received this as svg raw text')
+        // console.log(data) // , data.content)
         const svgText = data
         // console.log(svgText)
         const parser = new DOMParser()
         const svg = parser.parseFromString(svgText, 'image/svg+xml')
-        const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
-        console.log(path, relativePath)
-        dispatch('loadDocumentIntoStore', { path, dom: svg })
-        dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+        // const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+        // console.log(path, relativePath)
+        const dom = svg.querySelector('svg')
+        // console.log(dom)
+        dispatch('loadDocumentIntoStore', { path, dom })
+        // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
         if (typeof callback === 'function') {
           const data = { xml: svg }
           callback(data)

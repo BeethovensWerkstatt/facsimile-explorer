@@ -162,6 +162,10 @@ const dataModule = {
     },
 
     createNewWritingZone ({ commit, getters, dispatch }) {
+      if (!getters.documentWithCurrentPage || !getters.svgForCurrentPage) {
+        return null
+      }
+
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
@@ -184,13 +188,13 @@ const dataModule = {
       const existingWzCount = genDescPage.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]').length
       const genDescWzLabel = existingWzCount + 1
 
-      const genDescWz = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'genDesc')
+      const genDescWz = document.createElementNS('http://www.music-encoding.org/ns/mei', 'genDesc')
       genDescWz.setAttribute('xml:id', genDescWzId)
       genDescWz.setAttribute('class', '#geneticOrder_writingZoneLevel')
       genDescWz.setAttribute('corresp', svgLink + '#' + gWzId)
       genDescWz.setAttribute('label', genDescWzLabel)
 
-      const genStateWl = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'genState')
+      const genStateWl = document.createElementNS('http://www.music-encoding.org/ns/mei', 'genState')
       genStateWl.setAttribute('xml:id', genDescWlId)
       genStateWl.setAttribute('class', '#geneticOrder_writingLayerLevel #geneticOrder_finalState')
       genStateWl.setAttribute('corresp', svgLink + '#' + gWlId)
@@ -199,7 +203,7 @@ const dataModule = {
       genDescWz.appendChild(genStateWl)
       genDescPage.appendChild(genDescWz)
 
-      const zone = modifiedDom.createElementNS('http://www.music-encoding.org/ns/mei', 'zone')
+      const zone = document.createElementNS('http://www.music-encoding.org/ns/mei', 'zone')
       zone.setAttribute('xml:id', zoneId)
       zone.setAttribute('data', '#' + genDescWzId)
       zone.setAttribute('ulx', 0)
@@ -209,16 +213,16 @@ const dataModule = {
 
       surface.appendChild(zone)
 
-      const gWz = modifiedSvgDom.createElementNS('http://www.w3.org/2000/svg', 'g')
+      const gWz = document.createElementNS('http://www.w3.org/2000/svg', 'g')
       gWz.setAttribute('id', gWzId)
       gWz.setAttribute('class', 'writingZone')
 
-      const gWl = modifiedSvgDom.createElementNS('http://www.w3.org/2000/svg', 'g')
+      const gWl = document.createElementNS('http://www.w3.org/2000/svg', 'g')
       gWl.setAttribute('id', gWlId)
       gWl.setAttribute('class', 'writingLayer')
 
       gWz.appendChild(gWl)
-      modifiedSvgDom.querySelector('svg').appendChild(gWz)
+      modifiedSvgDom.appendChild(gWz)
 
       const docPath = getters.currentDocPath
       const docName = getters.documentNameByPath(docPath)
@@ -584,26 +588,11 @@ const dataModule = {
      * @return {[type]}         [description]
      */
     svgForCurrentPage: (state, getters) => {
-      const pageIndex = getters.currentPageZeroBased
-      const path = getters.filepath
-      const pages = getters.documentPagesForSidebars(path)
-      if (pages.length === 0) {
+      const svgFilePath = getters.currentSvgPath
+      if (svgFilePath === null) {
         return null
       }
 
-      const page = pages[pageIndex]
-      const docName = page.document
-      const surfaceId = page.id
-      const docPath = getters.documentPathByName(docName)
-      const dom = getters.documentByPath(docPath)
-
-      const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
-      const svgGraphic = surface.querySelector('graphic[type="shapes"]')
-      if (!svgGraphic) {
-        return null
-      }
-      const svgFileRelativeLink = svgGraphic.getAttribute('target')
-      const svgFilePath = docPath.split(docName + '.xml')[0] + svgFileRelativeLink.substring(2)
       const svgDom = getters.documentByPath(svgFilePath)
 
       return svgDom

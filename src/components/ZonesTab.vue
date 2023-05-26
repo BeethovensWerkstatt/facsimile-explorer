@@ -20,7 +20,6 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent :svg="true"/>
         <OpenSeadragonComponent :svg="true" :annotorious="false"/>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="zonesTab" v-if="zonesTabRightSidebarVisible">
@@ -71,12 +70,12 @@ export default {
       const svgPath = this.$store.getters.currentSvgPath
       const svg = this.$store.getters.svgForCurrentPage
 
-      console.log('\n\n\nSHOULD HAVE ' + svgPath)
-      console.log('what I have is')
-      console.log(svg)
+      // console.log('\n\n\nSHOULD HAVE ' + svgPath)
+      // console.log('what I have is')
+      // console.log(svg)
 
       if (svgPath !== null && !svg) {
-        console.log('need to do something about this…')
+        // console.log('need to do something about this…')
         this.$store.dispatch('loadSvgFile', {
           path: svgPath,
           ref: 'test'

@@ -77,24 +77,27 @@ export default {
       console.log(e)
     },
     renderShapes () {
+      // const svgPath = this.$store.getters.currentSvgPath
       const svg = this.$store.getters.svgForCurrentPage
+      if (!svg) {
+        return null
+      }
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
-      console.log('renderShapes()')
+      // console.log('renderShapes() for ' + this.$store.getters.currentSvgPath)
       // only relevant before component is mounted
       if (this.viewer === undefined) {
         return null
       }
       if (svg) {
-        console.log('getting in')
-        const element = svg.querySelector('svg')
-        console.log(element)
+        // console.log('getting in')
         this.viewer.addOverlay({
-          element,
+          element: svg,
           x: 0,
           y: 0,
           width: page.width,
           height: page.height
         })
+        // console.log('done')
         svg.addEventListener('click', this.svgClickListener)
         svg.addEventListener('dblclick', this.svgDoubleClickListener)
       }
@@ -234,8 +237,11 @@ export default {
       this.viewer = OpenSeadragon(osdOptions)
       // console.log('viewer', this.viewer)
       const page = this.$route.query.page
-      console.log('open', this.$store.getters.pageArray, page ? +page - 1 : 0)
-      this.viewer.open(this.$store.getters.pageArray, page ? +page - 1 : 0)
+      const n = page ? +page - 1 : 0
+      // console.log('open', this.$store.getters.pageArray[n])
+      // const osdPage = this.$store.getters.pageArrayOSD[n]
+      // console.log('osdPage', osdPage)
+      this.viewer.open(this.$store.getters.pageArrayOSD, n)
     } catch (err) {
       console.warn('WARNING: Unable to init OSD yet…')
     }
@@ -403,7 +409,6 @@ export default {
     } */
   },
   beforeUnmount () {
-    console.log('UNMOUNTING OSD')
     this.unwatchPages()
     this.unwatchSVG()
     this.unwatchSystems()
