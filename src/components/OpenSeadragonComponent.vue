@@ -41,7 +41,8 @@ const osdOptions = {
 export default {
   name: 'OpenSeadragonComponent',
   props: {
-    svg: Boolean
+    svg: Boolean,
+    annotorious: Boolean
   },
   computed: {
     currentTab () {
@@ -136,6 +137,10 @@ export default {
       })
     },
     generateSelectionFromZone () {
+      if (!this.annotorious) {
+        return false
+      }
+
       const systems = this.$store.getters.systemsOnCurrentPage
       const index = this.$store.getters.editingSystemOnCurrentPage
       const system = systems[index]
@@ -235,79 +240,81 @@ export default {
       console.warn('WARNING: Unable to init OSD yet…')
     }
 
-    const annotoriousConfig = {
-      disableEditor: true
+    if (this.annotorios) {
+      const annotoriousConfig = {
+        disableEditor: true
+      }
+      // Initialize the Annotorious plugin
+      this.anno = Annotorious(this.viewer, annotoriousConfig)
+      // this.anno.setVisible(false)
+      // this.anno.readOnly = true
+
+      // Listener for new Selections
+      this.anno.on('createSelection', async (selection) => {
+        // console.log('created selection:', selection)
+        selection.body = [{
+          type: 'TextualBody',
+          purpose: 'tagging',
+          value: ''
+        }]
+
+        await this.anno.updateSelected(selection)
+        this.anno.saveSelected()
+      })
+
+      // automatically triggered through createSelection
+      this.anno.on('createAnnotation', async (annotation) => {
+        // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
+        const raw = annotation.target.selector.value.substr(11).split(',')
+        const xywh = {
+          x: Math.max(Math.round(raw[0]), 0),
+          y: Math.max(Math.round(raw[1]), 0),
+          w: Math.round(raw[2]),
+          h: Math.round(raw[3])
+        }
+        this.$store.dispatch('createSystem', xywh)
+        this.anno.clearAnnotations()
+        this.renderSystems()
+      })
+
+      // Listener for changing selections
+      /* this.anno.on('changeSelectionTarget', (a) => {
+        console.log('changeSelectionTarget')
+        console.log(a)
+
+        // console.log('changed selection:', a)
+        const raw = a.selector.value.substr(11).split(',')
+        const xywh = {
+          x: Math.round(raw[0]),
+          y: Math.round(raw[1]),
+          w: Math.round(raw[2]),
+          h: Math.round(raw[3])
+        }
+        this.$store.dispatch('setSelectionRect', xywh)
+      }) */
+
+      this.anno.on('updateAnnotation', (annotation) => {
+        // The users has selected an existing annotation
+        console.log('updateAnnotation')
+        console.log(annotation)
+
+        const raw = annotation.target.selector.value.substr(11).split(',')
+        const xywh = {
+          x: Math.round(raw[0]),
+          y: Math.round(raw[1]),
+          w: Math.round(raw[2]),
+          h: Math.round(raw[3])
+        }
+        const system = {
+          i: annotation.id.substring(6),
+          rect: xywh
+        }
+
+        this.$store.dispatch('updateSystemCoordinates', system)
+        this.anno.clearAnnotations()
+        this.renderSystems()
+      })
     }
-    // Initialize the Annotorious plugin
-    this.anno = Annotorious(this.viewer, annotoriousConfig)
-    // this.anno.setVisible(false)
-    // this.anno.readOnly = true
-
-    // Listener for new Selections
-    this.anno.on('createSelection', async (selection) => {
-      // console.log('created selection:', selection)
-      selection.body = [{
-        type: 'TextualBody',
-        purpose: 'tagging',
-        value: ''
-      }]
-
-      await this.anno.updateSelected(selection)
-      this.anno.saveSelected()
-    })
-
-    // automatically triggered through createSelection
-    this.anno.on('createAnnotation', async (annotation) => {
-      // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
-      const raw = annotation.target.selector.value.substr(11).split(',')
-      const xywh = {
-        x: Math.max(Math.round(raw[0]), 0),
-        y: Math.max(Math.round(raw[1]), 0),
-        w: Math.round(raw[2]),
-        h: Math.round(raw[3])
-      }
-      this.$store.dispatch('createSystem', xywh)
-      this.anno.clearAnnotations()
-      this.renderSystems()
-    })
-
-    // Listener for changing selections
-    /* this.anno.on('changeSelectionTarget', (a) => {
-      console.log('changeSelectionTarget')
-      console.log(a)
-
-      // console.log('changed selection:', a)
-      const raw = a.selector.value.substr(11).split(',')
-      const xywh = {
-        x: Math.round(raw[0]),
-        y: Math.round(raw[1]),
-        w: Math.round(raw[2]),
-        h: Math.round(raw[3])
-      }
-      this.$store.dispatch('setSelectionRect', xywh)
-    }) */
-
-    this.anno.on('updateAnnotation', (annotation) => {
-      // The users has selected an existing annotation
-      console.log('updateAnnotation')
-      console.log(annotation)
-
-      const raw = annotation.target.selector.value.substr(11).split(',')
-      const xywh = {
-        x: Math.round(raw[0]),
-        y: Math.round(raw[1]),
-        w: Math.round(raw[2]),
-        h: Math.round(raw[3])
-      }
-      const system = {
-        i: annotation.id.substring(6),
-        rect: xywh
-      }
-
-      this.$store.dispatch('updateSystemCoordinates', system)
-      this.anno.clearAnnotations()
-      this.renderSystems()
-    })
 
     // TODO: Adjusted to see something for now…
     /*

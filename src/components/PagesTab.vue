@@ -30,7 +30,7 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent/>
+        <OpenSeadragonComponent :svg="false" :annotorious="true"/>
       </MainStage>
     </div>
   </div>
