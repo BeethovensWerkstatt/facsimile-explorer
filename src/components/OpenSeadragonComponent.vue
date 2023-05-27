@@ -77,6 +77,10 @@ export default {
       console.log(e)
     },
     renderShapes () {
+      if (!this.svg) {
+        return false
+      }
+
       // const svgPath = this.$store.getters.currentSvgPath
       const svg = this.$store.getters.svgForCurrentPage
       if (!svg) {
