@@ -60,9 +60,7 @@ export default {
       this.$store.dispatch('toggleZonesTabLeftSidebar')
     },
     createZone () {
-      console.log(1)
       if (this.$store.getters.svgForCurrentPage) {
-        console.log(2)
         this.$store.dispatch('createNewWritingZone')
       }
     },
@@ -92,7 +90,7 @@ export default {
         { id: 'dfg', totalCount: 82, layers: [{ id: 'dfg1', shapes: ['shapeP', 'shapeQ', 'shapeR', 'shapeS', 'shapeT'] }] }] */
     },
     unAssignedShapes () {
-      return ['shapeA', 'shapeB', 'shapeC', 'shapeD', 'shapeE', 'shapeF', 'shapeG']
+      return this.$store.getters.unassignedShapesOnCurrentPage
     }
   },
   created () {

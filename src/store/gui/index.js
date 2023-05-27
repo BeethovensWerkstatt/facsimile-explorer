@@ -16,6 +16,7 @@ const guiModule = {
    * @property {Number} annotTabRightSidebarWidth width of the right sidebar in annotTab
    * @property {Boolean} diploTabSidebarVisible if the left sidebar in diploTab is visible
    * @property {Number} diploTabSidebarWidth width of the left sidebar in diploTab
+   * @property {String} activeWritingZone ID of the currently active writing zone
    */
   state: {
     pageTabSidebarVisible: true,
@@ -29,7 +30,8 @@ const guiModule = {
     annotTabRightSidebarVisible: true,
     annotTabRightSidebarWidth: 300,
     diploTabSidebarVisible: true,
-    diploTabSidebarWidth: 300
+    diploTabSidebarWidth: 300,
+    activeWritingZone: null
   },
   /**
    * @namespace store.gui.mutations
@@ -136,6 +138,15 @@ const guiModule = {
      */
     TOGGLE_DIPLOTAB_SIDEBAR_VISIBILITY (state) {
       state.diploTabSidebarVisible = !state.diploTabSidebarVisible
+    },
+
+    /**
+     * sets the active writing zone
+     * @param {[type]} state  [description]
+     * @param {[type]} id     [description]
+     */
+    SET_ACTIVE_WRITINGZONE (state, id) {
+      state.activeWritingZone = id
     }
   },
   /**
@@ -195,6 +206,15 @@ const guiModule = {
      */
     toggleDiploTabSidebar ({ commit }) {
       commit('TOGGLE_DIPLOTAB_SIDEBAR_VISIBILITY')
+    },
+
+    /**
+     * sets ID of active WritingZone
+     * @param {[type]} commit  [description]
+     * @param {[type]} id      [description]
+     */
+    setActiveWritingZone ({ commit }, id) {
+      commit('SET_ACTIVE_WRITINGZONE', id)
     }
   },
   /**
@@ -308,6 +328,15 @@ const guiModule = {
      */
     diploTabSidebarWidth: (state) => {
       return state.diploTabSidebarWidth
+    },
+
+    /**
+     * returns ID of active writingZone
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    activeWritingZone: (state) => {
+      return state.activeWritingZone
     }
   }
 }

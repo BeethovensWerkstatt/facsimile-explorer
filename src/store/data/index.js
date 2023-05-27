@@ -169,9 +169,6 @@ const dataModule = {
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
-      console.log('test f1')
-      console.log(modifiedSvgDom)
-
       const surfaceId = getters.currentPageId
 
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
@@ -719,6 +716,29 @@ const dataModule = {
       })
 
       return arr
+    },
+
+    /**
+     * retrieves all shapes of the current page not currently assigned to a writing zone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    unassignedShapesOnCurrentPage: (state, getters) => {
+      const svg = getters.svgForCurrentPage
+
+      if (!svg) {
+        return []
+      }
+
+      const shapes = []
+      const children = [...svg.children]
+      children.forEach(elem => {
+        if (elem.localName === 'path') {
+          shapes.push(elem.id)
+        }
+      })
+      return shapes
     }
   }
 }

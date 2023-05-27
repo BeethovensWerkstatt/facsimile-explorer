@@ -286,6 +286,7 @@ export default createStore({
     setCurrentPage ({ commit }, i) {
       commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)
+      commit('SET_ACTIVE_WRITINGZONE', null)
     },
     setPreviewPage ({ commit }, i) {
       commit('SET_PREVIEW_PAGE', i)
