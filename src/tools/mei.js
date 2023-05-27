@@ -81,3 +81,45 @@ export function insertSystem (page, system, followingSystem) {
   page.insertBefore(system, where)
   page.insertBefore(document.createTextNode('\n'), where)
 }
+
+/**
+ * checks if SVG has grouped unassigned shapes already. Used during import.
+ * @param  {[type]} svg               [description]
+ * @return {[type]}     [description]
+ */
+export function verifyUnassignedGroupInSvg (svg) {
+  const children = [...svg.children]
+
+  const unassignedShapes = []
+  children.forEach(elem => {
+    if (elem.localName === 'path') {
+      unassignedShapes.push(elem)
+    }
+  })
+
+  const outSvg = svg.cloneNode(true)
+
+  if (unassignedShapes.length === 0) {
+    // console.log('INFO no shapes to move')
+    return outSvg
+  }
+
+  const existingGroup = svg.querySelector('g[class="unassigned"]')
+
+  let g
+
+  if (existingGroup) {
+    g = existingGroup
+  } else {
+    g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('class', 'unassigned')
+  }
+
+  unassignedShapes.forEach(path => {
+    g.append(path)
+  })
+
+  outSvg.append(g)
+
+  return outSvg
+}

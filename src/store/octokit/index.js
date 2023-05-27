@@ -3,6 +3,7 @@ import { Octokit } from '@octokit/rest'
 import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
 
 import config from '@/config.json'
+import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
 
 // export const OctokitPR = Octokit.plugin(createPullRequest)
 
@@ -261,8 +262,11 @@ const actions = {
         // const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
         // console.log(path, relativePath)
         const dom = svg.querySelector('svg')
+
+        const svgWithUnassignedGroup = verifyUnassignedGroupInSvg(dom)
+
         // console.log(dom)
-        dispatch('loadDocumentIntoStore', { path, dom })
+        dispatch('loadDocumentIntoStore', { path, dom: svgWithUnassignedGroup })
         // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
         if (typeof callback === 'function') {
           const data = { xml: svg }

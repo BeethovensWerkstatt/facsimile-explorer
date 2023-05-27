@@ -732,12 +732,13 @@ const dataModule = {
       }
 
       const shapes = []
-      const children = [...svg.children]
+      const children = svg.querySelectorAll('g[class="unassigned"] path')
       children.forEach(elem => {
         if (elem.localName === 'path') {
           shapes.push(elem.id)
         }
       })
+
       return shapes
     }
   }
