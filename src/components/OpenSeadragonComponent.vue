@@ -69,6 +69,7 @@ export default {
       e.stopPropagation()
       console.log('clicked shape')
       console.log(e)
+      this.$store.dispatch('clickedSvgShape', e.target.id)
     },
     svgDoubleClickListener (e) {
       e.preventDefault()

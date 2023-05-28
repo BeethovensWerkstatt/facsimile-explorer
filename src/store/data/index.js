@@ -232,8 +232,50 @@ const dataModule = {
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
       dispatch('logChange', { path: docPath, baseMessage, param })
       dispatch('logChange', { path: svgPath, baseMessage, param })
+    },
+
+    moveShapeToCurrentWritingZone ({ commit, getters, dispatch }, shapeId) {
+      if (!shapeId) {
+        return null
+      }
+
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+      if (!modifiedSvgDom) {
+        return null
+      }
+
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      const docName = page.document
+
+      const writingLayerGenDesc = getters.genDescForFinalWritingLayerInCurrentWritingZone
+      const corresp = writingLayerGenDesc.getAttribute('corresp')
+      const writingLayerSvgGroupId = corresp.split('#')[1]
+
+      const writingLayerSvgGroup = modifiedSvgDom.querySelector('#' + writingLayerSvgGroupId)
+
+      const shape = modifiedSvgDom.querySelector('#' + shapeId)
+      writingLayerSvgGroup.append(shape)
+
+      const svgPath = getters.currentSvgPath
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'changed writingZones for ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('logChange', { path: svgPath, baseMessage, param })
+    },
+    clickedSvgShape ({ commit, getters, dispatch }, shapeId) {
+      console.log('clicked shape ' + shapeId)
+
+      if (getters.currentTab === 'zones') {
+        dispatch('moveShapeToCurrentWritingZone', shapeId)
+      }
     }
   },
+
   /**
    * @namespace store.data.getters
    */
@@ -621,19 +663,66 @@ const dataModule = {
      * @return {[type]}         [description]
      */
     genDescForCurrentPage: (state, getters) => {
+      const dom = getters.documentWithCurrentPage
+      const surfaceId = getters.currentSurfaceId
+
+      if (!dom || !surfaceId) {
+        return null
+      }
+
+      const genDescPage = dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+
+      return genDescPage
+    },
+
+    /**
+     * retrieves the genDesc for current writingZone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    genDescForCurrentWritingZone: (state, getters) => {
+      const genDescPage = getters.genDescForCurrentPage
+      const writingZoneId = getters.activeWritingZone
+
+      if (!genDescPage || !writingZoneId) {
+        return null
+      }
+      const genDescWritingZone = [...genDescPage.childNodes].find(wz => wz.getAttribute('xml:id') === writingZoneId)
+      return genDescWritingZone
+    },
+
+    /**
+     * retrieves the final writingLayer in the currently active writingZone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    genDescForFinalWritingLayerInCurrentWritingZone: (state, getters) => {
+      const genDescWritingZone = getters.genDescForCurrentWritingZone
+
+      if (!genDescWritingZone) {
+        return null
+      }
+
+      const writingLayer = genDescWritingZone.querySelector('genState[class~="#geneticOrder_finalState"]')
+      return writingLayer
+    },
+
+    /**
+     * retrieves the xml:id of the currently displayed surface
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentSurfaceId: (state, getters) => {
       const pageIndex = getters.currentPageZeroBased
       const path = getters.filepath
       const pages = getters.documentPagesForSidebars(path)
 
       const page = pages[pageIndex]
-      const docName = page.document
       const surfaceId = page.id
-      const docPath = getters.documentPathByName(docName)
-      const dom = getters.documentByPath(docPath)
-
-      const genDescPage = dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
-
-      return genDescPage
+      return surfaceId
     },
 
     /**
@@ -643,23 +732,14 @@ const dataModule = {
      * @return {[type]}         [description]
      */
     writingZonesOnCurrentPage: (state, getters) => {
-      const pageIndex = getters.currentPageZeroBased
-      const path = getters.filepath
-      const pages = getters.documentPagesForSidebars(path)
-
-      const page = pages[pageIndex]
-      const docName = page.document
-      const surfaceId = page.id
-      const docPath = getters.documentPathByName(docName)
-      const dom = getters.documentByPath(docPath)
-
-      const genDescPage = dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+      const genDescPage = getters.genDescForCurrentPage // dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
       const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
 
       if (genDescWzArr.length === 0) {
         return []
       }
-
+      const dom = getters.documentWithCurrentPage
+      const surfaceId = getters.currentSurfaceId
       const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
       const svgDom = getters.svgForCurrentPage
 
