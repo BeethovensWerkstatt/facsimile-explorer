@@ -276,7 +276,7 @@ export default createStore({
     },
     setDocument ({ dispatch, getters }, path) {
       const doc = getters.documentByPath(path)
-      console.log(doc)
+      // console.log(doc)
       if (doc) {
         dispatch('setData', doc)
       } else {
@@ -350,7 +350,7 @@ export default createStore({
     addSVGshapes ({ commit, getters }, { svgstr, page }) {
       const svgdom = parser.parseFromString(svgstr, 'image/svg+xml')
       const svg = svgdom?.documentElement
-      console.log(page, svg)
+      // console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
     },
     openTab ({ commit, getters }, tab) {

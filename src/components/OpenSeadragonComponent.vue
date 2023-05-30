@@ -67,15 +67,19 @@ export default {
     svgClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
-      console.log('clicked shape')
-      console.log(e)
-      this.$store.dispatch('clickedSvgShape', e.target.id)
+      // console.log(e.target)
+      if (e.target.localName === 'path') {
+        console.log('clicked shape')
+        console.log(e)
+
+        this.$store.dispatch('clickedSvgShape', e.target.id)
+      }
     },
     svgDoubleClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
-      console.log('clicked shape')
-      console.log(e)
+      // console.log('clicked shape')
+      // console.log(e)
     },
     renderShapes () {
       if (!this.svg) {
@@ -94,17 +98,39 @@ export default {
         return null
       }
       if (svg) {
-        // console.log('getting in')
+        const existingOverlay = document.querySelector('#osdContainer svg')
+
+        if (existingOverlay !== null) {
+          const oldActive = existingOverlay.querySelector('.activeWritingZone')
+          if (oldActive !== null) {
+            oldActive.classList.remove('activeWritingZone')
+          }
+
+          this.removeListeners()
+          this.viewer.removeOverlay(existingOverlay)
+        }
+
+        const svgClone = svg.cloneNode(true)
         this.viewer.addOverlay({
-          element: svg,
+          element: svgClone,
           x: 0,
           y: 0,
           width: page.width,
           height: page.height
         })
+
+        const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
+        const activeWritingZone = this.$store.getters.activeWritingZone
+
+        const activeZone = writingZonesOnCurrentPage.find(wz => wz.id === activeWritingZone)
+
+        if (activeZone) {
+          svgClone.querySelector('#' + activeZone.svgGroupWzId).classList.add('activeWritingZone')
+        }
+
         // console.log('done')
-        svg.addEventListener('click', this.svgClickListener)
-        svg.addEventListener('dblclick', this.svgDoubleClickListener)
+        svgClone.addEventListener('click', this.svgClickListener)
+        svgClone.addEventListener('dblclick', this.svgDoubleClickListener)
       }
     },
     renderSystems () {
@@ -362,7 +388,7 @@ export default {
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
         const page = this.$route.query.page
-        console.log('open', newArr)
+        // console.log('open', newArr)
         this.viewer.open(newArr, page ? +page - 1 : 0)
         this.$store.dispatch('setCurrentPage', page ? +page - 1 : 0)
         this.renderSystems()
@@ -374,6 +400,14 @@ export default {
           this.renderShapes()
         }
         // this.viewer.open(newArr)
+      })
+    this.unwatchUnAssignedShapes = this.$store.watch((state, getters) => getters.unassignedShapesOnCurrentPage,
+      (arr) => {
+        this.renderShapes()
+      })
+    this.unwatchActiveWritingZone = this.$store.watch((state, getters) => getters.activeWritingZone,
+      (id) => {
+        this.renderShapes()
       })
     // const svg = this.$store.getters.svgOnCurrentPage
     this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
@@ -413,10 +447,15 @@ export default {
       console.log(err)
     } */
   },
+  updated () {
+    console.log('OSD updated – shall I now?')
+  },
   beforeUnmount () {
     this.unwatchPages()
     this.unwatchSVG()
     this.unwatchSystems()
+    this.unwatchUnAssignedShapes()
+    this.unwatchActiveWritingZone()
     this.unwatchCurrentPage()
     this.unwatchEditingSystem()
     this.unwatchPageXML()
@@ -531,7 +570,31 @@ export default {
     svg {
       width: 100%;
       height: 100%;
+
    }
+  }
+
+  .unassigned path {
+    fill: $svgUnassignedShapeColor;
+    stroke: $svgUnassignedShapeColor;
+    &:hover {
+      stroke-width: 10px;
+      stroke: lighten($svgUnassignedShapeColor, 15%);
+    }
+  }
+
+  .writingZone path {
+    fill: #666666;
+    stroke: #666666;
+    &:hover {
+      stroke-width: 10px;
+      stroke: azure;
+    }
+  }
+
+  .activeWritingZone path {
+    fill: $activeHighlightColor;
+    stroke: $activeHighlightColor;
   }
 }
 </style>

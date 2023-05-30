@@ -151,7 +151,7 @@ const actions = {
   checkAuthenticate ({ commit, getters }, opts) {
     getters.octokit.auth().then(auth => {
       const authenticated = auth.type !== 'unauthenticated'
-      console.log(auth, authenticated)
+      // console.log(auth, authenticated)
       commit('SET_AUTHENTICATED', authenticated)
       if (authenticated && opts?.authenticated) opts.authenticated()
     })
@@ -197,10 +197,10 @@ const actions = {
     if (contentData?.doc) {
       dispatch('setData', contentData.doc)
       commit('SET_GH_FILE', contentData)
-      console.log(contentData.path, 'loaded from cache')
+      // console.log(contentData.path, 'loaded from cache')
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
-        console.log(data.download_url) // , data.content)
+        // console.log(data.download_url) // , data.content)
         try {
           const mei = base64dom(data.content)
           if (callback) { // TODO if typeof function?

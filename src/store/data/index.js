@@ -234,24 +234,34 @@ const dataModule = {
       dispatch('logChange', { path: svgPath, baseMessage, param })
     },
 
+    /**
+     * called when a shape is supposed to be moved to the current writingZone
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} shapeId                [description]
+     * @return {[type]}          [description]
+     */
     moveShapeToCurrentWritingZone ({ commit, getters, dispatch }, shapeId) {
       if (!shapeId) {
         return null
       }
-
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
-      if (!modifiedSvgDom) {
+
+      if (!modifiedDom || !modifiedSvgDom) {
         return null
       }
 
-      const pageIndex = getters.currentPageZeroBased
-      const path = getters.filepath
-      const pages = getters.documentPagesForSidebars(path)
-
-      const page = pages[pageIndex]
-      const docName = page.document
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
 
       const writingLayerGenDesc = getters.genDescForFinalWritingLayerInCurrentWritingZone
+
+      if (!writingLayerGenDesc) {
+        return null
+      }
+
       const corresp = writingLayerGenDesc.getAttribute('corresp')
       const writingLayerSvgGroupId = corresp.split('#')[1]
 
@@ -260,16 +270,43 @@ const dataModule = {
       const shape = modifiedSvgDom.querySelector('#' + shapeId)
       writingLayerSvgGroup.append(shape)
 
+      const pageGenDesc = getters.genDescForCurrentPage
+      const wzGenDescArr = pageGenDesc.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+
+      const renderedWritingZones = document.querySelectorAll('svg .writingZone')
+      renderedWritingZones.forEach(svgWz => {
+        const bbox = svgWz.getBBox()
+
+        const wzGenDesc = [...wzGenDescArr].find(wz => wz.getAttribute('corresp').split('#')[1] === svgWz.getAttribute('id'))
+        const zone = surface.querySelector('zone[data="#' + wzGenDesc.getAttribute('xml:id') + '"]')
+        zone.setAttribute('ulx', Math.round(bbox.x))
+        zone.setAttribute('uly', Math.round(bbox.y))
+        zone.setAttribute('lrx', Math.round(bbox.x + bbox.width))
+        zone.setAttribute('lry', Math.round(bbox.y + bbox.height))
+      })
+
       const svgPath = getters.currentSvgPath
       const param = getters.currentSurfaceIndexForCurrentDoc
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
 
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
       dispatch('logChange', { path: svgPath, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param })
     },
-    clickedSvgShape ({ commit, getters, dispatch }, shapeId) {
-      console.log('clicked shape ' + shapeId)
 
+    /**
+     * called by OSD when clicking on an svg path element
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} shapeId                [description]
+     * @return {[type]}          [description]
+     */
+    clickedSvgShape ({ commit, getters, dispatch }, shapeId) {
       if (getters.currentTab === 'zones') {
         dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
@@ -752,6 +789,8 @@ const dataModule = {
       genDescWzArr.forEach(genDescWz => {
         const genDescWzId = genDescWz.getAttribute('xml:id')
 
+        const svgGroupWzId = genDescWz.getAttribute('corresp').split('#')[1]
+
         const zone = surface.querySelector('zone[data="#' + genDescWzId + '"]')
         const x = parseInt(zone.getAttribute('ulx'))
         const y = parseInt(zone.getAttribute('uly'))
@@ -777,6 +816,7 @@ const dataModule = {
           wl.id = genDescWl.getAttribute('xml:id')
           wl.label = genDescWl.getAttribute('label')
           wl.shapes = shapes
+          wl.svgGroupWlId = svgGroupId
 
           totalCount += shapes.length
 
@@ -791,6 +831,7 @@ const dataModule = {
         wz.annotTrans = null
         wz.xywh = x + ',' + y + ',' + w + ',' + h
         wz.layers = layers
+        wz.svgGroupWzId = svgGroupWzId
 
         arr.push(wz)
       })
