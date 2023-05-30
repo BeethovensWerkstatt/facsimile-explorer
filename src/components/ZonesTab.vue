@@ -75,8 +75,7 @@ export default {
       if (svgPath !== null && !svg) {
         // console.log('need to do something about this…')
         this.$store.dispatch('loadSvgFile', {
-          path: svgPath,
-          ref: 'test'
+          path: svgPath
         })
       }
     }
