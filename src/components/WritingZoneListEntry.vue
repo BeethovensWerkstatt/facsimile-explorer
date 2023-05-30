@@ -34,7 +34,7 @@ export default {
       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
     },
     deleteZone () {
-      alert('Mit Klick auf dieses X sollte erst noch ein kleiner Modal aufgehen, der nachfragt, ob man wirklich die WritingZone löschen möchte. \n\nFalls dem so ist, werden die zugehörigen Shapes einfach wieder in den "UnAssigned"-Pool zurückgeschoben.')
+      this.$store.dispatch('deleteWritingZone', this.wz.id)
     }
     /* switchTab (val) {
       this.$store.dispatch('setExplorerTab', val)

@@ -593,8 +593,8 @@ export default {
   }
 
   .activeWritingZone path {
-    fill: $activeHighlightColor;
-    stroke: $activeHighlightColor;
+    fill: $svgActiveWritingZoneColor;
+    stroke: $svgActiveWritingZoneColor;
   }
 }
 </style>

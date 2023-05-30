@@ -232,6 +232,8 @@ const dataModule = {
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
       dispatch('logChange', { path: docPath, baseMessage, param })
       dispatch('logChange', { path: svgPath, baseMessage, param })
+
+      dispatch('setActiveWritingZone', genDescWzId)
     },
 
     /**
@@ -291,6 +293,54 @@ const dataModule = {
       const svgPath = getters.currentSvgPath
       const param = getters.currentSurfaceIndexForCurrentDoc
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('logChange', { path: svgPath, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param })
+    },
+
+    /**
+     * deletes a writing zone and moves all its shapes to the unassigned group
+     * @param  {[type]} commit                    [description]
+     * @param  {[type]} getters                   [description]
+     * @param  {[type]} dispatch                  [description]
+     * @param  {[type]} genDescWzId               [description]
+     * @return {[type]}             [description]
+     */
+    deleteWritingZone ({ commit, getters, dispatch }, genDescWzId) {
+      if (!genDescWzId) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+
+      if (!modifiedDom || !modifiedSvgDom) {
+        return null
+      }
+
+      // ---
+
+      const genDescWz = modifiedDom.querySelector('genDesc[*|id="' + genDescWzId + '"]')
+      const svgGroupWz = modifiedSvgDom.querySelector('#' + genDescWz.getAttribute('corresp').split('#')[1])
+      const svgUnassignedGroup = modifiedSvgDom.querySelector('g.unassigned')
+
+      svgGroupWz.querySelectorAll('path').forEach(shape => svgUnassignedGroup.append(shape))
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const zone = surface.querySelector('zone[data="#' + genDescWz.getAttribute('xml:id') + '"]')
+
+      zone.remove()
+      genDescWz.remove()
+      svgGroupWz.remove()
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const svgPath = getters.currentSvgPath
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'deleted writingZone on ' + docName + ', p.'
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
