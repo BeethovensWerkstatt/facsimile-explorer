@@ -143,6 +143,12 @@ const dataModule = {
       const pixelWidth = parseInt(surface.querySelector('graphic[type="facsimile"]').getAttribute('width'))
       const pixelHeight = parseInt(surface.querySelector('graphic[type="facsimile"]').getAttribute('height'))
 
+      if (!svgDom.querySelector('g.unassigned')) {
+        const unassignedG = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+        unassignedG.classList.add('unassigned')
+        svgDom.querySelectorAll('path').forEach(shape => unassignedG.append(shape))
+        svgDom.querySelector('svg').append(unassignedG)
+      }
       if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
         dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom })
         dispatch('loadDocumentIntoStore', { path, dom: modifiedDom })
