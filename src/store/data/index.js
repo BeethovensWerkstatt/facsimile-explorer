@@ -150,7 +150,7 @@ const dataModule = {
         svgDom.querySelector('svg').append(unassignedG)
       }
       if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
-        dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom })
+        dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom.querySelector('svg') })
         dispatch('loadDocumentIntoStore', { path, dom: modifiedDom })
 
         // create array with files to commit
