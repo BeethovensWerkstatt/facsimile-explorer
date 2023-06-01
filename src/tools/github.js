@@ -1,4 +1,5 @@
 import { Base64 } from 'js-base64'
+import XMLBeautify from 'xml-beautify'
 import store from '@/store'
 
 /**
@@ -6,6 +7,7 @@ import store from '@/store'
  * @type {XMLSerializer}
  */
 const serializer = new XMLSerializer()
+const beautifier = new XMLBeautify()
 
 /**
  * decode base63 encoded utf-8 string
@@ -47,7 +49,8 @@ export const str2base64 = str => {
  */
 export const dom2base64 = dom => {
   const str = serializer.serializeToString(dom)
-  return str2base64(str)
+  const xml = beautifier.beautify(str)
+  return str2base64(xml)
 }
 
 export class OctokitNode {
