@@ -50,6 +50,9 @@ export const str2base64 = str => {
 export const dom2base64 = dom => {
   const str = serializer.serializeToString(dom)
   const xml = beautifier.beautify(str)
+  const parser = new DOMParser()
+  const domtest = parser.parseFromString(xml)
+  console.log(domtest)
   return str2base64(xml)
 }
 
