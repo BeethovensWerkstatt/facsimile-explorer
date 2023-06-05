@@ -7,6 +7,9 @@
         <span class="fragment" title="Image URI has a fragment identifier that specifies the actual physical page">Page Size: <i class="icon" :class="{'icon-check': page.hasFragment, 'icon-cross': !page.hasFragment}"></i></span>
         <span class="systems">Systems: {{page.systems}}</span>
       </div>
+      <div class="svgIndicator indicatorBox" v-if="page.hasSvg && i !== activePage"/>
+      <div class="fragmentIndicator indicatorBox" v-if="page.hasFragment && i !== activePage"/>
+      <div class="systemIndicator indicatorBox" v-if="page.systems !== 0 && i !== activePage"/>
     </div>
 
   </div>
@@ -70,6 +73,30 @@ export default {
 
 .pageBox {
   margin: .1rem 0 .2rem 0;
+  position: relative;
+
+  .indicatorBox {
+    position: absolute;
+    bottom: 10%;
+    width: 20%;
+    height: .1rem;
+    border-radius: 2px;
+
+    &.svgIndicator {
+      background-color: green;
+      left: 2%;
+    }
+
+    &.fragmentIndicator {
+      background-color: red;
+      left: 40%;
+    }
+
+    &.systemIndicator {
+      background-color: red;
+      left: 75%;
+    }
+  }
 
   h2 {
     font-size: .8rem;
