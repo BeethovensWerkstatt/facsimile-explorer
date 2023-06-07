@@ -356,12 +356,13 @@ const actions = {
     // console.log('commitSha', newCommitSha)
 
     // Update the specified branch to point to the new commit
-    await octokit.git.updateRef({
+    const ref = await octokit.git.updateRef({
       owner,
       repo,
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+    console.log('updateRef', ref)
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
 

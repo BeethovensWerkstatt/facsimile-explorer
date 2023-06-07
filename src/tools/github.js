@@ -1,5 +1,5 @@
 import { Base64 } from 'js-base64'
-import XMLBeautify from 'xml-beautify'
+import XMLFormat from 'xml-formatter'
 import store from '@/store'
 
 /**
@@ -7,10 +7,10 @@ import store from '@/store'
  * @type {XMLSerializer}
  */
 const serializer = new XMLSerializer()
-const beautifier = new XMLBeautify()
+// const beautifier = new XMLBeautify(new DOMParser())
 
 /**
- * decode base63 encoded utf-8 string
+ * decode base64 encoded utf-8 string
  * @param {string} data base64 encoded utf-8 string
  * @returns decoded text
  */
@@ -47,12 +47,9 @@ export const str2base64 = str => {
  * @param {DOM} dom DOM object to serialize to string and encode utf-8 base64
  * @returns base64 encoded utf-8 coded serialization of dom
  */
-export const dom2base64 = dom => {
+export const dom2base64 = (dom, type = 'application/xml') => {
   const str = serializer.serializeToString(dom)
-  const xml = beautifier.beautify(str)
-  const parser = new DOMParser()
-  const domtest = parser.parseFromString(xml)
-  console.log(domtest)
+  const xml = XMLFormat(str)
   return str2base64(xml)
 }
 
