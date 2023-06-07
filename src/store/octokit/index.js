@@ -368,7 +368,7 @@ const actions = {
 
     if (getters.changesNeedBranching) {
       // create PR
-      const PR = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
+      const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
         owner,
         repo,
         title: tmpBranch,
@@ -376,12 +376,12 @@ const actions = {
         head: tmpBranch,
         base: targetBranch
       })
-      console.log('PR', PR)
+      console.log('PR', data)
       // merge PR
-      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${PR.id}/merge`, {
+      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
         owner,
         repo,
-        pull_number: PR.id,
+        pull_number: data.number,
         commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
         commit_message: message,
         delete_branch_on_merge: true // does this work?
