@@ -17,6 +17,7 @@ const guiModule = {
    * @property {Boolean} diploTabSidebarVisible if the left sidebar in diploTab is visible
    * @property {Number} diploTabSidebarWidth width of the left sidebar in diploTab
    * @property {String} activeWritingZone ID of the currently active writing zone
+   * @property {Boolean} pageMarginSelectorMode whether pageMargin fragment identifier selection mode is active
    */
   state: {
     pageTabSidebarVisible: true,
@@ -31,7 +32,8 @@ const guiModule = {
     annotTabRightSidebarWidth: 300,
     diploTabSidebarVisible: true,
     diploTabSidebarWidth: 300,
-    activeWritingZone: null
+    activeWritingZone: null,
+    pageMarginSelectorMode: false
   },
   /**
    * @namespace store.gui.mutations
@@ -147,6 +149,15 @@ const guiModule = {
      */
     SET_ACTIVE_WRITINGZONE (state, id) {
       state.activeWritingZone = id
+    },
+
+    /**
+     * toggle fragment identifier selection mode
+     * @param {[type]} state  [description]
+     * @param {[type]} bool   [description]
+     */
+    ACTIVATE_PAGE_MARGIN_SELECTOR_MODE (state, bool) {
+      state.pageMarginSelectorMode = bool
     }
   },
   /**
@@ -215,6 +226,16 @@ const guiModule = {
      */
     setActiveWritingZone ({ commit }, id) {
       commit('SET_ACTIVE_WRITINGZONE', id)
+    },
+
+    /**
+     * toggles the selectorMode for pageMargin fragment identifiers
+     * @param  {[type]} commit                [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    togglePageMarginSelectorMode ({ commit, getters }) {
+      commit('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', !getters.pageMarginSelectorMode)
     }
   },
   /**
@@ -337,6 +358,15 @@ const guiModule = {
      */
     activeWritingZone: (state) => {
       return state.activeWritingZone
+    },
+
+    /**
+     * returns whether pageMarginSelectorMode is active
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageMarginSelectorMode: (state) => {
+      return state.pageMarginSelectorMode
     }
   }
 }

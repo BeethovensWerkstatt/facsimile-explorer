@@ -366,6 +366,46 @@ const dataModule = {
       if (getters.currentTab === 'zones') {
         dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
+    },
+
+    /**
+     * sets the fragment identifier for pages, describing the actual page size within an image
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} xywh                   [description]
+     * @return {[type]}          [description]
+     */
+    identifyPageFragment ({ commit, getters, dispatch }, xywh) {
+      if (!xywh || !xywh.x || !xywh.y || !xywh.w || !xywh.h) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+      const fragment = '#xywh=' + xywh.x + ',' + xywh.y + ',' + xywh.w + ',' + xywh.h
+
+      graphic.setAttribute('target', basePath + fragment)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'determine actual page dimensions within scan of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param })
+
+      commit('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', false)
     }
   },
 
@@ -831,6 +871,41 @@ const dataModule = {
 
       const page = pages[pageIndex]
       return { width: page.width, height: page.height }
+    },
+
+    /**
+     * returns an object with the dimensions of the current page fragment identifier, if any
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageFragmentIdentifier: (state, getters) => {
+      const dom = getters.documentWithCurrentPage
+      const surfaceId = getters.currentSurfaceId
+
+      if (!dom || !surfaceId) {
+        return null
+      }
+
+      const graphic = dom.querySelector('surface[*|id="' + surfaceId + '"] graphic[type="facsimile"]')
+
+      if (!graphic) {
+        return null
+      }
+
+      const fragment = graphic.getAttribute('target').split('#xywh=')[1]
+
+      if (!fragment) {
+        return null
+      }
+
+      const obj = {
+        x: fragment.split(',')[0],
+        y: fragment.split(',')[1],
+        w: fragment.split(',')[2],
+        h: fragment.split(',')[3]
+      }
+      return obj
     },
 
     /**

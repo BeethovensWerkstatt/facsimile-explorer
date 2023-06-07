@@ -353,9 +353,10 @@ export default createStore({
       // console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
     },
-    openTab ({ commit, getters }, tab) {
+    openTab ({ commit, getters, dispatch }, tab) {
       if (getters.isAuthenticated) {
         commit('OPEN_TAB', tab)
+        dispatch('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', false)
       }
     }
   },

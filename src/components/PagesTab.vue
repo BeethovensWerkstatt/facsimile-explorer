@@ -9,7 +9,7 @@
       <div class="menuItem fileInput" title="TODO: open a filepicker and load svg">
         <div class="customBtn" @click="addSVG"><i class="icon icon-upload"></i> Import SVG</div>
       </div>
-      <div class="menuItem mediaFragment" title="">
+      <div class="menuItem mediaFragment" title="" :class="{ active: fragmentModeActive }">
         <div class="customBtn" @click="setPageMargins"><i class="icon icon-bookmark"></i> Set Page Margins</div>
       </div>
       <div class="menuItem systems">
@@ -30,7 +30,7 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent :svg="false" :annotorious="true"/>
+        <OpenSeadragonComponent :svg="false" :annotorious="true" :pageBorders="true"/>
       </MainStage>
     </div>
   </div>
@@ -68,7 +68,8 @@ export default {
       alert('Hiermit wird das aktuell ausgewählte System gelöscht. Systeme werden einfach per Klick ausgewählt, und per Doppelklick wird wieder das Annotorious-Rect geladen, um sie anzupassen')
     },
     setPageMargins () {
-      alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
+      // alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
+      this.$store.dispatch('togglePageMarginSelectorMode')
     },
     addSVG () {
       const input = document.createElement('input')
@@ -98,7 +99,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased'])
+    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased']),
+    fragmentModeActive () {
+      return this.$store.getters.pageMarginSelectorMode
+    }
   }
 }
 </script>
@@ -174,7 +178,7 @@ i.showSidebar {
 
 .menuItem {
   display: inline-block;
-  margin: 0 .5rem 0 0;
+  margin: 0 .5rem 0 .5rem;
 
   .btn {
     height: 1rem;
@@ -198,6 +202,10 @@ i.showSidebar {
       top: -2px;
       margin-right: .2rem;
     }
+  }
+
+  &.mediaFragment.active {
+    background-color: pink;
   }
 }
 

@@ -42,11 +42,15 @@ export default {
   name: 'OpenSeadragonComponent',
   props: {
     svg: Boolean,
-    annotorious: Boolean
+    annotorious: Boolean,
+    pageBorders: Boolean
   },
   computed: {
     currentTab () {
       return this.$store.getters.explorerTab
+    },
+    pageMarginSelectorModeActive () {
+      return this.$store.getters.pageMarginSelectorMode
     }
   },
   methods: {
@@ -170,6 +174,78 @@ export default {
         }
       })
     },
+    renderPageBorders () {
+      // only relevant before component is mounted
+      if (!this.viewer === undefined) {
+        return null
+      }
+
+      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      })
+
+      if (!this.pageBorders) {
+        return null
+      }
+
+      const page = this.$store.getters.currentPageDimensions
+      const fragment = this.$store.getters.currentPageFragmentIdentifier
+      if (!fragment || !page) {
+        return null
+      }
+
+      const overlayTop = document.createElement('div')
+      overlayTop.classList.add('pageBorder')
+      overlayTop.classList.add('overlay')
+      overlayTop.classList.add('top')
+
+      const overlayLeft = document.createElement('div')
+      overlayLeft.classList.add('pageBorder')
+      overlayLeft.classList.add('overlay')
+      overlayLeft.classList.add('left')
+
+      const overlayRight = document.createElement('div')
+      overlayRight.classList.add('pageBorder')
+      overlayRight.classList.add('overlay')
+      overlayRight.classList.add('right')
+
+      const overlayBottom = document.createElement('div')
+      overlayBottom.classList.add('pageBorder')
+      overlayBottom.classList.add('overlay')
+      overlayBottom.classList.add('bottom')
+
+      this.viewer.addOverlay({
+        element: overlayTop,
+        x: 0,
+        y: 0,
+        width: parseInt(page.width),
+        height: parseInt(fragment.y)
+      })
+
+      this.viewer.addOverlay({
+        element: overlayLeft,
+        x: 0,
+        y: parseInt(fragment.y),
+        width: parseInt(fragment.x),
+        height: parseInt(fragment.h)
+      })
+
+      this.viewer.addOverlay({
+        element: overlayRight,
+        x: parseInt(fragment.x) + parseInt(fragment.w),
+        y: parseInt(fragment.y),
+        width: parseInt(page.width) - (parseInt(fragment.x) + parseInt(fragment.w)),
+        height: parseInt(fragment.h)
+      })
+
+      this.viewer.addOverlay({
+        element: overlayBottom,
+        x: 0,
+        y: parseInt(fragment.y) + parseInt(fragment.h),
+        width: parseInt(page.width),
+        height: parseInt(page.height) - (parseInt(fragment.y) + parseInt(fragment.h))
+      })
+    },
     generateSelectionFromZone () {
       if (!this.annotorious) {
         return false
@@ -208,6 +284,17 @@ export default {
 
       this.anno.setAnnotations([anno])
       this.anno.selectAnnotation(anno)
+    },
+    activateAnnotorious (bool) {
+      const container = document.querySelector('#osdContainer')
+      if (!container) {
+        return null
+      }
+      if (bool) {
+        container.classList.add('annotoriousActive')
+      } else {
+        container.classList.remove('annotoriousActive')
+      }
     },
     renderVerovioOverlay () {
       document.querySelectorAll('.verovio.overlay').forEach(overlay => {
@@ -277,7 +364,7 @@ export default {
       console.warn('WARNING: Unable to init OSD yet…')
     }
 
-    if (this.annotorios) {
+    if (this.annotorious) {
       const annotoriousConfig = {
         disableEditor: true
       }
@@ -288,7 +375,8 @@ export default {
 
       // Listener for new Selections
       this.anno.on('createSelection', async (selection) => {
-        // console.log('created selection:', selection)
+        console.log('created selection:', selection)
+
         selection.body = [{
           type: 'TextualBody',
           purpose: 'tagging',
@@ -302,16 +390,31 @@ export default {
       // automatically triggered through createSelection
       this.anno.on('createAnnotation', async (annotation) => {
         // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
+        console.log('got in here with annotation', annotation)
         const raw = annotation.target.selector.value.substr(11).split(',')
+        console.log(raw)
         const xywh = {
           x: Math.max(Math.round(raw[0]), 0),
           y: Math.max(Math.round(raw[1]), 0),
           w: Math.round(raw[2]),
           h: Math.round(raw[3])
         }
+        console.log(xywh)
+
+        if (this.pageMarginSelectorModeActive) {
+          console.log('need to (re)set page fragment identifier')
+          this.$store.dispatch('identifyPageFragment', xywh)
+          this.anno.clearAnnotations()
+          console.log('done that, should be committed')
+        }
+
+        /*
+
         this.$store.dispatch('createSystem', xywh)
         this.anno.clearAnnotations()
         this.renderSystems()
+
+         */
       })
 
       // Listener for changing selections
@@ -375,6 +478,7 @@ export default {
         this.$store.dispatch('setCurrentPage', data.page)
         this.renderSystems()
         this.renderShapes()
+        this.renderPageBorders()
       }
     })
 
@@ -384,6 +488,7 @@ export default {
         this.viewer.goToPage(newPage)
         this.renderSystems()
         this.renderShapes()
+        this.renderPageBorders()
       })
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
@@ -393,6 +498,7 @@ export default {
         this.$store.dispatch('setCurrentPage', page ? +page - 1 : 0)
         this.renderSystems()
         this.renderShapes()
+        this.renderPageBorders()
       })
     this.unwatchSVG = this.$store.watch((state, getters) => getters.svgForCurrentPage,
       (svg) => {
@@ -414,6 +520,10 @@ export default {
       (newArr, oldArr) => {
         this.renderSystems()
       })
+    this.unwatchSelectionMode = this.$store.watch((state, getters) => getters.pageMarginSelectorMode,
+      (newVal, oldVal) => {
+        this.activateAnnotorious(newVal)
+      })
     this.unwatchEditingSystem = this.$store.watch((state, getters) => getters.editingSystemOnCurrentPage,
       (newIndex, oldIndex) => {
         if (newIndex !== oldIndex) {
@@ -422,6 +532,10 @@ export default {
         if (newIndex !== -1) {
           this.generateSelectionFromZone()
         }
+      })
+    this.unwatchPageBorders = this.$store.watch((state, getters) => getters.currentPageFragmentIdentifier,
+      (newObj, oldObj) => {
+        this.renderPageBorders()
       })
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
@@ -471,6 +585,22 @@ export default {
 #osdContainer {
   width: 100%;
   height: 100%;
+
+  .a9s-annotationlayer {
+    z-index: -1
+  }
+
+  &.annotoriousActive {
+    .a9s-annotationlayer {
+      z-index: 1
+    }
+  }
+
+  .overlay.pageBorder {
+    width: 100px;
+    height: 100px;
+    background-color: #ff000033;
+  }
 
   .system.overlay {
     z-index: -1
