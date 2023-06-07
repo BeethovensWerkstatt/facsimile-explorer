@@ -819,6 +819,21 @@ const dataModule = {
     },
 
     /**
+     * returns the width and height of the current page in pixels
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageDimensions: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      return { width: page.width, height: page.height }
+    },
+
+    /**
      * retrieves the writing zons on the current page
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]

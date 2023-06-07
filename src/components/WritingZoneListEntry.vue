@@ -1,9 +1,15 @@
 <template>
   <div class="writingZone" :class="{active: isActive}">
-    <h1 @click="selectWritingZone">{{name}} <span class="shapeCount" title="Number of Shapes"># {{wz.totalCount}} <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
+    <h1 @click="selectWritingZone">{{name}}
+      <span class="previewFrame" :style="{width: pageDimensions.pageWidth}" @click="showWzPreview()">
+        <span class="actualPreview" :style="{top: pageDimensions.top, left: pageDimensions.left, width: pageDimensions.width, height: pageDimensions.height}"></span>
+      </span>
+      <span class="shapeCount" title="Number of Shapes"># {{wz.totalCount}} <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
     <div class="writingLayer">Writing Layers:</div>
     <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer active">
-      <h2>{{this.numPrefixer(i)}}  <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}}</span></h2>
+      <h2>{{this.numPrefixer(i)}}
+        <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}}</span>
+      </h2>
     </div>
   </div>
 </template>
@@ -35,6 +41,9 @@ export default {
     },
     deleteZone () {
       this.$store.dispatch('deleteWritingZone', this.wz.id)
+    },
+    showWzPreview () {
+      console.log('dispatch something to make OSD focus on ', this.wz.xywh)
     }
     /* switchTab (val) {
       this.$store.dispatch('setExplorerTab', val)
@@ -47,6 +56,28 @@ export default {
     // TODO: Hier vermutlich sinnvoller mit einem Getter arbeiten
     isActive () {
       return this.wz.id === this.$store.getters.activeWritingZone
+    },
+    pageDimensions () {
+      const page = this.$store.getters.currentPageDimensions
+
+      let pageWidth
+
+      if (page.width > page.height) {
+        const num = 0.8 * page.width / page.height
+        pageWidth = num.toFixed(2) + 'rem'
+      } else if (page.width <= page.height) {
+        const num = 0.8 * page.height / page.width
+        pageWidth = num.toFixed(2) + 'rem'
+      } else {
+        pageWidth = '.8rem'
+      }
+
+      const top = (100 / page.height * parseInt(this.wz.xywh.split(',')[1])) + '%'
+      const left = (100 / page.width * parseInt(this.wz.xywh.split(',')[0])) + '%'
+      const width = (100 / page.width * parseInt(this.wz.xywh.split(',')[2])) + '%'
+      const height = (100 / page.height * parseInt(this.wz.xywh.split(',')[3])) + '%'
+
+      return { pageWidth, top, left, width, height }
     }
     /* selectionEnabled: {
       get () {
@@ -89,6 +120,23 @@ h1 {
     &:hover {
       color: #cc3333;
     }
+  }
+}
+
+.previewFrame {
+  display: inline-block;
+  height: .8rem;
+  border: $lightBorder;
+  position: relative;
+  top: 2px;
+  cursor: pointer;
+  background-color: #ffffff;
+
+  .actualPreview {
+    position: absolute;
+    background-color: red;
+    min-width: 10%;
+    min-height: 10%;
   }
 }
 
