@@ -53,9 +53,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
-            latest=${{ github.ref == 'refs/heads/main' }}
-            dev=${{ github.ref == 'refs/heads/dev' }}
-            jpvdev=${{ github.ref == 'refs/heads/jpv/dev2' }}
+            latest=${{ github.ref == 'refs/heads/dev' }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
