@@ -19,7 +19,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   CLIENT_ID: 57017f5903e768628c42
 
-
 jobs:
   build:
 
