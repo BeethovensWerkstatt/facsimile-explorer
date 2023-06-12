@@ -3,7 +3,7 @@
     "owner": "BeethovensWerkstatt",
     "repo": "data",
     "branch": "test",
-    "defalt": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
+    "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
   },
   "root": "data/sources"
 }

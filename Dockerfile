@@ -4,12 +4,12 @@
 # 2. run it with nginx
 #########################
 FROM node:14 as build-stage
-ARG CLIENT_ID
+# ARG CLIENT_ID
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY ./ .
-RUN echo "VUE_APP_CLIENT_ID=$CLIENT_ID" >.env.production
+# RUN echo "VUE_APP_CLIENT_ID=$CLIENT_ID" >.env.production
 # RUN apk add git
 # RUN npm install -g gulp-cli gulp-git
 RUN npm run build
@@ -20,7 +20,10 @@ RUN npm run build
 #########################
 
 FROM nginx as production-stage
+RUN apt-get update
+RUN apt-get install -y jq
 RUN mkdir /app
+COPY src/config.json /
 COPY nginx-ghcred/40-create-ghcred.sh /docker-entrypoint.d
 COPY --from=build-stage /app/dist /app
 COPY nginx.conf /etc/nginx/nginx.conf
