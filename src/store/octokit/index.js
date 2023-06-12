@@ -356,18 +356,19 @@ const actions = {
     // console.log('commitSha', newCommitSha)
 
     // Update the specified branch to point to the new commit
-    await octokit.git.updateRef({
+    const ref = await octokit.git.updateRef({
       owner,
       repo,
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
+    console.log('updateRef', ref)
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
 
     if (getters.changesNeedBranching) {
       // create PR
-      const PR = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
+      const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
         owner,
         repo,
         title: tmpBranch,
@@ -375,12 +376,12 @@ const actions = {
         head: tmpBranch,
         base: targetBranch
       })
-      console.log('PR', PR)
+      console.log('PR', data)
       // merge PR
-      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${PR.id}/merge`, {
+      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
         owner,
         repo,
-        pull_number: PR.id,
+        pull_number: data.number,
         commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
         commit_message: message,
         delete_branch_on_merge: true // does this work?

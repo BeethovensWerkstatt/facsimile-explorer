@@ -4,7 +4,8 @@
     <div v-else class="loading">loading ...</div>
   </div>
   <div v-else>
-    <div class="externalMessages">Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!</div>
+    <div class="externalMessages" v-if="client_id">Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!</div>
+    <div class="externalMessages" v-else>bitte warten ...</div>
   </div>
 </template>
 
@@ -14,6 +15,12 @@ import CLIENT_ID from '@/clientID'
 
 export default {
   name: 'FacsimileExplorer',
+  data: () => ({
+    client_id: null
+  }),
+  created () {
+    CLIENT_ID.then(id => { this.client_id = id })
+  },
   computed: {
     ...mapGetters([
       'isAuthenticated',
@@ -22,7 +29,10 @@ export default {
     routeAuthenticate () {
       return this.$route.name === 'authenticate'
     },
-    authurl: () => `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
+    authurl () {
+      const clientId = this.client_id
+      return `https://github.com/login/oauth/authorize?scope=repo&client_id=${clientId}`
+    }
   },
   methods: {
     authenticated () {
