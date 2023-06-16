@@ -31,7 +31,13 @@ const state = {
 
   changes: [],
   commitMessage: null,
-  changesNeedBranching: false // TODO: this needs to be checked in preparation of commit
+  changesNeedBranching: false, // TODO: this needs to be checked in preparation of commit
+
+  commitResults: {
+    status: 'uncommitted', // allowed values: 'uncommitted', 'success', 'merged', 'conflicts'
+    prUrl: null,
+    conflictingUser: null
+  }
 }
 
 const getters = {
@@ -82,7 +88,9 @@ const getters = {
       paths.push(change.path)
     })
     return [...new Set(paths)]
-  }
+  },
+
+  commitResults: state => state.commitResults
 }
 
 const mutations = {
@@ -144,6 +152,9 @@ const mutations = {
   },
   SET_CHANGES_NEED_BRANCHING (state, bool) {
     state.changesNeedBranching = bool
+  },
+  SET_COMMIT_RESULTS (state, { status, prUrl, conflictingUser }) {
+    state.commitResults = { status, prUrl, conflictingUser }
   }
 }
 
@@ -288,7 +299,7 @@ const actions = {
    *
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
-  async commit2GitHub ({ commit, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+  async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
     // Check with former SHA!!! Conflict resolution!
@@ -365,6 +376,7 @@ const actions = {
     console.log('updateRef', ref)
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
+    dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
 
     if (getters.changesNeedBranching) {
       // create PR
@@ -390,8 +402,13 @@ const actions = {
       // merged?
       if (merge.merged) {
         console.log('merged', tmpBranch)
+        dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
       } else {
         console.warn('merge failed!')
+        // TODO: get proper pull request url
+        const prUrl = 'https://beethovens-werkstatt.de'
+        const conflictingUser = '@jpvoigt'
+        dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser })
       }
     }
 
@@ -444,6 +461,17 @@ const actions = {
 
   setCommitMessage ({ commit }, message) {
     commit('SET_COMMIT_MESSAGE', message)
+  },
+
+  setCommitResults ({ commit }, { status, prUrl, conflictingUser }) {
+    if (['uncommitted', 'success', 'merged', 'conflicts'].indexOf(status) === -1) {
+      console.error('Unknown status for commit results: ' + status)
+      return false
+    }
+    const url = typeof prUrl === 'string' ? prUrl : null
+    const user = typeof conflictingUser === 'string' ? conflictingUser : null
+
+    commit('SET_COMMIT_RESULTS', { status, prUrl: url, conflictingUser: user })
   },
 
   async loadSources ({ commit, dispatch, getters }) {
