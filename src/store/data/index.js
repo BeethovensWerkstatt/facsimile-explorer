@@ -821,7 +821,7 @@ const dataModule = {
       if (!genDescPage || !writingZoneId) {
         return null
       }
-      const genDescWritingZone = [...genDescPage.childNodes].find(wz => wz.getAttribute('xml:id') === writingZoneId)
+      const genDescWritingZone = [...genDescPage.children].find(wz => wz.getAttribute('xml:id') === writingZoneId)
       return genDescWritingZone
     },
 
