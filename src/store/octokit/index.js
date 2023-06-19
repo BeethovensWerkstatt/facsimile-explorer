@@ -379,7 +379,6 @@ const actions = {
       console.log('PR', data)
       // merge PR
       // TODO catch error, display message
-      // TODO delete branch on successful merge
       const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
         owner,
         repo,
@@ -392,8 +391,10 @@ const actions = {
       // merged?
       if (merge.data.merged) {
         console.log('merged', tmpBranch)
+        // TODO delete branch on successful merge
       } else {
         console.warn('merge failed!')
+        // TODO set error message
       }
     }
 
