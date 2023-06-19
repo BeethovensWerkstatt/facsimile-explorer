@@ -432,7 +432,7 @@ export default createStore({
       const arr = []
       state.pages.forEach(page => {
         const obj = {
-          tileSource: page.uri,
+          tileSource: page.uri.replace('http://', 'https://'),
           width: page.width,
           x: 0,
           y: 0
