@@ -278,6 +278,11 @@ const dataModule = {
       const shape = modifiedSvgDom.querySelector('#' + shapeId)
       writingLayerSvgGroup.append(shape)
 
+      // the following is necessary to get proper bboxes
+      const renderedLayerSvgGroup = document.querySelector('#' + writingLayerSvgGroupId)
+      const renderedShape = document.querySelector('#' + shapeId)
+      renderedLayerSvgGroup.append(renderedShape)
+
       const pageGenDesc = getters.genDescForCurrentPage
       const wzGenDescArr = pageGenDesc.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')
 
