@@ -14,26 +14,42 @@
             <div class="changedFile" v-for="(changedFile, i) in changedFiles" :key="i">{{changedFile}}</div>
           </div>
 
-          <label>Commit Message</label>
-          <textarea placeholder="commit message" class="commitMessage" v-model="message"></textarea>
+          <template v-if="!completed">
+            <label>Commit Message</label>
+            <textarea placeholder="commit message" class="commitMessage" v-model="message"></textarea>
+            <p>Please adjust the above Commit Message if necessary.</p>
+          </template>
 
-          <!-- TODO: Natürlich muss die Bedingung hier andersrum lauten… -->
-          <div class="branchWarning" v-if="!changesNeedBranching">
-            <label>Warning</label>
-            <div>This Commit may have conflicts with other recent changes on GitHub.
-              When you commit, Facsimile Explorer will generate a new branch on
-              GitHub, and will also create a Pull Request (PR). It is necessary to merge
-              that PR to get your changes into the dataset. It is not possible to resolve
-              this within Facsimile Explorer. Please commit now, and then get in touch
-              with your technical support soon, to avoid any additional and potentially
-              conflicting changes of the data you modified.</div>
+          <div class="statusMessage success" v-if="commitSuccess">
+            <h1>Changes successfully committed.</h1>
+            <p>You're changes have been successfully committed. You may close this modal
+            and continue your work.</p>
+          </div>
+
+          <div class="statusMessage merged" v-if="commitMerged">
+            <h1>Changes successfully merged.</h1>
+            <p>While there have been other changes to the data while you worked, it was possible
+            to store you're changes. However, it is recommended to reload the app in order to
+            fetch the changes from other users.</p>
+          </div>
+
+          <div class="statusMessage conflicts" v-if="commitConflicts">
+            <h1>Conflicts</h1>
+            <p>As you worked, user <b>{{ conflictingUser }}</b> has committed other changes to the
+            data. It was not possible to integrate your changes into the latest state available
+            on GitHub. However, we have uploaded your changes to GitHub and created a Pull Request
+            for you. If you navigate to
+            <b><a :href="prUrl" target="_blank" rel="nofollow noreferrer">{{prUrl}}</a></b>, you
+            may resolve those conflicts manually, and then merge the Pull Request. Please delete
+            the branch afterwards. We apologize for the inconvenience. If you need assistance,
+            please contact your friendly support. Many thanks!</p>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <div class="btn-group">
           <button class="btn" @click="closeModal()">Cancel</button>
-          <button class="btn btn-primary" @click="main()">Commit</button>
+          <button class="btn btn-primary" @click="main()">{{ completed ? 'Close' : 'Commit' }}</button>
         </div>
       </div>
     </div>
@@ -61,8 +77,11 @@ export default {
       // const message = this.message
       // const callback = this.closeModal
       // this.$store.dispatch('saveContent', { message, callback })
-      this.$store.dispatch('prepareGitCommit')
-      this.$store.dispatch('setModal', null)
+      if (this.completed) {
+        this.$store.dispatch('setModal', null)
+      } else {
+        this.$store.dispatch('prepareGitCommit')
+      }
     }
   },
   computed: {
@@ -81,7 +100,28 @@ export default {
         this.$store.dispatch('setCommitMessage', val)
       }
     },
-    ...mapGetters(['changedFiles', 'changesNeedBranching'])
+    ...mapGetters(['changedFiles', 'changesNeedBranching']),
+    commitSuccess () {
+      return this.$store.getters.commitResults.status === 'success'
+    },
+    commitMerged () {
+      return this.$store.getters.commitResults.status === 'merged'
+    },
+    commitConflicts () {
+      return this.$store.getters.commitResults.status === 'conflicts'
+    },
+    completed () {
+      return this.$store.getters.commitResults.status !== 'uncommitted'
+    },
+    status () {
+      return this.$store.getters.commitResults.status
+    },
+    conflictingUser () {
+      return '@jpvoigt' // this.$store.getters.commitResults.conflictingUser
+    },
+    prUrl () {
+      return 'https://beethovens-werkstatt.de' // this.$store.getters.commitResults.prUrl
+    }
   }
 }
 </script>
@@ -112,6 +152,13 @@ export default {
 
 .branchWarning {
   margin-top: .8rem;
+}
+
+.statusMessage {
+  margin: .8rem 0;
+  h1 {
+    font-size: .9rem;
+  }
 }
 
 </style>
