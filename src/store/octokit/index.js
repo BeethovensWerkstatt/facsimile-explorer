@@ -388,27 +388,38 @@ const actions = {
         head: tmpBranch,
         base: targetBranch
       })
-      console.log('PR', data)
       // merge PR
-      // TODO catch error, display message
-      const merge = await octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
-        owner,
-        repo,
-        pull_number: data.number,
-        commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
-        commit_message: message,
-        delete_branch_on_merge: true // does this work?
+      const prUrl = data.html_url
+      const prState = data.mergable_state
+      const conflictingUser = '@jpvoigt'
+      console.log('PR', prUrl, prState)
+      const merge = await new Promise((resolve, reject) => {
+        try {
+          const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
+            owner,
+            repo,
+            pull_number: data.number,
+            commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
+            commit_message: message,
+            delete_branch_on_merge: true // does this work?
+          })
+          merge.then(m => resolve(m)).catch(e => {
+            console.error(e)
+            resolve(null)
+          })
+        } catch (e) {
+          console.error(e)
+          resolve(null)
+        }
       })
       console.log(merge)
       // merged?
-      if (merge.data.merged) {
+      if (merge?.data.merged) {
         console.log('merged', tmpBranch)
+        // TODO: remove PR, temp branch
         dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
       } else {
         console.warn('merge failed!')
-        // TODO: get proper pull request url
-        const prUrl = 'https://beethovens-werkstatt.de'
-        const conflictingUser = '@jpvoigt'
         dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser })
       }
     }
