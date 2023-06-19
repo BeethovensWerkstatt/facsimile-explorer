@@ -8,7 +8,10 @@ function uuidv4 () {
   })
 }
 
-export const fixLink = uri => (uri?.startsWith('https://gallica.bnf.fr/iiif/') && !uri?.endsWith('/info.json')) ? uri + '/info.json' : uri
+export const fixLink = uri => {
+  uri = uri.replace('http://', 'https://')
+  return (uri?.startsWith('https://gallica.bnf.fr/iiif/') && !uri?.endsWith('/info.json')) ? uri + '/info.json' : uri
+}
 
 // meta now contains a property doc with the parsed XML. Should we change this?
 function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate) {
