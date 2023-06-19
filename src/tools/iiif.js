@@ -1,4 +1,5 @@
 import store from '@/store'
+import { Url } from './net'
 
 function uuidv4 () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -9,8 +10,11 @@ function uuidv4 () {
 }
 
 export const fixLink = uri => {
-  uri = uri.replace('http://', 'https://')
-  return (uri?.startsWith('https://gallica.bnf.fr/iiif/') && !uri?.endsWith('/info.json')) ? uri + '/info.json' : uri
+  const uri2 = new Url(uri?.replace('http://', 'https://'))
+  if (uri2.host === 'gallica.bnf.fr') {
+    console.log(uri2.host, uri2.path.elements.join('/'))
+  }
+  return uri
 }
 
 // meta now contains a property doc with the parsed XML. Should we change this?
@@ -53,7 +57,7 @@ function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate
 
   const graphic = surface.querySelector('graphic')
   graphic.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', graphicId)
-  graphic.setAttribute('target', fixLink(canvas?.images[0]?.resource?.service['@id']))
+  graphic.setAttribute('target', canvas?.images[0]?.resource?.service['@id']) // was fixLink
   graphic.setAttribute('width', width)
   graphic.setAttribute('height', height)
 

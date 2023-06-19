@@ -356,7 +356,7 @@ export default createStore({
     openTab ({ commit, getters, dispatch }, tab) {
       if (getters.isAuthenticated) {
         commit('OPEN_TAB', tab)
-        dispatch('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', false)
+        commit('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', false)
       }
     }
   },
