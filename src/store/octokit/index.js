@@ -386,7 +386,8 @@ const actions = {
         title: tmpBranch,
         body: message,
         head: tmpBranch,
-        base: targetBranch
+        base: targetBranch,
+        delete_branch_on_merge: true
       })
       // merge PR
       const prUrl = data.html_url
