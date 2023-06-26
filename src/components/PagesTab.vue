@@ -13,8 +13,8 @@
         <div class="customBtn" @click="setPageMargins"><i class="icon icon-bookmark"></i> Set Page Margins</div>
       </div>
       <div class="menuItem systems">
-        <div class="customBtn" title="Add system" @click="addSystem"><i class="icon icon-edit"></i> Add System</div>
-        <div class="customBtn" title="Delete system" @click="removeSystem"><i class="icon icon-delete"></i> Remove System</div>
+        <div class="customBtn" :class="{ active: addSystemModeActive }" title="Add system" @click="addSystem"><i class="icon icon-edit"></i> Add System</div>
+        <div class="customBtn" :class="{ active: removeSystemModeActive }" title="Delete system" @click="removeSystem"><i class="icon icon-delete"></i> Remove System</div>
       </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
@@ -62,14 +62,33 @@ export default {
       this.$store.dispatch('togglePageTabSidebar')
     },
     addSystem () {
-      alert('Hiermit in den Modus schalten, bei dem ein neues System markiert werden kann, indem ein Annotorious-Rechteck angelegt werden kann.')
+      // alert('Hiermit in den Modus schalten, bei dem ein neues System markiert werden kann, indem ein Annotorious-Rechteck angelegt werden kann.')
+      console.log('addSystem')
+      if (!this.addSystemModeActive) {
+        console.log('activating addSystemMode')
+        this.$store.dispatch('setAnnotoriousMode', 'addSystem')
+      } else {
+        this.$store.dispatch('disableAnnotorious')
+      }
     },
     removeSystem () {
-      alert('Hiermit wird das aktuell ausgewählte System gelöscht. Systeme werden einfach per Klick ausgewählt, und per Doppelklick wird wieder das Annotorious-Rect geladen, um sie anzupassen')
+      // alert('Hiermit wird das aktuell ausgewählte System gelöscht. Systeme werden einfach per Klick ausgewählt, und per Doppelklick wird wieder das Annotorious-Rect geladen, um sie anzupassen')
+      console.log('removeSystem')
+      if (!this.removeSystemModeActive) {
+        console.log('activating removeSystemMode')
+        this.$store.dispatch('setAnnotoriousMode', 'removeSystem')
+      } else {
+        this.$store.dispatch('disableAnnotorious')
+      }
     },
     setPageMargins () {
       // alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
-      this.$store.dispatch('togglePageMarginSelectorMode')
+      if (!this.fragmentModeActive) {
+        console.log('activating pageMarginMode')
+        this.$store.dispatch('setAnnotoriousMode', 'pageMargin')
+      } else {
+        this.$store.dispatch('disableAnnotorious')
+      }
     },
     addSVG () {
       const input = document.createElement('input')
@@ -101,7 +120,13 @@ export default {
   computed: {
     ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased']),
     fragmentModeActive () {
-      return this.$store.getters.pageMarginSelectorMode
+      return this.$store.getters.annotoriousMode === 'pageMargin'
+    },
+    addSystemModeActive () {
+      return this.$store.getters.annotoriousMode === 'addSystem'
+    },
+    removeSystemModeActive () {
+      return this.$store.getters.annotoriousMode === 'removeSystem'
     }
   }
 }
@@ -204,9 +229,10 @@ i.showSidebar {
     }
   }
 
-  &.mediaFragment.active {
+  &.mediaFragment.active, &.systems .customBtn.active {
     background-color: pink;
   }
+
 }
 
 .osdButtons {

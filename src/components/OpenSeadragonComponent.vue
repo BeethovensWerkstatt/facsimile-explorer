@@ -37,7 +37,7 @@ const osdOptions = {
   },
   silenceMultiImageWarnings: true
 }
-
+//
 export default {
   name: 'OpenSeadragonComponent',
   props: {
@@ -49,8 +49,8 @@ export default {
     currentTab () {
       return this.$store.getters.explorerTab
     },
-    pageMarginSelectorModeActive () {
-      return this.$store.getters.pageMarginSelectorMode
+    annotoriousMode () {
+      return this.$store.getters.annotoriousMode
     }
   },
   methods: {
@@ -174,15 +174,11 @@ export default {
         }
       })
     },
-    renderPageBorders () {
+    renderPageBorders (origin) {
       // only relevant before component is mounted
-      if (!this.viewer === undefined) {
+      if (!this.viewer === undefined || this.viewer.world.getItemCount() === 0) {
         return null
       }
-
-      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
-        this.viewer.removeOverlay(overlay)
-      })
 
       if (!this.pageBorders) {
         return null
@@ -193,6 +189,15 @@ export default {
       if (!fragment || !page) {
         return null
       }
+
+      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      })
+      //
+      console.log('\n\nHERE (' + origin + '): page width: ' + page.width + ', viewer.world.itemCount: ' + this.viewer.world.getItemCount())
+      console.log(this.viewer.viewport.getBounds())
+      console.log(this.viewer.world.getItemAt(0))
+      console.log(this.viewer)
 
       const overlayTop = document.createElement('div')
       overlayTop.classList.add('pageBorder')
@@ -216,6 +221,7 @@ export default {
 
       this.viewer.addOverlay({
         element: overlayTop,
+        checkResize: false,
         x: 0,
         y: 0,
         width: parseInt(page.width),
@@ -245,6 +251,13 @@ export default {
         width: parseInt(page.width),
         height: parseInt(page.height) - (parseInt(fragment.y) + parseInt(fragment.h))
       })
+    },
+    focusRect () {
+      const xywh = this.$store.getters.focusRect
+      if (!xywh) {
+        return null
+      }
+      this.viewer.viewport.fitBoundsWithConstraints(new OpenSeadragon.Rect(xywh.x, xywh.y, xywh.w, xywh.h))
     },
     generateSelectionFromZone () {
       if (!this.annotorious) {
@@ -360,6 +373,7 @@ export default {
       // const osdPage = this.$store.getters.pageArrayOSD[n]
       // console.log('osdPage', osdPage)
       this.viewer.open(this.$store.getters.pageArrayOSD, n)
+      this.renderPageBorders('mounted')
     } catch (err) {
       console.warn('WARNING: Unable to init OSD yet…')
     }
@@ -400,14 +414,22 @@ export default {
           h: Math.round(raw[3])
         }
         console.log(xywh)
+        console.log(this.annotoriousMode)
 
-        if (this.pageMarginSelectorModeActive) {
+        if (this.annotoriousMode === 'pageMargin') {
           console.log('need to (re)set page fragment identifier')
           this.$store.dispatch('identifyPageFragment', xywh)
-          this.anno.clearAnnotations()
-          console.log('done that, should be committed')
         }
 
+        if (this.annotoriousMode === 'addSystem') {
+          console.log('need to add system')
+          this.$store.dispatch('addSystem', xywh)
+
+          //
+        }
+
+        this.anno.clearAnnotations()
+        console.log('done that, should be committed')
         /*
 
         this.$store.dispatch('createSystem', xywh)
@@ -470,7 +492,7 @@ export default {
     this.viewer.addHandler('page', (data) => {
       // remove listeners
       this.removeListeners()
-
+      this.renderPageBorders('viewerPageListener')
       console.log('calling handler page, data.page ', data.page)
 
       if (data.page !== this.$store.getters.currentPageZeroBased) {
@@ -478,8 +500,21 @@ export default {
         this.$store.dispatch('setCurrentPage', data.page)
         this.renderSystems()
         this.renderShapes()
-        this.renderPageBorders()
       }
+    })
+
+    this.viewer.world.addHandler('metrics-change', (data) => {
+      console.log('Metrics changed in a world with ' + this.viewer.world.getItemCount() + ' items')
+      console.log(this.viewer.world)
+      this.renderPageBorders('metrics-change')
+    })
+
+    this.viewer.addHandler('viewport-change', (data) => {
+      this.renderPageBorders('viewport-change')
+    })
+
+    this.viewer.addHandler('open', (data) => {
+      setTimeout(() => this.renderPageBorders('viewerOpenListener'), 2000)
     })
 
     this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
@@ -488,7 +523,7 @@ export default {
         this.viewer.goToPage(newPage)
         this.renderSystems()
         this.renderShapes()
-        this.renderPageBorders()
+        this.renderPageBorders('unwatchCurrentPage')
       })
     this.unwatchPages = this.$store.watch((state, getters) => getters.pageArray,
       (newArr, oldArr) => {
@@ -498,7 +533,7 @@ export default {
         this.$store.dispatch('setCurrentPage', page ? +page - 1 : 0)
         this.renderSystems()
         this.renderShapes()
-        this.renderPageBorders()
+        this.renderPageBorders('unwatchPages')
       })
     this.unwatchSVG = this.$store.watch((state, getters) => getters.svgForCurrentPage,
       (svg) => {
@@ -515,14 +550,21 @@ export default {
       (id) => {
         this.renderShapes()
       })
+    this.unwatchFocusRect = this.$store.watch((state, getters) => getters.focusRect,
+      (newRect, oldRect) => {
+        console.log('rects changing…')
+        if (newRect !== oldRect && newRect !== null) {
+          this.focusRect()
+        }
+      })
     // const svg = this.$store.getters.svgOnCurrentPage
     this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderSystems()
       })
-    this.unwatchSelectionMode = this.$store.watch((state, getters) => getters.pageMarginSelectorMode,
+    this.unwatchSelectionMode = this.$store.watch((state, getters) => getters.annotoriousMode,
       (newVal, oldVal) => {
-        this.activateAnnotorious(newVal)
+        this.activateAnnotorious(newVal !== 'off')
       })
     this.unwatchEditingSystem = this.$store.watch((state, getters) => getters.editingSystemOnCurrentPage,
       (newIndex, oldIndex) => {
@@ -535,7 +577,7 @@ export default {
       })
     this.unwatchPageBorders = this.$store.watch((state, getters) => getters.currentPageFragmentIdentifier,
       (newObj, oldObj) => {
-        this.renderPageBorders()
+        this.renderPageBorders('unwatchPageBorders')
       })
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
@@ -574,6 +616,7 @@ export default {
     this.unwatchEditingSystem()
     this.unwatchPageXML()
     this.removeListeners()
+    this.unwatchFocusRect()
   }
 }
 </script>
@@ -599,7 +642,8 @@ export default {
   .overlay.pageBorder {
     width: 100px;
     height: 100px;
-    background-color: #ff000033;
+    background-color: rgba(255, 70, 70, 0.6);
+    backdrop-filter: blur(2px);
   }
 
   .system.overlay {

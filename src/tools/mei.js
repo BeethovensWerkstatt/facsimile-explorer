@@ -123,3 +123,108 @@ export function verifyUnassignedGroupInSvg (svg) {
 
   return outSvg
 }
+
+/**
+ * converts rectangles between mm and px units
+ * @param  {[type]} dom                     [description]
+ * @param  {[type]} surfaceId               [description]
+ * @param  {[type]} xywh                    [description]
+ * @param  {[type]} dir                     [description]
+ * @return {[type]}           [description]
+ */
+export function convertRectUnits (dom, surfaceId, xywh, dir) {
+  if (dir !== 'px2mm' && dir !== 'mm2px') {
+    console.log('Failed to provide proper translation direction on ' + surfaceId + ' for dir "' + dir + '". Rect: ', xywh)
+    return false
+  }
+
+  const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
+  const graphic = surface.querySelector('graphic[type="facsimile"]')
+
+  const xywhParam = graphic.getAttribute('target').split('#xywh=')[1]
+
+  if (!xywhParam) {
+    console.error('Surface ' + surfaceId + ' has apparently no media fragment identifier for determining the size of the actual page in that scan. Unable to calculate a proper factor between pixel and mm dimensions.')
+    return false
+  }
+
+  const pxOffsetX = xywhParam.split(',')[0]
+  const pxOffsetY = xywhParam.split(',')[1]
+  const pageWidthPx = xywhParam.split(',')[2]
+  const pageHeightPx = xywhParam.split(',')[3]
+
+  const folium = [...dom.querySelectorAll('foliaDesc *')].find(foliumLike => {
+    if (foliumLike.getAttribute('outer.recto') === '#' + surfaceId) {
+      return true
+    }
+    if (foliumLike.getAttribute('inner.verso') === '#' + surfaceId) {
+      return true
+    }
+    if (foliumLike.getAttribute('inner.recto') === '#' + surfaceId) {
+      return true
+    }
+    if (foliumLike.getAttribute('outer.verso') === '#' + surfaceId) {
+      return true
+    }
+    if (foliumLike.getAttribute('recto') === '#' + surfaceId) {
+      return true
+    }
+    if (foliumLike.getAttribute('verso') === '#' + surfaceId) {
+      return true
+    }
+    return false
+  })
+
+  const pageWidthMm = folium.getAttribute('width')
+  const pageHeightMm = folium.getAttribute('height')
+
+  const scaleFactorHeight = pageHeightMm / pageHeightPx
+  const scaleFactorWidth = pageWidthMm / pageWidthPx
+
+  /* // DEBUG
+  console.log('pageHeightMm: ' + pageHeightMm)
+  console.log('pageHeightPx: ' + pageHeightPx)
+  console.log('pageWidthMm: ' + pageWidthMm)
+  console.log('pageWidthPx: ' + pageWidthPx)
+  console.log('pxOffsetX: ' + pxOffsetX)
+  console.log('pxOffsetY: ' + pxOffsetY)
+  console.log('scaleFactors width=' + scaleFactorWidth + ' | height=' + scaleFactorHeight)
+  */
+
+  if (dir === 'px2mm') {
+    const rect = {}
+    rect.x = parseFloat(((xywh.x - pxOffsetX) * scaleFactorWidth).toFixed(2))
+    rect.y = parseFloat(((xywh.y - pxOffsetY) * scaleFactorHeight).toFixed(2))
+    rect.w = parseFloat((xywh.w * scaleFactorWidth).toFixed(2))
+    rect.h = parseFloat((xywh.h * scaleFactorHeight).toFixed(2))
+
+    return rect
+  } else {
+    const rect = {}
+    rect.x = Math.round(xywh.x / scaleFactorWidth + pxOffsetX)
+    rect.y = Math.round(xywh.y / scaleFactorHeight + pxOffsetY)
+    rect.w = Math.round(xywh.w / scaleFactorWidth)
+    rect.h = Math.round(xywh.h / scaleFactorHeight)
+
+    return rect
+  }
+}
+
+/**
+ * sorts the rastrum elements inside a given rastrumDesc
+ * @param  {[type]} rastrumDesc               [description]
+ * @return {[type]}             [description]
+ */
+export function sortRastrumsByVerticalPosition (rastrumDesc) {
+  const rastrums = [...rastrumDesc.querySelectorAll('rastrum')]
+
+  const sortFunc = (a, b) => {
+    const aY = parseFloat(a.getAttribute('system.topmar'))
+    const bY = parseFloat(b.getAttribute('system.topmar'))
+
+    return aY - bY
+  }
+
+  const reordered = rastrums.sort(sortFunc)
+  reordered.forEach(rastrum => rastrumDesc.append(rastrum))
+}

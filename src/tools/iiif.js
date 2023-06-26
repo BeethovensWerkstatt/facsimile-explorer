@@ -217,6 +217,10 @@ export function getPageArray (mei) {
       const fullPath = store.getters.getPathByName(folder)
       const file = store.getters.getContentData(fullPath)?.doc
       arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
+
+      if (!arr[i]) {
+        console.error('\n\nUnable to find surface id=' + id + ' in ' + fullPath)
+      }
     }
   })
 

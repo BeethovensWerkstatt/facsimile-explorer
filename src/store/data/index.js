@@ -1,5 +1,6 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { Base64 } from 'js-base64'
 
 /**
@@ -149,6 +150,10 @@ const dataModule = {
         svgDom.querySelectorAll('path').forEach(shape => unassignedG.append(shape))
         svgDom.querySelector('svg').append(unassignedG)
       }
+
+      console.log('\n\nME HERE')
+      console.log(svgDom)
+
       if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
         dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom.querySelector('svg') })
         dispatch('loadDocumentIntoStore', { path, dom: modifiedDom })
@@ -332,32 +337,23 @@ const dataModule = {
      * @return {[type]}          [description]
      */
     moveShapeToCurrentWritingZone ({ commit, getters, dispatch }, shapeId) {
-      console.log(1)
       if (!shapeId) {
-        console.log(2)
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
-      console.log(3)
       if (!modifiedDom || !modifiedSvgDom) {
-        console.log(4)
         return null
       }
 
-      console.log(5)
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
 
       const writingLayerGenDesc = getters.genDescForCurrentWritingLayer
-      console.log(6)
-      console.log(writingLayerGenDesc)
       if (!writingLayerGenDesc) {
-        console.log(7)
         return null
       }
-      console.log('moving in…')
 
       const corresp = writingLayerGenDesc.getAttribute('corresp')
       const writingLayerSvgGroupId = corresp.split('#')[1]
@@ -381,7 +377,7 @@ const dataModule = {
       const renderedWritingZones = document.querySelectorAll('svg .writingZone')
       renderedWritingZones.forEach(svgWz => {
         const bbox = svgWz.getBBox()
-
+        console.log('shapeCount:' + svgWz.querySelectorAll('path').length)
         const wzGenDesc = [...wzGenDescArr].find(wz => wz.getAttribute('corresp').split('#')[1] === svgWz.getAttribute('id'))
         const zone = surface.querySelector('zone[data="#' + wzGenDesc.getAttribute('xml:id') + '"]')
         zone.setAttribute('ulx', Math.round(bbox.x))
@@ -556,8 +552,173 @@ const dataModule = {
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('logChange', { path: path, baseMessage, param })
 
-      commit('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', false)
+      dispatch('disableAnnotorious')
+    },
+
+    /**
+     * adds a system to the current page
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} xywh      [description]
+     */
+    addSystem ({ commit, getters, dispatch }, xywh) {
+      if (!xywh || !xywh.x || !xywh.y || !xywh.w || !xywh.h) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      if (!modifiedDom) {
+        return null
+      }
+
+      const activeSystemId = getters.activeSystemId
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+
+      // create layout if necessary
+      if (!surface.hasAttribute('decls')) {
+        const physDesc = modifiedDom.querySelector('physDesc')
+
+        // create layoutDesc if necessary
+        if (!physDesc.querySelector('layoutDesc')) {
+          const layoutDesc = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layoutDesc')
+          physDesc.append(layoutDesc)
+        }
+
+        const layoutDesc = physDesc.querySelector('layoutDesc')
+
+        const layout = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layout')
+        const layoutId = 'l' + uuid()
+        layout.setAttribute('xml:id', layoutId)
+        layout.setAttribute('label', surface.hasAttribute('label') ? surface.getAttribute('label') : surface.getAttribute('n'))
+
+        const rastrumDesc = document.createElementNS('http://www.music-encoding.org/ns/mei', 'rastrumDesc')
+
+        layout.append(rastrumDesc)
+        layoutDesc.append(layout)
+
+        surface.setAttribute('decls', '#' + layoutId)
+      }
+
+      const layoutId = surface.getAttribute('decls').substring(1)
+      const layout = [...modifiedDom.querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
+
+      if (!layout.querySelector('rastrumDesc')) {
+        const rastrumDesc = document.createElementNS('http://www.music-encoding.org/ns/mei', 'rastrumDesc')
+        layout.append(rastrumDesc)
+      }
+
+      // get relevant rastrumDesc
+      const rastrumDesc = layout.querySelector('rastrumDesc')
+
+      // convert px to mm coordinates
+      const mmRect = convertRectUnits(modifiedDom, surfaceId, xywh, 'px2mm')
+      /* console.log('\n\nHELLO POOOOLLLY:')
+      console.log(xywh)
+      console.log(mmRect)
+      console.log(layout)
+      console.log(rastrumDesc) */
+
+      // no rastrum so far
+      if (!activeSystemId || !rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')) {
+        const rastrum = document.createElementNS('http://www.music-encoding.org/ns/mei', 'rastrum')
+        const rastrumId = 'r' + uuid()
+        rastrum.setAttribute('xml:id', rastrumId)
+        rastrum.setAttribute('systems', 1)
+        rastrum.setAttribute('system.height', mmRect.h)
+        rastrum.setAttribute('width', mmRect.w)
+        rastrum.setAttribute('system.leftmar', mmRect.x)
+        rastrum.setAttribute('system.topmar', mmRect.y)
+        rastrumDesc.append(rastrum)
+
+        dispatch('setActiveSystem', rastrumId)
+      } else {
+        const rastrum = rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')
+        rastrum.setAttribute('system.height', mmRect.h + 'mm')
+        rastrum.setAttribute('width', mmRect.w + 'mm')
+        rastrum.setAttribute('system.leftmar', mmRect.x + 'mm')
+        rastrum.setAttribute('system.topmar', mmRect.y + 'mm')
+      }
+
+      sortRastrumsByVerticalPosition(rastrumDesc)
+
+      console.log('\n\nHELLO POLLY')
+      console.log(modifiedDom)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param })
+
+      dispatch('disableAnnotorious')
     }
+
+    /*
+    CREATE_SYSTEM (state, rect) {
+      const xmlDoc = state.parsedXml.cloneNode(true)
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const pageHeight = parseInt(page.getAttribute('page.height'))
+      const newSystemUly = pageHeight - rect.y
+      const left = rect.x
+      const right = rect.w + rect.x
+      const height = rect.h
+
+      const existingSystems = page.querySelectorAll('system')
+      let i = 0
+
+      while (existingSystems.length > i && parseInt(existingSystems[i].getAttribute('uly')) > newSystemUly) {
+        i++
+      }
+      const newSystem = generateSystemFromRect(newSystemUly, left, right)
+
+      if (existingSystems.length === 0) {
+        initializePageIfNecessary(page, height)
+        insertSystem(page, newSystem, null)
+      } else {
+        const followingSystem = existingSystems[i]
+        insertSystem(page, newSystem, followingSystem)
+      }
+
+      state.parsedXml = xmlDoc
+    },
+    SET_SELECTED_SYSTEM_ON_CURRENT_PAGE (state, i) {
+      state.selectedSystemOnCurrentPage = i
+    },
+    SET_EDITING_SYSTEM_ON_CURRENT_PAGE (state, i) {
+      console.log('working here ' + i)
+      // if (state.selectionRectEnabled) {
+      state.editingSystemOnCurrentPage = i
+
+      const xmlDoc = state.parsedXml
+      const pageIndex = state.currentPage + 1
+      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
+      const page = xmlDoc.querySelector(pageQueryString)
+
+      const systemIndex = i + 1
+      const systemQueryString = 'system:nth-of-type(' + systemIndex + ')'
+      const system = page.querySelector(systemQueryString)
+      const measure = page.querySelector('measure')
+
+      const pageHeight = state.pages[state.currentPage].height
+
+      console.log(system)
+
+      const x = parseInt(measure.getAttribute('coord.x1'))
+      const y = parseInt(pageHeight - parseInt(system.getAttribute('uly')))
+      const w = parseInt(measure.getAttribute('coord.x2') - x)
+      const h = parseInt(Math.round(pageHeight / 30))
+
+      console.log('xywh:', x, y, w, h)
+      // }
+    },
+     */
   },
 
   /**
@@ -658,7 +819,20 @@ const dataModule = {
         obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
         obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
         obj.hasFragment = target.indexOf('#xywh=') !== -1
-        obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
+
+        if (!surface.hasAttribute('decls')) {
+          obj.systems = -2
+        } else {
+          const layoutId = surface.getAttribute('decls')?.substring(1)
+          const layout = mei.querySelector('layout[*|id="' + layoutId + '"]')
+
+          if (!layout) {
+            obj.systems = -1
+          } else {
+            obj.systems = layout.querySelectorAll('rastrum').length
+          }
+        }
+
         arr[n] = obj
       })
       return arr
@@ -763,7 +937,28 @@ const dataModule = {
         obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
         obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
         obj.hasFragment = target.indexOf('#xywh=') !== -1
-        obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
+
+        if (!surface.hasAttribute('decls')) {
+          obj.systems = -3
+        } else {
+          const layoutId = surface.getAttribute('decls')?.substring(1)
+          const layout = [...mei.querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
+
+          console.log('\nx1')
+          console.log(layoutId)
+          console.log('x2')
+          console.log([...mei.querySelectorAll('layout')])
+          console.log('x3')
+          console.log(mei)
+          console.log('x4')
+
+          if (!layout) {
+            obj.systems = -4
+          } else {
+            obj.systems = layout.querySelectorAll('rastrum').length
+          }
+        }
+
         arr[n] = obj
       })
       return arr
