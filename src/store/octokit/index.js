@@ -376,7 +376,6 @@ const actions = {
     console.log('updateRef', ref)
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
-    dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
 
     if (getters.changesNeedBranching) {
       // create PR
@@ -423,6 +422,8 @@ const actions = {
         console.warn('merge failed!')
         dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser })
       }
+    } else {
+      dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
     }
 
     commit('SET_COMMIT_MESSAGE', null)

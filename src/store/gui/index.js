@@ -17,7 +17,10 @@ const guiModule = {
    * @property {Boolean} diploTabSidebarVisible if the left sidebar in diploTab is visible
    * @property {Number} diploTabSidebarWidth width of the left sidebar in diploTab
    * @property {String} activeWritingZone ID of the currently active writing zone
-   * @property {Boolean} pageMarginSelectorMode whether pageMargin fragment identifier selection mode is active
+   * @property {String} activeWritingLayer ID of the currently active writing layer
+   * @property {String} annotoriousMode whether pageMargin fragment identifier selection mode is active
+   * @property {String} activeSystem ID of the currently active system
+   * @property {Object} focusRect
    */
   state: {
     pageTabSidebarVisible: true,
@@ -33,7 +36,10 @@ const guiModule = {
     diploTabSidebarVisible: true,
     diploTabSidebarWidth: 300,
     activeWritingZone: null,
-    pageMarginSelectorMode: false
+    activeWritingLayer: null,
+    annotoriousMode: 'off',
+    activeSystem: null,
+    focusRect: null
   },
   /**
    * @namespace store.gui.mutations
@@ -152,12 +158,41 @@ const guiModule = {
     },
 
     /**
-     * toggle fragment identifier selection mode
+     * sets the active writing layer
+     * @param {[type]} state  [description]
+     * @param {[type]} id     [description]
+     */
+    SET_ACTIVE_WRITINGLAYER (state, id) {
+      state.activeWritingLayer = id
+    },
+
+    /**
+     * set what annotorious is supposed to do on OSD mode
      * @param {[type]} state  [description]
      * @param {[type]} bool   [description]
      */
-    ACTIVATE_PAGE_MARGIN_SELECTOR_MODE (state, bool) {
-      state.pageMarginSelectorMode = bool
+    SET_ANNOTORIOUS_MODE (state, mode) {
+      state.annotoriousMode = mode
+      state.activeSystem = null
+      state.activeWritingZone = null
+    },
+
+    /**
+     * sets the active system
+     * @param {[type]} state  [description]
+     * @param {[type]} id     [description]
+     */
+    SET_ACTIVE_SYSTEM (state, id) {
+      state.activeSystem = id
+    },
+
+    /**
+     * sets the OSD focus rect
+     * @param {[type]} state  [description]
+     * @param {[type]} xywh   [description]
+     */
+    FOCUS_RECT (state, xywh) {
+      state.focusRect = xywh
     }
   },
   /**
@@ -224,18 +259,66 @@ const guiModule = {
      * @param {[type]} commit  [description]
      * @param {[type]} id      [description]
      */
-    setActiveWritingZone ({ commit }, id) {
+    setActiveWritingZone ({ commit, getters }, id) {
       commit('SET_ACTIVE_WRITINGZONE', id)
+
+      if (id !== null) {
+        const genDescWritingZone = getters.genDescForCurrentWritingZone
+        const genDescWritingLayer = genDescWritingZone.querySelector('genState')
+        const genDescWlId = genDescWritingLayer.getAttribute('xml:id')
+
+        commit('SET_ACTIVE_WRITINGLAYER', genDescWlId)
+      } else {
+        commit('SET_ACTIVE_WRITINGLAYER', null)
+      }
     },
 
     /**
-     * toggles the selectorMode for pageMargin fragment identifiers
+     * sets ID of active WritingLayer
+     * @param {[type]} commit  [description]
+     * @param {[type]} id      [description]
+     */
+    setActiveWritingLayer ({ commit }, id) {
+      commit('SET_ACTIVE_WRITINGLAYER', id)
+    },
+
+    /**
+     * set the annotoriousMode
      * @param  {[type]} commit                [description]
      * @param  {[type]} getters               [description]
      * @return {[type]}         [description]
      */
-    togglePageMarginSelectorMode ({ commit, getters }) {
-      commit('ACTIVATE_PAGE_MARGIN_SELECTOR_MODE', !getters.pageMarginSelectorMode)
+    setAnnotoriousMode ({ commit, getters }, mode) {
+      commit('SET_ANNOTORIOUS_MODE', mode)
+    },
+
+    /**
+     * deactivate annotorious
+     * @param {[type]} commit   [description]
+     * @param {[type]} getters  [description]
+     * @param {[type]} mode     [description]
+     */
+    disableAnnotorious ({ commit, getters }) {
+      commit('SET_ANNOTORIOUS_MODE', 'off')
+    },
+
+    /**
+     * sets ID of active system
+     * @param {[type]} commit  [description]
+     * @param {[type]} id      [description]
+     */
+    setActiveSystem ({ commit }, id) {
+      commit('SET_ACTIVE_SYSTEM', id)
+    },
+
+    /**
+     * sets OSD focus rect
+     * @param  {[type]} commit               [description]
+     * @param  {[type]} xywh                 [description]
+     * @return {[type]}        [description]
+     */
+    focusRect ({ commit }, xywh) {
+      commit('FOCUS_RECT', xywh)
     }
   },
   /**
@@ -361,12 +444,39 @@ const guiModule = {
     },
 
     /**
-     * returns whether pageMarginSelectorMode is active
+     * returns ID of active writingLayer
      * @param  {[type]} state               [description]
      * @return {[type]}       [description]
      */
-    pageMarginSelectorMode: (state) => {
-      return state.pageMarginSelectorMode
+    activeWritingLayer: (state) => {
+      return state.activeWritingLayer
+    },
+
+    /**
+     * returns the annotoriousMode
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    annotoriousMode: (state) => {
+      return state.annotoriousMode
+    },
+
+    /**
+     * returns ID of active system
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    activeSystemId: (state) => {
+      return state.activeSystem
+    },
+
+    /**
+     * returns rectangle (xywh) that OSD is supposed to focus
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    focusRect: (state) => {
+      return state.focusRect
     }
   }
 }

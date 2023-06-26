@@ -6,11 +6,13 @@
       </span>
       <span class="shapeCount" title="Number of Shapes"># {{wz.totalCount}} <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
     <div class="writingLayer">Writing Layers:</div>
-    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer active">
-      <h2>{{this.numPrefixer(i)}}
-        <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}}</span>
+    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}">
+      <h2 @click.stop="selectWritingLayer(wl.id)">{{this.numPrefixer(i)}}
+        <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}} <i v-if="wz.layers.length !== 1" class="icon icon-cross" @click.stop="deleteLayer(wl.id)" title="Delete Writing Layer"></i></span>
+
       </h2>
     </div>
+    <div class="writingLayer addLayerBtn" title="Add new writing layer"><i class="icon icon-plus" @click.stop="addLayer"></i></div>
   </div>
 </template>
 
@@ -39,11 +41,23 @@ export default {
       this.$store.dispatch('setActiveWritingZone', this.wz.id)
       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
     },
+    selectWritingLayer (id) {
+      this.$store.dispatch('setActiveWritingLayer', id)
+      // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
+    },
+    addLayer () {
+      console.log('adding layer')
+      this.$store.dispatch('createNewWritingLayer')
+    },
     deleteZone () {
       this.$store.dispatch('deleteWritingZone', this.wz.id)
     },
+    deleteLayer (id) {
+      this.$store.dispatch('deleteWritingLayer', id)
+    },
     showWzPreview () {
       console.log('dispatch something to make OSD focus on ', this.wz.xywh)
+      this.$store.dispatch('focusRect', this.wz.xywh)
     }
     /* switchTab (val) {
       this.$store.dispatch('setExplorerTab', val)
@@ -78,6 +92,9 @@ export default {
       const height = (100 / page.height * parseInt(this.wz.xywh.split(',')[3])) + '%'
 
       return { pageWidth, top, left, width, height }
+    },
+    activeLayerId () {
+      return this.$store.getters.activeWritingLayer
     }
     /* selectionEnabled: {
       get () {
@@ -100,6 +117,14 @@ export default {
 
 .writingZone {
   margin-bottom: 1.2rem;
+
+  .writingLayer {
+    display: none;
+  }
+
+  &.active .writingLayer {
+    display: block;
+  }
 }
 
 h1 {
@@ -151,15 +176,34 @@ h1 {
     font-weight: 500;
     font-size: .8rem;
     padding: 0 .2rem;
-    margin-left: -.2rem;
+    margin: 0 0 0 -.2rem;
     border: .5px solid transparent;
     border-radius: 3px;
+
+    .icon-cross {
+      font-size: .6rem;
+      position: relative;
+      top: -2px;
+      cursor: pointer;
+
+      &:hover {
+        color: #cc3333;
+      }
+    }
   }
 }
 
 .writingZone.active .writingLayer.active h2 {
   background-color: lighten($highlightColor06, 30%);
   border: $lightBorder;
+}
+
+.addLayerBtn {
+  cursor: pointer;
+
+  i {
+    font-size: .6rem;
+  }
 }
 
 .shapeCount {

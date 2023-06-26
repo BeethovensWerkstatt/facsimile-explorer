@@ -167,6 +167,13 @@ const dataModule = {
       }
     },
 
+    /**
+     * creates a new writingZone on the current page
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @return {[type]}          [description]
+     */
     createNewWritingZone ({ commit, getters, dispatch }) {
       if (!getters.documentWithCurrentPage || !getters.svgForCurrentPage) {
         return null
@@ -240,6 +247,80 @@ const dataModule = {
       dispatch('logChange', { path: svgPath, baseMessage, param })
 
       dispatch('setActiveWritingZone', genDescWzId)
+      dispatch('setActiveWritingLayer', genDescWlId)
+    },
+
+    /**
+     * creates a new writingLayer in the currently active writingZone
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @return {[type]}          [description]
+     */
+    createNewWritingLayer ({ commit, getters, dispatch }) {
+      if (!getters.documentWithCurrentPage || !getters.svgForCurrentPage) {
+        return null
+      }
+
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+
+      const surfaceId = getters.currentPageId
+
+      const activeWzGenDescId = getters.activeWritingZone
+
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      // const genDescWz = getters.genDescForCurrentWritingZone
+
+      const genDescWz = [...modifiedDom.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')].find(wz => wz.getAttribute('xml:id') === activeWzGenDescId)
+
+      console.log('\n\nStrange things happening')
+      console.log('activeWzGenDescId: ' + activeWzGenDescId)
+      console.log(genDescWz)
+
+      console.log(getters.genDescForCurrentPage)
+      console.log(getters.genDescForCurrentWritingZone)
+      console.log(getters.genDescForCurrentWritingLayer)
+
+      const svgLink = surface.querySelector('graphic[type="shapes"]').getAttribute('target')
+
+      const genDescWlId = 'g' + uuid()
+      const gWlId = 'l' + uuid()
+
+      const existingWlCount = genDescWz.querySelectorAll('genDesc[class~="#geneticOrder_writingLayerLevel"]').length
+      const genDescWlLabel = existingWlCount + 1
+
+      const genStateWl = document.createElementNS('http://www.music-encoding.org/ns/mei', 'genState')
+      genStateWl.setAttribute('xml:id', genDescWlId)
+      genStateWl.setAttribute('class', '#geneticOrder_writingLayerLevel')
+      genStateWl.setAttribute('corresp', svgLink + '#' + gWlId)
+      genStateWl.setAttribute('label', genDescWlLabel)
+
+      genDescWz.appendChild(genStateWl)
+
+      const gWzId = genDescWz.getAttribute('corresp').split('#')[1]
+
+      const gWz = modifiedSvgDom.querySelector('#' + gWzId)
+
+      const gWl = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+      gWl.setAttribute('id', gWlId)
+      gWl.setAttribute('class', 'writingLayer')
+
+      gWz.appendChild(gWl)
+
+      const docPath = getters.currentDocPath
+      const docName = getters.documentNameByPath(docPath)
+      const svgPath = getters.currentSvgPath
+
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('loadDocumentIntoStore', { path: docPath, dom: modifiedDom })
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'changed writingZones for ' + docName + ', p.'
+      dispatch('logChange', { path: docPath, baseMessage, param })
+      dispatch('logChange', { path: svgPath, baseMessage, param })
+
+      dispatch('setActiveWritingLayer', genDescWlId)
     },
 
     /**
@@ -251,24 +332,32 @@ const dataModule = {
      * @return {[type]}          [description]
      */
     moveShapeToCurrentWritingZone ({ commit, getters, dispatch }, shapeId) {
+      console.log(1)
       if (!shapeId) {
+        console.log(2)
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
+      console.log(3)
       if (!modifiedDom || !modifiedSvgDom) {
+        console.log(4)
         return null
       }
 
+      console.log(5)
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
 
-      const writingLayerGenDesc = getters.genDescForFinalWritingLayerInCurrentWritingZone
-
+      const writingLayerGenDesc = getters.genDescForCurrentWritingLayer
+      console.log(6)
+      console.log(writingLayerGenDesc)
       if (!writingLayerGenDesc) {
+        console.log(7)
         return null
       }
+      console.log('moving in…')
 
       const corresp = writingLayerGenDesc.getAttribute('corresp')
       const writingLayerSvgGroupId = corresp.split('#')[1]
@@ -352,6 +441,63 @@ const dataModule = {
       const svgPath = getters.currentSvgPath
       const param = getters.currentSurfaceIndexForCurrentDoc
       const baseMessage = 'deleted writingZone on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('logChange', { path: svgPath, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param })
+    },
+
+    /**
+     * deletes a writing layer and moves all its shapes to the unassigned group
+     * @param  {[type]} commit                    [description]
+     * @param  {[type]} getters                   [description]
+     * @param  {[type]} dispatch                  [description]
+     * @param  {[type]} genDescWzId               [description]
+     * @return {[type]}             [description]
+     */
+    deleteWritingLayer ({ commit, getters, dispatch }, genDescWlId) {
+      if (!genDescWlId) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+
+      if (!modifiedDom || !modifiedSvgDom) {
+        return null
+      }
+
+      const genDescWl = [...modifiedDom.querySelectorAll('genState')].find(genState => genState.getAttribute('xml:id') === genDescWlId)
+      const genDescWz = genDescWl.closest('genDesc[class~="#geneticOrder_writingZoneLevel"]')
+      const svgGroupWl = modifiedSvgDom.querySelector('#' + genDescWl.getAttribute('corresp').split('#')[1])
+      const svgUnassignedGroup = modifiedSvgDom.querySelector('g.unassigned')
+
+      svgGroupWl.querySelectorAll('path').forEach(shape => svgUnassignedGroup.append(shape))
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const zone = surface.querySelector('zone[data="#' + genDescWz.getAttribute('xml:id') + '"]')
+
+      // this needs to happen with the rendered svg, or it won't get positions!
+      const renderedWritingLayer = document.querySelector('#' + genDescWl.getAttribute('corresp').split('#')[1])
+      const renderedWritingZone = renderedWritingLayer.closest('g.writingZone')
+      renderedWritingLayer.remove()
+
+      const bbox = renderedWritingZone.getBBox()
+      zone.setAttribute('ulx', Math.round(bbox.x))
+      zone.setAttribute('uly', Math.round(bbox.y))
+      zone.setAttribute('lrx', Math.round(bbox.x + bbox.width))
+      zone.setAttribute('lry', Math.round(bbox.y + bbox.height))
+
+      genDescWl.remove()
+      svgGroupWl.remove()
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const svgPath = getters.currentSvgPath
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'deleted writingLayer on ' + docName + ', p.'
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
@@ -831,6 +977,23 @@ const dataModule = {
     },
 
     /**
+     * retrieves the genDesc for current writingLayer
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    genDescForCurrentWritingLayer: (state, getters) => {
+      const genDescPage = getters.genDescForCurrentPage
+      const writingLayerId = getters.activeWritingLayer
+
+      if (!genDescPage || !writingLayerId) {
+        return null
+      }
+      const genDescWritingLayer = [...genDescPage.querySelectorAll('genState')].find(wz => wz.getAttribute('xml:id') === writingLayerId)
+      return genDescWritingLayer
+    },
+
+    /**
      * retrieves the final writingLayer in the currently active writingZone
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
@@ -968,6 +1131,7 @@ const dataModule = {
           wl.label = genDescWl.getAttribute('label')
           wl.shapes = shapes
           wl.svgGroupWlId = svgGroupId
+          wl.classes = genDescWl.getAttribute('class').split(' ')
 
           totalCount += shapes.length
 
