@@ -418,6 +418,7 @@ const actions = {
         console.log('merged', tmpBranch)
         // TODO: remove PR, temp branch
         dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
+        dispatch('deleteBranch', { ref: tmpBranch })
       } else {
         console.warn('merge failed!')
         dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser })
@@ -429,6 +430,19 @@ const actions = {
     commit('SET_COMMIT_MESSAGE', null)
     commit('EMPTY_CHANGELOG')
     commit('SET_CHANGES_NEED_BRANCHING', false)
+  },
+
+  deleteBranch ({ commit }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
+    console.log('delete branch', ref)
+    const octokit = getters.octokit
+    octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/${ref}`, {
+      owner,
+      repo,
+      ref,
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    }).then(res => console.log(res))
   },
 
   /**
