@@ -939,21 +939,13 @@ const dataModule = {
         obj.hasFragment = target.indexOf('#xywh=') !== -1
 
         if (!surface.hasAttribute('decls')) {
-          obj.systems = -3
+          obj.systems = 0
         } else {
           const layoutId = surface.getAttribute('decls')?.substring(1)
-          const layout = [...mei.querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
-
-          console.log('\nx1')
-          console.log(layoutId)
-          console.log('x2')
-          console.log([...mei.querySelectorAll('layout')])
-          console.log('x3')
-          console.log(mei)
-          console.log('x4')
+          const layout = [...surface.closest('mei').querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
 
           if (!layout) {
-            obj.systems = -4
+            obj.systems = 0
           } else {
             obj.systems = layout.querySelectorAll('rastrum').length
           }
