@@ -432,10 +432,10 @@ const actions = {
     commit('SET_CHANGES_NEED_BRANCHING', false)
   },
 
-  deleteBranch ({ commit }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
+  deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
     console.log('delete branch', ref)
     const octokit = getters.octokit
-    octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/${ref}`, {
+    octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/heads/${ref}`, {
       owner,
       repo,
       ref,
