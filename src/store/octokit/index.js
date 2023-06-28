@@ -350,7 +350,7 @@ const actions = {
       ref: `heads/${branch}`
     })
     console.log(refObject)
-    const { sha: remoteSHA } = refObject
+    const { sha: remoteSHA, url: headURL } = refObject
     if (remoteSHA !== localSHA) {
       commit('SET_CHANGES_NEED_BRANCHING', true)
     }
@@ -393,9 +393,6 @@ const actions = {
       })
       // merge PR
       const prUrl = data.html_url
-      const prState = data.mergable_state
-      const conflictingUser = '@jpvoigt'
-      console.log('PR', prUrl, prState)
       const merge = await new Promise((resolve, reject) => {
         try {
           const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
@@ -424,7 +421,7 @@ const actions = {
         dispatch('deleteBranch', { ref: tmpBranch })
       } else {
         console.warn('merge failed!', prUrl)
-        dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser })
+        fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
       }
     } else {
       dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
