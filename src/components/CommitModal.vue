@@ -117,10 +117,10 @@ export default {
       return this.$store.getters.commitResults.status
     },
     conflictingUser () {
-      return '@jpvoigt' // this.$store.getters.commitResults.conflictingUser
+      return this.$store.getters.commitResults.conflictingUser
     },
     prUrl () {
-      return 'https://beethovens-werkstatt.de' // this.$store.getters.commitResults.prUrl
+      return this.$store.getters.commitResults.prUrl
     }
   }
 }
