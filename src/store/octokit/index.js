@@ -164,7 +164,18 @@ const actions = {
       const authenticated = auth.type !== 'unauthenticated'
       // console.log(auth, authenticated)
       commit('SET_AUTHENTICATED', authenticated)
-      if (authenticated && opts?.authenticated) opts.authenticated()
+      if (authenticated && opts?.authenticated) {
+        opts.authenticated()
+        /*
+        getters.octokit.git.getRef({
+          owner: config.repository.owner,
+          repo: config.repository.repo,
+          ref: `heads/${config.repository.branch}`
+        }).then(({ data: { object: { url } } }) => {
+          fetch(url).then(res => res.json()).then(json => console.log(json))
+        })
+        */
+      }
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
@@ -416,7 +427,6 @@ const actions = {
       // merged?
       if (merge?.data.merged) {
         console.log('merged', tmpBranch)
-        // TODO: remove PR, temp branch
         dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
         dispatch('deleteBranch', { ref: tmpBranch })
       } else {
