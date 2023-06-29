@@ -164,7 +164,21 @@ const actions = {
       const authenticated = auth.type !== 'unauthenticated'
       // console.log(auth, authenticated)
       commit('SET_AUTHENTICATED', authenticated)
-      if (authenticated && opts?.authenticated) opts.authenticated()
+      if (authenticated) {
+        if (opts?.authenticated) {
+          opts.authenticated()
+        }
+        const repository = {
+          owner: opts?.repository?.owner || config.repository.owner,
+          repo: opts?.repository?.repo || config.repository.repo,
+          ref: `heads/${opts?.repository?.branch || config.repository.branch}`
+        }
+        getters.octokit.git.getRef({
+          ...repository
+        }).then(({ data: { object: { url } } }) => {
+          fetch(url).then(res => res.json()).then(json => console.log(repository, json))
+        })
+      }
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
