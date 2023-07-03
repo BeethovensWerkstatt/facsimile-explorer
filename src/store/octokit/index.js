@@ -31,7 +31,7 @@ const state = {
 
   changes: [],
   commitMessage: null,
-  changesNeedBranching: false, // TODO: this needs to be checked in preparation of commit
+  changesNeedBranching: false,
 
   commitResults: {
     status: 'uncommitted', // allowed values: 'uncommitted', 'success', 'merged', 'conflicts'
@@ -513,12 +513,20 @@ const actions = {
     commit('SET_COMMIT_MESSAGE', message)
   },
 
+  resetCommitResults ({ dispatch }) {
+    const nullResults = {
+      status: 'uncommitted',
+      prUrl: null,
+      conflictingUser: null
+    }
+    dispatch('setCommitResults', nullResults)
+  },
   setCommitResults ({ commit }, { status, prUrl, conflictingUser }) {
     if (['uncommitted', 'success', 'merged', 'conflicts'].indexOf(status) === -1) {
       console.error('Unknown status for commit results: ' + status)
       return false
     }
-    console.log('PR URL', prUrl)
+    if (prUrl) console.log('PR URL', prUrl)
     const url = typeof prUrl === 'string' ? prUrl : null
     const user = typeof conflictingUser === 'string' ? conflictingUser : null
 
