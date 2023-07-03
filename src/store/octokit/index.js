@@ -182,8 +182,12 @@ const actions = {
           ...repository
         }).then(({ data: { object: { url } } }) => {
           fetch(url).then(res => res.json()).then(json => console.log(repository, json))
+        }).catch(e => {
+          console.warn('not authenicated!')
         })
       }
+    }).catch(e => {
+      console.warn('not authenticated!')
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
