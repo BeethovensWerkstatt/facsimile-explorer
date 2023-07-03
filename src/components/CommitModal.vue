@@ -72,13 +72,11 @@ export default {
   methods: {
     closeModal () {
       this.$store.dispatch('setModal', null)
+      this.$store.dispatch('resetCommitResults')
     },
     main () {
-      // const message = this.message
-      // const callback = this.closeModal
-      // this.$store.dispatch('saveContent', { message, callback })
       if (this.completed) {
-        this.$store.dispatch('setModal', null)
+        this.closeModal()
       } else {
         this.$store.dispatch('prepareGitCommit')
       }

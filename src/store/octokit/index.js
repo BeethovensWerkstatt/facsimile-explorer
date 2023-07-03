@@ -31,7 +31,7 @@ const state = {
 
   changes: [],
   commitMessage: null,
-  changesNeedBranching: false, // TODO: this needs to be checked in preparation of commit
+  changesNeedBranching: false,
 
   commitResults: {
     status: 'uncommitted', // allowed values: 'uncommitted', 'success', 'merged', 'conflicts'
@@ -103,12 +103,17 @@ const mutations = {
     try {
       state.octokit = new Octokit({
         auth: state.auth,
-        userAgent: 'facsimile-explorer/v0.0.1'
+        userAgent: 'facsimile-explorer/v0.0.2'
       })
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
           state.user = data
           if (store) store(state.auth)
+        }).catch(e => {
+          console.log('token invalid', state.auth)
+          state.auth = ''
+          state.user = {}
+          if (remove) remove()
         })
       } else {
         state.user = {}
@@ -177,8 +182,12 @@ const actions = {
           ...repository
         }).then(({ data: { object: { url } } }) => {
           fetch(url).then(res => res.json()).then(json => console.log(repository, json))
+        }).catch(e => {
+          console.warn('not authenicated!')
         })
       }
+    }).catch(e => {
+      console.warn('not authenticated!')
     })
   },
   setAccessToken ({ commit, dispatch }, { auth, store, remove }) {
@@ -430,7 +439,6 @@ const actions = {
       // merged?
       if (merge?.data.merged) {
         console.log('merged', tmpBranch)
-        // TODO: remove PR, temp branch
         dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
         dispatch('deleteBranch', { ref: tmpBranch })
       } else {
@@ -505,12 +513,20 @@ const actions = {
     commit('SET_COMMIT_MESSAGE', message)
   },
 
+  resetCommitResults ({ dispatch }) {
+    const nullResults = {
+      status: 'uncommitted',
+      prUrl: null,
+      conflictingUser: null
+    }
+    dispatch('setCommitResults', nullResults)
+  },
   setCommitResults ({ commit }, { status, prUrl, conflictingUser }) {
     if (['uncommitted', 'success', 'merged', 'conflicts'].indexOf(status) === -1) {
       console.error('Unknown status for commit results: ' + status)
       return false
     }
-    console.log('PR URL', prUrl)
+    if (prUrl) console.log('PR URL', prUrl)
     const url = typeof prUrl === 'string' ? prUrl : null
     const user = typeof conflictingUser === 'string' ? conflictingUser : null
 
