@@ -325,9 +325,12 @@ const actions = {
   async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
+    console.log('commit 2 GitHub: create blobs ...')
+
     // Create a new tree that contains the specified files
     const newTree = await Promise.all(files.map(async ({ path, content }) => {
       // Create a blob for each file
+      console.log(`commit 2 GitHub: create blob "${path}"`, content)
       const { data: { sha: blobSha } } = await octokit.git.createBlob({
         owner,
         repo,
@@ -348,6 +351,8 @@ const actions = {
     // Get the latest commit SHA for the specified branch
     const localSHA = getters.commit
 
+    console.log('commit 2 GitHub: create tree ...')
+
     // Create a new tree that references the new blobs
     const { data: { sha: newTreeSha } } = await octokit.git.createTree({
       owner,
@@ -356,6 +361,8 @@ const actions = {
       tree: newTree
     })
     // console.log('treeSha', newTreeSha)
+
+    console.log('commit 2 GitHub: create commit ...')
 
     // Create a new commit that references the new tree
     const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
@@ -367,11 +374,14 @@ const actions = {
     })
     // console.log('commitSha', newCommitSha)
 
+    console.log('commit 2 GitHub: get ref ...')
+
     const { data: { object: refObject } } = await octokit.git.getRef({
       owner,
       repo,
       ref: `heads/${branch}`
     })
+
     console.log(refObject)
     const { sha: remoteSHA, url: headURL } = refObject
     if (remoteSHA !== localSHA) {
@@ -393,18 +403,20 @@ const actions = {
     }
 
     // Update the specified branch to point to the new commit
+    console.log('commit 2 GitHub: update "' + branch + '" ...')
     const ref = await octokit.git.updateRef({
       owner,
       repo,
       ref: `heads/${branch}`,
       sha: newCommitSha
     })
-    console.log('updateRef', ref)
+    console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
     // keep the new commit hash
     commit('SET_COMMIT', newCommitSha)
 
     if (getters.changesNeedBranching) {
       // create PR
+      console.log('commit 2 GitHub: create PR ...')
       const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
         owner,
         repo,
@@ -418,6 +430,7 @@ const actions = {
       const prUrl = data.html_url
       const merge = await new Promise((resolve, reject) => {
         try {
+          console.log('commit 2 GitHub: merge PR ...')
           const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
             owner,
             repo,
@@ -435,7 +448,7 @@ const actions = {
           resolve(null)
         }
       })
-      console.log(merge)
+      console.log('commit 2 GitHub: merge result', merge)
       // merged?
       if (merge?.data.merged) {
         console.log('merged', tmpBranch)
@@ -446,16 +459,18 @@ const actions = {
         fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
       }
     } else {
+      console.log('committed')
       dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
     }
 
+    // TODO what/when clear commit results
     commit('SET_COMMIT_MESSAGE', null)
     commit('EMPTY_CHANGELOG')
     commit('SET_CHANGES_NEED_BRANCHING', false)
   },
 
   deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
-    console.log('delete branch', ref)
+    console.log('commit 2 GitHub: delete branch', ref)
     const octokit = getters.octokit
     octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/heads/${ref}`, {
       owner,
@@ -488,6 +503,8 @@ const actions = {
    * @return {[type]}          [description]
    */
   prepareGitCommit ({ commit, dispatch, getters }) {
+    console.log('prepareGitCommit ...', getters.loggedChanges)
+    const fileStore = {}
     const files = []
     const baseMessages = []
     getters.loggedChanges.forEach(change => {
@@ -497,14 +514,16 @@ const actions = {
         baseMessages.push(change.baseMessage)
       }
 
-      // TODO: brauchen wir dafür rootgetters? Das ist aus dem data-module…
+      fileStore[path] = fileStore[path] ? fileStore[path] + 1 : 1
+    })
+    for (const path in fileStore) {
       const dom = getters.documentByPath(path)
       const content = dom2base64(dom)
-
       files.push({ path, content })
-    })
+    }
 
     const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
+    console.log('commit "' + message + '"')
 
     dispatch('commit2GitHub', { message, files })
   },
