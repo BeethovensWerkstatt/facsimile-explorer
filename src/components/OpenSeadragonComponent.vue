@@ -125,11 +125,20 @@ export default {
 
         const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
         const activeWritingZone = this.$store.getters.activeWritingZone
+        const activeWritingLayer = this.$store.getters.activeWritingLayer
 
         const activeZone = writingZonesOnCurrentPage.find(wz => wz.id === activeWritingZone)
 
         if (activeZone) {
           svgClone.querySelector('#' + activeZone.svgGroupWzId).classList.add('activeWritingZone')
+        }
+
+        if (activeWritingLayer) {
+          const activeLayer = activeZone.layers.find(wl => wl.id === activeWritingLayer)
+
+          if (activeLayer) {
+            svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
+          }
         }
 
         // console.log('done')
@@ -766,9 +775,14 @@ export default {
     }
   }
 
-  .activeWritingZone path {
-    fill: $svgActiveWritingZoneColor;
-    stroke: $svgActiveWritingZoneColor;
+  .activeWritingZone {
+    path {
+      fill: $svgActiveWritingZoneColor;
+      stroke: $svgActiveWritingZoneColor;
+    }
+    .activeWritingLayer path {
+      opacity: 1;
+    }
   }
 }
 
