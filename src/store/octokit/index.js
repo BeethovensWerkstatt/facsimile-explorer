@@ -103,12 +103,17 @@ const mutations = {
     try {
       state.octokit = new Octokit({
         auth: state.auth,
-        userAgent: 'facsimile-explorer/v0.0.1'
+        userAgent: 'facsimile-explorer/v0.0.2'
       })
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
           state.user = data
           if (store) store(state.auth)
+        }).catch(e => {
+          console.log('token invalid', state.auth)
+          state.auth = ''
+          state.user = {}
+          if (remove) remove()
         })
       } else {
         state.user = {}
@@ -164,17 +169,20 @@ const actions = {
       const authenticated = auth.type !== 'unauthenticated'
       // console.log(auth, authenticated)
       commit('SET_AUTHENTICATED', authenticated)
-      if (authenticated && opts?.authenticated) {
-        opts.authenticated()
-        /*
+      if (authenticated) {
+        if (opts?.authenticated) {
+          opts.authenticated()
+        }
+        const repository = {
+          owner: opts?.repository?.owner || config.repository.owner,
+          repo: opts?.repository?.repo || config.repository.repo,
+          ref: `heads/${opts?.repository?.branch || config.repository.branch}`
+        }
         getters.octokit.git.getRef({
-          owner: config.repository.owner,
-          repo: config.repository.repo,
-          ref: `heads/${config.repository.branch}`
+          ...repository
         }).then(({ data: { object: { url } } }) => {
-          fetch(url).then(res => res.json()).then(json => console.log(json))
+          fetch(url).then(res => res.json()).then(json => console.log(repository, json))
         })
-        */
       }
     })
   },

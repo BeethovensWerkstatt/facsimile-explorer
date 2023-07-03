@@ -771,4 +771,20 @@ export default {
     stroke: $svgActiveWritingZoneColor;
   }
 }
+
+.hideUnassigned .unassigned path {
+  opacity: 0;
+}
+
+.hideInactive {
+  .writingZone {
+    &:not(.activeWritingZone) path {
+      opacity: 0;
+    }
+  }
+}
+
+.hideActive .activeWritingZone path {
+  opacity: 0;
+}
 </style>
