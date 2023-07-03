@@ -10,8 +10,13 @@
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
       </div>
+      <div class="menuItem displayModes">
+        <span class="displayMode" ref="hideInactive" @click="toggleDisplayOptions('hideInactive')">Hide Inactive Zones</span>
+        <span class="displayMode" ref="hideActive" @click="toggleDisplayOptions('hideActive')">Hide Active Zone</span>
+        <span class="displayMode" ref="hideUnassigned" @click="toggleDisplayOptions('hideUnassigned')">Hide Unassigned</span>
+      </div>
     </TopMenu>
-    <div class="flexBox">
+    <div class="flexBox" ref="container">
       <div class="showSideBar" v-if="!zonesTabLeftSidebarVisible" @click="toggleSidebar"></div>
       <Transition name="slide-fade">
         <SideBar class="stageItem sidebarLeft" position="left" tab="zonesTab" v-if="zonesTabLeftSidebarVisible">
@@ -63,6 +68,10 @@ export default {
       if (this.$store.getters.svgForCurrentPage) {
         this.$store.dispatch('createNewWritingZone')
       }
+    },
+    toggleDisplayOptions (option) {
+      this.$refs.container.classList.toggle(option)
+      this.$refs[option].classList.toggle('active')
     },
     verifySvgAvailable () {
       const svgPath = this.$store.getters.currentSvgPath
@@ -205,6 +214,22 @@ i.showSidebar {
       position: relative;
       top: -2px;
       margin-right: .2rem;
+    }
+  }
+}
+
+.displayModes {
+  float: right;
+
+  .displayMode {
+    display: inline-block;
+    padding: 0 .4rem;
+    margin: 0 .2rem;
+    cursor: pointer;
+    border-radius: 6px;
+
+    &.active {
+      background-color: transparentize($highlightColor05, 0.6);
     }
   }
 }

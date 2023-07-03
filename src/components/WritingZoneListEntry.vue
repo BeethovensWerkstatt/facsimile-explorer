@@ -4,7 +4,7 @@
       <span class="previewFrame" :style="{width: pageDimensions.pageWidth}" @click="showWzPreview()">
         <span class="actualPreview" :style="{top: pageDimensions.top, left: pageDimensions.left, width: pageDimensions.width, height: pageDimensions.height}"></span>
       </span>
-      <span class="shapeCount" title="Number of Shapes"># {{wz.totalCount}} <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
+      <span class="shapeCount" title="Number of Shapes"><span class="sum">∑</span>{{wz.totalCount}} ({{wz.layers.length}}) <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
     <div class="writingLayer">Writing Layers:</div>
     <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}">
       <h2 @click.stop="selectWritingLayer(wl.id)">{{this.numPrefixer(i)}}
@@ -135,6 +135,12 @@ h1 {
   background-color: $mainBackgroundColor;
   border: $lightBorder;
   border-radius: 3px;
+
+  .sum {
+    font-size: .6rem;
+    position: relative;
+    top: -2px;
+  }
 
   .icon-cross {
     font-size: .6rem;
