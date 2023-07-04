@@ -1,5 +1,6 @@
 import { Base64 } from 'js-base64'
-import XMLFormat from 'xml-formatter'
+// import XMLFormat from 'xml-formatter'
+import beautify from 'xml-beautifier'
 import store from '@/store'
 
 /**
@@ -49,7 +50,8 @@ export const str2base64 = str => {
  */
 export const dom2base64 = (dom, type = 'application/xml') => {
   const str = serializer.serializeToString(dom)
-  const xml = XMLFormat(str)
+  // const xml = XMLFormat(str)
+  const xml = beautify(str)
   return str2base64(xml)
 }
 
