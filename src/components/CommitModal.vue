@@ -16,9 +16,14 @@
 
           <template v-if="!completed">
             <label>Commit Message</label>
-            <textarea placeholder="commit message" class="commitMessage" v-model="message"></textarea>
+            <textarea placeholder="commit message" class="commitMessage" v-model="message" :disabled="committing"></textarea>
             <p>Please adjust the above Commit Message if necessary.</p>
           </template>
+
+          <div class="statusMessage" v-if="committing">
+            <h1>Sending Commit ...</h1>
+            <div class="loading loading-lg"></div>
+          </div>
 
           <div class="statusMessage success" v-if="commitSuccess">
             <h1>Changes successfully committed.</h1>
@@ -48,8 +53,8 @@
       </div>
       <div class="modal-footer">
         <div class="btn-group">
-          <button class="btn" @click="closeModal()">Cancel</button>
-          <button class="btn btn-primary" @click="main()">{{ completed ? 'Close' : 'Commit' }}</button>
+          <button class="btn" @click="closeModal()" :disabled="committing">Cancel</button>
+          <button class="btn btn-primary" @click="main()" :disabled="committing">{{ completed ? 'Close' : 'Commit' }}</button>
         </div>
       </div>
     </div>
@@ -98,7 +103,7 @@ export default {
         this.$store.dispatch('setCommitMessage', val)
       }
     },
-    ...mapGetters(['changedFiles', 'changesNeedBranching']),
+    ...mapGetters(['changedFiles', 'changesNeedBranching', 'committing']),
     commitSuccess () {
       return this.$store.getters.commitResults.status === 'success'
     },

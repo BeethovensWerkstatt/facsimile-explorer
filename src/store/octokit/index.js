@@ -21,6 +21,7 @@ const state = {
   filerepo: undefined,
   fileref: undefined,
   commit: undefined,
+  committing: false,
 
   sources: [],
   documents: {},
@@ -48,6 +49,7 @@ const getters = {
   fileowner: state => state.fileowner,
   fileref: state => state.fileref,
   commit: state => state.commit,
+  committing: state => state.committing,
   // TODO following moved to store.data!
   filepath: state => state.filepath,
   filename: state => state.filename,
@@ -126,10 +128,15 @@ const mutations = {
       if (remove) remove()
     }
   },
+
   SET_COMMIT (state, commit) {
     // console.log('commit', commit)
     state.commit = commit
   },
+  SET_COMMITTING (state, committing) {
+    state.committing = committing
+  },
+
   SET_GH_FILE (state, { repo, owner, ref, path, name, sha }) {
     state.filerepo = repo
     state.fileowner = owner
@@ -325,148 +332,160 @@ const actions = {
   async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     const octokit = getters.octokit
 
-    console.log('commit 2 GitHub: create blobs ...')
+    commit('SET_COMMITTING', true)
 
-    // Create a new tree that contains the specified files
-    const newTree = await Promise.all(files.map(async ({ path, content }) => {
-      // Create a blob for each file
-      console.log(`commit 2 GitHub: create blob "${path}"`, content)
-      const { data: { sha: blobSha } } = await octokit.git.createBlob({
-        owner,
-        repo,
-        content,
-        encoding: 'base64'
-      })
-      // console.log('blobSha', blobSha, path)
-      // Return the path and blob SHA for each file
-      return {
-        path,
-        mode: '100644',
-        type: 'blob',
-        sha: blobSha
-      }
-    }))
-
-    // Check with former SHA!!! Conflict resolution!
-    // Get the latest commit SHA for the specified branch
-    const localSHA = getters.commit
-
-    console.log('commit 2 GitHub: create tree ...')
-
-    // Create a new tree that references the new blobs
-    const { data: { sha: newTreeSha } } = await octokit.git.createTree({
-      owner,
-      repo,
-      base_tree: localSHA,
-      tree: newTree
-    })
-    // console.log('treeSha', newTreeSha)
-
-    console.log('commit 2 GitHub: create commit ...')
-
-    // Create a new commit that references the new tree
-    const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
-      owner,
-      repo,
-      message,
-      tree: newTreeSha,
-      parents: [localSHA]
-    })
-    // console.log('commitSha', newCommitSha)
-
-    console.log('commit 2 GitHub: get ref ...')
-
-    const { data: { object: refObject } } = await octokit.git.getRef({
-      owner,
-      repo,
-      ref: `heads/${branch}`
-    })
-
-    console.log(refObject)
-    const { sha: remoteSHA, url: headURL } = refObject
-    if (remoteSHA !== localSHA) {
-      commit('SET_CHANGES_NEED_BRANCHING', true)
-    }
-
-    const targetBranch = branch
-    const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
-    if (getters.changesNeedBranching) {
-      console.log(remoteSHA, localSHA, tmpBranch)
-      const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
-        owner,
-        repo,
-        ref: 'refs/heads/' + tmpBranch,
-        sha: localSHA
-      })
-      branch = tmpBranch
-      console.log(newBranch)
-    }
-
-    // Update the specified branch to point to the new commit
-    console.log('commit 2 GitHub: update "' + branch + '" ...')
-    const ref = await octokit.git.updateRef({
-      owner,
-      repo,
-      ref: `heads/${branch}`,
-      sha: newCommitSha
-    })
-    console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
-    // keep the new commit hash
-    commit('SET_COMMIT', newCommitSha)
-
-    if (getters.changesNeedBranching) {
-      // create PR
-      console.log('commit 2 GitHub: create PR ...')
-      const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
-        owner,
-        repo,
-        title: tmpBranch,
-        body: message,
-        head: tmpBranch,
-        base: targetBranch,
-        delete_branch_on_merge: true
-      })
-      // merge PR
-      const prUrl = data.html_url
-      const merge = await new Promise((resolve, reject) => {
-        try {
-          console.log('commit 2 GitHub: merge PR ...')
-          const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
-            owner,
-            repo,
-            pull_number: data.number,
-            commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
-            commit_message: message,
-            delete_branch_on_merge: true // does this work?
-          })
-          merge.then(m => resolve(m)).catch(e => {
-            console.warn(e)
-            resolve(null)
-          })
-        } catch (e) {
-          console.error(e)
-          resolve(null)
+    try {
+      // Create a new tree that contains the specified files
+      console.log('commit 2 GitHub: create blobs ...')
+      const newTree = await Promise.all(files.map(async ({ path, content }) => {
+        // Create a blob for each file
+        console.log(`commit 2 GitHub: create blob "${path}"`, content)
+        const { data: { sha: blobSha } } = await octokit.git.createBlob({
+          owner,
+          repo,
+          content,
+          encoding: 'base64'
+        })
+        // console.log('blobSha', blobSha, path)
+        // Return the path and blob SHA for each file
+        return {
+          path,
+          mode: '100644',
+          type: 'blob',
+          sha: blobSha
         }
-      })
-      console.log('commit 2 GitHub: merge result', merge)
-      // merged?
-      if (merge?.data.merged) {
-        console.log('merged', tmpBranch)
-        dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
-        dispatch('deleteBranch', { ref: tmpBranch })
-      } else {
-        console.warn('merge failed!', prUrl)
-        fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
-      }
-    } else {
-      console.log('committed')
-      dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
-    }
+      }))
 
-    // TODO what/when clear commit results
-    commit('SET_COMMIT_MESSAGE', null)
-    commit('EMPTY_CHANGELOG')
-    commit('SET_CHANGES_NEED_BRANCHING', false)
+      // Check with former SHA!!! Conflict resolution!
+      // Get the latest commit SHA for the specified branch
+      const localSHA = getters.commit
+
+      console.log('commit 2 GitHub: create tree ...')
+
+      // Create a new tree that references the new blobs
+      const { data: { sha: newTreeSha } } = await octokit.git.createTree({
+        owner,
+        repo,
+        base_tree: localSHA,
+        tree: newTree
+      })
+      // console.log('treeSha', newTreeSha)
+
+      console.log('commit 2 GitHub: create commit ...')
+
+      // Create a new commit that references the new tree
+      const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
+        owner,
+        repo,
+        message,
+        tree: newTreeSha,
+        parents: [localSHA]
+      })
+      // console.log('commitSha', newCommitSha)
+
+      console.log('commit 2 GitHub: get ref ...')
+
+      const { data: { object: refObject } } = await octokit.git.getRef({
+        owner,
+        repo,
+        ref: `heads/${branch}`
+      })
+
+      console.log(refObject)
+      const { sha: remoteSHA, url: headURL } = refObject
+      if (remoteSHA !== localSHA) {
+        commit('SET_CHANGES_NEED_BRANCHING', true)
+      }
+
+      const targetBranch = branch
+      const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
+      if (getters.changesNeedBranching) {
+        console.log(remoteSHA, localSHA, tmpBranch)
+        const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
+          owner,
+          repo,
+          ref: 'refs/heads/' + tmpBranch,
+          sha: localSHA
+        })
+        branch = tmpBranch
+        console.log(newBranch)
+      }
+
+      // Update the specified branch to point to the new commit
+      console.log('commit 2 GitHub: update "' + branch + '" ...')
+      const ref = await octokit.git.updateRef({
+        owner,
+        repo,
+        ref: `heads/${branch}`,
+        sha: newCommitSha
+      })
+      console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
+      // keep the new commit hash
+      commit('SET_COMMIT', newCommitSha)
+
+      if (getters.changesNeedBranching) {
+        // create PR
+        console.log('commit 2 GitHub: create PR ...')
+        const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
+          owner,
+          repo,
+          title: tmpBranch,
+          body: message,
+          head: tmpBranch,
+          base: targetBranch,
+          delete_branch_on_merge: true
+        })
+        // merge PR
+        const prUrl = data.html_url
+        const merge = await new Promise((resolve, reject) => {
+          try {
+            console.log('commit 2 GitHub: merge PR ...')
+            const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
+              owner,
+              repo,
+              pull_number: data.number,
+              commit_title: 'merge ' + tmpBranch + ' into ' + targetBranch,
+              commit_message: message,
+              delete_branch_on_merge: true // does this work?
+            })
+            merge.then(m => resolve(m)).catch(e => {
+              console.warn(e)
+              resolve(null)
+            })
+          } catch (e) {
+            console.error(e)
+            resolve(null)
+          }
+        })
+        console.log('commit 2 GitHub: merge result', merge)
+        // merged?
+        if (merge?.data.merged) {
+          console.log('merged', tmpBranch)
+          dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
+          dispatch('deleteBranch', { ref: tmpBranch })
+        } else {
+          console.warn('merge failed!', prUrl)
+          fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
+        }
+      } else {
+        console.log('committed')
+        dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
+      }
+
+      const { data: { object: { sha: finalCommit, url: finalCommitURL } } } = await octokit.git.getRef({
+        owner,
+        repo,
+        ref: `heads/${branch}`
+      })
+      commit('SET_COMMIT', finalCommit)
+      console.log(branch, finalCommit, finalCommitURL)
+    } finally {
+      commit('SET_COMMITTING', false)
+      // TODO what/when clear commit results
+      commit('SET_COMMIT_MESSAGE', null)
+      commit('EMPTY_CHANGELOG')
+      commit('SET_CHANGES_NEED_BRANCHING', false)
+    }
   },
 
   deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
