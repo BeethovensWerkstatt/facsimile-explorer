@@ -7,8 +7,14 @@
         die einzelnen Schritte umgesetzt, um aus der Kombination von SVG-Shapes in
         Kombination mit einer annotierten Transkription eine diplomatische zu erstellen.
       </p>
-    </div>
     <div class="externalMessages"><SourceSelector :table="true" /></div>
+    <h2>Info</h2>
+      <table class="table">
+        <tr><th>Repository</th><td>{{ infoRepo }}</td></tr>
+        <tr><th>Branch</th><td>{{ infoBranch }}</td></tr>
+        <tr><th>Commit</th><td><code>{{ infoCommit }}</code></td></tr>
+      </table>
+    </div>
     <!--
     <div class="internalMessages">
       <h1>Hallo Jan-Peter :)</h1>
@@ -54,6 +60,7 @@
 <script>
 import SourceSelector from '@/components/shared/SourceSelector.vue'
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
+import config from '@/config.json'
 
 export default {
   name: 'HomeTab',
@@ -63,6 +70,11 @@ export default {
   methods: {
   },
   computed: {
+    infoRepo: () => `${config.repository.owner} / ${config.repository.repo}`,
+    infoBranch: () => config.repository.branch,
+    infoCommit () {
+      return this.$store.getters.commit
+    }
   }
 }
 </script>
