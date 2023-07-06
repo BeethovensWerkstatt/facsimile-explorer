@@ -12,7 +12,8 @@
       <table class="table">
         <tr><th>Repository</th><td>{{ infoRepo }}</td></tr>
         <tr><th>Branch</th><td>{{ infoBranch }}</td></tr>
-        <tr><th>Commit</th><td><code>{{ infoCommit }}</code></td></tr>
+        <tr><th>Commit</th><td><a :href="infoCommit.html_url"><code>{{ infoCommit.sha }}</code></a>, {{ infoCommit.author.name }}, {{ new Date(infoCommit.author.date).toLocaleString() }}, {{  infoCommit.message }}</td></tr>
+        <tr><th>Tree</th><td><code>{{ infoCommit.tree.sha }}</code></td></tr>
       </table>
     </div>
     <!--

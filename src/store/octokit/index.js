@@ -61,6 +61,8 @@ const getters = {
   loggedChanges: state => state.changes,
   changesNeedBranching: state => state.changesNeedBranching,
 
+  // getCommit: (state, getters) => (sha) => getters.octokit.
+
   proposedCommitMessage: state => {
     if (state.changes.length === 0) {
       return ''
@@ -130,7 +132,7 @@ const mutations = {
   },
 
   SET_COMMIT (state, commit) {
-    // console.log('commit', commit)
+    console.log('commit', commit)
     state.commit = commit
   },
   SET_COMMITTING (state, committing) {
@@ -187,8 +189,12 @@ const actions = {
         }
         getters.octokit.git.getRef({
           ...repository
-        }).then(({ data: { object: { url } } }) => {
-          fetch(url).then(res => res.json()).then(json => console.log(repository, json))
+        }).then(({ data: { object: refObject } }) => {
+          // console.log('R', refObject)
+          fetch(refObject.url).then(res => res.json()).then(json => {
+            // console.log('A', repository, json)
+            commit('SET_COMMIT', json)
+          })
         }).catch(e => {
           console.warn('not authenicated!')
         })
@@ -358,15 +364,16 @@ const actions = {
 
       // Check with former SHA!!! Conflict resolution!
       // Get the latest commit SHA for the specified branch
-      const localSHA = getters.commit
+      const localSHA = getters.commit.sha
+      const localTree = getters.commit.tree.sha
 
-      console.log('commit 2 GitHub: create tree ...')
+      console.log('commit 2 GitHub: create tree ...', localSHA, localTree)
 
       // Create a new tree that references the new blobs
       const { data: { sha: newTreeSha } } = await octokit.git.createTree({
         owner,
         repo,
-        base_tree: localSHA,
+        base_tree: localTree,
         tree: newTree
       })
       // console.log('treeSha', newTreeSha)
@@ -393,9 +400,7 @@ const actions = {
 
       console.log(refObject)
       const { sha: remoteSHA, url: headURL } = refObject
-      if (remoteSHA !== localSHA) {
-        commit('SET_CHANGES_NEED_BRANCHING', true)
-      }
+      commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
       const targetBranch = branch
       const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
@@ -421,7 +426,9 @@ const actions = {
       })
       console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
       // keep the new commit hash
-      commit('SET_COMMIT', newCommitSha)
+      const commitFetch = await fetch(ref.data.object.url)
+      const commitObj = await commitFetch.json()
+      commit('SET_COMMIT', commitObj)
 
       if (getters.changesNeedBranching) {
         // create PR
@@ -472,13 +479,16 @@ const actions = {
         dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
 
-      const { data: { object: { sha: finalCommit, url: finalCommitURL } } } = await octokit.git.getRef({
+      const { data: { object: finalRef } } = await octokit.git.getRef({
         owner,
         repo,
         ref: `heads/${branch}`
       })
+      const finalCommit = await new Promise((resolve, reject) => {
+        fetch(finalRef.url).then(resp => resp.json()).then(json => resolve(json))
+      })
+      console.log(branch, finalCommit)
       commit('SET_COMMIT', finalCommit)
-      console.log(branch, finalCommit, finalCommitURL)
     } finally {
       commit('SET_COMMITTING', false)
       // TODO what/when clear commit results
@@ -583,7 +593,8 @@ const actions = {
     const sourcefiles = []
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder
-    commit('SET_COMMIT', repo.sha)
+    console.log(repo.commitUrl)
+    fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
     console.log('commit', getters.commit)
     const folder = await root.getFile(config.root)
     const sources = await folder.folder
@@ -592,7 +603,7 @@ const actions = {
         const srcfiles = await source.folder
         for (const srcfile of srcfiles) {
           if (srcfile.name.endsWith('.xml')) {
-            console.log(srcfile.path)
+            console.log('source:', srcfile.path)
             sourcefiles.push({ name: source.name, path: srcfile.path })
           }
         }

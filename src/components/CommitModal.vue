@@ -103,7 +103,7 @@ export default {
         this.$store.dispatch('setCommitMessage', val)
       }
     },
-    ...mapGetters(['changedFiles', 'changesNeedBranching', 'committing']),
+    ...mapGetters(['changedFiles', 'changesNeedBranching', 'commit', 'committing']),
     commitSuccess () {
       return this.$store.getters.commitResults.status === 'success'
     },

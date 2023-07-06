@@ -252,6 +252,7 @@ export class OctokitRepo {
   _repo
   _branch
   _sha
+  _commit
   _ready
   _folder
   _modified
@@ -262,6 +263,7 @@ export class OctokitRepo {
     this._repo = repo
     this._branch = branch
     this._sha = null
+    this._commit_url = null
     this._modified = {}
     this.refreshFolder()
   }
@@ -275,6 +277,8 @@ export class OctokitRepo {
   get branch () { return this._branch }
 
   get sha () { return this._sha }
+
+  get commitUrl () { return this._commit_url }
 
   get ready () { return this._ready }
 
@@ -294,6 +298,7 @@ export class OctokitRepo {
         }).then(({ data }) => {
           // console.log(data.object);
           this._sha = data.object.sha
+          this._commit_url = data.object.url
           this.octokit.git.getTree({
             owner: this.owner,
             repo: this.repo,
