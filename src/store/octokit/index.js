@@ -388,7 +388,7 @@ const actions = {
         tree: newTreeSha,
         parents: [localSHA]
       })
-      // console.log('commitSha', newCommitSha)
+      console.log('commit 2 GitHub: commitSha', newCommitSha)
 
       console.log('commit 2 GitHub: get ref ...')
 
@@ -398,7 +398,7 @@ const actions = {
         ref: `heads/${branch}`
       })
 
-      console.log(refObject)
+      console.log('commit 2 GitHub:', refObject)
       const { sha: remoteSHA, url: headURL } = refObject
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
@@ -421,13 +421,14 @@ const actions = {
       const ref = await octokit.git.updateRef({
         owner,
         repo,
-        ref: `heads/${branch}`,
+        ref: `heads/${branch}`, // TODO refs/heads/branch ????
         sha: newCommitSha
       })
       console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
       // keep the new commit hash
       const commitFetch = await fetch(ref.data.object.url)
       const commitObj = await commitFetch.json()
+      console.log(commitObj)
       commit('SET_COMMIT', commitObj)
 
       if (getters.changesNeedBranching) {
@@ -470,6 +471,18 @@ const actions = {
           console.log('merged', tmpBranch)
           dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
           dispatch('deleteBranch', { ref: tmpBranch })
+          console.log('getRef ...')
+          const { data: { object: finalRef } } = await octokit.git.getRef({
+            owner,
+            repo,
+            ref: `heads/${targetBranch}`
+          })
+          console.log('get commit ...')
+          const finalCommit = await new Promise((resolve, reject) => {
+            fetch(finalRef.url).then(resp => resp.json()).then(json => resolve(json))
+          })
+          console.log(branch, finalCommit)
+          commit('SET_COMMIT', finalCommit)
         } else {
           console.warn('merge failed!', prUrl)
           fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
@@ -478,17 +491,6 @@ const actions = {
         console.log('committed')
         dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
-
-      const { data: { object: finalRef } } = await octokit.git.getRef({
-        owner,
-        repo,
-        ref: `heads/${branch}`
-      })
-      const finalCommit = await new Promise((resolve, reject) => {
-        fetch(finalRef.url).then(resp => resp.json()).then(json => resolve(json))
-      })
-      console.log(branch, finalCommit)
-      commit('SET_COMMIT', finalCommit)
     } finally {
       commit('SET_COMMITTING', false)
       // TODO what/when clear commit results
