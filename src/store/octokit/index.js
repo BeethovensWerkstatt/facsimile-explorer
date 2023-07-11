@@ -398,7 +398,7 @@ const actions = {
         ref: `heads/${branch}`
       })
 
-      console.log('commit 2 GitHub:', refObject)
+      console.log('commit 2 GitHub: current ref', refObject)
       const { sha: remoteSHA, url: headURL } = refObject
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
@@ -413,7 +413,7 @@ const actions = {
           sha: localSHA
         })
         branch = tmpBranch
-        console.log(newBranch)
+        console.log('commit 2 GitHub: created', newBranch)
       }
 
       // Update the specified branch to point to the new commit
@@ -428,8 +428,7 @@ const actions = {
       // keep the new commit hash
       const commitFetch = await fetch(ref.data.object.url)
       const commitObj = await commitFetch.json()
-      console.log(commitObj)
-      commit('SET_COMMIT', commitObj)
+      console.log('commit 2 GitHub: commit object', commitObj)
 
       if (getters.changesNeedBranching) {
         // create PR
@@ -489,6 +488,7 @@ const actions = {
         }
       } else {
         console.log('committed')
+        commit('SET_COMMIT', commitObj)
         dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
     } finally {
