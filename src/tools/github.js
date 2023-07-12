@@ -352,4 +352,18 @@ export class OctokitRepo {
     console.log(this._modified, newCommitSha)
     // TODO clear _modified on successful commit
   }
+
+  getRef () {
+    return this.octokit.git.getRef({
+      owner: this.owner,
+      repo: this.repo,
+      ref: `heads/${this.branch}`
+    })
+  }
+
+  getLastCommit () {
+    return new Promise((resolve, reject) => {
+      this.getRef().then(({ url }) => fetch(url).then(res => res.json()).then(c => resolve(c)))
+    })
+  }
 }

@@ -132,7 +132,7 @@ const mutations = {
   },
 
   SET_COMMIT (state, commit) {
-    console.log('commit', commit)
+    console.log('set commit', state.commit?.sha, '->', commit?.sha)
     state.commit = commit
   },
   SET_COMMITTING (state, committing) {
@@ -341,6 +341,7 @@ const actions = {
     commit('SET_COMMITTING', true)
 
     try {
+      const octoRepo = new OctokitRepo({ owner, repo, branch })
       // Create a new tree that contains the specified files
       console.log('commit 2 GitHub: create blobs ...')
       const newTree = await Promise.all(files.map(async ({ path, content }) => {
@@ -392,14 +393,16 @@ const actions = {
 
       console.log('commit 2 GitHub: get ref ...')
 
+      octoRepo.getLastCommit().then(c => console.log('OctotkitRepo.getLastCommit()', c))
+
       const { data: { object: refObject } } = await octokit.git.getRef({
         owner,
         repo,
         ref: `heads/${branch}`
       })
 
-      console.log('commit 2 GitHub: current ref', refObject)
-      const { sha: remoteSHA, url: headURL } = refObject
+      console.log('commit 2 GitHub: current ref', getters.commit, refObject)
+      const { sha: remoteSHA, url: headURL } = fetch(refObject.url)
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
       const targetBranch = branch
@@ -480,7 +483,7 @@ const actions = {
           const finalCommit = await new Promise((resolve, reject) => {
             fetch(finalRef.url).then(resp => resp.json()).then(json => resolve(json))
           })
-          console.log(branch, finalCommit)
+          console.log(targetBranch, finalCommit)
           commit('SET_COMMIT', finalCommit)
         } else {
           console.warn('merge failed!', prUrl)
@@ -488,7 +491,13 @@ const actions = {
         }
       } else {
         console.log('committed')
-        commit('SET_COMMIT', commitObj)
+        const { data: { object: finalCommit } } = await octokit.git.getRef({
+          owner,
+          repo,
+          ref: `heads/${branch}`
+        })
+        console.log(commitObj, finalCommit, commitObj?.sha === finalCommit.sha)
+        commit('SET_COMMIT', finalCommit)
         dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
     } finally {
@@ -594,6 +603,7 @@ const actions = {
     dispatch('setLoading', true)
     const sourcefiles = []
     const repo = new OctokitRepo(repometa)
+    repo.getLastCommit().then(c => console.log('latest commit', c))
     const root = await repo.folder
     console.log(repo.commitUrl)
     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
