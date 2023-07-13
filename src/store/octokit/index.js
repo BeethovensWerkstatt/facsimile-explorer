@@ -467,7 +467,15 @@ const actions = {
           console.log(targetBranch, finalCommit)
           commit('SET_COMMIT', finalCommit)
           // TODO reload data
-          dispatch('loadSources')
+          // dispatch('loadSources')
+          files.forEach(({ path }) => {
+            console.log('reload', path)
+            if (path.endsWith('svg')) {
+              dispatch('loadSvgFile', { path })
+            } else {
+              dispatch('loadContent', { path })
+            }
+          })
         } else {
           console.warn('merge failed!', prUrl)
           fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
