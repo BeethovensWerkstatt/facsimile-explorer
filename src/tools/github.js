@@ -353,17 +353,30 @@ export class OctokitRepo {
     // TODO clear _modified on successful commit
   }
 
+  /**
+   * get current ref for branch
+   * @param {string} branch
+   * @returns object
+   */
   getRef (branch = this.branch) {
     return new Promise((resolve, reject) => this.octokit.git.getRef({
       owner: this.owner,
       repo: this.repo,
       ref: `heads/${branch}`
-    }).then(({ data }) => resolve(data)))
+    }).then(({ data }) => resolve(data)).catch(error => reject(error)))
   }
 
+  /**
+   * get last commit
+   * @param {string} branch
+   * @returns object
+   */
   getLastCommit (branch = this.branch) {
     return new Promise((resolve, reject) => {
-      this.getRef(branch).then(({ object: { url } }) => fetch(url).then(res => res.json()).then(c => resolve(c)))
+      this.getRef(branch).then(({ object: { url } }) => {
+        console.log('current commit', url)
+        fetch(url).then(res => res.json()).then(c => resolve(c)).catch(error => reject(error))
+      })
     })
   }
 }

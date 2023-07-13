@@ -133,6 +133,7 @@ const mutations = {
 
   SET_COMMIT (state, commit) {
     console.log('set commit', state.commit?.sha, '->', commit?.sha)
+    if (!commit.tree?.sha) console.warn('incomplete commit', commit)
     state.commit = commit
   },
   SET_COMMITTING (state, committing) {
@@ -382,19 +383,28 @@ const actions = {
       console.log('commit 2 GitHub: create commit ...')
 
       // Create a new commit that references the new tree
-      const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
+      const { data: newCommit } = await octokit.git.createCommit({
         owner,
         repo,
         message,
         tree: newTreeSha,
         parents: [localSHA]
       })
-      console.log('commit 2 GitHub: commitSha', newCommitSha)
+      console.log('commit 2 GitHub: commitSha', newCommit.sha)
 
       console.log('commit 2 GitHub: get ref ...')
 
-      const remoteCommit = await octoRepo.getLastCommit()
-      console.log('commit 2 GitHub: current ref', getters.commit, remoteCommit)
+      // const remoteCommit = await octoRepo.getLastCommit()
+      const { data: currentRef } = await octokit.git.getRef({ owner, repo, ref: 'heads/' + branch })
+      console.log(currentRef)
+      const remoteCommit = await new Promise((resolve, reject) => {
+        fetch(currentRef.object.url)
+          .then(res => res.json())
+          .then(json => resolve(json))
+          .catch(error => reject(error))
+      })
+
+      console.log('commit 2 GitHub: current commmit', getters.commit, remoteCommit)
       const { sha: remoteSHA, url: headURL } = remoteCommit
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
@@ -418,11 +428,15 @@ const actions = {
         owner,
         repo,
         ref: `heads/${branch}`,
-        sha: newCommitSha
+        sha: newCommit.sha
       })
       console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
 
-      if (getters.changesNeedBranching) {
+      if (!getters.changesNeedBranching) { // direct commit
+        console.log('committed')
+        commit('SET_COMMIT', newCommit)
+        dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
+      } else {
         // create PR
         console.log('commit 2 GitHub: create PR ...')
         const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
@@ -463,7 +477,7 @@ const actions = {
           dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
           dispatch('deleteBranch', { ref: tmpBranch })
 
-          const finalCommit = octoRepo.getLastCommit(targetBranch)
+          const finalCommit = await octoRepo.getLastCommit(targetBranch)
           console.log(targetBranch, finalCommit)
           commit('SET_COMMIT', finalCommit)
           // TODO reload data
@@ -480,12 +494,6 @@ const actions = {
           console.warn('merge failed!', prUrl)
           fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
         }
-      } else {
-        console.log('committed')
-        const finalCommit = octoRepo.getLastCommit()
-        console.log('final commit', finalCommit)
-        commit('SET_COMMIT', finalCommit)
-        dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
     } finally {
       commit('SET_COMMITTING', false)
