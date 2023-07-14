@@ -294,7 +294,13 @@ export class OctokitRepo {
         this.octokit.git.getRef({
           owner: this.owner,
           repo: this.repo,
-          ref: `heads/${this.branch || data.default_branch}`
+          ref: `heads/${this.branch || data.default_branch}`,
+          headers: {
+            'If-None-Match': ''
+          },
+          request: {
+            cache: 'reload'
+          }
         }).then(({ data }) => {
           // console.log(data.object);
           this._sha = data.object.sha
@@ -351,5 +357,45 @@ export class OctokitRepo {
 
     console.log(this._modified, newCommitSha)
     // TODO clear _modified on successful commit
+  }
+
+  /**
+   * get current ref for branch
+   * @param {string} branch
+   * @returns object
+   */
+  getRef (branch = this.branch) {
+    return new Promise((resolve, reject) => this.octokit.git.getRef({
+      owner: this.owner,
+      repo: this.repo,
+      ref: `heads/${branch}`,
+      headers: {
+        'If-None-Match': ''
+      },
+      request: {
+        cache: 'reload'
+      }
+    }).then(({ data }) => resolve(data)).catch(error => reject(error)))
+  }
+
+  /**
+   * get last commit
+   * @param {string} branch
+   * @returns object
+   */
+  getLastCommit (branch = this.branch) {
+    return new Promise((resolve, reject) => {
+      this.getRef(branch).then(({ object: { url } }) => {
+        console.log('current commit', url)
+        fetch(url, {
+          headers: {
+            'If-None-Match': ''
+          },
+          request: {
+            cache: 'reload'
+          }
+        }).then(res => res.json()).then(c => resolve(c)).catch(error => reject(error))
+      })
+    })
   }
 }

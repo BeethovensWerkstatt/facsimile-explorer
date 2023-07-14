@@ -9,7 +9,7 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/:source/:modus',
+    path: '/:source/:modus/:param?',
     name: 'modus',
     component: ModusView
   },

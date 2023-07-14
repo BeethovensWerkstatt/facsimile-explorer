@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
 import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
+import { Base64 } from 'js-base64'
 
 import config from '@/config.json'
 import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
@@ -132,7 +133,8 @@ const mutations = {
   },
 
   SET_COMMIT (state, commit) {
-    console.log('commit', commit)
+    console.log('set commit', state.commit?.sha, '->', commit?.sha)
+    if (!commit.tree?.sha) console.warn('incomplete commit', commit)
     state.commit = commit
   },
   SET_COMMITTING (state, committing) {
@@ -188,10 +190,23 @@ const actions = {
           ref: `heads/${opts?.repository?.branch || config.repository.branch}`
         }
         getters.octokit.git.getRef({
-          ...repository
+          ...repository,
+          headers: {
+            'If-None-Match': ''
+          },
+          request: {
+            cache: 'reload'
+          }
         }).then(({ data: { object: refObject } }) => {
           // console.log('R', refObject)
-          fetch(refObject.url).then(res => res.json()).then(json => {
+          fetch(refObject.url, {
+            headers: {
+              'If-None-Match': ''
+            },
+            request: {
+              cache: 'reload'
+            }
+          }).then(res => res.json()).then(json => {
             // console.log('A', repository, json)
             commit('SET_COMMIT', json)
           })
@@ -336,8 +351,10 @@ const actions = {
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
   async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+    const octoRepo = new OctokitRepo({ owner, repo, branch })
     const octokit = getters.octokit
 
+    // start loading icon ...
     commit('SET_COMMITTING', true)
 
     try {
@@ -381,25 +398,20 @@ const actions = {
       console.log('commit 2 GitHub: create commit ...')
 
       // Create a new commit that references the new tree
-      const { data: { sha: newCommitSha } } = await octokit.git.createCommit({
+      const { data: newCommit } = await octokit.git.createCommit({
         owner,
         repo,
         message,
         tree: newTreeSha,
         parents: [localSHA]
       })
-      console.log('commit 2 GitHub: commitSha', newCommitSha)
+      console.log('commit 2 GitHub: new commitSha', newCommit.sha)
 
       console.log('commit 2 GitHub: get ref ...')
 
-      const { data: { object: refObject } } = await octokit.git.getRef({
-        owner,
-        repo,
-        ref: `heads/${branch}`
-      })
-
-      console.log('commit 2 GitHub:', refObject)
-      const { sha: remoteSHA, url: headURL } = refObject
+      const remoteCommit = await octoRepo.getLastCommit()
+      console.log('commit 2 GitHub: current commmit', getters.commit, remoteCommit)
+      const { sha: remoteSHA, url: headURL } = remoteCommit
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
       const targetBranch = branch
@@ -413,7 +425,7 @@ const actions = {
           sha: localSHA
         })
         branch = tmpBranch
-        console.log(newBranch)
+        console.log('commit 2 GitHub: created', newBranch)
       }
 
       // Update the specified branch to point to the new commit
@@ -421,17 +433,16 @@ const actions = {
       const ref = await octokit.git.updateRef({
         owner,
         repo,
-        ref: `heads/${branch}`, // TODO refs/heads/branch ????
-        sha: newCommitSha
+        ref: `heads/${branch}`,
+        sha: newCommit.sha
       })
       console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
-      // keep the new commit hash
-      const commitFetch = await fetch(ref.data.object.url)
-      const commitObj = await commitFetch.json()
-      console.log(commitObj)
-      commit('SET_COMMIT', commitObj)
 
-      if (getters.changesNeedBranching) {
+      if (!getters.changesNeedBranching) { // direct commit
+        console.log('committed')
+        commit('SET_COMMIT', newCommit)
+        dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
+      } else {
         // create PR
         console.log('commit 2 GitHub: create PR ...')
         const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
@@ -456,7 +467,10 @@ const actions = {
               commit_message: message,
               delete_branch_on_merge: true // does this work?
             })
-            merge.then(m => resolve(m)).catch(e => {
+            merge.then(m => {
+              console.log('merge', m)
+              resolve(m)
+            }).catch(e => {
               console.warn(e)
               resolve(null)
             })
@@ -471,25 +485,41 @@ const actions = {
           console.log('merged', tmpBranch)
           dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
           dispatch('deleteBranch', { ref: tmpBranch })
-          console.log('getRef ...')
-          const { data: { object: finalRef } } = await octokit.git.getRef({
-            owner,
-            repo,
-            ref: `heads/${targetBranch}`
-          })
-          console.log('get commit ...')
-          const finalCommit = await new Promise((resolve, reject) => {
-            fetch(finalRef.url).then(resp => resp.json()).then(json => resolve(json))
-          })
-          console.log(branch, finalCommit)
+
+          const finalCommit = await octoRepo.getLastCommit(targetBranch)
+          console.log(targetBranch, finalCommit)
           commit('SET_COMMIT', finalCommit)
+          // TODO reload data
+          // dispatch('loadSources')
+          files.forEach(({ path }) => {
+            console.log('reload', path)
+            octokit.repos.getContent({
+              owner,
+              repo,
+              ref: targetBranch,
+              path,
+              headers: {
+                'If-None-Match': ''
+              },
+              request: {
+                cache: 'reload'
+              }
+            }).then(({ data }) => {
+              const dec = new TextDecoder('utf-8')
+              const content = dec.decode(Base64.toUint8Array(data.content))
+              console.log(path, content.substring(0, 50))
+              /*
+              const parser = new DOMParser()
+              const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
+              const dom = parser.parseFromString(content, type)
+              dispatch('loadDocumentIntoStore', { path, dom })
+              */
+            }).catch(error => console.error(error))
+          })
         } else {
           console.warn('merge failed!', prUrl)
           fetch(headURL).then(res => res.json()).then(json => dispatch('setCommitResults', { status: 'conflicts', prUrl, conflictingUser: json.author.name }))
         }
-      } else {
-        console.log('committed')
-        dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       }
     } finally {
       commit('SET_COMMITTING', false)
@@ -594,6 +624,7 @@ const actions = {
     dispatch('setLoading', true)
     const sourcefiles = []
     const repo = new OctokitRepo(repometa)
+    // repo.getLastCommit().then(c => console.log('latest commit', c))
     const root = await repo.folder
     console.log(repo.commitUrl)
     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
@@ -604,7 +635,7 @@ const actions = {
       if (source.type === 'dir' || source.type === 'tree') {
         const srcfiles = await source.folder
         for (const srcfile of srcfiles) {
-          if (srcfile.name.endsWith('.xml')) {
+          if (srcfile.name.endsWith('.xml') || srcfile.name.endsWith('.mei')) {
             console.log('source:', srcfile.path)
             sourcefiles.push({ name: source.name, path: srcfile.path })
           }
