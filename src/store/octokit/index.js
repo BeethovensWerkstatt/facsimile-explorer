@@ -190,10 +190,23 @@ const actions = {
           ref: `heads/${opts?.repository?.branch || config.repository.branch}`
         }
         getters.octokit.git.getRef({
-          ...repository
+          ...repository,
+          headers: {
+            'If-None-Match': ''
+          },
+          request: {
+            cache: 'reload'
+          }
         }).then(({ data: { object: refObject } }) => {
           // console.log('R', refObject)
-          fetch(refObject.url).then(res => res.json()).then(json => {
+          fetch(refObject.url, {
+            headers: {
+              'If-None-Match': ''
+            },
+            request: {
+              cache: 'reload'
+            }
+          }).then(res => res.json()).then(json => {
             // console.log('A', repository, json)
             commit('SET_COMMIT', json)
           })
@@ -396,16 +409,7 @@ const actions = {
 
       console.log('commit 2 GitHub: get ref ...')
 
-      // const remoteCommit = await octoRepo.getLastCommit()
-      const { data: currentRef } = await octokit.git.getRef({ owner, repo, ref: 'heads/' + branch })
-      console.log(currentRef)
-      const remoteCommit = await new Promise((resolve, reject) => {
-        fetch(currentRef.object.url)
-          .then(res => res.json())
-          .then(json => resolve(json))
-          .catch(error => reject(error))
-      })
-
+      const remoteCommit = await octoRepo.getLastCommit()
       console.log('commit 2 GitHub: current commmit', getters.commit, remoteCommit)
       const { sha: remoteSHA, url: headURL } = remoteCommit
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
@@ -494,10 +498,13 @@ const actions = {
             }).then(({ data }) => {
               const dec = new TextDecoder('utf-8')
               const content = dec.decode(Base64.toUint8Array(data.content))
+              console.log(path, content.substring(0, 50))
+              /*
               const parser = new DOMParser()
               const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
               const dom = parser.parseFromString(content, type)
               dispatch('loadDocumentIntoStore', { path, dom })
+              */
             }).catch(error => console.error(error))
           })
         } else {
