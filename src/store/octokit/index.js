@@ -340,6 +340,7 @@ const actions = {
     const octoRepo = new OctokitRepo({ owner, repo, branch })
     const octokit = getters.octokit
 
+    // start loading icon ...
     commit('SET_COMMITTING', true)
 
     try {
@@ -390,7 +391,7 @@ const actions = {
         tree: newTreeSha,
         parents: [localSHA]
       })
-      console.log('commit 2 GitHub: commitSha', newCommit.sha)
+      console.log('commit 2 GitHub: new commitSha', newCommit.sha)
 
       console.log('commit 2 GitHub: get ref ...')
 
@@ -461,7 +462,10 @@ const actions = {
               commit_message: message,
               delete_branch_on_merge: true // does this work?
             })
-            merge.then(m => resolve(m)).catch(e => {
+            merge.then(m => {
+              console.log('merge', m)
+              resolve(m)
+            }).catch(e => {
               console.warn(e)
               resolve(null)
             })
@@ -484,11 +488,11 @@ const actions = {
           // dispatch('loadSources')
           files.forEach(({ path }) => {
             console.log('reload', path)
-            if (path.endsWith('svg')) {
-              dispatch('loadSvgFile', { path })
-            } else {
-              dispatch('loadContent', { path })
-            }
+            octokit.repos.getContent({
+              owner, repo, ref: targetBranch, path
+            }).then(({ data }) => {
+
+            }).catch(error => console.error(error))
           })
         } else {
           console.warn('merge failed!', prUrl)
