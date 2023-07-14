@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
 import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
+import { Base64 } from 'js-base64'
 
 import config from '@/config.json'
 import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
@@ -491,7 +492,12 @@ const actions = {
             octokit.repos.getContent({
               owner, repo, ref: targetBranch, path
             }).then(({ data }) => {
-
+              const dec = new TextDecoder('utf-8')
+              const content = dec.decode(Base64.toUint8Array(data.content))
+              const parser = new DOMParser()
+              const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
+              const dom = parser.parseFromString(content, type)
+              dispatch('loadDocumentIntoStore', { path, dom })
             }).catch(error => console.error(error))
           })
         } else {
