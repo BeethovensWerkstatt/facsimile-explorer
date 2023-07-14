@@ -494,7 +494,16 @@ const actions = {
           files.forEach(({ path }) => {
             console.log('reload', path)
             octokit.repos.getContent({
-              owner, repo, ref: targetBranch, path
+              owner,
+              repo,
+              ref: targetBranch,
+              path,
+              headers: {
+                'If-None-Match': ''
+              },
+              request: {
+                cache: 'reload'
+              }
             }).then(({ data }) => {
               const dec = new TextDecoder('utf-8')
               const content = dec.decode(Base64.toUint8Array(data.content))
