@@ -29,15 +29,8 @@ export default {
   methods: {
     ...mapActions(['setCurrentPage']),
     setPage (i) {
-      if (i !== this.currentPageZeroBased) {
-        const route = {
-          name: this.$route.name,
-          params: this.$route.params,
-          query: { ...this.$route.query, page: i + 1 }
-        }
-        this.$router.push(route)
-        this.setCurrentPage(i)
-      }
+      this.setCurrentPage(i)
+      // this.$router.replace({ query: { page: i + 1 } })
     }
   },
   computed: {

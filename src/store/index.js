@@ -6,6 +6,7 @@ import verovioModule from '@/store/vrv'
 import guiModule from '@/store/gui'
 import dataModule from '@/store/data'
 // import VuexPersistence from 'vuex-persist'
+import router from '@/router'
 
 /* function nsResolver (prefix) {
   const ns = {
@@ -287,6 +288,7 @@ export default createStore({
       commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)
       commit('SET_ACTIVE_WRITINGZONE', null)
+      router.replace({ query: { page: i + 1 } })
     },
     setPreviewPage ({ commit }, i) {
       commit('SET_PREVIEW_PAGE', i)

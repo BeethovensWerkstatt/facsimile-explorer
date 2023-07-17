@@ -97,6 +97,10 @@ export default {
     currentPath () {
       this.reload()
     },
+    currentPage () {
+      console.log('current page', this.$route.query.page)
+      // this.reload()
+    },
     docPath () {
       this.reload()
     }
@@ -135,6 +139,9 @@ export default {
     },
     currentTab () {
       return this.$route.params.modus // this.$store.getters.currentTab
+    },
+    currentPage () {
+      return (+this.$route.query.page || 1) - 1
     }
   }
 }
