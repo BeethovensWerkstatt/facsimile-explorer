@@ -1,6 +1,6 @@
 <template>
   <div class="pageList">
-    <div class="pageBox" v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="$store.dispatch('setCurrentPage', i)">
+    <div class="pageBox" v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="setPage(i)">
       <h2>{{ page.label }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document}}: {{page.modernLabel}}</small></h2>
       <div class="activePageContent" v-if="i === activePage && tab === 'pagesTab'">
         <span class="svg">SVG: <i class="icon" :class="{'icon-check': page.hasSvg, 'icon-cross': !page.hasSvg}"></i></span>
@@ -27,7 +27,18 @@ export default {
 
   },
   methods: {
-    ...mapActions(['setCurrentPage'])
+    ...mapActions(['setCurrentPage']),
+    setPage (i) {
+      // this.setCurrentPage(i)
+      if (i !== this.currentPageZeroBased) {
+        const route = {
+          name: this.$route.name,
+          params: this.$route.params,
+          query: { ...this.$route.query, page: i + 1 }
+        }
+        this.$router.push(route)
+      }
+    }
   },
   computed: {
     ...mapGetters(['currentPageZeroBased']),
@@ -35,32 +46,10 @@ export default {
       const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
 
       return pages
-
-      /*
-      if (this.tab === 'pagesTab') {
-        return [{ label: '1', hasSVG: true, systems: 12, hasFragment: true },
-          { label: '2', hasSVG: true, systems: 12, hasFragment: true },
-          { label: '3', hasSVG: true, systems: 11, hasFragment: true },
-          { label: '4', hasSVG: true, systems: 12, hasFragment: true },
-          { label: '5', hasSVG: true, systems: 13, hasFragment: true },
-          { label: '6', hasSVG: false, systems: 12, hasFragment: true },
-          { label: '7', hasSVG: false, systems: 12, hasFragment: true },
-          { label: '8', hasSVG: false, systems: 12, hasFragment: false }]
-      } else if (this.tab === 'zonesTab') {
-        return [{ label: '1', zonesCount: 11 },
-          { label: '2', zonesCount: 3 },
-          { label: '3', zonesCount: 7 },
-          { label: '4', zonesCount: 12 },
-          { label: '5', zonesCount: 19 },
-          { label: '6', zonesCount: 8 },
-          { label: '7', zonesCount: 14 },
-          { label: '8', zonesCount: 11 }]
-      }
-      return []
-      */
     },
     activePage () {
       /* INFO JP: Wie wir die aktive Seite identifizieren (Index oder Label) ist egal… */
+      /* JP: index - labels sind nicht immer eindeutig (sollten sie aber ...) */
       return this.currentPageZeroBased
     }
   }

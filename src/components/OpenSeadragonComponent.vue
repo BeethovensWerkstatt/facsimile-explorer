@@ -98,7 +98,7 @@ export default {
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
       // console.log('renderShapes() for ' + this.$store.getters.currentSvgPath)
       // only relevant before component is mounted
-      if (this.viewer === undefined) {
+      if (!this.viewer) {
         return null
       }
       if (svg) {
@@ -152,7 +152,7 @@ export default {
       const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
 
       // only relevant before component is mounted
-      if (this.viewer === undefined) {
+      if (!this.viewer) {
         return null
       }
 
@@ -185,7 +185,7 @@ export default {
     },
     renderPageBorders (origin) {
       // only relevant before component is mounted
-      if (!this.viewer === undefined || this.viewer.world.getItemCount() === 0) {
+      if (!this.viewer || this.viewer.world.getItemCount() === 0) {
         return null
       }
 
@@ -263,7 +263,7 @@ export default {
     },
     focusRect () {
       const xywh = this.$store.getters.focusRect
-      if (!xywh) {
+      if (!this.viewer || !xywh) {
         return null
       }
       this.viewer.viewport.fitBoundsWithConstraints(new OpenSeadragon.Rect(xywh.x, xywh.y, xywh.w, xywh.h))
@@ -319,6 +319,10 @@ export default {
       }
     },
     renderVerovioOverlay () {
+      // only relevant before component is mounted
+      if (!this.viewer) {
+        return null
+      }
       document.querySelectorAll('.verovio.overlay').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })

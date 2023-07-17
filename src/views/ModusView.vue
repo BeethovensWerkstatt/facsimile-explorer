@@ -87,7 +87,7 @@ export default {
     AnnotTab,
     DiploTab
   },
-  mounted () {
+  created () {
     this.reload()
   },
   watch: {
@@ -106,6 +106,7 @@ export default {
       console.log(e)
     },
     reload () {
+      // console.log('route', this.$route)
       const path = this.$store.getters.getPathByName(this.$route.params.source)
       const modus = this.$route.params.modus
       const page = this.$route.query.page
