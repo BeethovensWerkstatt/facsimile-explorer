@@ -140,8 +140,9 @@ const dataModule = {
 
         const param = surfaceIndex
         const baseMessage = 'added SVG for ' + docName + ', p.'
-        dispatch('logChange', { path, baseMessage, param })
-        dispatch('logChange', { path: svgFullPath, baseMessage, param })
+        // TODO collect xmlIDs for changed elements
+        dispatch('logChange', { path, baseMessage, param, xmlIDs: [] })
+        dispatch('logChange', { path: svgFullPath, baseMessage, param, xmlIDs: [] })
       } else {
         alert('[ERROR] SVG Dimensions for ' + svgFullPath + ' incorrect: \n\n   pixelWidth: ' + pixelWidth + '\n     svgWidth: ' + svgWidth + '\n  pixelHeight: ' + pixelHeight + '\n    svgHeight: ' + svgHeight + '\n\n Loading SVG file aborted.')
       }

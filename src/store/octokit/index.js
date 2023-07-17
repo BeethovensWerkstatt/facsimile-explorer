@@ -157,8 +157,8 @@ const mutations = {
     if (!doc) console.warn(`no document '${path}'`)
     state.documents[path] = { repo, owner, ref, path, name, sha, doc }
   },
-  LOG_CHANGE (state, { path, baseMessage, param }) {
-    state.changes.push({ path, baseMessage, param })
+  LOG_CHANGE (state, { path, baseMessage, param, xmlIDs }) {
+    state.changes.push({ path, baseMessage, param, xmlIDs })
   },
   EMPTY_CHANGELOG (state) {
     state.changes = []
@@ -551,8 +551,8 @@ const actions = {
    * @param  {[type]} param                     [description]
    * @return {[type]}             [description]
    */
-  logChange ({ commit }, { path, baseMessage, param }) {
-    commit('LOG_CHANGE', { path, baseMessage, param })
+  logChange ({ commit }, { path, baseMessage, param, xmlIDs = [] }) {
+    commit('LOG_CHANGE', { path, baseMessage, param, xmlIDs })
   },
 
   /**
@@ -576,8 +576,11 @@ const actions = {
       }
 
       fileStore[path] = fileStore[path] ? fileStore[path] + 1 : 1
+      // TODO aggregate DOM objects changed
     })
     for (const path in fileStore) {
+      // load current version from git and
+      // replace DOM objects changed here
       const dom = getters.documentByPath(path)
       const content = dom2base64(dom)
       files.push({ path, content })
