@@ -29,7 +29,6 @@ export default {
   methods: {
     ...mapActions(['setCurrentPage']),
     setPage (i) {
-      // this.setCurrentPage(i)
       if (i !== this.currentPageZeroBased) {
         const route = {
           name: this.$route.name,
@@ -37,6 +36,7 @@ export default {
           query: { ...this.$route.query, page: i + 1 }
         }
         this.$router.push(route)
+        this.setCurrentPage(i)
       }
     }
   },
