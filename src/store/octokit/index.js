@@ -507,13 +507,11 @@ const actions = {
             }).then(({ data }) => {
               const dec = new TextDecoder('utf-8')
               const content = dec.decode(Base64.toUint8Array(data.content))
-              console.log(path, content.substring(0, 50))
-              /*
+              // console.log(path, content.substring(0, 50))
               const parser = new DOMParser()
               const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
               const dom = parser.parseFromString(content, type)
               dispatch('loadDocumentIntoStore', { path, dom })
-              */
             }).catch(error => console.error(error))
           })
         } else {
