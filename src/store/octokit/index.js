@@ -157,8 +157,8 @@ const mutations = {
     if (!doc) console.warn(`no document '${path}'`)
     state.documents[path] = { repo, owner, ref, path, name, sha, doc }
   },
-  LOG_CHANGE (state, { path, baseMessage, param, xmlIDs }) {
-    state.changes.push({ path, baseMessage, param, xmlIDs })
+  LOG_CHANGE (state, { path, baseMessage, param, xmlIDs, isNewDocument }) {
+    state.changes.push({ path, baseMessage, param, xmlIDs, isNewDocument })
   },
   EMPTY_CHANGELOG (state) {
     state.changes = []
@@ -549,8 +549,8 @@ const actions = {
    * @param  {[type]} param                     [description]
    * @return {[type]}             [description]
    */
-  logChange ({ commit }, { path, baseMessage, param, xmlIDs = [] }) {
-    commit('LOG_CHANGE', { path, baseMessage, param, xmlIDs })
+  logChange ({ commit }, { path, baseMessage, param, xmlIDs = [], isNewDocument = false }) {
+    commit('LOG_CHANGE', { path, baseMessage, param, xmlIDs, isNewDocument })
   },
 
   /**
@@ -561,8 +561,10 @@ const actions = {
    * @param  {[type]} getters                [description]
    * @return {[type]}          [description]
    */
-  prepareGitCommit ({ commit, dispatch, getters }) {
+  async prepareGitCommit ({ commit, dispatch, getters }, { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
     console.log('prepareGitCommit ...', getters.loggedChanges)
+    commit('SET_COMMITTING', true)
+
     const fileStore = {}
     const files = []
     const baseMessages = []
@@ -573,14 +575,37 @@ const actions = {
         baseMessages.push(change.baseMessage)
       }
 
-      fileStore[path] = fileStore[path] ? fileStore[path] + 1 : 1
-      // TODO aggregate DOM objects changed
+      const fileChange = fileStore[path] ? fileStore[path] : { xmlIDs: [], isNewDocument: true }
+      fileStore[path] = { ...fileChange, xmlIDs: [...fileChange.xmlIDs, ...change.xmlIDs], isNewDocument: fileChange.isNewDocument && change.isNewDocument }
     })
     for (const path in fileStore) {
-      // load current version from git and
-      // replace DOM objects changed here
+      const xmlIDs = fileStore[path].xmlIDs
+      const isNewDocument = fileStore[path].isNewDocument
       const dom = getters.documentByPath(path)
-      const content = dom2base64(dom)
+      const finalDOM = isNewDocument
+        ? dom
+        : await new Promise((resolve, reject) => {
+          getters.octokit.repos.getContent({
+            owner, repo, ref: `heads/${branch}`, path
+          }).then(({ data }) => {
+            const parser = new DOMParser()
+            const dec = new TextDecoder('utf-8')
+            const content = dec.decode(Base64.toUint8Array(data.content))
+            const dom = parser.parseFromString(content, 'application/xml')
+            resolve(dom)
+          }).catch(error => reject(error))
+        })
+
+      if (!isNewDocument) {
+        for (const id in xmlIDs) {
+          const localNode = dom.querySelectorAll('*').find(node => node.getAttribute('xml:id') === id || node.getAttribute('id') === id).cloneNode(true)
+          const remoteNode = finalDOM.querySelectorAll('*').find(elem => elem.getAttribute('xml:id') === id || elem.getAttribute('id') === id)
+          remoteNode.replaceWith(localNode)
+        }
+        dispatch('loadDocumentIntoStore', { path, dom: finalDOM })
+      }
+
+      const content = dom2base64(finalDOM)
       files.push({ path, content })
     }
 

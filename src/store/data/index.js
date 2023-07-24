@@ -141,8 +141,8 @@ const dataModule = {
         const param = surfaceIndex
         const baseMessage = 'added SVG for ' + docName + ', p.'
         // TODO collect xmlIDs for changed elements
-        dispatch('logChange', { path, baseMessage, param, xmlIDs: [] })
-        dispatch('logChange', { path: svgFullPath, baseMessage, param, xmlIDs: [] })
+        dispatch('logChange', { path, baseMessage, param, xmlIDs: [surfaceId], isNewDocument: false })
+        dispatch('logChange', { path: svgFullPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
       } else {
         alert('[ERROR] SVG Dimensions for ' + svgFullPath + ' incorrect: \n\n   pixelWidth: ' + pixelWidth + '\n     svgWidth: ' + svgWidth + '\n  pixelHeight: ' + pixelHeight + '\n    svgHeight: ' + svgHeight + '\n\n Loading SVG file aborted.')
       }
@@ -163,10 +163,13 @@ const dataModule = {
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
+      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
+
       const surfaceId = getters.currentPageId
 
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
       const genDescPage = modifiedDom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+      const genDescPageId = genDescPage.getAttribute('xml:id')
 
       const svgLink = surface.querySelector('graphic[type="shapes"]').getAttribute('target')
 
@@ -224,8 +227,8 @@ const dataModule = {
 
       const param = getters.currentSurfaceIndexForCurrentDoc
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
-      dispatch('logChange', { path: docPath, baseMessage, param })
-      dispatch('logChange', { path: svgPath, baseMessage, param })
+      dispatch('logChange', { path: docPath, baseMessage, param, xmlIDs: [surfaceId, genDescPageId], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
 
       dispatch('setActiveWritingZone', genDescWzId)
       dispatch('setActiveWritingLayer', genDescWlId)
@@ -246,6 +249,8 @@ const dataModule = {
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
       const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
 
+      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
+
       const surfaceId = getters.currentPageId
 
       const activeWzGenDescId = getters.activeWritingZone
@@ -254,6 +259,7 @@ const dataModule = {
       // const genDescWz = getters.genDescForCurrentWritingZone
 
       const genDescWz = [...modifiedDom.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')].find(wz => wz.getAttribute('xml:id') === activeWzGenDescId)
+      const genDescPageId = genDescWz.closest('genDesc[class~="#geneticOrder_pageLevel"]').getAttribute('xml:id')
 
       console.log('\n\nStrange things happening')
       console.log('activeWzGenDescId: ' + activeWzGenDescId)
@@ -298,8 +304,8 @@ const dataModule = {
 
       const param = getters.currentSurfaceIndexForCurrentDoc
       const baseMessage = 'changed writingZones for ' + docName + ', p.'
-      dispatch('logChange', { path: docPath, baseMessage, param })
-      dispatch('logChange', { path: svgPath, baseMessage, param })
+      dispatch('logChange', { path: docPath, baseMessage, param, xmlIDs: [surfaceId, genDescPageId], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
 
       dispatch('setActiveWritingLayer', genDescWlId)
     },
@@ -323,6 +329,8 @@ const dataModule = {
         return null
       }
 
+      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
+
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
 
@@ -345,6 +353,7 @@ const dataModule = {
       renderedLayerSvgGroup.append(renderedShape)
 
       const pageGenDesc = getters.genDescForCurrentPage
+      const genDescPageId = pageGenDesc.getAttribute('xml:id')
       const wzGenDescArr = pageGenDesc.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')
 
       const surfaceId = getters.currentPageId
@@ -368,8 +377,8 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
-      dispatch('logChange', { path: svgPath, baseMessage, param })
-      dispatch('logChange', { path: path, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [surfaceId, genDescPageId], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
     },
 
     /**
@@ -391,7 +400,7 @@ const dataModule = {
         return null
       }
 
-      // ---
+      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
 
       const genDescWz = modifiedDom.querySelector('genDesc[*|id="' + genDescWzId + '"]')
       const svgGroupWz = modifiedSvgDom.querySelector('#' + genDescWz.getAttribute('corresp').split('#')[1])
@@ -402,6 +411,9 @@ const dataModule = {
       const surfaceId = getters.currentPageId
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
       const zone = surface.querySelector('zone[data="#' + genDescWz.getAttribute('xml:id') + '"]')
+
+      const pageGenDesc = getters.genDescForCurrentPage
+      const genDescPageId = pageGenDesc.getAttribute('xml:id')
 
       zone.remove()
       genDescWz.remove()
@@ -416,8 +428,8 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
-      dispatch('logChange', { path: svgPath, baseMessage, param })
-      dispatch('logChange', { path: path, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [surfaceId, genDescPageId], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
     },
 
     /**
@@ -439,6 +451,8 @@ const dataModule = {
         return null
       }
 
+      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
+
       const genDescWl = [...modifiedDom.querySelectorAll('genState')].find(genState => genState.getAttribute('xml:id') === genDescWlId)
       const genDescWz = genDescWl.closest('genDesc[class~="#geneticOrder_writingZoneLevel"]')
       const svgGroupWl = modifiedSvgDom.querySelector('#' + genDescWl.getAttribute('corresp').split('#')[1])
@@ -449,6 +463,9 @@ const dataModule = {
       const surfaceId = getters.currentPageId
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
       const zone = surface.querySelector('zone[data="#' + genDescWz.getAttribute('xml:id') + '"]')
+
+      const pageGenDesc = getters.genDescForCurrentPage
+      const genDescPageId = pageGenDesc.getAttribute('xml:id')
 
       // this needs to happen with the rendered svg, or it won't get positions!
       const renderedWritingLayer = document.querySelector('#' + genDescWl.getAttribute('corresp').split('#')[1])
@@ -473,8 +490,8 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
-      dispatch('logChange', { path: svgPath, baseMessage, param })
-      dispatch('logChange', { path: path, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [surfaceId, genDescPageId], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
     },
 
     /**
@@ -512,6 +529,7 @@ const dataModule = {
       const surfaceId = getters.currentPageId
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
       const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
 
       const existingTarget = graphic.getAttribute('target')
       const basePath = existingTarget.split('#xywh')[0]
@@ -526,7 +544,7 @@ const dataModule = {
       const baseMessage = 'determine actual page dimensions within scan of ' + docName + ', p.'
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
-      dispatch('logChange', { path: path, baseMessage, param })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
 
       dispatch('disableAnnotorious')
     },
@@ -628,7 +646,8 @@ const dataModule = {
       const baseMessage = 'adjust systems on ' + docName + ', p.'
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
-      dispatch('logChange', { path: path, baseMessage, param })
+      // TODO xmlIDs
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [], isNewDocument: false })
 
       dispatch('disableAnnotorious')
     }
