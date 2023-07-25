@@ -561,8 +561,9 @@ const actions = {
    * @param  {[type]} getters                [description]
    * @return {[type]}          [description]
    */
-  async prepareGitCommit ({ commit, dispatch, getters }, { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+  async prepareGitCommit ({ commit, dispatch, getters }, param) {
     console.log('prepareGitCommit ...', getters.loggedChanges)
+    const { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch } = param || {}
     commit('SET_COMMITTING', true)
 
     const fileStore = {}
@@ -598,9 +599,13 @@ const actions = {
 
       if (!isNewDocument) {
         for (const id in xmlIDs) {
-          const localNode = dom.querySelectorAll('*').find(node => node.getAttribute('xml:id') === id || node.getAttribute('id') === id).cloneNode(true)
-          const remoteNode = finalDOM.querySelectorAll('*').find(elem => elem.getAttribute('xml:id') === id || elem.getAttribute('id') === id)
-          remoteNode.replaceWith(localNode)
+          const localNode = dom.querySelector(`*[*|id="${id}"]`)?.cloneNode(true)
+          const remoteNode = finalDOM.querySelector(`*[*|id="${id}"]`)
+          if (localNode && remoteNode) {
+            remoteNode.replaceWith(localNode)
+          } else {
+            console.warn('node not found:', id)
+          }
         }
         dispatch('loadDocumentIntoStore', { path, dom: finalDOM })
       }

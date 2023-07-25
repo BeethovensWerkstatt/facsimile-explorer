@@ -329,7 +329,9 @@ const dataModule = {
         return null
       }
 
-      const svgId = modifiedSvgDom.querySelector('svg').getAttribute('id')
+      // console.log('get svg id', modifiedSvgDom.getAttribute('id'))
+      const svgId = modifiedSvgDom.getAttribute('id') || modifiedSvgDom.querySelector('svg')?.getAttribute('id')
+      if (typeof svgId !== 'string') console.warn('no svgId')
 
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
