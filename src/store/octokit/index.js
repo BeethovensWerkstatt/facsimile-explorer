@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
-import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
+import { OctokitRepo, base64dom, base64text, dom2base64 } from '@/tools/github'
 import { Base64 } from 'js-base64'
 
 import config from '@/config.json'
@@ -592,22 +592,24 @@ const actions = {
             const parser = new DOMParser()
             const dec = new TextDecoder('utf-8')
             const content = dec.decode(Base64.toUint8Array(data.content))
-            const dom = parser.parseFromString(content, 'application/xml')
+            const dom = parser.parseFromString(content, path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
+            console.log('remote', path, dom)
             resolve(dom)
           }).catch(error => reject(error))
         })
 
       if (!isNewDocument) {
-        for (const id in xmlIDs) {
+        for (const id of xmlIDs) {
           const localNode = dom.querySelector(`*[*|id="${id}"]`)?.cloneNode(true)
           const remoteNode = finalDOM.querySelector(`*[*|id="${id}"]`)
           if (localNode && remoteNode) {
             remoteNode.replaceWith(localNode)
           } else {
-            console.warn('node not found:', id)
+            console.warn('node not found:', path, id, localNode, remoteNode)
           }
         }
-        dispatch('loadDocumentIntoStore', { path, dom: finalDOM })
+        console.log(path, 'finalDOM', finalDOM)
+        dispatch('loadDocumentIntoStore', { path, dom: finalDOM.documentElement })
       }
 
       const content = dom2base64(finalDOM)
@@ -617,7 +619,10 @@ const actions = {
     const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
     console.log('commit "' + message + '"')
 
-    dispatch('commit2GitHub', { message, files })
+    for (const file of files) {
+      console.log('commit', file.path, base64text(file.content))
+    }
+    // dispatch('commit2GitHub', { message, files })
   },
 
   setCommitMessage ({ commit }, message) {
