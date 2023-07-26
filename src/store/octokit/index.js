@@ -245,7 +245,6 @@ const actions = {
   logout ({ commit }, { remove }) {
     commit('SET_ACCESS_TOKEN', { auth: '', remove })
   },
-  // TODO select owner, repo, path, branch (ref)
   loadContent (
     { commit, dispatch, getters },
     {
@@ -587,11 +586,18 @@ const actions = {
         ? dom
         : await new Promise((resolve, reject) => {
           getters.octokit.repos.getContent({
-            owner, repo, ref: `heads/${branch}`, path
+            owner,
+            repo,
+            ref: `heads/${branch}`,
+            path,
+            headers: {
+              Accept: 'application/vnd.github.v3.raw'
+            }
           }).then(({ data }) => {
             const parser = new DOMParser()
             const dec = new TextDecoder('utf-8')
             const content = dec.decode(Base64.toUint8Array(data.content))
+            console.log('content', path, content)
             const dom = parser.parseFromString(content, path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
             console.log('remote', path, dom)
             resolve(dom)
