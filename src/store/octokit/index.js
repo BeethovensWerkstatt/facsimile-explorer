@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
-import { OctokitRepo, base64dom, base64text, dom2base64 } from '@/tools/github'
+import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
 import { Base64 } from 'js-base64'
 
 import config from '@/config.json'
@@ -591,12 +591,14 @@ const actions = {
             ref: `heads/${branch}`,
             path,
             headers: {
+              'If-None-Match': '',
               Accept: 'application/vnd.github.v3.raw'
+            },
+            request: {
+              cache: 'reload'
             }
-          }).then(({ data }) => {
+          }).then(({ data: content }) => {
             const parser = new DOMParser()
-            const dec = new TextDecoder('utf-8')
-            const content = dec.decode(Base64.toUint8Array(data.content))
             console.log('content', path, content)
             const dom = parser.parseFromString(content, path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
             console.log('remote', path, dom)
@@ -606,12 +608,16 @@ const actions = {
 
       if (!isNewDocument) {
         for (const id of xmlIDs) {
-          const localNode = dom.querySelector(`*[*|id="${id}"]`)?.cloneNode(true)
+          const parser = new DOMParser()
+          const serializer = new XMLSerializer()
+          const localCopy = parser.parseFromString(serializer.serializeToString(dom), path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
+          const localNode = localCopy.querySelector(`*[*|id="${id}"]`)?.cloneNode(true)
+          // const localNode = [...dom.querySelectorAll('*')].find(n => n.getAttribute('id') === id || n.getAttribute('xml:id') === id)?.cloneNode(true)
           const remoteNode = finalDOM.querySelector(`*[*|id="${id}"]`)
           if (localNode && remoteNode) {
             remoteNode.replaceWith(localNode)
           } else {
-            console.warn('node not found:', path, id, localNode, remoteNode)
+            console.warn('node not found:', path, id, localNode || dom, remoteNode || finalDOM)
           }
         }
         console.log(path, 'finalDOM', finalDOM)
@@ -625,10 +631,7 @@ const actions = {
     const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
     console.log('commit "' + message + '"')
 
-    for (const file of files) {
-      console.log('commit', file.path, base64text(file.content))
-    }
-    // dispatch('commit2GitHub', { message, files })
+    dispatch('commit2GitHub', { message, files })
   },
 
   setCommitMessage ({ commit }, message) {
