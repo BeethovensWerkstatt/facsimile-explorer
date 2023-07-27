@@ -11,9 +11,12 @@ on:
     # - cron: '31 01 * * 4'
   # run on every push to any branch
   push:
-    branches: [ dev ]
+    branches: 
+      - dev
+      - jpv/dev2
   pull_request:
-    branches: [ dev ]
+    branches:
+      - dev
   
 env:
   # Use docker.io for Docker Hub if empty
