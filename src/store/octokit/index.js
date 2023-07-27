@@ -43,6 +43,7 @@ const state = {
 }
 
 const getters = {
+  // TODO use OctokitRepo for GH access
   gh_user: state => state.user,
   octokit: state => state.octokit,
   isAuthenticated: state => state.authenticated, // (state.auth && state.user?.login),
@@ -608,10 +609,22 @@ const actions = {
 
       if (!isNewDocument) {
         for (const id of xmlIDs) {
-          const parser = new DOMParser()
-          const serializer = new XMLSerializer()
-          const localCopy = parser.parseFromString(serializer.serializeToString(dom), path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
-          const localNode = localCopy.querySelector(`*[*|id="${id}"]`)?.cloneNode(true)
+          // TODO some documents are XMLDocuments, some (SVG) are Node trees ... make consistent!
+
+          // const parser = new DOMParser() // one way to make sure you have an XMLDocument
+          // const serializer = new XMLSerializer()
+          // const localCopy = parser.parseFromString(serializer.serializeToString(dom), path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
+
+          // check if dom is of type XMLDocument
+          const localDOM = dom.documentElement
+            ? dom
+            : (() => {
+                const doc = document.implementation.createDocument(null, dom.localName)
+                doc.documentElement.replaceWith(dom)
+                return doc
+              })()
+          const localNode = localDOM.querySelector(`*[*|id="${id}"]`)?.cloneNode(true) // querySelector() only works consistently on XMLDocument!
+          // ... the same applys for querySelectorAll()!
           // const localNode = [...dom.querySelectorAll('*')].find(n => n.getAttribute('id') === id || n.getAttribute('xml:id') === id)?.cloneNode(true)
           const remoteNode = finalDOM.querySelector(`*[*|id="${id}"]`)
           if (localNode && remoteNode) {
@@ -632,6 +645,7 @@ const actions = {
     console.log('commit "' + message + '"')
 
     dispatch('commit2GitHub', { message, files })
+    // commit('SET_COMMITTING', false)
   },
 
   setCommitMessage ({ commit }, message) {
