@@ -13,7 +13,6 @@ on:
   push:
     branches: 
       - dev
-      - jpv/dev2
   pull_request:
     branches:
       - dev
