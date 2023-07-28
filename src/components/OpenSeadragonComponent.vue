@@ -114,7 +114,9 @@ export default {
           this.viewer.removeOverlay(existingOverlay)
         }
 
-        const svgClone = svg.cloneNode(true)
+        // JPV: svg is XMLDocument now
+        if (!svg.documentElement) console.warn('not an XMLDocument', svg)
+        const svgClone = svg.documentElement.cloneNode(true)
         this.viewer.addOverlay({
           element: svgClone,
           x: 0,

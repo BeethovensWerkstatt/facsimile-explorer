@@ -88,7 +88,8 @@ export function insertSystem (page, system, followingSystem) {
  * @return {[type]}     [description]
  */
 export function verifyUnassignedGroupInSvg (svg) {
-  const children = [...svg.children]
+  // JPV: svg is XMLDocument now
+  const children = [...svg.documentElement.children]
 
   const unassignedShapes = []
   children.forEach(elem => {

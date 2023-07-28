@@ -35,6 +35,7 @@ const dataModule = {
      * @param {[type]} dom    The DOM of the document
      */
     LOAD_DOCUMENT_INTO_STORE (state, { path, dom }) {
+      if (!dom.documentElement) console.warn('load:', path, dom, new Error())
       state.documents[path] = dom // = { ...state.documents, [path]: dom } // reactivity ?
     },
 
@@ -217,7 +218,7 @@ const dataModule = {
       gWl.setAttribute('class', 'writingLayer')
 
       gWz.appendChild(gWl)
-      modifiedSvgDom.appendChild(gWz)
+      modifiedSvgDom.documentElement.appendChild(gWz)
 
       const docPath = getters.currentDocPath
       const docName = getters.documentNameByPath(docPath)
@@ -331,7 +332,7 @@ const dataModule = {
       }
 
       // console.log('get svg id', modifiedSvgDom.getAttribute('id'))
-      const svgId = modifiedSvgDom.getAttribute('id') || modifiedSvgDom.querySelector('svg')?.getAttribute('id')
+      const svgId = modifiedSvgDom.querySelector('svg')?.getAttribute('id')
       if (typeof svgId !== 'string') console.warn('no svgId')
 
       const path = getters.currentDocPath
@@ -1102,8 +1103,9 @@ const dataModule = {
       }
 
       const svgDom = getters.documentByPath(svgFilePath)
-      // JPV: in store is now an XMLDocument
-      return svgDom?.querySelector('svg')
+      // console.log(svgFilePath, svgDom)
+      // JPV: in store is now an XMLDocument *or* an Element
+      return svgDom
     },
 
     /**

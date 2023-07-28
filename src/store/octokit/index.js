@@ -1,7 +1,7 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
 import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
-import { Base64 } from 'js-base64'
+// import { Base64 } from 'js-base64'
 
 import config from '@/config.json'
 import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
@@ -323,7 +323,7 @@ const actions = {
         const svg = parser.parseFromString(svgText, 'image/svg+xml')
         // const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
         // console.log(path, relativePath)
-        const dom = svg.querySelector('svg')
+        const dom = svg // .querySelector('svg')
 
         const svgWithUnassignedGroup = verifyUnassignedGroupInSvg(dom)
 
@@ -499,15 +499,16 @@ const actions = {
               ref: targetBranch,
               path,
               headers: {
-                'If-None-Match': ''
+                'If-None-Match': '',
+                Accept: 'application/vnd.github.v3.raw'
               },
               request: {
                 cache: 'reload'
               }
-            }).then(({ data }) => {
-              const dec = new TextDecoder('utf-8')
-              const content = dec.decode(Base64.toUint8Array(data.content))
-              // console.log(path, content.substring(0, 50))
+            }).then(({ data: content }) => {
+              // const dec = new TextDecoder('utf-8')
+              // const content = dec.decode(Base64.toUint8Array(data.content))
+              console.log(path, content.substring(0, 50))
               const parser = new DOMParser()
               const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
               const dom = parser.parseFromString(content, type)
@@ -634,7 +635,7 @@ const actions = {
           }
         }
         console.log(path, 'finalDOM', finalDOM)
-        dispatch('loadDocumentIntoStore', { path, dom: finalDOM.documentElement })
+        dispatch('loadDocumentIntoStore', { path, dom: finalDOM })
       }
 
       const content = dom2base64(finalDOM)
