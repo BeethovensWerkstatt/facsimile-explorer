@@ -130,7 +130,8 @@ const dataModule = {
       console.log(svgDom)
 
       if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
-        dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom.querySelector('svg') })
+        // JPV: store XMLDocument, because we need to use querySelector() on doc later
+        dispatch('loadDocumentIntoStore', { path: svgFullPath, dom: svgDom })
         dispatch('loadDocumentIntoStore', { path, dom: modifiedDom })
 
         // create array with files to commit
@@ -140,7 +141,7 @@ const dataModule = {
 
         const param = surfaceIndex
         const baseMessage = 'added SVG for ' + docName + ', p.'
-        // TODO collect xmlIDs for changed elements
+        // TODO collect xmlIDs for changed elements?
         dispatch('logChange', { path, baseMessage, param, xmlIDs: [surfaceId], isNewDocument: false })
         dispatch('logChange', { path: svgFullPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
       } else {
@@ -1101,8 +1102,8 @@ const dataModule = {
       }
 
       const svgDom = getters.documentByPath(svgFilePath)
-
-      return svgDom
+      // JPV: in store is now an XMLDocument
+      return svgDom?.querySelector('svg')
     },
 
     /**
