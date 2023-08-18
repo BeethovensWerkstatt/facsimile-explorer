@@ -1,4 +1,4 @@
-<template>
+<template v-if="explorerTab === 'home' && noCurrentDoc">
   <AppHeader/>
 
   <!-- TODO: Check modals -->
@@ -9,14 +9,15 @@
   <CommitModal/>
   <OpenFileModal/>
   <AssignSVGsModal/>
+  HALLO HOMEVIEW
 
-  <HomeTab v-if="currentTab === 'home'"/>
-  <PagesTab v-if="currentTab === 'pages'"/>
-  <ZonesTab v-if="currentTab === 'zones'"/>
-  <AnnotTab v-if="currentTab === 'annot'"/>
-  <DiploTab v-if="currentTab === 'diplo'"/>
+  <HomeTab v-if="explorerTab === 'home'"/>
+  <PagesTab v-else-if="explorerTab === 'pages'"/>
+  <ZonesTab v-else-if="explorerTab === 'zones'"/>
+  <AnnotTab v-else-if="explorerTab === 'annot'"/>
+  <DiploTab v-else-if="explorerTab === 'diplo'"/>
 
-  <template v-if="isReady && !isReady">
+  <!--<template v-if="isReady && !isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
         <OpenSeadragonComponent/>
@@ -42,14 +43,14 @@
         * Anbindung XML-Editor <br/>
         * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
      </div>
-  </template>
+  </template>-->
 </template>
 
 <script>
 import AppHeader from '@/components/AppHeader.vue'
-import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
-import ExplorerForm from '@/components/ExplorerForm.vue'
-import XmlEditor from '@/components/XmlEditor.vue'
+// import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+// import ExplorerForm from '@/components/ExplorerForm.vue'
+// import XmlEditor from '@/components/XmlEditor.vue'
 import IiifModal from '@/components/IiifModal.vue'
 import LoadXmlModal from '@/components/LoadXmlModal.vue'
 import OverviewModal from '@/components/OverviewModal.vue'
@@ -63,24 +64,24 @@ import ZonesTab from '@/components/ZonesTab.vue'
 import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
 
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+// import { Splitpanes, Pane } from 'splitpanes'
+// import 'splitpanes/dist/splitpanes.css'
 
 export default {
   name: 'App',
   components: {
     AppHeader,
-    ExplorerForm,
-    OpenSeadragonComponent,
-    XmlEditor,
+    // ExplorerForm,
+    // OpenSeadragonComponent,
+    // XmlEditor,
     IiifModal,
     LoadXmlModal,
     OverviewModal,
     CommitModal,
     OpenFileModal,
     AssignSVGsModal,
-    Splitpanes,
-    Pane,
+    // Splitpanes,
+    // Pane,
     HomeTab,
     PagesTab,
     ZonesTab,
@@ -96,8 +97,11 @@ export default {
     isReady () {
       return this.$store.getters.isReady
     },
-    currentTab () {
-      return this.$store.getters.currentTab
+    explorerTab () {
+      return this.$store.getters.explorerTab
+    },
+    noCurrentDoc () {
+      return !this.$store.getters.currentDocPath
     }
   }
 }

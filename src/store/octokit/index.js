@@ -271,13 +271,15 @@ const actions = {
             callback = null
           }
           const parr = path.split('/')
-          dispatch('loadDocumentIntoStore', { path, name: parr[parr.length - 2], dom: mei })
+          const name = parr[parr.length - 2]
+          dispatch('loadDocumentIntoStore', { path, name, dom: mei })
 
           contentData = { ...data, owner, repo, ref }
           commit('SET_GH_FILE', contentData)
           commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
         } catch (e) { // TODO if typeof function?
           console.error(e.message)
+          console.error(e)
           if (callback) {
             const data = { error: e }
             callback(data)
@@ -487,12 +489,12 @@ const actions = {
           dispatch('deleteBranch', { ref: tmpBranch })
 
           const finalCommit = await octoRepo.getLastCommit(targetBranch)
-          console.log(targetBranch, finalCommit)
+          // console.log(targetBranch, finalCommit)
           commit('SET_COMMIT', finalCommit)
           // TODO reload data
           // dispatch('loadSources')
           files.forEach(({ path }) => {
-            console.log('reload', path)
+            // console.log('reload', path)
             octokit.repos.getContent({
               owner,
               repo,
@@ -508,7 +510,7 @@ const actions = {
             }).then(({ data: content }) => {
               // const dec = new TextDecoder('utf-8')
               // const content = dec.decode(Base64.toUint8Array(data.content))
-              console.log(path, content.substring(0, 50))
+              // console.log(path, content.substring(0, 50))
               const parser = new DOMParser()
               const type = path.endsWith('.svg') ? 'image/svg+xml' : 'application/xml'
               const dom = parser.parseFromString(content, type)
@@ -530,7 +532,7 @@ const actions = {
   },
 
   deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
-    console.log('commit 2 GitHub: delete branch', ref)
+    // console.log('commit 2 GitHub: delete branch', ref)
     const octokit = getters.octokit
     octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/heads/${ref}`, {
       owner,
@@ -563,7 +565,7 @@ const actions = {
    * @return {[type]}          [description]
    */
   async prepareGitCommit ({ commit, dispatch, getters }, param) {
-    console.log('prepareGitCommit ...', getters.loggedChanges)
+    // console.log('prepareGitCommit ...', getters.loggedChanges)
     const { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch } = param || {}
     commit('SET_COMMITTING', true)
 
@@ -601,9 +603,9 @@ const actions = {
             }
           }).then(({ data: content }) => {
             const parser = new DOMParser()
-            console.log('content', path, content)
+            // console.log('content', path, content)
             const dom = parser.parseFromString(content, path.endsWith('svg') ? 'image/svg+xml' : 'application/xml')
-            console.log('remote', path, dom)
+            // console.log('remote', path, dom)
             resolve(dom)
           }).catch(error => reject(error))
         })
@@ -634,7 +636,7 @@ const actions = {
             console.warn('node not found:', path, id, localNode || dom, remoteNode || finalDOM)
           }
         }
-        console.log(path, 'finalDOM', finalDOM)
+        // console.log(path, 'finalDOM', finalDOM)
         dispatch('loadDocumentIntoStore', { path, dom: finalDOM })
       }
 
@@ -643,7 +645,7 @@ const actions = {
     }
 
     const message = getters.commitMessage !== null ? getters.commitMessage : getters.proposedCommitMessage
-    console.log('commit "' + message + '"')
+    // console.log('commit "' + message + '"')
 
     dispatch('commit2GitHub', { message, files })
     // commit('SET_COMMITTING', false)
@@ -686,9 +688,9 @@ const actions = {
     const repo = new OctokitRepo(repometa)
     // repo.getLastCommit().then(c => console.log('latest commit', c))
     const root = await repo.folder
-    console.log(repo.commitUrl)
+    // console.log(repo.commitUrl)
     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
-    console.log('commit', getters.commit)
+    // console.log('commit', getters.commit)
     const folder = await root.getFile(config.root)
     const sources = await folder.folder
     for (const source of sources) {
@@ -696,7 +698,7 @@ const actions = {
         const srcfiles = await source.folder
         for (const srcfile of srcfiles) {
           if (srcfile.name.endsWith('.xml') || srcfile.name.endsWith('.mei')) {
-            console.log('source:', srcfile.path)
+            // console.log('source:', srcfile.path)
             sourcefiles.push({ name: source.name, path: srcfile.path })
           }
         }
@@ -715,6 +717,18 @@ const actions = {
       dispatch('setLoading', false)
       console.log('all loaded')
       commit('SET_GH_FILE', {})
+      if (getters.awaitedDocument !== null) {
+        const path = getters.documentPathByName(getters.awaitedDocument)
+        // console.log('I was waiting for ' + path + ', now I have it, so moving on…')
+        dispatch('loadContent', { path })
+        dispatch('setAwaitedDocument', null)
+        // console.log('done')
+        /* if (getters.awaitedPage !== null) {
+          dispatch('setCurrentPage', getters.awaitedPage - 1)
+          dispatch('setAwaitedPage', null)
+          // console.log('done')
+        } */
+      }
     })
     // for (const source of sourcefiles) {
     //   dispatch('loadContent', source)

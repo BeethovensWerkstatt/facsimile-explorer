@@ -10,10 +10,15 @@
     <div class="externalMessages"><SourceSelector :table="true" /></div>
     <h2>Info</h2>
       <table class="table">
-        <tr><th>Repository</th><td>{{ infoRepo }}</td></tr>
-        <tr><th>Branch</th><td>{{ infoBranch }}</td></tr>
-        <tr><th>Commit</th><td><a :href="infoCommit.html_url"><code>{{ infoCommit.sha }}</code></a>, {{ infoCommit.author.name }}, {{ new Date(infoCommit.author.date).toLocaleString() }}, {{  infoCommit.message }}</td></tr>
-        <tr><th>Tree</th><td><code>{{ infoCommit.tree.sha }}</code></td></tr>
+        <tr><td>Repository</td><td>{{ infoRepo }}</td></tr>
+        <tr><td>Branch</td><td>{{ infoBranch }}</td></tr>
+        <template v-if="!apiRateLimitReached">
+          <tr><td>Commit</td><td><a :href="commitUrl"><code>{{ commitSha }}</code></a>, {{ authorName }}, {{ commitDate }}, {{  commitMessage }}</td></tr>
+          <tr><td>Tree</td><td><code>{{ commitTreeSha }}</code></td></tr>
+        </template>
+        <template v-else>
+          <tr><td>GitHub API Rate Limit Reached.</td><td></td></tr>
+        </template>
       </table>
     </div>
     <!--
@@ -75,6 +80,52 @@ export default {
     infoBranch: () => config.repository.branch,
     infoCommit () {
       return this.$store.getters.commit
+    },
+    apiRateLimitReached () {
+      const commit = this.$store.getters.commit
+      return !commit || commit.documentation_url === 'https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting'
+    },
+    authorName () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return commit
+      }
+      return commit?.author?.name
+    },
+    commitMessage () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return ''
+      }
+      return commit?.message
+    },
+    commitDate () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return ''
+      }
+      return new Date(commit?.author?.date).toLocaleString()
+    },
+    commitUrl () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return ''
+      }
+      return commit?.html_url
+    },
+    commitSha () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return ''
+      }
+      return commit?.sha
+    },
+    commitTreeSha () {
+      const commit = this.$store.getters.commit
+      if (!commit) {
+        return ''
+      }
+      return commit?.tree?.sha
     }
   }
 }

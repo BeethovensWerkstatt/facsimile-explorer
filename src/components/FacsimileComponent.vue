@@ -1,0 +1,706 @@
+<template>
+   <div id="facsimileContainer" :class="explorerTab">
+      <!--<div style="position: absolute; top: 1em; left: 1em; right: 1em; border: .5px solid red; z-index: 20; padding: .3rem; background-color: #ffffff66;">TileSource: {{ tileSource }}</div>-->
+   </div>
+</template>
+
+<script>
+import OpenSeadragon from 'openseadragon'
+
+const osdOptions = {
+  id: 'facsimileContainer',
+  preserveViewport: false,
+  visibilityRatio: 0.8,
+  sequenceMode: false,
+  showNavigator: false,
+  // navigatorId: 'openSeadragonNavigator',
+  homeButton: 'zoomHome',
+  zoomInButton: 'zoomIn',
+  zoomOutButton: 'zoomOut',
+  previousButton: 'pageLeft',
+  nextButton: 'pageRight',
+  gestureSettingsMouse: {
+    clickToZoom: false
+  },
+  silenceMultiImageWarnings: true
+}
+
+export default {
+  name: 'FacsimileComponent',
+  props: {
+
+  },
+  computed: {
+    /**
+     * the tileSource for the current page
+     * @return {[type]} [description]
+     */
+    tileSource () {
+      const tileSource = this.$store.getters.osdTileSourceForCurrentPage
+
+      return tileSource
+    },
+
+    /**
+     * the currently opened tab of FX
+     * @return {[type]} [description]
+     */
+    explorerTab () {
+      return this.$store.getters.explorerTab
+    },
+
+    /**
+     * in which tabs of the FX shall we render svg shapes?
+     * @return {[type]} [description]
+     */
+    renderSvg () {
+      const tab = this.$store.getters.explorerTab
+      const validTabs = ['pages', 'zones', 'annot', 'diplo']
+      return validTabs.indexOf(tab) !== -1
+    },
+
+    /**
+     * in which tabs of the FX shall we render rastrums / systems as boxes?
+     * @return {[type]} [description]
+     */
+    renderRastrums () {
+      const tab = this.$store.getters.explorerTab
+      const validTabs = ['pages']
+      return validTabs.indexOf(tab) !== -1
+    },
+
+    /**
+     * in which tabs of the FX shall we render the page border as box?
+     * @return {[type]} [description]
+     */
+    showPageBorders () {
+      const tab = this.$store.getters.explorerTab
+      const validTabs = ['pages']
+      return validTabs.indexOf(tab) !== -1
+    }
+  },
+  methods: {
+    /**
+     * triggered by clicking into the facsimile
+     * @param  {[type]} e               [description]
+     * @return {[type]}   [description]
+     */
+    facsimileClickListener (e) {
+      const image = this.viewer.world.getItemAt(0)
+      const imagePoint = image.viewerElementToImageCoordinates(e.position)
+
+      const click = {
+        x: imagePoint.x,
+        y: imagePoint.y,
+        shift: e.shift
+      }
+      console.log('clicked image', click, image.getBounds())
+      this.$store.dispatch('facsimileClick', click)
+    },
+
+    /**
+     * triggered by clicking onto a rastrum box
+     * @param  {[type]} e               [description]
+     * @return {[type]}   [description]
+     */
+    rastrumClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      const n = e.target.getAttribute('data-n')
+      // console.log('clicked rastrum ' + n)
+      this.$store.dispatch('selectSystemOnCurrentPage', n)
+    },
+
+    /**
+     * triggered by double-clicking onto a rastrum box
+     * @param  {[type]} e               [description]
+     * @return {[type]}   [description]
+     */
+    systemDoubleClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      const n = e.target.getAttribute('data-n')
+      // console.log('doubleClicked rastrum ' + n)
+      this.$store.dispatch('editSystemOnCurrentPage', n)
+    },
+
+    /**
+     * triggered by clicking onto the svg overlay; extracts the shape actually clicked on
+     * @param  {[type]} e               [description]
+     * @return {[type]}   [description]
+     */
+    svgClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      // console.log(e.target)
+      if (e.target.localName === 'path') {
+        // console.log('clicked shape')
+        // console.log(e)
+        this.$store.dispatch('clickedSvgShape', e.target.id)
+      }
+    },
+
+    /**
+     * triggered by double-clicking onto the svg overlay
+     * @param  {[type]} e               [description]
+     * @return {[type]}   [description]
+     */
+    svgDoubleClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      // console.log('clicked shape')
+      // console.log(e)
+    },
+
+    /**
+     * open the facsimile given in this.tileSource
+     * @return {[type]} [description]
+     */
+    openFacsimile () {
+      if (!this.tileSource) {
+        // console.log('Page not available (yet)')
+        return null
+      }
+
+      if (this.renderedUri === this.tileSource.tileSource) {
+        // console.log('already showing that page…')
+        return null
+      }
+
+      // todo: remove listeners
+      this.$store.dispatch('setLoading', true)
+      // this.$store.dispatch('resetPageBorderPoints')
+      this.viewer.open(this.tileSource)
+    },
+
+    /**
+     * listeners called when facsimile is opened
+     * @return {[type]} [description]
+     */
+    facsimileOpened (data) {
+      this.renderedUri = data.source
+      this.$store.dispatch('setLoading', false)
+
+      console.log('facsimileOpened', data)
+      this.renderGrid(data)
+
+      if (this.showPageBorders) {
+        this.renderPageBorders()
+      }
+    },
+
+    /**
+     * updates the facsimile position when borders or dimensions change etc.
+     * @return {[type]} [description]
+     */
+    updateFacsimile (tileSource, oldSource) {
+      // console.warn('\nchanging tileSource: ', tileSource, oldSource)
+      if (!tileSource) {
+        return null
+      }
+
+      const tiledImage = this.viewer.world.getItemAt(0)
+
+      if (!tiledImage) {
+        return null
+      }
+
+      try {
+        if (tileSource.width !== oldSource.width) {
+          tiledImage.setWidth(tileSource.width)
+        }
+      } catch (err) {
+        console.error('Unable to set width of tiledImage to ' + tileSource.width + ': ' + err, err)
+      }
+
+      try {
+        if (tileSource.x !== oldSource.x || tileSource.y !== oldSource.y) {
+          tiledImage.setPosition(new OpenSeadragon.Point(tileSource.x, tileSource.y))
+        }
+      } catch (err) {
+        console.error('Unable to set position of tiledImage to ' + tileSource.x + ' / ' + tileSource.y + ': ' + err, err)
+      }
+    },
+
+    /**
+     * renders graph paper ("Millimeterpapier") as a grid
+     * @return {[type]} [description]
+     */
+    renderGrid () {
+      document.querySelectorAll('.grid').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      })
+
+      const tiledImage = this.viewer.world.getItemAt(0)
+
+      if (!tiledImage) {
+        console.log('no tiledImage, so no renderGrid')
+        return null
+      }
+
+      const currentPageDimensions = this.$store.getters.currentPageDimensions
+
+      if (!currentPageDimensions) {
+        return null
+      }
+
+      const pageWidth = parseInt(currentPageDimensions.mmWidth)
+      const pageHeight = parseInt(currentPageDimensions.mmHeight)
+
+      const verticalStart = parseInt(pageHeight * -0.1)
+      const verticalEnd = parseInt(pageHeight * 1.1)
+
+      const horizontalStart = parseInt(pageWidth * -0.1)
+      const horizontalEnd = parseInt(pageWidth * 1.1)
+
+      // draw vertical lines
+      for (let i = horizontalStart; i < horizontalEnd; i++) {
+        const element = document.createElement('div')
+        element.classList.add('grid')
+        element.classList.add('v')
+
+        let width = 0.1
+
+        if (i % 100 === 0) {
+          element.classList.add('v100')
+          element.title = i + 'mm'
+          width = 1
+        } else if (i % 10 === 0) {
+          element.classList.add('v10')
+          element.title = i + 'mm'
+          width = 0.5
+        } else if (i % 5 === 0) {
+          element.classList.add('v5')
+          width = 0.2
+        }
+
+        this.viewer.addOverlay({
+          element,
+          location: new OpenSeadragon.Point(parseInt(i) - width / 2, verticalStart),
+          width,
+          height: pageHeight * 1.2,
+          placement: OpenSeadragon.Placement.TOP
+        })
+      }
+
+      // draw horizontal lines
+      for (let i = verticalStart; i < verticalEnd; i++) {
+        const element = document.createElement('div')
+        element.classList.add('grid')
+        element.classList.add('h')
+
+        let height = 0.1
+
+        if (i % 100 === 0) {
+          element.classList.add('h100')
+          element.title = i + 'mm'
+          height = 1
+        } else if (i % 10 === 0) {
+          element.classList.add('h10')
+          element.title = i + 'mm'
+          height = 0.5
+        } else if (i % 5 === 0) {
+          element.classList.add('h5')
+          height = 0.2
+        }
+
+        this.viewer.addOverlay({
+          element,
+          location: new OpenSeadragon.Point(horizontalStart, parseInt(i) - height / 2),
+          width: pageWidth * 1.2,
+          height,
+          placement: OpenSeadragon.Placement.LEFT
+        })
+      }
+    },
+
+    /**
+     * rotate the page facsimile
+     */
+    setPageRotation () {
+      const tiledImage = this.viewer.world.getItemAt(0)
+      const rotation = parseFloat(this.$store.getters.currentPageRotation)
+
+      if (!tiledImage || !rotation) {
+        return null
+      }
+
+      tiledImage.setRotation(rotation)
+    },
+
+    renderPageBorders () {
+      const tiledImage = this.viewer.world.getItemAt(0)
+
+      if (!tiledImage) {
+        // console.log('no tiledImage, so no renderPageBorders')
+        return null
+      }
+
+      const pageDimensions = this.$store.getters.currentPageDimensions
+
+      if (!pageDimensions) {
+        return null
+      }
+
+      const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
+
+      const existingOverlay = document.querySelector('.pageBorder.overlay')
+
+      if (!existingOverlay) {
+        const element = document.createElement('div')
+        element.classList.add('overlay')
+        element.classList.add('pageBorder')
+
+        this.viewer.addOverlay({
+          element,
+          location,
+          rotationMode: OpenSeadragon.OverlayRotationMode.EXACT
+        })
+      } else {
+        this.viewer.updateOverlay(existingOverlay, location)
+      }
+
+      //
+      /* document.querySelectorAll('.pageBorderPoint.overlay, .fragmentFrame, .pageBorder.overlay').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      }) */
+
+      /* const xScale = parseFloat(pageDimensions.mmWidth) / parseFloat(pageDimensions.width)
+      const yScale = parseFloat(pageDimensions.mmHeight) / parseFloat(pageDimensions.height)
+
+      // const pageBorderPoints = this.$store.getters.pageBorderPoints
+      const data = this.$store.getters.currentPageFragIdRect
+
+      const renderPoint = ({ x, y }, className) => {
+        const element = document.createElement('div')
+        element.classList.add('overlay')
+        element.classList.add('point')
+        element.classList.add(className)
+
+        this.viewer.addOverlay({
+          element,
+          location: new OpenSeadragon.Point(parseInt(x) * xScale, parseInt(y) * yScale),
+          width: 3,
+          height: 3,
+          placement: 'CENTER'
+        })
+      }
+
+      renderPoint(data.center, 'center')
+      renderPoint(data.inner.ul, 'ul')
+      renderPoint(data.inner.ur, 'ur')
+      renderPoint(data.inner.lr, 'lr')
+      renderPoint(data.inner.ll, 'll')
+      renderPoint(data.rotate.handle, 'rotate')
+      */
+
+      /* const pageUnrotated = document.createElement('div')
+      const pageRotated = document.createElement('div')
+      pageUnrotated.append(pageRotated)
+      const loc = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
+
+      console.log('rect: ', loc)
+      // inner.classList.add('unrotatedFrame')
+      // inner.classList.add('fragmentFrame')
+
+      pageUnrotated.classList.add('pageBorder')
+      pageUnrotated.classList.add('overlay')
+      pageRotated.classList.add('rotated')
+      pageRotated.style.transform = 'rotate(' + data.rotate.deg + 'deg)'
+      */
+    },
+    unload () {
+      document.querySelectorAll('.overlay, .grid').forEach(overlay => {
+        this.viewer.removeOverlay(overlay)
+      })
+    }
+  },
+  created () {
+
+  },
+  mounted () {
+    this.viewer = OpenSeadragon(osdOptions)
+
+    this.viewer.addHandler('open', (data) => {
+      this.facsimileOpened(data)
+    })
+    this.viewer.addHandler('canvas-click', (data) => {
+      this.facsimileClickListener(data)
+    })
+
+    /* this.unwatchPageBorders = this.$store.watch(
+      (state, getters) => [getters.currentPageFragIdRect, getters.pageBorderPointsLength],
+      ([newRect, newPoints], [oldRect, oldPoints]) => {
+        this.renderPageBorders()
+      }) */
+
+    this.unwatchPageRotation = this.$store.watch(
+      (state, getters) => getters.currentPageRotation,
+      (newRot, oldRot) => {
+        this.setPageRotation()
+      })
+
+    this.unwatchPageDimensions = this.$store.watch(
+      (state, getters) => [getters.currentPageWidthMm, getters.currentPageHeightMm],
+      ([newW, newH], [oldW, oldH]) => {
+        this.renderPageBorders()
+      })
+    this.unwatchTileSource = this.$store.watch(
+      (state, getters) => getters.osdTileSourceForCurrentPage,
+      (newTs, oldTs) => {
+        const newTsUri = newTs && newTs.tileSource ? newTs.tileSource.split('#')[0] : null
+        const oldTsUri = oldTs && oldTs.tileSource ? oldTs.tileSource.split('#')[0] : null
+        if (newTsUri !== null && newTsUri !== oldTsUri) {
+          this.openFacsimile()
+        }
+        this.updateFacsimile(newTs, oldTs)
+      })
+
+    this.openFacsimile()
+  },
+  updated () {
+    console.log('updated facsimile')
+    this.openFacsimile()
+  },
+  beforeUnmount () {
+    this.unload()
+    // this.unwatchPageBorders()
+    this.unwatchPageRotation()
+    this.unwatchPageDimensions()
+    this.unwatchTileSource()
+  }
+}
+
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss">
+@import '@/css/_variables.scss';
+
+#facsimileContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  .system.overlay {
+    z-index: 0;
+    background-color: rgba(70 ,255, 70, 0.6);
+  }
+
+  g.sketchArea {
+    path {
+      fill: rgb(67, 158, 3);
+      stroke: rgb(67, 158, 3);
+      opacity: .3;
+    }
+    &.activeGroup path {
+      fill: rgb(156, 217, 43);
+      stroke: rgb(156, 217, 43);
+      opacity: .5;
+    }
+    &:hover path {
+      opacity: .6;
+    }
+  }
+
+  &.sketchGroups {
+    .shapeOverlay {
+      z-index: 10;
+    }
+  }
+
+  &.transcript {
+    .shapeOverlay {
+      z-index: 10;
+
+      path {
+         opacity: .2;
+         &:hover {
+            opacity: .8;
+         }
+
+         &.activeElem {
+            stroke: $activeHighlightColor;
+            fill: $activeHighlightColor;
+            opacity: .6;
+         }
+      }
+    }
+    .verovio.overlay {
+      z-index: 5;
+      opacity: .5;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  &.demo {
+    .writingZone.overlay {
+      background-color: rgba(100, 66, 119, 0.61);
+      z-index: 1;
+
+      &:hover {
+        background-color: rgba(16, 158, 228, 0.21);
+        outline: 5px solid rgba(11, 108, 156, 0.8);
+      }
+    }
+  }
+
+  &.systems {
+     .system.overlay {
+       z-index: 5;
+       background-color: rgba(57, 6, 238, 0.2);
+     }
+
+     .shapeOverlay {
+        z-index: -1;
+     }
+  }
+
+  .verovio.overlay {
+    z-index: -1;
+  }
+
+  &.rendering .verovio.overlay {
+    z-index: 0;
+    background-color: rgba(255,255,255,.3);
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .fullSizeOverlay {
+    svg {
+      width: 100%;
+      height: 100%;
+
+   }
+  }
+
+  .unassigned path {
+    fill: $svgUnassignedShapeColor;
+    stroke: $svgUnassignedShapeColor;
+    &:hover {
+      stroke-width: 10px;
+      stroke: lighten($svgUnassignedShapeColor, 15%);
+    }
+  }
+
+  .writingZone path {
+    fill: #666666;
+    stroke: #666666;
+    &:hover {
+      stroke-width: 10px;
+      stroke: azure;
+    }
+  }
+
+  .activeWritingZone {
+    path {
+      fill: $svgActiveWritingZoneColor;
+      stroke: $svgActiveWritingZoneColor;
+    }
+    .activeWritingLayer path {
+      opacity: 1;
+    }
+  }
+}
+
+.hideUnassigned .unassigned path {
+  opacity: 0;
+}
+
+.hideInactive {
+  .writingZone {
+    &:not(.activeWritingZone) path {
+      opacity: 0;
+    }
+  }
+}
+
+.hideActive .activeWritingZone path {
+  opacity: 0;
+}
+
+.pageBorderPoint {
+  background-color: transparent;
+  border: 5px solid red;
+  border-radius: 10px;
+
+  &.point0 {
+    border-color: red;
+  }
+
+  &.point1 {
+    border-color: blue;
+  }
+
+  &.point2 {
+    border-color: green;
+  }
+}
+
+.unrotatedFrame {
+   outline: 1px solid red;
+   background-color: #ff000033;
+   position: relative;
+}
+
+.fragmentIdentifier.overlay {
+  background-color: #ff000066;
+}
+
+.overlay.point {
+   background-color: blue;
+
+   &.ul, &.lr {
+     cursor: nwse-resize;
+   }
+
+   &.ur, &.ll {
+     cursor: nesw-resize;
+   }
+
+   &.rotate {
+     cursor: crosshair;
+   }
+}
+
+.rotated.overlay {
+   transform-origin: center;
+   position: relative;
+}
+
+.overlay.pageBorder {
+  outline: 8px solid #0000ff99;
+}
+
+.overlay.rotatedPageBorder {
+  outline: 8px solid #ff00ff99;
+}
+
+.grid {
+  background-color: #00000033;
+  opacity: 0.4;
+  &.v10, &.v5, &.h10, &.h5 {
+    background-color: #ff000066;
+  }
+
+  &.v100, &.h100 {
+    background-color: #cc000099;
+  }
+
+  &.v10, &.h10, &.v100, &.h100 {
+    z-index: 1;
+    &:hover {
+      border: 1px solid #99999999;
+      opacity: 1;
+    }
+  }
+}
+</style>

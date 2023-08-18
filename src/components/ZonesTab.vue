@@ -25,7 +25,7 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent :svg="true" :annotorious="false" :pageBorders="false"/>
+        <OpenSeadragonComponent :svg="true" :annotorious="false" :pageBorders="false" :rastrums="false"/>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="zonesTab" v-if="zonesTabRightSidebarVisible">
         <h1>Writing Zones ({{writingZones.length}})</h1>

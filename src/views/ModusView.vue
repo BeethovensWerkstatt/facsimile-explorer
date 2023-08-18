@@ -10,13 +10,15 @@
   <OpenFileModal/>
   <AssignSVGsModal/>
 
-  <HomeTab v-if="currentTab === 'home'"/>
-  <PagesTab v-if="currentTab === 'pages'"/>
-  <ZonesTab v-if="currentTab === 'zones'"/>
-  <AnnotTab v-if="currentTab === 'annot'"/>
-  <DiploTab v-if="currentTab === 'diplo'"/>
+  HELLO MODUSVIEW
 
-  <template v-if="isReady && !isReady">
+  <HomeTab v-if="explorerTab === 'home'"/>
+  <PagesTab v-else-if="explorerTab === 'pages'"/>
+  <ZonesTab v-else-if="explorerTab === 'zones'"/>
+  <AnnotTab v-else-if="explorerTab === 'annot'"/>
+  <DiploTab v-else-if="explorerTab === 'diplo'"/>
+
+  <!--<template v-if="isReady && !isReady">
     <splitpanes class="mainSplitter default-theme">
       <pane size="55" min-size="30" @scroll="doScroll">
         <OpenSeadragonComponent/>
@@ -42,14 +44,14 @@
         * Anbindung XML-Editor <br/>
         * <em>entweder</em>: Anbindung Git, <em>oder</em>: Up- und Download<br/>
      </div>
-  </template>
+  </template>-->
 </template>
 
 <script>
 import AppHeader from '@/components/AppHeader.vue'
-import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
-import ExplorerForm from '@/components/ExplorerForm.vue'
-import XmlEditor from '@/components/XmlEditor.vue'
+// import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+// import ExplorerForm from '@/components/ExplorerForm.vue'
+//  import XmlEditor from '@/components/XmlEditor.vue'
 import IiifModal from '@/components/IiifModal.vue'
 import LoadXmlModal from '@/components/LoadXmlModal.vue'
 import OverviewModal from '@/components/OverviewModal.vue'
@@ -63,24 +65,24 @@ import ZonesTab from '@/components/ZonesTab.vue'
 import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
 
-import { Splitpanes, Pane } from 'splitpanes'
-import 'splitpanes/dist/splitpanes.css'
+// import { Splitpanes, Pane } from 'splitpanes'
+// import 'splitpanes/dist/splitpanes.css'
 
 export default {
   name: 'ModusView',
   components: {
     AppHeader,
-    ExplorerForm,
-    OpenSeadragonComponent,
-    XmlEditor,
+    // ExplorerForm,
+    // OpenSeadragonComponent,
+    // XmlEditor,
     IiifModal,
     LoadXmlModal,
     OverviewModal,
     CommitModal,
     OpenFileModal,
     AssignSVGsModal,
-    Splitpanes,
-    Pane,
+    // Splitpanes,
+    // Pane,
     HomeTab,
     PagesTab,
     ZonesTab,
@@ -114,12 +116,12 @@ export default {
       const path = this.$store.getters.getPathByName(this.$route.params.source)
       const modus = this.$route.params.modus
       const page = this.$route.query.page
-      console.log(path, modus, page)
+      console.log('ModusView: sourceParam="' + this.$route.params.source + '", resulting path="' + path + '", modus="' + modus + '", page="' + page + '"')
       if (path && this.$store.getters.filePath !== path) {
         this.$store.dispatch('loadContent', { path })
       }
       if (this.$store.getters.modus !== modus) {
-        this.$store.dispatch('openTab', modus)
+        this.$store.dispatch('setExplorerTab', modus)
       }
       if (page && this.$store.getters.currentPageOneBased !== page) {
         console.log('setCurrentPage', +page - 1)
@@ -137,8 +139,8 @@ export default {
     isReady () {
       return this.$store.getters.isReady
     },
-    currentTab () {
-      return this.$route.params.modus // this.$store.getters.currentTab
+    explorerTab () {
+      return this.$route.params.modus // this.$store.getters.explorerTab
     },
     currentPage () {
       return (+this.$route.query.page || 1) - 1

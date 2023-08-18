@@ -39,7 +39,7 @@ const serializer = new XMLSerializer()
 const vuexLocal = new VuexPersistence({
   storage: window.sessionStorage,
   reducer: state => ({
-    currentTab: state.currentTab
+    explorerTab: state.explorerTab
   })
 })
 */
@@ -57,7 +57,6 @@ export default createStore({
   },
   // plugins: [vuexLocal.plugin],
   state: {
-    explorerTab: 'home',
     pages: [],
     currentPage: -1,
     previewPage: -1,
@@ -65,15 +64,11 @@ export default createStore({
     parsedXml: null,
     temporaryCode: '',
     wellformed: false,
-    modal: null,
-    loading: false,
-    processing: false,
     selectionRectEnabled: false,
     selectionRect: null,
     selectedSystemOnCurrentPage: -1,
     editingSystemOnCurrentPage: -1,
-    pageSVGs: [],
-    currentTab: 'home' // allowed values: 'home', 'pages', 'systems', 'zones', 'diplo'
+    pageSVGs: []
   },
   mutations: {
     SET_XML_DOC (state, domDoc) {
@@ -110,18 +105,6 @@ export default createStore({
     },
     SET_WELLFORMED (state, bool) {
       state.wellformed = bool
-    },
-    SET_MODAL (state, modal) {
-      state.modal = modal
-    },
-    SET_LOADING (state, bool) {
-      state.loading = bool
-    },
-    SET_PROCESSING (state, bool) {
-      state.processing = bool
-    },
-    SET_EXPLORER_TAB (state, val) {
-      state.explorerTab = val
     },
     SET_SELECTION_RECT_ENABLED (state, bool) {
       state.selectionRectEnabled = bool
@@ -216,13 +199,6 @@ export default createStore({
 
       console.log('xywh:', x, y, w, h)
       // }
-    },
-    OPEN_TAB (state, tab) {
-      const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
-      if (allowedTabs.indexOf(tab) !== -1) {
-        console.log('open tab', tab)
-        state.currentTab = tab
-      }
     }
   },
   actions: {
@@ -262,7 +238,7 @@ export default createStore({
           dispatch('setData', mei)
         })
     },
-    setData ({ commit }, mei) {
+    setData ({ commit, getters, dispatch }, mei) {
       const pageArray = getPageArray(mei)
       commit('SET_PAGES', pageArray)
 
@@ -270,7 +246,9 @@ export default createStore({
       const title = mei.querySelector('title').textContent
       commit('SET_TITLE', title)
 
-      commit('SET_CURRENT_PAGE', 0)
+      const num = getters.awaitedPage !== null ? parseInt(getters.awaitedPage) - 1 : 0
+      commit('SET_CURRENT_PAGE', num)
+      dispatch('setAwaitedPage', null)
       commit('SET_WELLFORMED', true)
       commit('SET_PROCESSING', false)
       commit('SET_MODAL', null)
@@ -285,6 +263,7 @@ export default createStore({
       }
     },
     setCurrentPage ({ commit }, i) {
+      console.log('setting current page to ' + i + ' (zero-based)')
       commit('SET_WELLFORMED', true)
       commit('SET_CURRENT_PAGE', i)
       commit('SET_ACTIVE_WRITINGZONE', null)
@@ -292,18 +271,6 @@ export default createStore({
     },
     setPreviewPage ({ commit }, i) {
       commit('SET_PREVIEW_PAGE', i)
-    },
-    setModal ({ commit }, modal) {
-      commit('SET_MODAL', modal)
-    },
-    setLoading ({ commit }, bool) {
-      commit('SET_LOADING', bool)
-    },
-    setProcessing ({ commit }, bool) {
-      commit('SET_PROCESSING', bool)
-    },
-    setExplorerTab ({ commit }, val) {
-      commit('SET_EXPLORER_TAB', val)
     },
     setSelectionRectEnabled ({ commit }, bool) {
       commit('SET_SELECTION_RECT_ENABLED', bool)
@@ -354,12 +321,6 @@ export default createStore({
       const svg = svgdom?.documentElement
       // console.log(page, svg)
       commit('SET_PAGE_SVG', { i: getters.previewPageZeroBased, svg })
-    },
-    openTab ({ commit, getters, dispatch }, tab) {
-      if (getters.isAuthenticated) {
-        commit('OPEN_TAB', tab)
-        dispatch('disableAnnotorious')
-      }
     }
   },
   getters: {
@@ -517,22 +478,6 @@ export default createStore({
       return svg
     },
 
-    modal: state => {
-      return state.modal
-    },
-
-    loading: state => {
-      return state.loading
-    },
-
-    processing: state => {
-      return state.processing
-    },
-
-    explorerTab: state => {
-      return state.explorerTab
-    },
-
     selectionRectEnabled: state => {
       return state.selectionRectEnabled
     },
@@ -547,9 +492,6 @@ export default createStore({
 
     editingSystemOnCurrentPage: state => {
       return state.editingSystemOnCurrentPage
-    },
-    currentTab: state => {
-      return state.currentTab
     }
   }
 })

@@ -1,6 +1,7 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
 import { convertRectUnits, sortRastrumsByVerticalPosition } from '@/tools/mei.js'
+// import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
 /**
@@ -126,9 +127,6 @@ const dataModule = {
         svgDom.querySelectorAll('path').forEach(shape => unassignedG.append(shape))
         svgDom.querySelector('svg').append(unassignedG)
       }
-
-      console.log('\n\nME HERE')
-      console.log(svgDom)
 
       if (svgWidth === pixelWidth && svgHeight === pixelHeight) {
         // JPV: store XMLDocument, because we need to use querySelector() on doc later
@@ -262,14 +260,6 @@ const dataModule = {
 
       const genDescWz = [...modifiedDom.querySelectorAll('genDesc[class~="#geneticOrder_writingZoneLevel"]')].find(wz => wz.getAttribute('xml:id') === activeWzGenDescId)
       const genDescPageId = genDescWz.closest('genDesc[class~="#geneticOrder_pageLevel"]').getAttribute('xml:id')
-
-      console.log('\n\nStrange things happening')
-      console.log('activeWzGenDescId: ' + activeWzGenDescId)
-      console.log(genDescWz)
-
-      console.log(getters.genDescForCurrentPage)
-      console.log(getters.genDescForCurrentWritingZone)
-      console.log(getters.genDescForCurrentWritingLayer)
 
       const svgLink = surface.querySelector('graphic[type="shapes"]').getAttribute('target')
 
@@ -507,7 +497,7 @@ const dataModule = {
      * @return {[type]}          [description]
      */
     clickedSvgShape ({ commit, getters, dispatch }, shapeId) {
-      if (getters.currentTab === 'zones') {
+      if (getters.explorerTab === 'zones') {
         dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
     },
@@ -550,7 +540,340 @@ const dataModule = {
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
 
-      dispatch('disableAnnotorious')
+      dispatch('disableFacsimileClicks')
+    },
+
+    /**
+     * set the rotation for the current page
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} rotation  [description]
+     */
+    setPageRotation ({ commit, getters, dispatch }, rotation) {
+      if (!rotation) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+
+      const rotate = '&rotate=' + rotation
+
+      let fragment = existingTarget.split('#xywh')[1]
+      if (fragment !== undefined) {
+        fragment = '#xywh' + fragment.split('&rotate=')[0]
+      } else {
+        const pageDim = getters.currentPageDimensions
+        fragment = '#xywh=0,0,' + pageDim.width + ',' + pageDim.height
+      }
+
+      graphic.setAttribute('target', basePath + fragment + rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set page rotation for scan of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
+      dispatch('disableFacsimileClicks')
+    },
+
+    /**
+     * set the width of the current page in mm
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} width     [description]
+     */
+    setPageWidth ({ commit, getters, dispatch }, width) {
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const id = '#' + getters.currentPageId
+      const foliumLike = modifiedDom.querySelectorAll('foliaDesc *')
+      const folium = [...foliumLike].find(folium =>
+        folium.getAttribute('outer.verso') === id ||
+        folium.getAttribute('inner.recto') === id ||
+        folium.getAttribute('inner.verso') === id ||
+        folium.getAttribute('outer.recto') === id ||
+        folium.getAttribute('recto') === id ||
+        folium.getAttribute('verso') === id)
+
+      folium.setAttribute('width', width)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set page dimensions for scan of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [folium.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the width of the current page in mm
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} height     [description]
+     */
+    setPageHeight ({ commit, getters, dispatch }, height) {
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const id = '#' + getters.currentPageId
+      const foliumLike = modifiedDom.querySelectorAll('foliaDesc *')
+      const folium = [...foliumLike].find(folium =>
+        folium.getAttribute('outer.verso') === id ||
+        folium.getAttribute('inner.recto') === id ||
+        folium.getAttribute('inner.verso') === id ||
+        folium.getAttribute('outer.recto') === id ||
+        folium.getAttribute('recto') === id ||
+        folium.getAttribute('verso') === id)
+
+      folium.setAttribute('height', height)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set page dimensions for scan of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [folium.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the x coordinate for the current page's fragment identifier
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x     [description]
+     */
+    setPageFragX ({ commit, getters, dispatch }, x) {
+      if (!x) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+
+      let rotate = '&rotate=0'
+
+      let fragment = existingTarget.split('#xywh')[1]
+      if (fragment !== undefined) {
+        const xywh = fragment.split('&rotate=')[0]
+        fragment = '#xywh=' + x + ',' + xywh.split(',')[1] + ',' + xywh.split(',')[2] + ',' + xywh.split(',')[3]
+
+        const existingRotate = fragment.split('&rotate=')[1]
+        if (existingRotate !== undefined) {
+          rotate = '&rotate=' + existingRotate
+        }
+      } else {
+        const pageDim = getters.currentPageDimensions
+        fragment = '#xywh=' + x + ',0,' + pageDim.width + ',' + pageDim.height
+      }
+
+      graphic.setAttribute('target', basePath + fragment + rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set fragment identifier of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
+    },
+
+    /**
+     * set the y coordinate for the current page's fragment identifier
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} y     [description]
+     */
+    setPageFragY ({ commit, getters, dispatch }, y) {
+      if (!y) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+
+      let rotate = '&rotate=0'
+
+      let fragment = existingTarget.split('#xywh=')[1]
+      if (fragment !== undefined) {
+        const xywh = fragment.split('&rotate=')[0]
+        fragment = '#xywh=' + xywh.split(',')[0] + ',' + y + ',' + xywh.split(',')[2] + ',' + xywh.split(',')[3]
+
+        const existingRotate = fragment.split('&rotate=')[1]
+        if (existingRotate !== undefined) {
+          rotate = '&rotate=' + existingRotate
+        }
+      } else {
+        const pageDim = getters.currentPageDimensions
+        fragment = '#xywh=0,' + y + ',' + pageDim.width + ',' + pageDim.height
+      }
+
+      console.log('setting to ' + fragment + rotate)
+      graphic.setAttribute('target', basePath + fragment + rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set fragment identifier of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
+    },
+
+    /**
+     * set the w coordinate for the current page's fragment identifier
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} w     [description]
+     */
+    setPageFragW ({ commit, getters, dispatch }, w) {
+      if (!w) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+
+      let rotate = '&rotate=0'
+
+      let fragment = existingTarget.split('#xywh=')[1]
+      if (fragment !== undefined) {
+        const xywh = fragment.split('&rotate=')[0]
+        fragment = '#xywh=' + xywh.split(',')[0] + ',' + xywh.split(',')[1] + ',' + w + ',' + xywh.split(',')[3]
+
+        const existingRotate = fragment.split('&rotate=')[1]
+        if (existingRotate !== undefined) {
+          rotate = '&rotate=' + existingRotate
+        }
+      } else {
+        const pageDim = getters.currentPageDimensions
+        fragment = '#xywh=0,0,' + w + ',' + pageDim.height
+      }
+
+      graphic.setAttribute('target', basePath + fragment + rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set fragment identifier of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
+    },
+
+    /**
+     * set the h coordinate for the current page's fragment identifier
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} h     [description]
+     */
+    setPageFragH ({ commit, getters, dispatch }, h) {
+      if (!h) {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const surfaceId = getters.currentPageId
+      const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      const graphicId = graphic.getAttribute('xml:id')
+
+      const existingTarget = graphic.getAttribute('target')
+      const basePath = existingTarget.split('#xywh')[0]
+
+      let rotate = '&rotate=0'
+
+      let fragment = existingTarget.split('#xywh=')[1]
+      if (fragment !== undefined) {
+        const xywh = fragment.split('&rotate=')[0]
+        fragment = '#xywh=' + xywh.split(',')[0] + ',' + xywh.split(',')[1] + ',' + xywh.split(',')[2] + ',' + h
+
+        const existingRotate = fragment.split('&rotate=')[1]
+        if (existingRotate !== undefined) {
+          rotate = '&rotate=' + existingRotate
+        }
+      } else {
+        const pageDim = getters.currentPageDimensions
+        fragment = '#xywh=0,0,' + pageDim.width + ',' + h
+      }
+
+      graphic.setAttribute('target', basePath + fragment + rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'set fragment identifier of ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
     },
 
     /**
@@ -653,7 +976,7 @@ const dataModule = {
       // TODO xmlIDs
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [], isNewDocument: false })
 
-      dispatch('disableAnnotorious')
+      dispatch('disableFacsimileClicks')
     }
 
     /*
@@ -734,7 +1057,7 @@ const dataModule = {
      * @param  {String} path               The Git path of the document in question
      * @return {[type]}                    An array of tileSources, for use with OpenSeadragon
      */
-    documentPagesForOSD: (state, getters, rootState, rootGetters) => (path) => {
+    /* documentPagesForOSD: (state, getters, rootState, rootGetters) => (path) => {
       const resolveFoliumLike2Surfaces = (arr, foliumLike) => {
         const type = foliumLike.localName
         if (type === undefined) {
@@ -806,11 +1129,24 @@ const dataModule = {
         // const i = n + 1
         // const page = mei.querySelector('page:nth-child(' + i + ')')
 
+        const surfaceId = surface.getAttribute('xml:id').trim()
+
+        const mei = surface.closest('mei')
+        const allFolia = mei.querySelector('foliaDesc *')
+        const match = '#' + surfaceId
+        const folium = allFolia.find(folium =>
+          folium.getAttribute('outer.recto') === match ||
+          folium.getAttribute('inner.verso') === match ||
+          folium.getAttribute('inner.recto') === match ||
+          folium.getAttribute('outer.verso') === match ||
+          folium.getAttribute('recto') === match ||
+          folium.getAttribute('verso') === match)
+
         const obj = {}
         const target = graphic.getAttributeNS('', 'target').trim()
 
         obj.uri = target
-        obj.id = surface.getAttribute('xml:id').trim()
+        obj.id = surfaceId
         obj.n = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : n
         obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
         obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
@@ -818,6 +1154,9 @@ const dataModule = {
         obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
         obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
         obj.hasFragment = target.indexOf('#xywh=') !== -1
+        obj.foliumId = folium.getAttribute('xml:id').trim()
+        obj.mmWidth = folium.getAttribute('width')
+        obj.mmHeight = folium.getAttribute('height')
 
         if (!surface.hasAttribute('decls')) {
           obj.systems = -2
@@ -835,7 +1174,7 @@ const dataModule = {
         arr[n] = obj
       })
       return arr
-    },
+    }, */
 
     documentPagesForSidebars: (state, getters) => (path) => {
       const resolveFoliumLike2Surfaces = (arr, foliumLike) => {
@@ -905,52 +1244,82 @@ const dataModule = {
 
           const fullPath = getters.documentPathByName(folder)
           const file = getters.documentByPath(fullPath)
-          arr[i] = { name: folder, surface: file.querySelector('surface[*|id = "' + id + '"]') }
+          if (!file) {
+            arr[i] = { available: false, name: folder }
+          } else {
+            arr[i] = { available: true, name: folder, surface: file.querySelector('surface[*|id = "' + id + '"]') }
+          }
         }
       })
 
       arr.forEach((page, n) => {
-        const name = page.name
-        const surface = page.surface
-        const graphic = surface.querySelector('graphic[type="facsimile"]')
-        const i = n + 1
-        // const page = mei.querySelector('page:nth-child(' + i + ')')
+        if (page.available) {
+          const name = page.name
+          const surface = page.surface
+          const graphic = surface.querySelector('graphic[type="facsimile"]')
+          const i = n + 1
+          // const page = mei.querySelector('page:nth-child(' + i + ')')
 
-        const obj = {}
+          const surfaceId = surface.getAttribute('xml:id').trim()
 
-        const target = graphic.getAttributeNS('', 'target').trim()
-        const surfaceN = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : i
-        const surfaceLabel = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : surfaceN
-        const label = isReconstruction ? i : surfaceLabel
+          const mei = surface.closest('mei')
+          const allFolia = mei.querySelectorAll('foliaDesc *')
+          const match = '#' + surfaceId
+          const folium = [...allFolia].find(folium =>
+            folium.getAttribute('outer.recto') === match ||
+            folium.getAttribute('inner.verso') === match ||
+            folium.getAttribute('inner.recto') === match ||
+            folium.getAttribute('outer.verso') === match ||
+            folium.getAttribute('recto') === match ||
+            folium.getAttribute('verso') === match)
 
-        obj.uri = target
-        obj.id = surface.getAttribute('xml:id').trim()
-        obj.label = label
-        obj.modernLabel = isReconstruction ? surfaceLabel : null
+          const obj = {}
 
-        obj.document = name
+          const target = graphic.getAttributeNS('', 'target').trim()
+          const surfaceN = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : i
+          const surfaceLabel = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : surfaceN
+          const label = isReconstruction ? i : surfaceLabel
 
-        obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
-        obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
+          obj.uri = target
+          obj.id = surfaceId
+          obj.label = label
+          obj.modernLabel = isReconstruction ? surfaceLabel : null
 
-        obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
-        obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
-        obj.hasFragment = target.indexOf('#xywh=') !== -1
+          obj.document = name
 
-        if (!surface.hasAttribute('decls')) {
-          obj.systems = 0
-        } else {
-          const layoutId = surface.getAttribute('decls')?.substring(1)
-          const layout = [...surface.closest('mei').querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
+          obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
+          obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
 
-          if (!layout) {
+          obj.foliumId = folium.getAttribute('xml:id').trim()
+          obj.mmWidth = parseFloat(folium.getAttribute('width'))
+          obj.mmHeight = parseFloat(folium.getAttribute('height'))
+
+          obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+          obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
+          obj.hasFragment = target.indexOf('#xywh=') !== -1
+
+          if (!surface.hasAttribute('decls')) {
             obj.systems = 0
           } else {
-            obj.systems = layout.querySelectorAll('rastrum').length
-          }
-        }
+            const layoutId = surface.getAttribute('decls')?.substring(1)
+            const layout = [...surface.closest('mei').querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
 
-        arr[n] = obj
+            if (!layout) {
+              obj.systems = 0
+            } else {
+              obj.systems = layout.querySelectorAll('rastrum').length
+            }
+          }
+
+          arr[n] = obj
+        } else {
+          const name = page.name
+          const i = n + 1
+
+          const obj = {}
+          obj.document = name
+          obj.label = 'loading data for page ' + i
+        }
       })
       return arr
     },
@@ -1052,6 +1421,11 @@ const dataModule = {
       }
 
       const page = pages[pageIndex]
+
+      if (!page) {
+        return null
+      }
+
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
 
@@ -1120,6 +1494,9 @@ const dataModule = {
       const pages = getters.documentPagesForSidebars(path)
 
       const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
       const dom = getters.documentByPath(docPath)
@@ -1209,8 +1586,104 @@ const dataModule = {
       const pages = getters.documentPagesForSidebars(path)
 
       const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
       const surfaceId = page.id
       return surfaceId
+    },
+
+    /**
+     * the OSD tileSource for the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    osdTileSourceForCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page || !page.uri) {
+        return null
+      }
+      // console.log('\n\nbuilding osdTileSourceForCurrentPage for ' + page.uri)
+      // console.log('pageIndex ', pageIndex)
+      // console.log('page ', page)
+      const xScale = parseFloat(page.mmWidth) / parseFloat(page.width)
+      const yScale = parseFloat(page.mmHeight) / parseFloat(page.height)
+
+      // console.log('xScale / yScale', xScale, yScale)
+      const fragmentRaw = page.uri.split('#xywh=')[1]
+      const fragment = {
+        x: 0,
+        y: 0,
+        w: parseInt(page.width),
+        h: parseInt(page.height),
+        rotate: 0
+      }
+
+      if (fragmentRaw !== undefined) {
+        const xywh = fragmentRaw.split('&rotate=')[0]
+        const rotate = fragmentRaw.split('&rotate=')[1]
+
+        fragment.x = parseFloat(xywh.split(',')[0])
+        fragment.y = parseFloat(xywh.split(',')[1])
+        fragment.w = parseFloat(xywh.split(',')[2])
+        fragment.h = parseFloat(xywh.split(',')[3])
+
+        if (rotate !== undefined) {
+          fragment.rotate = parseFloat(rotate.split(',')[0])
+        }
+      }
+
+      // console.log('fragment', fragment)
+
+      const imageX = fragment.x * xScale * -1
+      const imageY = fragment.y * yScale * -1
+      const width = page.mmWidth * page.width / fragment.w
+
+      // console.log('imageX ', imageX)
+      // console.log('imageY', imageY)
+      // console.log('width', width)
+
+      const tileSource = {
+        tileSource: page.uri,
+        x: imageX,
+        y: imageY,
+        width,
+        degrees: fragment.rotate
+      }
+
+      // console.log('tileSource ', tileSource)
+
+      return tileSource
+    },
+
+    /**
+     * returns the rotation of the current page in degrees
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageRotation: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page || !page.uri) {
+        return null
+      }
+
+      const rotate = page.uri.split('&rotate=')[1]
+
+      if (rotate !== undefined) {
+        return parseFloat(rotate.split(',')[0])
+      }
+
+      return 0
     },
 
     /**
@@ -1225,7 +1698,112 @@ const dataModule = {
       const pages = getters.documentPagesForSidebars(path)
 
       const page = pages[pageIndex]
-      return { width: page.width, height: page.height }
+      if (!page) {
+        return null
+      }
+
+      return {
+        width: page.width,
+        height: page.height,
+        mmWidth: page.mmWidth,
+        mmHeight: page.mmHeight
+      }
+    },
+
+    /**
+     * returns the width of the current page in mm
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageWidthMm: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+      return parseFloat(page.mmWidth)
+    },
+
+    /**
+     * returns the height of the current page in mm
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageHeightMm: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+      return parseFloat(page.mmHeight)
+    },
+
+    /**
+     * get x from current page fragment
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageFragmentX: (state, getters) => {
+      const obj = getters.currentPageFragmentIdentifier
+
+      if (obj === null) {
+        return null
+      }
+      return parseInt(obj.x)
+    },
+
+    /**
+     * get y from current page fragment
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageFragmentY: (state, getters) => {
+      const obj = getters.currentPageFragmentIdentifier
+
+      if (obj === null) {
+        return null
+      }
+      return parseInt(obj.y)
+    },
+
+    /**
+     * get w from current page fragment
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageFragmentW: (state, getters) => {
+      const obj = getters.currentPageFragmentIdentifier
+
+      if (obj === null) {
+        return null
+      }
+      return parseInt(obj.w)
+    },
+
+    /**
+     * get h from current page fragment
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageFragmentH: (state, getters) => {
+      const obj = getters.currentPageFragmentIdentifier
+
+      if (obj === null) {
+        return null
+      }
+      return parseInt(obj.h)
     },
 
     /**
@@ -1254,14 +1832,60 @@ const dataModule = {
         return null
       }
 
+      const xywh = fragment.split('&rotate=')[0]
+      const rotate = fragment.split('&rotate=')[1]
+
       const obj = {
-        x: fragment.split(',')[0],
-        y: fragment.split(',')[1],
-        w: fragment.split(',')[2],
-        h: fragment.split(',')[3]
+        x: xywh.split(',')[0],
+        y: xywh.split(',')[1],
+        w: xywh.split(',')[2],
+        h: xywh.split(',')[3]
       }
+
+      if (rotate !== undefined) {
+        obj.rotate = rotate.split(',')[0]
+
+        /* if (rotate.split(',').length === 3) {
+          obj.rotateX = rotate.split(',')[1]
+          obj.rotateY = rotate.split(',')[2]
+        } else {
+          obj.rotateX = xywh.split(',')[0]
+          obj.rotateY = xywh.split(',')[1]
+        } */
+      } else {
+        obj.rotate = 0
+        // obj.rotateX = xywh.split(',')[0]
+        // obj.rotateY = xywh.split(',')[1]
+      }
+
       return obj
     },
+
+    /**
+     * return detailed information about the page fragment identifier
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    /* currentPageFragIdRect: (state, getters) => {
+      const dom = getters.documentWithCurrentPage
+      const surfaceId = getters.currentSurfaceId
+
+      if (!dom || !surfaceId) {
+        return null
+      }
+
+      const graphic = dom.querySelector('surface[*|id="' + surfaceId + '"] graphic[type="facsimile"]')
+
+      if (!graphic) {
+        return null
+      }
+
+      const fragment = graphic.getAttribute('target').split('#')[1]
+      const rect = getRectFromFragment(fragment)
+
+      return rect
+    }, */
 
     /**
      * retrieves the writing zons on the current page
@@ -1271,6 +1895,9 @@ const dataModule = {
      */
     writingZonesOnCurrentPage: (state, getters) => {
       const genDescPage = getters.genDescForCurrentPage // dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+      if (!genDescPage) {
+        return []
+      }
       const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
 
       if (genDescWzArr.length === 0) {
@@ -1363,6 +1990,62 @@ const dataModule = {
       })
 
       return shapes
+    },
+
+    /**
+     * retrieves the rastrums on the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    rastrumsOnCurrentPage: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+
+      if (!page) {
+        return []
+      }
+
+      const docName = page.document
+      const docPath = getters.documentPathByName(docName)
+      const dom = getters.documentByPath(docPath)
+      const surfaceId = getters.currentSurfaceId
+      const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
+
+      const layoutId = surface.getAttribute('decls')?.substring(1)
+
+      if (!layoutId) {
+        return []
+      }
+
+      const layout = [...dom.querySelectorAll('layout')].find(layout => layout.getAttribute('xml:id') === layoutId)
+      if (!layout) {
+        return []
+      }
+      const arr = []
+      layout.querySelectorAll('rastrum').forEach(rastrum => {
+        // arr.push(rastrum)
+        // console.log('\n\nrastrum:')
+        // console.log(rastrum)
+
+        const mm = {
+          x: parseFloat(rastrum.getAttribute('system.leftmar')),
+          y: parseFloat(rastrum.getAttribute('system.topmar')),
+          w: parseFloat(rastrum.getAttribute('width')),
+          h: parseFloat(rastrum.getAttribute('system.height'))
+        }
+
+        // console.log(mm)
+        const xywh = convertRectUnits(dom, surfaceId, mm, 'mm2px')
+        // console.log(xywh)
+
+        arr.push({ id: rastrum.getAttribute('xml:id'), xywh })
+      })
+
+      return arr
     }
   }
 }

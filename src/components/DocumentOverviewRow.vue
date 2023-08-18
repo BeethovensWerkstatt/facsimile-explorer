@@ -87,6 +87,9 @@ export default {
     },
     leftImg () {
       const uri = this.$store.getters.page(this.left)?.uri
+      if (typeof uri.endsWith !== 'function') {
+        return uri
+      }
       const slash = (uri.endsWith('/')) ? '' : '/'
       return uri + slash + 'full/!110,110/0/default.jpg'
     },
@@ -98,6 +101,9 @@ export default {
     },
     rightImg () {
       const uri = this.$store.getters.page(this.right)?.uri
+      if (typeof uri.endsWith !== 'function') {
+        return uri
+      }
       const slash = (uri.endsWith('/')) ? '' : '/'
       return uri + slash + 'full/!110,110/0/default.jpg'
     },

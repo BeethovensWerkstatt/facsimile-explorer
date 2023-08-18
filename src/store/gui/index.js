@@ -1,9 +1,25 @@
+const angleFunc = (p1, p2, direction) => {
+  const dy = p2.y - p1.y
+  const dx = p2.x - p1.x
+  let theta = Math.atan2(dy, dx) // range (-PI, PI]
+  theta *= 180 / Math.PI // rads to degs, range (-180, 180]
+  // if (theta < 0) theta = 360 + theta; // range [0, 360)
+  if (direction === 'vertical') {
+    theta -= 90
+  }
+  return theta
+}
+
 /**
  * @namespace store.gui
  */
 const guiModule = {
   /**
    * @namespace store.gui.state
+   * @property {String} explorerTab the currently opened tab of the application
+   * @property {String} modal the currently shown modal (null if none)
+   * @property {Boolean} loading whether the app is currently loading data
+   * @property {Boolean} processing whether the app is currently processing bigger data
    * @property {Boolean} pageTabSidebarVisible if the left sidebar in pageTab is visible
    * @property {Number} pageTabSidebarWidth width of the left sidebar in pageTab
    * @property {Boolean} zonesTabLeftSidebarVisible if the left sidebar in zonesTab is visible
@@ -18,11 +34,17 @@ const guiModule = {
    * @property {Number} diploTabSidebarWidth width of the left sidebar in diploTab
    * @property {String} activeWritingZone ID of the currently active writing zone
    * @property {String} activeWritingLayer ID of the currently active writing layer
-   * @property {String} annotoriousMode whether pageMargin fragment identifier selection mode is active
+   * @property {String} facsimileClickMode whether pageMargin fragment identifier selection mode is active
    * @property {String} activeSystem ID of the currently active system
    * @property {Object} focusRect
+   * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
+   * @property {Number} awaitedPage number of the page to be opened when sufficient data is available. Used to resolve routes
    */
   state: {
+    explorerTab: 'home',
+    modal: null,
+    loading: false,
+    processing: false,
     pageTabSidebarVisible: true,
     pageTabSidebarWidth: 300,
     zonesTabLeftSidebarVisible: true,
@@ -37,14 +59,58 @@ const guiModule = {
     diploTabSidebarWidth: 300,
     activeWritingZone: null,
     activeWritingLayer: null,
-    annotoriousMode: 'off',
+    facsimileClickMode: 'off',
     activeSystem: null,
-    focusRect: null
+    focusRect: null,
+    pageBorderPoints: [],
+    awaitedDocument: null,
+    awaitedPage: null
   },
   /**
    * @namespace store.gui.mutations
    */
   mutations: {
+    /**
+     * opens a given modal
+     * @param {[type]} state  [description]
+     * @param {[type]} modal  [description]
+     */
+    SET_MODAL (state, modal) {
+      state.modal = modal
+    },
+
+    /**
+     * shows a loading indicator
+     * @param {[type]} state  [description]
+     * @param {[type]} bool   [description]
+     */
+    SET_LOADING (state, bool) {
+      state.loading = bool
+    },
+
+    /**
+     * shows a processing indicator
+     * @param {[type]} state  [description]
+     * @param {[type]} bool   [description]
+     */
+    SET_PROCESSING (state, bool) {
+      state.processing = bool
+    },
+
+    /**
+     * opens a given tab
+     * @param {[type]} state  [description]
+     * @param {[type]} val    [description]
+     */
+    SET_EXPLORER_TAB (state, val) {
+      const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
+      if (allowedTabs.indexOf(val) !== -1) {
+        state.explorerTab = val
+      } else {
+        console.error('Unknown application tab: ' + val)
+      }
+    },
+
     /**
      * sets width of sidebar in pageTab
      * @memberof store.gui.mutations
@@ -171,8 +237,8 @@ const guiModule = {
      * @param {[type]} state  [description]
      * @param {[type]} bool   [description]
      */
-    SET_ANNOTORIOUS_MODE (state, mode) {
-      state.annotoriousMode = mode
+    SET_FACSIMILE_CLICK_MODE (state, mode) {
+      state.facsimileClickMode = mode
       state.activeSystem = null
       state.activeWritingZone = null
     },
@@ -193,12 +259,87 @@ const guiModule = {
      */
     FOCUS_RECT (state, xywh) {
       state.focusRect = xywh
+    },
+
+    /**
+     * adds a point to the current page border points
+     * @param {[type]} state  [description]
+     * @param {[type]} x      [description]
+     * @param {[type]} y      [description]
+     */
+    ADD_PAGE_BORDER_POINT (state, { x, y }) {
+      state.pageBorderPoints.push({ x, y })
+    },
+
+    /**
+     * resets the pageBorder points
+     * @param {[type]} state  [description]
+     */
+    RESET_PAGE_BORDER_POINTS (state) {
+      state.pageBorderPoints = []
+    },
+
+    /**
+     * sets the awaited document (to be opened as soon as data is loaded)
+     * @param {[type]} state  [description]
+     * @param {[type]} name   [description]
+     */
+    SET_AWAITED_DOCUMENT (state, name) {
+      state.awaitedDocument = name
+    },
+
+    /**
+     * sets the awaited page number (to be openend as soon as data is loaded)
+     * @param {[type]} state    [description]
+     * @param {[type]} pageNum  [description]
+     */
+    SET_AWAITED_PAGE (state, pageNum) {
+      state.awaitedPage = parseInt(pageNum)
     }
   },
   /**
    * @namespace store.gui.actions
    */
   actions: {
+    /**
+     * opens a given modal
+     * @param {[type]} commit  [description]
+     * @param {[type]} modal   [description]
+     */
+    setModal ({ commit }, modal) {
+      commit('SET_MODAL', modal)
+    },
+
+    /**
+     * shows a loading indicator
+     * @param {[type]} commit  [description]
+     * @param {[type]} bool    [description]
+     */
+    setLoading ({ commit }, bool) {
+      commit('SET_LOADING', bool)
+    },
+
+    /**
+     * shows a processing indicator
+     * @param {[type]} commit  [description]
+     * @param {[type]} bool    [description]
+     */
+    setProcessing ({ commit }, bool) {
+      commit('SET_PROCESSING', bool)
+    },
+
+    /**
+     * opens a given tab of the app
+     * @param {[type]} commit  [description]
+     * @param {[type]} val     [description]
+     */
+    setExplorerTab ({ commit, getters, dispatch }, val) {
+      if (getters.isAuthenticated) {
+        commit('SET_EXPLORER_TAB', val)
+        dispatch('disableFacsimileClicks')
+      }
+    },
+
     /**
      * toggles visibility of the pageTab sidebar
      * @memberof store.gui.actions
@@ -283,13 +424,13 @@ const guiModule = {
     },
 
     /**
-     * set the annotoriousMode
+     * set the facsimileClickMode
      * @param  {[type]} commit                [description]
      * @param  {[type]} getters               [description]
      * @return {[type]}         [description]
      */
-    setAnnotoriousMode ({ commit, getters }, mode) {
-      commit('SET_ANNOTORIOUS_MODE', mode)
+    setFacsimileClickMode ({ commit, getters }, mode) {
+      commit('SET_FACSIMILE_CLICK_MODE', mode)
     },
 
     /**
@@ -298,8 +439,8 @@ const guiModule = {
      * @param {[type]} getters  [description]
      * @param {[type]} mode     [description]
      */
-    disableAnnotorious ({ commit, getters }) {
-      commit('SET_ANNOTORIOUS_MODE', 'off')
+    disableFacsimileClicks ({ commit, getters }) {
+      commit('SET_FACSIMILE_CLICK_MODE', 'off')
     },
 
     /**
@@ -319,12 +460,105 @@ const guiModule = {
      */
     focusRect ({ commit }, xywh) {
       commit('FOCUS_RECT', xywh)
+    },
+
+    /**
+     * handles the action when clicking onto the facsimile
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} x                      [description]
+     * @param  {[type]} y                      [description]
+     * @param  {[type]} shift                  [description]
+     * @return {[type]}          [description]
+     */
+    facsimileClick ({ commit, getters, dispatch }, { x, y, shift }) {
+      if (getters.facsimileClickMode === 'pageMargin' && shift) {
+        dispatch('addPageBorderPoint', { x, y })
+      }
+    },
+
+    /**
+     * adds a point to the current page border
+     * @param {[type]} commit  [description]
+     * @param {[type]} x       [description]
+     * @param {[type]} y       [description]
+     */
+    addPageBorderPoint ({ commit, getters }, { x, y }) {
+      if (getters.pageBorderPointsIncomplete) {
+        commit('ADD_PAGE_BORDER_POINT', { x, y })
+      } else { // temporary
+        commit('RESET_PAGE_BORDER_POINTS')
+      }
+    },
+
+    /**
+     * resets the pageBorder points
+     * @param {[type]} commit  [description]
+     */
+    resetPageBorderPoints ({ commit }) {
+      commit('RESET_PAGE_BORDER_POINTS')
+    },
+
+    /**
+     * this is a document name that shall be opened as soon as sufficient data for that is available
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} filename  [description]
+     */
+    setAwaitedDocument ({ commit, getters }, filename) {
+      commit('SET_AWAITED_DOCUMENT', filename)
+    },
+
+    /**
+     * keeps the number of hte page to be openend when data is loaded
+     * @param {[type]} commit   [description]
+     * @param {[type]} pageNum  [description]
+     */
+    setAwaitedPage ({ commit }, pageNum) {
+      commit('SET_AWAITED_PAGE', pageNum)
     }
   },
   /**
    * @namespace store.gui.getters
    */
   getters: {
+    /**
+     * returns the currently opened modal
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    modal: state => {
+      return state.modal
+    },
+
+    /**
+     * whether a loading indicator should be visible
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    loading: state => {
+      return state.loading
+    },
+
+    /**
+     * whether a processing indicator should be visible
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    processing: state => {
+      return state.processing
+    },
+
+    /**
+     * the currently shown tab of the application
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    explorerTab: state => {
+      return state.explorerTab
+    },
+
     /**
      * returns visibility of sidebar on pageTab
      * @memberof store.gui.getters
@@ -453,12 +687,12 @@ const guiModule = {
     },
 
     /**
-     * returns the annotoriousMode
+     * returns the facsimileClickMode
      * @param  {[type]} state               [description]
      * @return {[type]}       [description]
      */
-    annotoriousMode: (state) => {
-      return state.annotoriousMode
+    facsimileClickMode: (state) => {
+      return state.facsimileClickMode
     },
 
     /**
@@ -477,6 +711,82 @@ const guiModule = {
      */
     focusRect: (state) => {
       return state.focusRect
+    },
+
+    /**
+     * returns whether all points for determining the rectangle of the current
+     * page are available already
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageBorderPointsIncomplete: (state) => {
+      return state.pageBorderPoints.length < 3
+    },
+
+    /**
+     * returns all points for the rectangle defining the current page's bounding
+     * box
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageBorderPoints: (state, getters) => {
+      const fragment = getters.currentPageFragmentIdentifier
+
+      // generate pagePoints from fragment
+      if (state.pageBorderPoints.length === 0 && fragment !== null) {
+        const arr = []
+        arr.push({ x: fragment.x, y: fragment.y })
+        arr.push({ x: fragment.x, y: fragment.y + fragment.h })
+        arr.push({ x: fragment.x + fragment.w, y: fragment.y })
+
+        return arr
+      }
+
+      return state.pageBorderPoints
+    },
+
+    /**
+     * returns the number of pageBorderPoints (0 to 3)
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageBorderPointsLength: (state) => {
+      return state.pageBorderPoints.length
+    },
+
+    /**
+     * returns the angle of the current page's bounding box
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    currentPageAngle: (state) => {
+      if (state.pageBorderPoints.length < 2) {
+        return null
+      }
+
+      const p1 = state.pageBorderPoints[0]
+      const p2 = state.pageBorderPoints[1]
+
+      const angle = angleFunc(p1, p2, 'vertical')
+      return angle
+    },
+
+    /**
+     * returns the name of the currently awaited document (if any)
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    awaitedDocument: (state) => {
+      return state.awaitedDocument
+    },
+
+    /**
+     * returns the number of the currently awaited page (if any)
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    awaitedPage: (state) => {
+      return state.awaitedPage
     }
   }
 }

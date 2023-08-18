@@ -21,19 +21,19 @@
     <div class="appTabs">
       <ul class="tab">
         <li class="tab-item" >
-          <a href="#" :class="{active: currentTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
+          <a href="#" :class="{active: explorerTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
+          <a href="#" :class="{active: explorerTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
+          <a href="#" :class="{active: explorerTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
+          <a href="#" :class="{active: explorerTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: currentTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
+          <a href="#" :class="{active: explorerTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
         </li>
       </ul>
     </div>
@@ -73,8 +73,8 @@ export default {
     isLoading () {
       return this.$store.getters.loading || this.$store.getters.processing
     },
-    currentTab () {
-      return this.$store.getters.currentTab
+    explorerTab () {
+      return this.$store.getters.explorerTab
     },
     changedFiles () {
       return this.$store.getters.changedFiles.length
@@ -90,7 +90,7 @@ export default {
       if (modus === 'home') {
         console.log('go home ...')
         this.$router.push({ name: 'home' })
-        this.$store.dispatch('openTab', modus)
+        this.$store.dispatch('setExplorerTab', modus)
         return
       }
       const source = this.$route.params.source || this.$store.getters.filename

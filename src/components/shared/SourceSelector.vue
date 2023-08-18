@@ -40,19 +40,21 @@ export default {
   },
   methods: {
     openDocument (doc) {
+      console.log('\n\nopenDocument', doc)
       this.$store.dispatch('loadContent', doc)
       console.log(doc.name, this.$route.params.modus || 'pages')
       this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' } })
       console.log(this.table)
       if (this.table) {
-        this.$store.dispatch('openTab', 'pages')
+        this.$store.dispatch('setExplorerTab', 'pages')
       }
     }
   },
   computed: {
     ...mapGetters(['sources', 'filepath']),
     currentDocumentName () {
-      console.log(this.filepath, this.availableDocuments)
+      // console.log('\n\nFILEPATH: ' + this.$store.getters.filepath)
+      // console.log(this.filepath, this.availableDocuments)
       const cursrc = this.availableDocuments.filter(s => s.path === this.filepath)
       if (cursrc.length > 0) return cursrc[0].label
       return 'N/A'

@@ -1,13 +1,11 @@
 <template>
-  <div id="osdContainer" :class="currentTab">
+  <div id="osdContainer" :class="explorerTab">
 
   </div>
 </template>
 
 <script>
 import OpenSeadragon from 'openseadragon'
-import * as Annotorious from '@recogito/annotorious-openseadragon'
-import '@recogito/annotorious-openseadragon/dist/annotorious.min.css'
 
 const verovioOptions = {
   scale: 30,
@@ -42,18 +40,26 @@ export default {
   name: 'OpenSeadragonComponent',
   props: {
     svg: Boolean,
-    annotorious: Boolean,
-    pageBorders: Boolean
+    pageBorders: Boolean,
+    rastrums: Boolean
   },
   computed: {
-    currentTab () {
+    explorerTab () {
       return this.$store.getters.explorerTab
-    },
-    annotoriousMode () {
-      return this.$store.getters.annotoriousMode
     }
   },
   methods: {
+    facsimileClickListener (e) {
+      const image = this.viewer.world.getItemAt(0)
+      const imagePoint = image.viewerElementToImageCoordinates(e.position)
+
+      const click = {
+        x: imagePoint.x,
+        y: imagePoint.y,
+        shift: e.shift
+      }
+      this.$store.dispatch('facsimileClick', click)
+    },
     systemClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
@@ -117,7 +123,7 @@ export default {
         // JPV: svg is XMLDocument now
         if (!svg.documentElement) console.warn('not an XMLDocument', svg)
         const svgClone = svg.documentElement.cloneNode(true)
-        this.viewer.addOverlay({
+        this.viewer.world.getItemAt(0).addOverlay({
           element: svgClone,
           x: 0,
           y: 0,
@@ -149,9 +155,13 @@ export default {
       }
     },
     renderSystems () {
-      const systems = this.$store.getters.systemsOnCurrentPage
+      if (!this.rastrums) {
+        return null
+      }
+
+      const systems = this.$store.getters.rastrumsOnCurrentPage
       const editedSystem = this.$store.getters.editingSystemOnCurrentPage
-      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
+      // const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
 
       // only relevant before component is mounted
       if (!this.viewer) {
@@ -172,12 +182,21 @@ export default {
           overlay.setAttribute('title', i + 1)
           overlay.setAttribute('data-n', i)
 
-          this.viewer.addOverlay({
+          /* this.viewer.addOverlay({
             element: overlay,
-            x: system.left,
-            y: system.top,
-            width: system.right - system.left,
-            height: page.height / 30
+            x: system.x,
+            y: system.y,
+            width: system.w,
+            height: system.h
+          }) */
+          const rect = new OpenSeadragon.Rect(system.x, system.y, system.w, system.h)
+          console.log(rect)
+          console.log('\n\nHERE')
+          console.log(this.viewer.world)
+          console.log(this.viewer.world.getItemAt(0))
+          this.viewer.world.getItemAt(0).addOverlay({
+            element: overlay,
+            location: rect
           })
 
           overlay.addEventListener('click', this.systemClickListener)
@@ -186,139 +205,80 @@ export default {
       })
     },
     renderPageBorders (origin) {
+      console.log(0)
       // only relevant before component is mounted
       if (!this.viewer || this.viewer.world.getItemCount() === 0) {
         return null
       }
+      console.log(1)
 
       if (!this.pageBorders) {
         return null
       }
 
-      const page = this.$store.getters.currentPageDimensions
-      const fragment = this.$store.getters.currentPageFragmentIdentifier
-      if (!fragment || !page) {
+      // const page = this.$store.getters.currentPageDimensions
+      // const fragment = this.$store.getters.currentPageFragmentIdentifier
+      /* if (!fragment || !page) {
         return null
-      }
+      } */
 
-      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
+      document.querySelectorAll('.pageBorderPoint.overlay').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
-      //
-      console.log('\n\nHERE (' + origin + '): page width: ' + page.width + ', viewer.world.itemCount: ' + this.viewer.world.getItemCount())
-      console.log(this.viewer.viewport.getBounds())
-      console.log(this.viewer.world.getItemAt(0))
-      console.log(this.viewer)
 
-      const overlayTop = document.createElement('div')
+      if (this.$store.getters.facsimileClickMode !== 'pageMargin') {
+        return null
+      }
+      console.log(2)
+      const pageBorderPoints = this.$store.getters.pageBorderPoints
+
+      // const overlays = []
+      pageBorderPoints.forEach((point, i) => {
+        console.log(3, 'dealing with point')
+        console.log(point)
+        const overlay = document.createElement('div')
+        overlay.classList.add('pageBorderPoint')
+        overlay.classList.add('overlay')
+        overlay.classList.add('point' + i)
+
+        console.log('\n\nHERE2')
+        console.log(this.viewer.world)
+        console.log(this.viewer.world.getItemAt(0))
+
+        this.viewer.world.getItemAt(0).addOverlay({
+          element: overlay,
+          location: new OpenSeadragon.Rect(point.x - 10, point.y - 10, 20, 20)
+        })
+        console.log(4)
+      })
+
+      /* const overlayTop = document.createElement('div')
       overlayTop.classList.add('pageBorder')
       overlayTop.classList.add('overlay')
-      overlayTop.classList.add('top')
+      overlayTop.classList.add('top') */
 
-      const overlayLeft = document.createElement('div')
-      overlayLeft.classList.add('pageBorder')
-      overlayLeft.classList.add('overlay')
-      overlayLeft.classList.add('left')
+      // console.info(tempRect.rotate(20, new OpenSeadragon.Point(1000, 1000)))
+      // this.viewer.viewport.setRotation(10)
+      // tempOverlay.setAttribute('data-rotate', -20)
 
-      const overlayRight = document.createElement('div')
-      overlayRight.classList.add('pageBorder')
-      overlayRight.classList.add('overlay')
-      overlayRight.classList.add('right')
+      /* this.viewer.addOverlay({
+        element: tempOverlay,
+        location: tempRect.rotate(20),
+        rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
+      }) */
 
-      const overlayBottom = document.createElement('div')
-      overlayBottom.classList.add('pageBorder')
-      overlayBottom.classList.add('overlay')
-      overlayBottom.classList.add('bottom')
-
-      this.viewer.addOverlay({
+      /* this.viewer.addOverlay({
         element: overlayTop,
-        checkResize: false,
-        x: 0,
-        y: 0,
-        width: parseInt(page.width),
-        height: parseInt(fragment.y)
-      })
-
-      this.viewer.addOverlay({
-        element: overlayLeft,
-        x: 0,
-        y: parseInt(fragment.y),
-        width: parseInt(fragment.x),
-        height: parseInt(fragment.h)
-      })
-
-      this.viewer.addOverlay({
-        element: overlayRight,
-        x: parseInt(fragment.x) + parseInt(fragment.w),
-        y: parseInt(fragment.y),
-        width: parseInt(page.width) - (parseInt(fragment.x) + parseInt(fragment.w)),
-        height: parseInt(fragment.h)
-      })
-
-      this.viewer.addOverlay({
-        element: overlayBottom,
-        x: 0,
-        y: parseInt(fragment.y) + parseInt(fragment.h),
-        width: parseInt(page.width),
-        height: parseInt(page.height) - (parseInt(fragment.y) + parseInt(fragment.h))
-      })
+        location: topRect
+      }) */
     },
+
     focusRect () {
       const xywh = this.$store.getters.focusRect
       if (!this.viewer || !xywh) {
         return null
       }
       this.viewer.viewport.fitBoundsWithConstraints(new OpenSeadragon.Rect(xywh.x, xywh.y, xywh.w, xywh.h))
-    },
-    generateSelectionFromZone () {
-      if (!this.annotorious) {
-        return false
-      }
-
-      const systems = this.$store.getters.systemsOnCurrentPage
-      const index = this.$store.getters.editingSystemOnCurrentPage
-      const system = systems[index]
-      if (index === -1 || system === undefined || system === null) {
-        return false
-      }
-
-      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)
-      const imageUri = this.$store.getters.pageArray[this.$store.getters.currentPageZeroBased]
-      const xywh = 'xywh=pixel:' + system.left + ',' + system.top + ',' + parseInt(system.right - system.left) + ',' + Math.round(page.height / 30)
-
-      const anno = {
-        type: 'Annotation',
-        body: [{
-          type: 'TextualBody',
-          purpose: 'tagging',
-          value: ''
-        }
-        ],
-        target: {
-          source: imageUri,
-          selector: {
-            type: 'FragmentSelector',
-            conformsTo: 'http://www.w3.org/TR/media-frags/',
-            value: xywh
-          }
-        },
-        '@context': 'http://www.w3.org/ns/anno.jsonld',
-        id: 'prefix' + index
-      }
-
-      this.anno.setAnnotations([anno])
-      this.anno.selectAnnotation(anno)
-    },
-    activateAnnotorious (bool) {
-      const container = document.querySelector('#osdContainer')
-      if (!container) {
-        return null
-      }
-      if (bool) {
-        container.classList.add('annotoriousActive')
-      } else {
-        container.classList.remove('annotoriousActive')
-      }
     },
     renderVerovioOverlay () {
       // only relevant before component is mounted
@@ -348,7 +308,7 @@ export default {
       overlay.classList.add('overlay')
       overlay.innerHTML = svg
 
-      this.viewer.addOverlay({
+      this.viewer.world.getItemAt(0).addOverlay({
         element: overlay,
         x: 0,
         y: 0,
@@ -385,112 +345,12 @@ export default {
       const page = this.$route.query.page
       const n = page ? +page - 1 : 0
       // console.log('open', this.$store.getters.pageArray[n])
-      // const osdPage = this.$store.getters.pageArrayOSD[n]
-      // console.log('osdPage', osdPage)
-      this.viewer.open(this.$store.getters.pageArrayOSD, n)
-      this.renderPageBorders('mounted')
+      const osdPage = this.$store.getters.pageArrayOSD[n]
+      console.log('osdPage', osdPage)
+      // this.viewer.open(this.$store.getters.pageArrayOSD, n)
+      // this.renderPageBorders('mounted')
     } catch (err) {
       console.warn('WARNING: Unable to init OSD yet…')
-    }
-
-    if (this.annotorious) {
-      const annotoriousConfig = {
-        disableEditor: true
-      }
-      // Initialize the Annotorious plugin
-      this.anno = Annotorious(this.viewer, annotoriousConfig)
-      // this.anno.setVisible(false)
-      // this.anno.readOnly = true
-
-      // Listener for new Selections
-      this.anno.on('createSelection', async (selection) => {
-        console.log('created selection:', selection)
-
-        selection.body = [{
-          type: 'TextualBody',
-          purpose: 'tagging',
-          value: ''
-        }]
-
-        await this.anno.updateSelected(selection)
-        this.anno.saveSelected()
-      })
-
-      // automatically triggered through createSelection
-      this.anno.on('createAnnotation', async (annotation) => {
-        // xywh=pixel:647.4000244140625,802,1304.3333740234375,199.3333740234375
-        console.log('got in here with annotation', annotation)
-        const raw = annotation.target.selector.value.substr(11).split(',')
-        console.log(raw)
-        const xywh = {
-          x: Math.max(Math.round(raw[0]), 0),
-          y: Math.max(Math.round(raw[1]), 0),
-          w: Math.round(raw[2]),
-          h: Math.round(raw[3])
-        }
-        console.log(xywh)
-        console.log(this.annotoriousMode)
-
-        if (this.annotoriousMode === 'pageMargin') {
-          console.log('need to (re)set page fragment identifier')
-          this.$store.dispatch('identifyPageFragment', xywh)
-        }
-
-        if (this.annotoriousMode === 'addSystem') {
-          console.log('need to add system')
-          this.$store.dispatch('addSystem', xywh)
-
-          //
-        }
-
-        this.anno.clearAnnotations()
-        console.log('done that, should be committed')
-        /*
-
-        this.$store.dispatch('createSystem', xywh)
-        this.anno.clearAnnotations()
-        this.renderSystems()
-
-         */
-      })
-
-      // Listener for changing selections
-      /* this.anno.on('changeSelectionTarget', (a) => {
-        console.log('changeSelectionTarget')
-        console.log(a)
-
-        // console.log('changed selection:', a)
-        const raw = a.selector.value.substr(11).split(',')
-        const xywh = {
-          x: Math.round(raw[0]),
-          y: Math.round(raw[1]),
-          w: Math.round(raw[2]),
-          h: Math.round(raw[3])
-        }
-        this.$store.dispatch('setSelectionRect', xywh)
-      }) */
-
-      this.anno.on('updateAnnotation', (annotation) => {
-        // The users has selected an existing annotation
-        console.log('updateAnnotation')
-        console.log(annotation)
-
-        const raw = annotation.target.selector.value.substr(11).split(',')
-        const xywh = {
-          x: Math.round(raw[0]),
-          y: Math.round(raw[1]),
-          w: Math.round(raw[2]),
-          h: Math.round(raw[3])
-        }
-        const system = {
-          i: annotation.id.substring(6),
-          rect: xywh
-        }
-
-        this.$store.dispatch('updateSystemCoordinates', system)
-        this.anno.clearAnnotations()
-        this.renderSystems()
-      })
     }
 
     // TODO: Adjusted to see something for now…
@@ -518,18 +378,12 @@ export default {
       }
     })
 
-    this.viewer.world.addHandler('metrics-change', (data) => {
-      console.log('Metrics changed in a world with ' + this.viewer.world.getItemCount() + ' items')
-      console.log(this.viewer.world)
-      this.renderPageBorders('metrics-change')
-    })
-
-    this.viewer.addHandler('viewport-change', (data) => {
-      this.renderPageBorders('viewport-change')
+    this.viewer.addHandler('canvas-click', (data) => {
+      this.facsimileClickListener(data)
     })
 
     this.viewer.addHandler('open', (data) => {
-      setTimeout(() => this.renderPageBorders('viewerOpenListener'), 2000)
+      this.renderPageBorders('viewerOpenListener')
     })
 
     this.unwatchCurrentPage = this.$store.watch((state, getters) => getters.currentPageZeroBased,
@@ -573,13 +427,9 @@ export default {
         }
       })
     // const svg = this.$store.getters.svgOnCurrentPage
-    this.unwatchSystems = this.$store.watch((state, getters) => getters.systemsOnCurrentPage,
+    this.unwatchSystems = this.$store.watch((state, getters) => getters.rastrumsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderSystems()
-      })
-    this.unwatchSelectionMode = this.$store.watch((state, getters) => getters.annotoriousMode,
-      (newVal, oldVal) => {
-        this.activateAnnotorious(newVal !== 'off')
       })
     this.unwatchEditingSystem = this.$store.watch((state, getters) => getters.editingSystemOnCurrentPage,
       (newIndex, oldIndex) => {
@@ -599,6 +449,18 @@ export default {
         // console.log('RENDER NOW')
         this.renderVerovioOverlay()
       })
+    this.unwatchPageBorderPoints = this.$store.watch((state, getters) => getters.pageBorderPointsLength,
+      (num) => {
+        console.log('value changed to  ' + num)
+        /* if (newArr.length !== 0) {
+          this.renderPageBorders()
+        } */
+        this.renderPageBorders()
+      })
+
+    const page = this.$route.query.page
+    const n = page ? +page - 1 : 0
+    this.viewer.open(this.$store.getters.pageArrayOSD, n)
     /*
     try {
       if (this.$store.getters.currentPageZeroBased !== -1) {
@@ -632,6 +494,7 @@ export default {
     this.unwatchPageXML()
     this.removeListeners()
     this.unwatchFocusRect()
+    this.unwatchPageBorderPoints()
   }
 }
 </script>
@@ -640,19 +503,14 @@ export default {
 <style lang="scss">
 @import '@/css/_variables.scss';
 
+*[data-rotate] {
+  // set per JS: transform: 'rotate(10deg)';
+  transform-origin: top left;
+}
+
 #osdContainer {
   width: 100%;
   height: 100%;
-
-  .a9s-annotationlayer {
-    z-index: -1
-  }
-
-  &.annotoriousActive {
-    .a9s-annotationlayer {
-      z-index: 1
-    }
-  }
 
   .overlay.pageBorder {
     width: 100px;
@@ -662,7 +520,8 @@ export default {
   }
 
   .system.overlay {
-    z-index: -1
+    z-index: 0;
+    background-color: rgba(70 ,255, 70, 0.6);
   }
 
   g.sketchArea {
@@ -713,9 +572,6 @@ export default {
         height: 100%;
       }
     }
-    .a9s-annotationlayer {
-        z-index: -1;
-     }
   }
 
   &.demo {
@@ -806,5 +662,23 @@ export default {
 
 .hideActive .activeWritingZone path {
   opacity: 0;
+}
+
+.pageBorderPoint {
+  background-color: transparent;
+  border: 5px solid red;
+  border-radius: 10px;
+
+  &.point0 {
+    border-color: red;
+  }
+
+  &.point1 {
+    border-color: blue;
+  }
+
+  &.point2 {
+    border-color: green;
+  }
 }
 </style>

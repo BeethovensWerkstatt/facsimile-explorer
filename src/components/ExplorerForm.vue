@@ -2,21 +2,21 @@
   <div>
     <OpenSeadragonNavigator/>
     <ul class="tab">
-      <li class="tab-item" :class="{ active: currentTab === 'systems'}" @click="switchTab('systems')">
+      <li class="tab-item" :class="{ active: explorerTab === 'systems'}" @click="switchTab('systems')">
         <a href="#" class="btn btn-link"><i class="icon icon-menu"></i> Systems</a>
       </li>
-      <li class="tab-item" :class="{ active: currentTab === 'transcript'}" @click="switchTab('transcript')">
+      <li class="tab-item" :class="{ active: explorerTab === 'transcript'}" @click="switchTab('transcript')">
         <a href="#" class="btn btn-link"><span class="transcript">♫</span> Transcription</a>
       </li>
-      <li class="tab-item" :class="{ active: currentTab === 'rendering'}" @click="switchTab('rendering')">
+      <li class="tab-item" :class="{ active: explorerTab === 'rendering'}" @click="switchTab('rendering')">
         <a href="#" class="btn btn-link">Rendering</a>
       </li>
     </ul>
     <div class="container">
-      <div id="tab_systems" class="tabContent" :class="{ active: currentTab === 'systems'}">
+      <div id="tab_systems" class="tabContent" :class="{ active: explorerTab === 'systems'}">
          <SystemCartographer/>
       </div>
-      <div id="tab_transcript" class="tabContent" :class="{ active: currentTab === 'transcript'}">
+      <div id="tab_transcript" class="tabContent" :class="{ active: explorerTab === 'transcript'}">
          <div class="verticalTabContent"></div>
          <div class="verticalTab active"><span class="colorProbe color1"></span>Notes</div>
          <div class="verticalTab"><span class="colorProbe color2"></span>Rests</div>
@@ -27,7 +27,7 @@
          <div class="verticalTab"><span class="colorProbe color7"></span>Text</div>
          <div class="verticalTab"><span class="colorProbe color8"></span>Other</div>
       </div>
-      <div id="tab_rendering" class="tabContent" :class="{ active: currentTab === 'rendering'}">
+      <div id="tab_rendering" class="tabContent" :class="{ active: explorerTab === 'rendering'}">
          settings for Verovio (if any)
       </div>
     </div>
@@ -50,7 +50,7 @@ export default {
     }
   },
   computed: {
-    currentTab () {
+    explorerTab () {
       return this.$store.getters.explorerTab
     }
   }

@@ -11,10 +11,10 @@ function uuidv4 () {
 
 export const fixLink = uri => {
   const uri2 = new Url(uri?.replace('http://', 'https://'))
-  if (uri2.host === 'gallica.bnf.fr') {
+  /* if (uri2.host === 'gallica.bnf.fr') {
     console.log(uri2.host, uri2.path.elements.join('/'))
-  }
-  return uri
+  } */
+  return uri2
 }
 
 // meta now contains a property doc with the parsed XML. Should we change this?
@@ -216,31 +216,42 @@ export function getPageArray (mei) {
 
       const fullPath = store.getters.getPathByName(folder)
       const file = store.getters.getContentData(fullPath)?.doc
-      arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
-
-      if (!arr[i]) {
-        console.error('\n\nUnable to find surface id=' + id + ' in ' + fullPath)
+      if (!file) {
+        arr[i] = null
+      } else {
+        arr[i] = file.querySelector('surface[*|id = "' + id + '"]')
       }
+
+      /* if (!arr[i]) {
+        console.error('Unable to find surface id=' + id + ' in ' + fullPath)
+      } */
     }
   })
 
   arr.forEach((surface, n) => {
-    const graphic = surface.querySelector('graphic[type="facsimile"]')
-    // const i = n + 1
-    // const page = mei.querySelector('page:nth-child(' + i + ')')
+    if (!surface) {
+      const obj = {}
+      obj.label = 'loading'
+      obj.n = n
+      arr[n] = obj
+    } else {
+      const graphic = surface.querySelector('graphic[type="facsimile"]')
+      // const i = n + 1
+      // const page = mei.querySelector('page:nth-child(' + i + ')')
 
-    const obj = {}
-    obj.uri = graphic.getAttributeNS('', 'target').trim()
-    obj.id = surface.getAttribute('xml:id').trim()
-    obj.n = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : n
-    obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
-    obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
-    obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
-    obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
-    obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
+      const obj = {}
+      obj.uri = graphic.getAttributeNS('', 'target').trim()
+      obj.id = surface.getAttribute('xml:id').trim()
+      obj.n = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : n
+      obj.label = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : n
+      obj.width = parseInt(graphic.getAttributeNS('', 'width').trim(), 10)
+      obj.height = parseInt(graphic.getAttributeNS('', 'height').trim(), 10)
+      obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
+      obj.hasZones = surface.querySelector('zone') !== null // exists(mei:zone) inside relevant /surface
 
-    obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
-    arr[n] = obj
+      obj.systems = 0 // page.querySelectorAll('system').length // count(mei:system) inside relevant /page
+      arr[n] = obj
+    }
   })
   // console.log(arr)
   /* mei.querySelectorAll('surface').forEach((surface, n) => {
