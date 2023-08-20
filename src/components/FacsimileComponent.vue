@@ -149,7 +149,7 @@ export default {
 
       const counterRotate = this.viewer.viewport.getRotation()// this.tileSource.degrees * -1
       const center = { x: 0, y: 0 }
-      console.log('counterRotate: ', counterRotate)
+      console.log('counterRotate: ', counterRotate, this.tileSource.degrees * -1)
       console.log(e)
 
       const pageOverlay = this.viewer.getOverlayById(document.querySelector('.overlay.pageBorder'))
@@ -199,6 +199,7 @@ export default {
      * @return {[type]} [description]
      */
     openFacsimile () {
+      console.log('FacsimileComponent:openFasimile() started')
       if (!this.tileSource) {
         // console.log('Page not available (yet)')
         return null
@@ -223,15 +224,22 @@ export default {
      * @return {[type]} [description]
      */
     facsimileOpened (data) {
+      console.log('FacsimileComponent:facsimileOpened()')
       this.renderedUri = data.source
       this.$store.dispatch('setLoading', false)
+
+      // temporary condition
+      /* if (this.viewer) {
+        return null
+      } */
+
       this.setPageRotation()
-      console.log('facsimileOpened', data)
       this.renderGrid(data)
 
       if (this.showPageBorders) {
         this.renderPageBorders()
       }
+      console.log('facsimileOpened', data)
     },
 
     /**
@@ -239,7 +247,7 @@ export default {
      * @return {[type]} [description]
      */
     updateFacsimile (tileSource, oldSource) {
-      // console.warn('\nchanging tileSource: ', tileSource, oldSource)
+      // console.log('FacsimileComponent:updateFacsimile() received new tileSource:', tileSource, oldSource)
       if (!tileSource) {
         return null
       }
@@ -255,7 +263,7 @@ export default {
           tiledImage.setWidth(tileSource.width)
         }
       } catch (err) {
-        console.error('Unable to set width of tiledImage to ' + tileSource.width + ': ' + err, err)
+        console.error('FacsimileComponent:updateFacsimile(): Unable to set width of tiledImage to ' + tileSource.width + ': ' + err, err)
       }
 
       try {
@@ -263,7 +271,21 @@ export default {
           tiledImage.setPosition(new OpenSeadragon.Point(tileSource.x, tileSource.y))
         }
       } catch (err) {
-        console.error('Unable to set position of tiledImage to ' + tileSource.x + ' / ' + tileSource.y + ': ' + err, err)
+        console.error('FacsimileComponent:updateFacsimile(): Unable to set position of tiledImage to ' + tileSource.x + ' / ' + tileSource.y + ': ' + err, err)
+      }
+
+      try {
+        if (tileSource.degrees !== oldSource.degrees) {
+          this.setPageRotation()
+        }
+      } catch (err) {
+        console.error('FacsimileComponent:updateFacsimile(): Unable to update page rotation: ' + err, err)
+      }
+
+      try {
+        this.renderPageBorders()
+      } catch (err) {
+        console.error('FacsimileComponent:updateFacsimile(): Unable to update pageBorders: ' + err, err)
       }
     },
 
@@ -272,6 +294,12 @@ export default {
      * @return {[type]} [description]
      */
     renderGrid () {
+      console.log('FacsimileComponent:renderGrid()')
+      // temporary condition
+      /* if (this.viewer) {
+        return null
+      } */
+
       document.querySelectorAll('.grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
@@ -383,6 +411,11 @@ export default {
     },
 
     renderPageBorders () {
+      // temporary condition
+      /* if (this.viewer) {
+        return null
+      } */
+
       const tiledImage = this.viewer.world.getItemAt(0)
 
       if (!tiledImage) {
@@ -396,7 +429,8 @@ export default {
         return null
       }
 
-      const existingRotatedOverlay = document.querySelector('.rotatedPageBorder.overlay')
+      // the bounding box of the media fragment, which could be loaded by IIIF
+      const existingRotatedOverlay = document.querySelector('.overlay.pageBorder.bbox')
 
       const centerX = parseFloat(pageDimensions.mmWidth) / 2
       const centerY = parseFloat(pageDimensions.mmHeight) / 2
@@ -405,7 +439,8 @@ export default {
       if (!existingRotatedOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
-        element.classList.add('rotatedPageBorder')
+        element.classList.add('pageBorder')
+        element.classList.add('bbox')
 
         this.viewer.addOverlay({
           element,
@@ -417,15 +452,17 @@ export default {
         this.viewer.updateOverlay(existingRotatedOverlay, rotatedLocation)
       }
 
+      // the actual rectangle stored in the data
       const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
 
-      const existingOverlay = document.querySelector('.pageBorder.overlay')
+      const existingOverlay = document.querySelector('.overlay.pageBorder.mediaFragment')
 
       if (!existingOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('pageBorder')
-        element.addEventListener('click', this.pageClickListener)
+        element.classList.add('mediaFragment')
+        element.title = 'Generated IIIF Selection'
 
         this.viewer.addOverlay({
           element,
@@ -435,42 +472,36 @@ export default {
       } else {
         this.viewer.updateOverlay(existingOverlay, location)
       }
-      /*
+
+      // get innermost rectangle
       const center = location.getCenter()
       const deg = this.viewer.viewport.getRotation()
       const tl = location.getTopLeft()// .rotate(deg, location.getTopLeft())
-      const tr = location.getTopRight()// .rotate(deg, location.getTopRight())
-      const bl = location.getBottomLeft()// .rotate(deg, location.getBottomLeft())
-      const br = location.getBottomRight()// .rotate(deg, location.getBottomRight())
 
-      const tlRotated = tl.rotate(deg, tl)
-      const trRotated = tr.rotate(deg, tr)
-      const blRotated = bl.rotate(deg, bl)
-      const brRotated = br.rotate(deg, br)
+      const centerRotated = center.rotate(deg, tl)
 
-      const left = deg > 0 ? tlRotated.x : blRotated.x
-      const top = deg > 0 ? trRotated.y : tlRotated.y
-      const right = deg > 0 ? brRotated.x : trRotated.x
-      const bottom = deg > 0 ? blRotated.y : brRotated.y
-      const width = right - left
-      const height = bottom - top
+      const width = location.width
+      const height = location.height
 
-      const origin = rotatePoint({ x: center.x - width / 2, y: center.y - height / 2 }, { x: tl.x, y: tl.x }, deg)
+      const offsetX = Math.abs(center.x - centerRotated.x)
+      const offsetY = Math.abs(center.y - centerRotated.y)
 
-      const offsetX = origin.x - tl.x
-      const offsetY = origin.y - tl.y
-      const irX = deg > 0 ? origin.x : origin.x - offsetX
-      const irY = deg > 0 ? origin.y + offsetY : origin.y
-      const irW = width - offsetX
-      const irH = height - offsetY
+      // const origin = rotatePoint({ x: center.x - width / 2, y: center.y - height / 2 }, { x: tl.x, y: tl.x }, deg * -1)
+
+      const irX = deg < 0 ? center.x - width / 2 + offsetX * 2 : center.x - width / 2
+      const irY = deg < 0 ? center.y - height / 2 : center.y - height / 2 + offsetY * 2
+      const irW = deg < 0 ? width - offsetX * 2 : width - offsetX * 2
+      const irH = deg < 0 ? height - offsetY * 2 : height - offsetY * 2
 
       const innerRect = new OpenSeadragon.Rect(irX, irY, irW, irH)
-      const existingInnerOverlay = document.querySelector('.pageBorderInner.overlay')
+      const existingInnerOverlay = document.querySelector('.overlay.pageBorder.actualPage')
 
       if (!existingInnerOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
-        element.classList.add('pageBorderInner')
+        element.classList.add('pageBorder')
+        element.classList.add('actualPage')
+        element.addEventListener('click', this.pageClickListener)
 
         this.viewer.addOverlay({
           element,
@@ -479,7 +510,7 @@ export default {
         })
       } else {
         this.viewer.updateOverlay(existingInnerOverlay, innerRect)
-      } */
+      }
 
       //
       /* document.querySelectorAll('.pageBorderPoint.overlay, .fragmentFrame, .pageBorder.overlay').forEach(overlay => {
@@ -541,6 +572,7 @@ export default {
     }
   },
   created () {
+    console.log('FacsimileComponent:created()')
     this.$watch(
       () => this.$route.query,
       (to, previous) => {
@@ -555,9 +587,8 @@ export default {
     )
   },
   mounted () {
-    this.viewer = OpenSeadragon(osdOptions)
     console.log('FacsimileComponent:mounted()')
-    console.log('FacsimileComponent:created()')
+    this.viewer = OpenSeadragon(osdOptions)
     this.viewer.addHandler('open', (data) => {
       this.facsimileOpened(data)
     })
@@ -574,7 +605,8 @@ export default {
     this.unwatchPageRotation = this.$store.watch(
       (state, getters) => getters.currentPageRotation,
       (newRot, oldRot) => {
-        this.setPageRotation()
+        // this is done by updateFacsimile, as tileSources.degrees triggers that as well
+        // this.setPageRotation()
       })
 
     this.unwatchPageDimensions = this.$store.watch(
@@ -600,8 +632,8 @@ export default {
     this.openFacsimile()
   },
   beforeUnmount () {
-    this.unload()
     console.log('FacsimileComponent:beforeUnmount()')
+    this.unload()
     // this.unwatchPageBorders()
     this.unwatchPageRotation()
     this.unwatchPageDimensions()
@@ -814,15 +846,15 @@ export default {
    position: relative;
 }
 
-.overlay.pageBorder {
+.overlay.pageBorder.bbox {
   outline: 1px solid #ff00ff;
 }
 
-.overlay.pageBorderInner {
+.overlay.pageBorder.mediaFragment {
   outline: 1px solid #00ffff;
 }
 
-.overlay.rotatedPageBorder {
+.overlay.pageBorder.actualPage {
   outline: 8px solid #0000ff99;
 }
 

@@ -60,13 +60,13 @@ router.beforeEach((to, from) => {
         store.dispatch('loadContent', { path })
         console.log('content opened')
         // check if queried page is a proper integer
-        if (to.query.page && parseInt(to.query.page).toFixed(0) === to.query.page) {
+        /* if (to.query.page && parseInt(to.query.page).toFixed(0) === to.query.page) {
           if (path && store.getters.documentPagesForSidebars(path)[parseInt(to.query.page)] !== undefined) {
             store.dispatch('setCurrentPage', parseInt(to.query.page) - 1)
           } else {
             store.dispatch('setAwaitedPage', parseInt(to.query.page))
           }
-        }
+        } */
       }
     }
   } catch (err) {

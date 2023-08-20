@@ -11,7 +11,7 @@
   <AssignSVGsModal/>
   HALLO HOMEVIEW
 
-  <HomeTab v-if="explorerTab === 'home'"/>
+  <HomeTab/>
   <!--<PagesTab v-else-if="explorerTab === 'pages'"/>
   <ZonesTab v-else-if="explorerTab === 'zones'"/>
   <AnnotTab v-else-if="explorerTab === 'annot'"/>
