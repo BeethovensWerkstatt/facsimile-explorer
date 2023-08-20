@@ -5,20 +5,24 @@
         {{currentDocumentName}} <i class="icon icon-caret"></i>
       </button>
       <!-- menu component -->
-      <ul class="menu">
-        <!-- menu header text -->
-        <li class="divider" data-content="Modern Documents"></li>
-        <li class="menu-item" v-for="(doc, d) in availableModernDocuments" :key="d">
-          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
-          <!-- <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink> -->
-        </li>
+      <div v-if="allDocsLoaded">
+        <ul class="menu">
+          <!-- menu header text -->
+          <li class="divider" data-content="Modern Documents"></li>
 
-        <li class="divider" data-content="Reconstructions"></li>
-        <li class="menu-item" v-for="(doc, d) in availableReconstructionDocuments" :key="d">
-          <a href="#" @click.prevent="openDocument(doc)">{{doc.label}}</a>
-          <!-- <RouterLink :to="{ name: 'modus', params: { source: doc.name, modus: $route.params.modus || 'pages' } }">{{  doc.label  }}</RouterLink> -->
-        </li>
-      </ul>
+            <li class="menu-item" v-for="(doc, d) in availableModernDocuments" :key="d">
+              <!-- <a href="#" @click.prevent="openDocument(doc)">{{doc?.label}}</a>-->
+              <!-- <RouterLink :to="{ name: 'modus', params: { source: doc?.name, modus: $route.params.modus || 'pages' } }">{{  doc?.label  }}</RouterLink> -->
+              <router-link :to="'/' + doc.name + '/pages?page=1'">{{doc.label}}</router-link>
+            </li>
+          <li class="divider" data-content="Reconstructions"></li>
+          <li class="menu-item" v-for="(doc, d) in availableReconstructionDocuments" :key="d">
+            <!-- <a href="#" @click.prevent="openDocument(doc)">{{doc?.label}}</a>-->
+            <!-- <RouterLink :to="{ name: 'modus', params: { source: doc?.name, modus: $route.params.modus || 'pages' } }">{{  doc?.label  }}</RouterLink> -->
+            <router-link :to="'/' + doc.name + '/pages?page=1'">{{doc.label}}</router-link>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -43,15 +47,14 @@ export default {
       console.log('\n\nopenDocument', doc)
       this.$store.dispatch('loadContent', doc)
       console.log(doc.name, this.$route.params.modus || 'pages')
-      this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' } })
-      console.log(this.table)
+      this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' }, query: { page: 1 } })
       if (this.table) {
         this.$store.dispatch('setExplorerTab', 'pages')
       }
     }
   },
   computed: {
-    ...mapGetters(['sources', 'filepath']),
+    ...mapGetters(['sources', 'filepath', 'allDocsLoaded']),
     currentDocumentName () {
       // console.log('\n\nFILEPATH: ' + this.$store.getters.filepath)
       // console.log(this.filepath, this.availableDocuments)
@@ -60,6 +63,7 @@ export default {
       return 'N/A'
     },
     availableDocuments () {
+      // console.log('SourceSelector: ' + this.sources.length + ' sources available')
       return this.sources.map(s => ({
         ...s,
         id: s.name.replaceAll(' ', '_'),

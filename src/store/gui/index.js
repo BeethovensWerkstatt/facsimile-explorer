@@ -39,6 +39,7 @@ const guiModule = {
    * @property {Object} focusRect
    * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
    * @property {Number} awaitedPage number of the page to be opened when sufficient data is available. Used to resolve routes
+   * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
    */
   state: {
     explorerTab: 'home',
@@ -64,7 +65,8 @@ const guiModule = {
     focusRect: null,
     pageBorderPoints: [],
     awaitedDocument: null,
-    awaitedPage: null
+    awaitedPage: -1,
+    allDocsLoaded: false
   },
   /**
    * @namespace store.gui.mutations
@@ -295,6 +297,14 @@ const guiModule = {
      */
     SET_AWAITED_PAGE (state, pageNum) {
       state.awaitedPage = parseInt(pageNum)
+    },
+
+    /**
+     * called once as soon as all documents are properly loaded
+     * @param {[type]} state  [description]
+     */
+    SET_ALL_DOCS_LOADED (state) {
+      state.allDocsLoaded = true
     }
   },
   /**
@@ -516,7 +526,17 @@ const guiModule = {
      * @param {[type]} pageNum  [description]
      */
     setAwaitedPage ({ commit }, pageNum) {
-      commit('SET_AWAITED_PAGE', pageNum)
+      if (pageNum === parseInt(pageNum)) {
+        commit('SET_AWAITED_PAGE', pageNum)
+      }
+    },
+
+    /**
+     * used to flag that all documents are loaded
+     * @param {[type]} commit  [description]
+     */
+    setAllDocsLoaded ({ commit }) {
+      commit('SET_ALL_DOCS_LOADED')
     }
   },
   /**
@@ -787,6 +807,15 @@ const guiModule = {
      */
     awaitedPage: (state) => {
       return state.awaitedPage
+    },
+
+    /**
+     * returns if all docs are loaded
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    allDocsLoaded: (state) => {
+      return state.allDocsLoaded
     }
   }
 }

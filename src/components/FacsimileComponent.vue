@@ -416,7 +416,18 @@ export default {
     }
   },
   created () {
-
+    this.$watch(
+      () => this.$route.query,
+      (to, previous) => {
+        console.log('FacsimileComponent watch($query): ' + previous.page + ' -> ' + to.page)
+        // react to route changes...
+      },
+      () => this.$route.params,
+      (to, previous) => {
+        console.log('FacsimileComponent watch($params): ' + previous.source + ' -> ' + to.source)
+        // react to route changes...
+      }
+    )
   },
   mounted () {
     this.viewer = OpenSeadragon(osdOptions)

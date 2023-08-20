@@ -275,8 +275,12 @@ const actions = {
           dispatch('loadDocumentIntoStore', { path, name, dom: mei })
 
           contentData = { ...data, owner, repo, ref }
-          commit('SET_GH_FILE', contentData)
-          commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+          if (!getters.awaitedDocument) {
+            commit('SET_GH_FILE', contentData)
+            commit('SET_CONTENT_DATA', { ...contentData, doc: mei })
+          } else {
+            // console.log('skipping to set-gh-file for ' + contentData.name + ' while waiting for ' + getters.awaitedDocument)
+          }
         } catch (e) { // TODO if typeof function?
           console.error(e.message)
           console.error(e)
@@ -714,8 +718,8 @@ const actions = {
     }))
     // finally if any file fails
     Promise.all(sourcePromises).finally(() => {
+      dispatch('setAllDocsLoaded')
       dispatch('setLoading', false)
-      console.log('all loaded')
       commit('SET_GH_FILE', {})
       if (getters.awaitedDocument !== null) {
         const path = getters.documentPathByName(getters.awaitedDocument)
@@ -723,12 +727,13 @@ const actions = {
         dispatch('loadContent', { path })
         dispatch('setAwaitedDocument', null)
         // console.log('done')
-        /* if (getters.awaitedPage !== null) {
+        /* if (getters.awaitedPage !== -1) {
           dispatch('setCurrentPage', getters.awaitedPage - 1)
-          dispatch('setAwaitedPage', null)
+          dispatch('setAwaitedPage', -1)
           // console.log('done')
         } */
       }
+      console.log('Octokit: All documents properly loaded')
     })
     // for (const source of sourcefiles) {
     //   dispatch('loadContent', source)

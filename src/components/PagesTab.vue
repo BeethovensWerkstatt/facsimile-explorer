@@ -52,8 +52,9 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <!--<OpenSeadragonComponent :svg="false" :annotorious="true" :pageBorders="true" :rastrums="true" :page="currentPage"/>-->
-        <FacsimileComponent v-if="tileSource !== null"/>
+        <div><FacsimileComponent v-if="tileSource !== null"/></div>
       </MainStage>
+
     </div>
   </div>
 </template>
@@ -145,7 +146,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased', 'currentPageAngle', 'pageBorderPoints', 'pageBorderPointsIncomplete', 'currentPageDimensions']),
+    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased', 'currentPageAngle', 'pageBorderPoints', 'pageBorderPointsIncomplete', 'currentPageDimensions', 'allDocsLoaded']),
     fragmentModeActive () {
       return this.$store.getters.facsimileClickMode === 'pageMargin'
     },
@@ -196,6 +197,12 @@ export default {
       flex: 1 1 auto;
       order: 2;
       height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+
+      & > div {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
     }
   }
 }

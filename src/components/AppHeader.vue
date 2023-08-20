@@ -21,19 +21,24 @@
     <div class="appTabs">
       <ul class="tab">
         <li class="tab-item" >
-          <a href="#" :class="{active: explorerTab === 'home'}" @click.stop.prevent="openTab('home')"><img class="home" src="/home.png"></a>
+          <router-link to="/" active-class="active"><img class="home" src="/home.png"></router-link>
+          <!--<a href="#" :class="{active: explorerTab === 'home'}" @click.stop.prevent="openTab('home')"></a>-->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: explorerTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>
+          <router-link :to="getRouterLinkTarget('pages')" active-class="active">Pages / SVG</router-link>
+          <!-- <a href="#" :class="{active: explorerTab === 'pages'}" @click.stop.prevent="openTab('pages')">Pages / SVG</a>-->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: explorerTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>
+          <router-link :to="getRouterLinkTarget('zones')" active-class="active">Writing Zones</router-link>
+          <!-- <a href="#" :class="{active: explorerTab === 'zones'}" @click.stop.prevent="openTab('zones')">Writing Zones</a>-->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: explorerTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>
+          <router-link :to="getRouterLinkTarget('annot')" active-class="active">Annotated Transcripts</router-link>
+          <!-- <a href="#" :class="{active: explorerTab === 'annot'}" @click.stop.prevent="openTab('annot')">Annotated Transcripts</a>-->
         </li>
         <li class="tab-item">
-          <a href="#" :class="{active: explorerTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>
+          <router-link :to="getRouterLinkTarget('diplo')" active-class="active">Diplomatic Transcripts</router-link>
+          <!-- <a href="#" :class="{active: explorerTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>-->
         </li>
       </ul>
     </div>
@@ -105,6 +110,12 @@ export default {
     },
     commitGH () {
       this.$store.dispatch('setModal', 'commitmei')
+    },
+    getRouterLinkTarget (mode) {
+      const doc = this.$route.params.source || this.$store.getters.filename
+      const page = this.$route.query.page ? '?page=' + this.$route.query.page : ''
+      const out = !doc ? '/' : '/' + doc + '/' + mode + page
+      return out
     }
   }
 }

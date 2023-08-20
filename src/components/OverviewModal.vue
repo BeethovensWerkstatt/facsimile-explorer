@@ -11,17 +11,19 @@
         <div class="content">
           <div>
             <h1>Pages</h1>
-            <DocumentOverviewRow
-              v-for="r in maxRows"
-              :key="r"
-              :left="calcRowLeft(r)"
-              :right="calcRowRight(r)"
-            />
+            <template v-if="allDocsLoaded">
+              <DocumentOverviewRow
+                v-for="r in maxRows"
+                :key="r"
+                :left="calcRowLeft(r)"
+                :right="calcRowRight(r)"
+              />
+            </template>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <div v-if="this.$store.getters.previewPageZeroBased >= 0" class="preview-info">
+        <div v-if="allDocsLoaded && this.$store.getters.previewPageZeroBased >= 0" class="preview-info">
           <div>
             <div>
               Label: {{ previewLabel }}
@@ -128,6 +130,9 @@ export default {
       const currentPage = this.$store.getters.currentPageZeroBased
 
       return previewPage === -1 || previewPage === currentPage
+    },
+    allDocsLoaded () {
+      return this.$store.getters.allDocsLoaded
     }
   },
   created () {

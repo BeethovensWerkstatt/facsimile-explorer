@@ -246,9 +246,9 @@ export default createStore({
       const title = mei.querySelector('title').textContent
       commit('SET_TITLE', title)
 
-      const num = getters.awaitedPage !== null ? parseInt(getters.awaitedPage) - 1 : 0
+      const num = getters.awaitedPage !== -1 ? parseInt(getters.awaitedPage) - 1 : 0
       commit('SET_CURRENT_PAGE', num)
-      dispatch('setAwaitedPage', null)
+      dispatch('setAwaitedPage', -1)
       commit('SET_WELLFORMED', true)
       commit('SET_PROCESSING', false)
       commit('SET_MODAL', null)
@@ -395,7 +395,7 @@ export default createStore({
       const arr = []
       state.pages.forEach(page => {
         const obj = {
-          tileSource: page.uri.replace('http://', 'https://'),
+          tileSource: typeof page?.uri?.replace === 'function' ? page.uri.replace('http://', 'https://') : '',
           width: page.width,
           x: 0,
           y: 0
