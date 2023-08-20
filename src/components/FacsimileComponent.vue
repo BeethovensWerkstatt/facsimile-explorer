@@ -6,6 +6,7 @@
 
 <script>
 import OpenSeadragon from 'openseadragon'
+import { rotatePoint } from '@/tools/trigonometry.js'
 
 const osdOptions = {
   id: 'facsimileContainer',
@@ -94,7 +95,8 @@ export default {
         y: imagePoint.y,
         shift: e.shift
       }
-      console.log('clicked image', click, image.getBounds())
+      console.log('clicked image', click)
+      // console.log(e)
       this.$store.dispatch('facsimileClick', click)
     },
 
@@ -140,6 +142,46 @@ export default {
       }
     },
 
+    pageClickListener (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      // const image = this.viewer.world.getItemAt(0)
+
+      const counterRotate = this.viewer.viewport.getRotation()// this.tileSource.degrees * -1
+      const center = { x: 0, y: 0 }
+      console.log('counterRotate: ', counterRotate)
+      console.log(e)
+
+      const pageOverlay = this.viewer.getOverlayById(document.querySelector('.overlay.pageBorder'))
+      const pageOverlayViewportBounds = pageOverlay.getBounds(this.viewer.viewport)
+
+      console.log('pageOverlayViewportBounds', pageOverlayViewportBounds)
+
+      const clientPos = new OpenSeadragon.Point(e.clientX, e.clientY)// { x: e.clientX, y: e.clientY }
+
+      // const imagePoint = image.viewerElementToImageCoordinates(clientPos)
+      // const viewerPoint = this.viewer.viewport.viewportToViewerElementCoordinates(clientPos)
+      // const viewPoint = this.viewer.viewport.viewerElementToViewportCoordinates(clientPos)
+      // const pointFromPixel = this.viewer.viewport.pointFromPixel(clientPos)
+      // const pointFromPixelNoRotate = this.viewer.viewport.pointFromPixelNoRotate(clientPos)
+      // const windowToImageCoordinates = this.viewer.viewport.windowToImageCoordinates(clientPos)
+      const windowToViewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(clientPos)
+      const click = {
+        x: clientPos.x,
+        y: clientPos.y,
+        shift: e.shift
+      }
+
+      console.log('clicked page', click)
+      // console.log('unrotated imagePoint ', imagePoint, rotatePoint(imagePoint, center, counterRotate))
+      // console.log('unrotated viewerPoint ', viewerPoint, rotatePoint(viewerPoint, center, counterRotate))
+      // console.log('unrotated viewPoint ', viewPoint, rotatePoint(viewPoint, center, counterRotate))
+      // console.log('unrotated pointFromPixel ', pointFromPixel, rotatePoint(pointFromPixel, center, counterRotate))
+      // console.log('pointFromPixelNoRotate', pointFromPixelNoRotate)
+      // console.log('windowToImageCoordinates ', windowToImageCoordinates, rotatePoint(windowToImageCoordinates, center, counterRotate))
+      console.log('windowToViewportCoordinates ', windowToViewportCoordinates, rotatePoint(windowToViewportCoordinates, center, counterRotate), windowToViewportCoordinates.rotate(counterRotate, center))
+    },
+
     /**
      * triggered by double-clicking onto the svg overlay
      * @param  {[type]} e               [description]
@@ -170,7 +212,10 @@ export default {
       // todo: remove listeners
       this.$store.dispatch('setLoading', true)
       // this.$store.dispatch('resetPageBorderPoints')
-      this.viewer.open(this.tileSource)
+
+      const ts = this.tileSource
+      ts.degrees = 0
+      this.viewer.open(ts)
     },
 
     /**
@@ -180,7 +225,7 @@ export default {
     facsimileOpened (data) {
       this.renderedUri = data.source
       this.$store.dispatch('setLoading', false)
-
+      this.setPageRotation()
       console.log('facsimileOpened', data)
       this.renderGrid(data)
 
@@ -279,7 +324,8 @@ export default {
           location: new OpenSeadragon.Point(parseInt(i) - width / 2, verticalStart),
           width,
           height: pageHeight * 1.2,
-          placement: OpenSeadragon.Placement.TOP
+          placement: OpenSeadragon.Placement.TOP,
+          rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
         })
       }
 
@@ -309,7 +355,8 @@ export default {
           location: new OpenSeadragon.Point(horizontalStart, parseInt(i) - height / 2),
           width: pageWidth * 1.2,
           height,
-          placement: OpenSeadragon.Placement.LEFT
+          placement: OpenSeadragon.Placement.LEFT,
+          rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
         })
       }
     },
@@ -318,14 +365,21 @@ export default {
      * rotate the page facsimile
      */
     setPageRotation () {
-      const tiledImage = this.viewer.world.getItemAt(0)
+      /* const tiledImage = this.viewer.world.getItemAt(0)
       const rotation = parseFloat(this.$store.getters.currentPageRotation)
 
       if (!tiledImage || !rotation) {
         return null
       }
 
-      tiledImage.setRotation(rotation)
+      tiledImage.setRotation(rotation) */
+      const rotation = parseFloat(this.$store.getters.currentPageRotation)
+
+      if (!rotation) {
+        return null
+      }
+
+      this.viewer.viewport.setRotationWithPivot(rotation, new OpenSeadragon.Point(0, 0))
     },
 
     renderPageBorders () {
@@ -342,6 +396,27 @@ export default {
         return null
       }
 
+      const existingRotatedOverlay = document.querySelector('.rotatedPageBorder.overlay')
+
+      const centerX = parseFloat(pageDimensions.mmWidth) / 2
+      const centerY = parseFloat(pageDimensions.mmHeight) / 2
+      const rotatedLocation = new OpenSeadragon.Rect(0, 0, centerX * 2, centerY * 2)
+
+      if (!existingRotatedOverlay) {
+        const element = document.createElement('div')
+        element.classList.add('overlay')
+        element.classList.add('rotatedPageBorder')
+
+        this.viewer.addOverlay({
+          element,
+          location: rotatedLocation,
+          placement: OpenSeadragon.Placement.CENTER,
+          rotationMode: OpenSeadragon.OverlayRotationMode.BOUNDING_BOX
+        })
+      } else {
+        this.viewer.updateOverlay(existingRotatedOverlay, rotatedLocation)
+      }
+
       const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
 
       const existingOverlay = document.querySelector('.pageBorder.overlay')
@@ -350,6 +425,7 @@ export default {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('pageBorder')
+        element.addEventListener('click', this.pageClickListener)
 
         this.viewer.addOverlay({
           element,
@@ -359,6 +435,51 @@ export default {
       } else {
         this.viewer.updateOverlay(existingOverlay, location)
       }
+      /*
+      const center = location.getCenter()
+      const deg = this.viewer.viewport.getRotation()
+      const tl = location.getTopLeft()// .rotate(deg, location.getTopLeft())
+      const tr = location.getTopRight()// .rotate(deg, location.getTopRight())
+      const bl = location.getBottomLeft()// .rotate(deg, location.getBottomLeft())
+      const br = location.getBottomRight()// .rotate(deg, location.getBottomRight())
+
+      const tlRotated = tl.rotate(deg, tl)
+      const trRotated = tr.rotate(deg, tr)
+      const blRotated = bl.rotate(deg, bl)
+      const brRotated = br.rotate(deg, br)
+
+      const left = deg > 0 ? tlRotated.x : blRotated.x
+      const top = deg > 0 ? trRotated.y : tlRotated.y
+      const right = deg > 0 ? brRotated.x : trRotated.x
+      const bottom = deg > 0 ? blRotated.y : brRotated.y
+      const width = right - left
+      const height = bottom - top
+
+      const origin = rotatePoint({ x: center.x - width / 2, y: center.y - height / 2 }, { x: tl.x, y: tl.x }, deg)
+
+      const offsetX = origin.x - tl.x
+      const offsetY = origin.y - tl.y
+      const irX = deg > 0 ? origin.x : origin.x - offsetX
+      const irY = deg > 0 ? origin.y + offsetY : origin.y
+      const irW = width - offsetX
+      const irH = height - offsetY
+
+      const innerRect = new OpenSeadragon.Rect(irX, irY, irW, irH)
+      const existingInnerOverlay = document.querySelector('.pageBorderInner.overlay')
+
+      if (!existingInnerOverlay) {
+        const element = document.createElement('div')
+        element.classList.add('overlay')
+        element.classList.add('pageBorderInner')
+
+        this.viewer.addOverlay({
+          element,
+          location: innerRect,
+          rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
+        })
+      } else {
+        this.viewer.updateOverlay(existingInnerOverlay, innerRect)
+      } */
 
       //
       /* document.querySelectorAll('.pageBorderPoint.overlay, .fragmentFrame, .pageBorder.overlay').forEach(overlay => {
@@ -413,6 +534,10 @@ export default {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
+
+      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
+        overlay.removeEventListener('click', this.pageClickListener)
+      })
     }
   },
   created () {
@@ -431,7 +556,8 @@ export default {
   },
   mounted () {
     this.viewer = OpenSeadragon(osdOptions)
-
+    console.log('FacsimileComponent:mounted()')
+    console.log('FacsimileComponent:created()')
     this.viewer.addHandler('open', (data) => {
       this.facsimileOpened(data)
     })
@@ -470,11 +596,12 @@ export default {
     this.openFacsimile()
   },
   updated () {
-    console.log('updated facsimile')
+    console.log('FacsimileComponent:updated()')
     this.openFacsimile()
   },
   beforeUnmount () {
     this.unload()
+    console.log('FacsimileComponent:beforeUnmount()')
     // this.unwatchPageBorders()
     this.unwatchPageRotation()
     this.unwatchPageDimensions()
@@ -688,11 +815,15 @@ export default {
 }
 
 .overlay.pageBorder {
-  outline: 8px solid #0000ff99;
+  outline: 1px solid #ff00ff;
+}
+
+.overlay.pageBorderInner {
+  outline: 1px solid #00ffff;
 }
 
 .overlay.rotatedPageBorder {
-  outline: 8px solid #ff00ff99;
+  outline: 8px solid #0000ff99;
 }
 
 .grid {

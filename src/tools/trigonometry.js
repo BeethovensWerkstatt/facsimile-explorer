@@ -150,6 +150,7 @@ function determineDeg (p1, p2) {
  * @return {[type]}     [description]
  */
 function deg2rad (deg) {
+  // console.log('\n\ndeg2rad. deg="' + deg + '", rad="' + deg * (Math.PI / 180) + '"')
   return deg * (Math.PI / 180)
 }
 
@@ -160,7 +161,7 @@ function deg2rad (deg) {
  * @param  {[type]} deg                  the rotation in degrees
  * @return {[type]}        a point with x and y props
  */
-function rotatePoint (point, center, deg) {
+export function rotatePoint (point, center, deg) {
   const xOff = center.x
   const yOff = center.y
 
@@ -177,7 +178,7 @@ function rotatePoint (point, center, deg) {
     y: y1 + yOff // Math.sin(rad) * dist + xOff
   }
 
-  // console.log('rotating points', /* point, { x, y }, */ dist, rad, newPoint, center)
+  // console.log('rotating points', deg, /* point, { x, y }, dist, */ rad, newPoint, center)
 
   return newPoint
 }
