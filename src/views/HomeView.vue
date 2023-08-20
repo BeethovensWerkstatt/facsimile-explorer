@@ -12,10 +12,10 @@
   HALLO HOMEVIEW
 
   <HomeTab v-if="explorerTab === 'home'"/>
-  <PagesTab v-else-if="explorerTab === 'pages'"/>
+  <!--<PagesTab v-else-if="explorerTab === 'pages'"/>
   <ZonesTab v-else-if="explorerTab === 'zones'"/>
   <AnnotTab v-else-if="explorerTab === 'annot'"/>
-  <DiploTab v-else-if="explorerTab === 'diplo'"/>
+  <DiploTab v-else-if="explorerTab === 'diplo'"/>-->
 
   <!--<template v-if="isReady && !isReady">
     <splitpanes class="mainSplitter default-theme">
@@ -59,10 +59,10 @@ import OpenFileModal from '@/components/OpenFileModal.vue'
 import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 
 import HomeTab from '@/components/HomeTab.vue'
-import PagesTab from '@/components/PagesTab.vue'
-import ZonesTab from '@/components/ZonesTab.vue'
-import AnnotTab from '@/components/AnnotTab.vue'
-import DiploTab from '@/components/DiploTab.vue'
+// import PagesTab from '@/components/PagesTab.vue'
+// import ZonesTab from '@/components/ZonesTab.vue'
+// import AnnotTab from '@/components/AnnotTab.vue'
+// import DiploTab from '@/components/DiploTab.vue'
 
 // import { Splitpanes, Pane } from 'splitpanes'
 // import 'splitpanes/dist/splitpanes.css'
@@ -82,11 +82,11 @@ export default {
     AssignSVGsModal,
     // Splitpanes,
     // Pane,
-    HomeTab,
-    PagesTab,
-    ZonesTab,
-    AnnotTab,
-    DiploTab
+    HomeTab
+    // PagesTab,
+    // ZonesTab,
+    // AnnotTab,
+    // DiploTab
   },
   methods: {
     doScroll (e) {
@@ -103,6 +103,12 @@ export default {
     noCurrentDoc () {
       return !this.$store.getters.currentDocPath
     }
+  },
+  beforeUnmount () {
+    console.log('HomeView:beforeUnmount()')
+  },
+  unmounted () {
+    console.log('HomeView:unmounted()')
   }
 }
 </script>

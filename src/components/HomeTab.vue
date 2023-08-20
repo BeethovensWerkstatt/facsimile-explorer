@@ -76,6 +76,9 @@ export default {
   methods: {
   },
   computed: {
+    sources () {
+      return this.$store.getters.sources
+    },
     infoRepo: () => `${config.repository.owner} / ${config.repository.repo}`,
     infoBranch: () => config.repository.branch,
     infoCommit () {

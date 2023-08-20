@@ -1,7 +1,8 @@
 <template>
 
    <div class="modal" :class="{ active }" id="open-file-modal">
-   <a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
+     OpenFileModal
+   <!--<a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
    <div class="modal-container">
      <div class="modal-header">
        <a href="#close" @click="closeModal()" class="btn btn-clear float-right" aria-label="Close"></a>
@@ -28,7 +29,7 @@
          <button class="btn" @click="closeModal()">Cancel</button>
        </div>
      </div>
-   </div>
+   </div>-->
  </div>
 
 </template>
