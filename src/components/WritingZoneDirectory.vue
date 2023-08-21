@@ -1,9 +1,9 @@
 <template>
   <div class="writingZoneDirectory">
 
-    <div class="page" :class="{ active: page.id === activePageId }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
-      <h2 title="Page Number">{{pageLabel(page)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page)}}</small></h2>
-      <template v-if="page.id === activePageId">
+    <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
+      <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page)}}</small></h2>
+      <template v-if="p === activePage">
         <div class="wz" :class="{ firstZone: wz.annotTrans !== null && wz.annotTrans.firstZone, followUpZone: wz.annotTrans !== null && !wz.annotTrans.firstZone, active: wz.id === activeWritingZoneId }" v-for="(wz, w) in writingZonesOnActivePage" :key="w">
           <span class="zoneNumber">WZ {{wz.label}}</span>
           <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
@@ -52,62 +52,31 @@ export default {
         return '.8rem'
       }
     },
-    pageLabel (page) {
-      if (this.displayPerspective === 'reconstruction') {
-        return page.reconstructionLabel
-      } else {
-        return page.modernLabel
-      }
+    pageLabel (page, p) {
+      return page.label || p
     },
-    pageAltLabel (page) {
-      if (this.displayPerspective === 'reconstruction') {
-        const doc = this.modernDocuments.find(d => d.id === page.modernDocumentId)
-        return doc.label + ': ' + page.modernLabel
-      } else {
-        const doc = this.reconstructionDocuments.find(d => d.id === page.reconstructionId)
-        return doc.label + ': ' + page.reconstructionLabel
-      }
+    pageAltLabel (page, p) {
+      return page.name ? page.name + ' ' + p : null
     },
     showWzPreview (page, wz) {
       alert('Hier könnte man gut einen Modal aufmachen, in dem der jeweilige Bildausschnitt per IIIF geladen wird. Keine Overlays o.ä., einfach nur eine schnelle Voransicht, damit man sehen kann, welcher Bereich das ist.')
     }
   },
   computed: {
-    displayPerspective () {
-      // TODO: das sollte natürlich über einen getter funktionieren
-      return 'reconstruction' // 'modern'
+    activePage () {
+      return this.$store.getters.currentPageZeroBased
     },
     activePageId () {
       // TODO: das sollte natürlich über einen getter funktionieren
-      return 'e5'
+      return this.pages[this.$store.getters.currentPageZeroBased].id
     },
     activeWritingZoneId () {
       return 'sdf'
     },
-    modernDocuments () {
-      return [{ id: 'E', label: 'Engelmann' },
-        { id: 'L', label: 'Landsberg 8' },
-        { id: 'B', label: 'BSk 21' },
-        { id: 'G', label: 'Grasnick 20b' },
-        { id: 'F', label: 'BN fond français 12.756' },
-        { id: 'Ms96', label: 'Ms. 96' },
-        { id: 'Ms57', label: 'Ms. 57(2)' }
-      ]
-    },
-    reconstructionDocuments () {
-      return [{ id: 'NotK', label: 'Notirungsbuch K' }]
-    },
     pages () {
-      // TODO: width und height können auch woanders herkommen, hier erstmal nur kleine Werte, weil ich unten erst Prozentwerte dachte.
-      // Das sollen die Pixelabmessungen der Bilder sein.
-      return [{ id: 'e1', modernLabel: '1r', reconstructionLabel: '1', zonesCount: 11, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e2', modernLabel: '1v', reconstructionLabel: '2', zonesCount: 3, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e3', modernLabel: '2r', reconstructionLabel: '3', zonesCount: 7, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e4', modernLabel: '2v', reconstructionLabel: '4', zonesCount: 12, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e6', modernLabel: '4v', reconstructionLabel: '6', zonesCount: 8, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e7', modernLabel: '3r', reconstructionLabel: '7', zonesCount: 14, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 },
-        { id: 'e8', modernLabel: '3v', reconstructionLabel: '8', zonesCount: 11, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 }]
+      const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
+      console.log(this.activePage, pages)
+      return pages.map(p => ({ ...p, modernLabel: p.label }))
     },
     writingZonesOnActivePage () {
       // TODO: das sollte natürlich über einen getter funktionieren. WritingZones nicht in pages ()
