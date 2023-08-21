@@ -1674,7 +1674,7 @@ const dataModule = {
 
       const page = pages[pageIndex]
       if (!page || !page.uri) {
-        return null
+        return 0
       }
 
       const rotate = page.uri.split('&rotate=')[1]
