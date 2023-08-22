@@ -106,11 +106,10 @@ export default {
       return this.$store.getters.currentPageZeroBased
     },
     activePageId () {
-      // TODO: das sollte natürlich über einen getter funktionieren
       return this.pages[this.$store.getters.currentPageZeroBased].id
     },
     activeWritingZoneId () {
-      return 'sdf'
+      return this.activeWritingZone
     },
     pages () {
       const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
