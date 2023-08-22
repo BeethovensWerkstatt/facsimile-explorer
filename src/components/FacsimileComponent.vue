@@ -6,7 +6,8 @@
 
 <script>
 import OpenSeadragon from 'openseadragon'
-import { rotatePoint } from '@/tools/trigonometry.js'
+// import { rotatePoint } from '@/tools/trigonometry.js'
+import { getMediaFragmentBBoxRect, getMediaFragmentRect, getMediaFragmentInnerBoxRect } from '@/tools/facsimileHelpers.js'
 
 const osdOptions = {
   id: 'facsimileContainer',
@@ -96,6 +97,59 @@ export default {
         shift: e.shift
       }
       console.log('clicked image', click)
+
+      // console.log('Position: ', e.position, e)
+
+      const origin = new OpenSeadragon.Point(0, 0)
+      const deg = this.$store.getters.currentPageRotation
+
+      const originalClick = new OpenSeadragon.Point(e.originalEvent.clientX, e.originalEvent.clientY)
+      const viewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(originalClick)
+      const clickedPagePos = viewportCoordinates.rotate(deg, origin)
+      const pageRect = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+
+      const onPage = pageRect.location.containsPoint(clickedPagePos)
+
+      if (onPage) {
+        console.log('clicked page ', clickedPagePos)
+      }
+
+      /*
+      const counterRotate = this.viewer.viewport.getRotation()// this.tileSource.degrees * -1
+      const center = { x: 0, y: 0 }
+      console.log('counterRotate: ', counterRotate, this.tileSource.degrees * -1)
+      console.log(e)
+
+      const pageOverlay = this.viewer.getOverlayById(document.querySelector('.overlay.pageBorder'))
+      const pageOverlayViewportBounds = pageOverlay.getBounds(this.viewer.viewport)
+
+      console.log('pageOverlayViewportBounds', pageOverlayViewportBounds)
+
+      const clientPos = new OpenSeadragon.Point(e.clientX, e.clientY)// { x: e.clientX, y: e.clientY }
+
+      // const imagePoint = image.viewerElementToImageCoordinates(clientPos)
+      // const viewerPoint = this.viewer.viewport.viewportToViewerElementCoordinates(clientPos)
+      // const viewPoint = this.viewer.viewport.viewerElementToViewportCoordinates(clientPos)
+      // const pointFromPixel = this.viewer.viewport.pointFromPixel(clientPos)
+      // const pointFromPixelNoRotate = this.viewer.viewport.pointFromPixelNoRotate(clientPos)
+      // const windowToImageCoordinates = this.viewer.viewport.windowToImageCoordinates(clientPos)
+      const windowToViewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(clientPos)
+      const click = {
+        x: clientPos.x,
+        y: clientPos.y,
+        shift: e.shift
+      }
+
+      console.log('clicked page', click)
+      // console.log('unrotated imagePoint ', imagePoint, rotatePoint(imagePoint, center, counterRotate))
+      // console.log('unrotated viewerPoint ', viewerPoint, rotatePoint(viewerPoint, center, counterRotate))
+      // console.log('unrotated viewPoint ', viewPoint, rotatePoint(viewPoint, center, counterRotate))
+      // console.log('unrotated pointFromPixel ', pointFromPixel, rotatePoint(pointFromPixel, center, counterRotate))
+      // console.log('pointFromPixelNoRotate', pointFromPixelNoRotate)
+      // console.log('windowToImageCoordinates ', windowToImageCoordinates, rotatePoint(windowToImageCoordinates, center, counterRotate))
+      console.log('windowToViewportCoordinates ', windowToViewportCoordinates, rotatePoint(windowToViewportCoordinates, center, counterRotate), windowToViewportCoordinates.rotate(counterRotate, center))
+      */
+
       // console.log(e)
       this.$store.dispatch('facsimileClick', click)
     },
@@ -140,46 +194,6 @@ export default {
         // console.log(e)
         this.$store.dispatch('clickedSvgShape', e.target.id)
       }
-    },
-
-    pageClickListener (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      // const image = this.viewer.world.getItemAt(0)
-
-      const counterRotate = this.viewer.viewport.getRotation()// this.tileSource.degrees * -1
-      const center = { x: 0, y: 0 }
-      console.log('counterRotate: ', counterRotate, this.tileSource.degrees * -1)
-      console.log(e)
-
-      const pageOverlay = this.viewer.getOverlayById(document.querySelector('.overlay.pageBorder'))
-      const pageOverlayViewportBounds = pageOverlay.getBounds(this.viewer.viewport)
-
-      console.log('pageOverlayViewportBounds', pageOverlayViewportBounds)
-
-      const clientPos = new OpenSeadragon.Point(e.clientX, e.clientY)// { x: e.clientX, y: e.clientY }
-
-      // const imagePoint = image.viewerElementToImageCoordinates(clientPos)
-      // const viewerPoint = this.viewer.viewport.viewportToViewerElementCoordinates(clientPos)
-      // const viewPoint = this.viewer.viewport.viewerElementToViewportCoordinates(clientPos)
-      // const pointFromPixel = this.viewer.viewport.pointFromPixel(clientPos)
-      // const pointFromPixelNoRotate = this.viewer.viewport.pointFromPixelNoRotate(clientPos)
-      // const windowToImageCoordinates = this.viewer.viewport.windowToImageCoordinates(clientPos)
-      const windowToViewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(clientPos)
-      const click = {
-        x: clientPos.x,
-        y: clientPos.y,
-        shift: e.shift
-      }
-
-      console.log('clicked page', click)
-      // console.log('unrotated imagePoint ', imagePoint, rotatePoint(imagePoint, center, counterRotate))
-      // console.log('unrotated viewerPoint ', viewerPoint, rotatePoint(viewerPoint, center, counterRotate))
-      // console.log('unrotated viewPoint ', viewPoint, rotatePoint(viewPoint, center, counterRotate))
-      // console.log('unrotated pointFromPixel ', pointFromPixel, rotatePoint(pointFromPixel, center, counterRotate))
-      // console.log('pointFromPixelNoRotate', pointFromPixelNoRotate)
-      // console.log('windowToImageCoordinates ', windowToImageCoordinates, rotatePoint(windowToImageCoordinates, center, counterRotate))
-      console.log('windowToViewportCoordinates ', windowToViewportCoordinates, rotatePoint(windowToViewportCoordinates, center, counterRotate), windowToViewportCoordinates.rotate(counterRotate, center))
     },
 
     /**
@@ -429,14 +443,19 @@ export default {
         return null
       }
 
+      const outerPos = getMediaFragmentBBoxRect(OpenSeadragon, this.$store.getters)
+      const centerPos = getMediaFragmentRect(OpenSeadragon, this.$store.getters)
+      const innerPos = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+
+      if (!outerPos || !centerPos || !innerPos) {
+        // console.log('rectangles unavailable', outerPos, centerPos, innerPos)
+        return null
+      }
+
       // the bounding box of the media fragment, which could be loaded by IIIF
-      const existingRotatedOverlay = document.querySelector('.overlay.pageBorder.bbox')
+      const existingBBoxOverlay = document.querySelector('.overlay.pageBorder.bbox')
 
-      const centerX = parseFloat(pageDimensions.mmWidth) / 2
-      const centerY = parseFloat(pageDimensions.mmHeight) / 2
-      const rotatedLocation = new OpenSeadragon.Rect(0, 0, centerX * 2, centerY * 2)
-
-      if (!existingRotatedOverlay) {
+      if (!existingBBoxOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('pageBorder')
@@ -444,17 +463,15 @@ export default {
 
         this.viewer.addOverlay({
           element,
-          location: rotatedLocation,
-          placement: OpenSeadragon.Placement.CENTER,
-          rotationMode: OpenSeadragon.OverlayRotationMode.BOUNDING_BOX
+          location: outerPos.location,
+          placement: outerPos.placement,
+          rotationMode: outerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingRotatedOverlay, rotatedLocation)
+        this.viewer.updateOverlay(existingBBoxOverlay, outerPos.location)
       }
 
       // the actual rectangle stored in the data
-      const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
-
       const existingOverlay = document.querySelector('.overlay.pageBorder.mediaFragment')
 
       if (!existingOverlay) {
@@ -466,34 +483,14 @@ export default {
 
         this.viewer.addOverlay({
           element,
-          location,
-          rotationMode: OpenSeadragon.OverlayRotationMode.EXACT
+          location: centerPos.location,
+          rotationMode: centerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingOverlay, location)
+        this.viewer.updateOverlay(existingOverlay, centerPos.location)
       }
 
       // get innermost rectangle
-      const center = location.getCenter()
-      const deg = this.viewer.viewport.getRotation()
-      const tl = location.getTopLeft()// .rotate(deg, location.getTopLeft())
-
-      const centerRotated = center.rotate(deg, tl)
-
-      const width = location.width
-      const height = location.height
-
-      const offsetX = Math.abs(center.x - centerRotated.x)
-      const offsetY = Math.abs(center.y - centerRotated.y)
-
-      // const origin = rotatePoint({ x: center.x - width / 2, y: center.y - height / 2 }, { x: tl.x, y: tl.x }, deg * -1)
-
-      const irX = deg < 0 ? center.x - width / 2 + offsetX * 2 : center.x - width / 2
-      const irY = deg < 0 ? center.y - height / 2 : center.y - height / 2 + offsetY * 2
-      const irW = deg < 0 ? width - offsetX * 2 : width - offsetX * 2
-      const irH = deg < 0 ? height - offsetY * 2 : height - offsetY * 2
-
-      const innerRect = new OpenSeadragon.Rect(irX, irY, irW, irH)
       const existingInnerOverlay = document.querySelector('.overlay.pageBorder.actualPage')
 
       if (!existingInnerOverlay) {
@@ -501,15 +498,14 @@ export default {
         element.classList.add('overlay')
         element.classList.add('pageBorder')
         element.classList.add('actualPage')
-        element.addEventListener('click', this.pageClickListener)
 
         this.viewer.addOverlay({
           element,
-          location: innerRect,
-          rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
+          location: innerPos.location,
+          rotationMode: innerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingInnerOverlay, innerRect)
+        this.viewer.updateOverlay(existingInnerOverlay, innerPos.location)
       }
 
       //
@@ -564,10 +560,6 @@ export default {
     unload () {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
-      })
-
-      document.querySelectorAll('.pageBorder.overlay').forEach(overlay => {
-        overlay.removeEventListener('click', this.pageClickListener)
       })
     }
   },
@@ -856,6 +848,8 @@ export default {
 
 .overlay.pageBorder.actualPage {
   outline: 8px solid #0000ff99;
+  background: #0000ff33;
+  z-index: 1;
 }
 
 .grid {
