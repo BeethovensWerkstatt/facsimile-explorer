@@ -10,7 +10,7 @@
   <OpenFileModal/>
   <AssignSVGsModal/>
 
-  HELLO MODUSVIEW
+  <!-- HELLO MODUSVIEW -->
 
   <HomeTab v-if="explorerTab === 'home'"/>
   <PagesTab v-else-if="explorerTab === 'pages'"/>

@@ -1899,7 +1899,6 @@ const dataModule = {
         return []
       }
       const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
-      console.log(genDescWzArr)
 
       if (genDescWzArr.length === 0) {
         return []
@@ -1909,6 +1908,7 @@ const dataModule = {
       const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
       const svgDom = getters.svgForCurrentPage
 
+      // console.log(genDescPage, genDescWzArr, surface, svgDom)
       const arr = []
 
       if (!svgDom) {

@@ -64,9 +64,35 @@ export default {
     WritingZonesAtAnnotTrans,
     VerovioComponent
   },
+  created () {
+    this.unwatchSvgVerification = this.$store.watch((state, getters) => getters.currentSvgPath,
+      (newPath, oldPath) => {
+        this.verifySvgAvailable()
+      })
+
+    this.verifySvgAvailable()
+  },
+  beforeUnmount () {
+    this.unwatchSvgVerification()
+  },
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleAnnotTabLeftSidebar')
+    },
+    verifySvgAvailable () {
+      const svgPath = this.$store.getters.currentSvgPath
+      const svg = this.$store.getters.svgForCurrentPage
+
+      // console.log('\n\n\nSHOULD HAVE ' + svgPath)
+      // console.log('what I have is')
+      // console.log(svg)
+
+      if (svgPath !== null && !svg) {
+        // console.log('need to do something about this…')
+        this.$store.dispatch('loadSvgFile', {
+          path: svgPath
+        })
+      }
     }
     /* loadAnnotTrans () {
       this.$store.dispatch('getFile', {
