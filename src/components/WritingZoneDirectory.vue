@@ -1,14 +1,20 @@
 <template>
   <div class="writingZoneDirectory">
 
-    <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id" @click="setPage(p)">
+    <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
       <!-- <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page, p)}}</small></h2> -->
-      <h2>{{ page.label ? page.label : (p + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
+      <h2 @click="setPage(p)">{{ page.label ? page.label : (p + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
       <template v-if="p === activePage">
-        <div class="wz" :class="{ firstZone: wz.annotTrans !== null && wz.annotTrans.firstZone, followUpZone: wz.annotTrans !== null && !wz.annotTrans.firstZone, active: wz.id === activeWritingZoneId }" v-for="(wz, w) in writingZonesOnActivePage" :key="w">
+        <div
+          class="wz"
+          :class="{ firstZone: wz.annotTrans !== null && wz.annotTrans.firstZone, followUpZone: wz.annotTrans !== null && !wz.annotTrans.firstZone, active: wz.id === activeWritingZone }"
+          v-for="(wz, w) in writingZonesOnActivePage"
+          :key="w"
+          @click="selectWritingZone(wz)"
+        >
           <span class="zoneNumber">WZ {{wz.label}}</span>
           <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
-            <span class="actualPreview" :style="{top: wz.xywh.split(',')[0] + '%', left: wz.xywh.split(',')[1] + '%', width: wz.xywh.split(',')[2] + '%', height: wz.xywh.split(',')[3] + '%'}"></span>
+            <span class="actualPreview" :style="wzPageDimensions(page, wz.xywh)"></span>
           </span>
           <span class="hasTrans float-right">
             <template v-if="wz.annotTrans !== null">
@@ -34,7 +40,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
 
@@ -68,9 +74,34 @@ export default {
     },
     showWzPreview (page, wz) {
       alert('Hier könnte man gut einen Modal aufmachen, in dem der jeweilige Bildausschnitt per IIIF geladen wird. Keine Overlays o.ä., einfach nur eine schnelle Voransicht, damit man sehen kann, welcher Bereich das ist.')
+    },
+    wzPageDimensions (page, xywh) {
+      let pageWidth
+
+      if (page.width > page.height) {
+        const num = 0.8 * page.width / page.height
+        pageWidth = num.toFixed(2) + 'rem'
+      } else if (page.width <= page.height) {
+        const num = 0.8 * page.height / page.width
+        pageWidth = num.toFixed(2) + 'rem'
+      } else {
+        pageWidth = '.8rem'
+      }
+
+      const top = (100 / page.height * parseInt(xywh.split(',')[1])) + '%'
+      const left = (100 / page.width * parseInt(xywh.split(',')[0])) + '%'
+      const width = (100 / page.width * parseInt(xywh.split(',')[2])) + '%'
+      const height = (100 / page.height * parseInt(xywh.split(',')[3])) + '%'
+
+      return { pageWidth, top, left, width, height }
+    },
+    selectWritingZone (wz) {
+      this.$store.dispatch('setActiveWritingZone', wz.id)
+      // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
     }
   },
   computed: {
+    ...mapGetters(['activeWritingZone']),
     activePage () {
       return this.$store.getters.currentPageZeroBased
     },
@@ -100,7 +131,9 @@ export default {
         { id: 'qwe', label: '04', xywh: '14,21,23,9', annotTrans: null },
         { id: 'wer', label: '05', xywh: '38,47,32,23', annotTrans: { file: 'NK_p005_wz05_at.xml', firstZone: true } }]
       */
-      return this.$store.getters.writingZonesOnCurrentPage
+      const wzArr = this.$store.getters.writingZonesOnCurrentPage
+      console.log('writing zones', wzArr)
+      return wzArr
     }
   }
 }
