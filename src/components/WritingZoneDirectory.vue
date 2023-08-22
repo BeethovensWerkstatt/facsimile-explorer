@@ -1,8 +1,9 @@
 <template>
   <div class="writingZoneDirectory">
 
-    <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
-      <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page)}}</small></h2>
+    <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id" @click="setPage(p)">
+      <!-- <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page, p)}}</small></h2> -->
+      <h2>{{ page.label ? page.label : (p + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
       <template v-if="p === activePage">
         <div class="wz" :class="{ firstZone: wz.annotTrans !== null && wz.annotTrans.firstZone, followUpZone: wz.annotTrans !== null && !wz.annotTrans.firstZone, active: wz.id === activeWritingZoneId }" v-for="(wz, w) in writingZonesOnActivePage" :key="w">
           <span class="zoneNumber">WZ {{wz.label}}</span>
@@ -33,6 +34,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
 
 export default {
@@ -41,6 +44,11 @@ export default {
 
   },
   methods: {
+    ...mapActions(['setCurrentPage']),
+    setPage (i) {
+      this.setCurrentPage(i)
+      // this.$router.replace({ query: { page: i + 1 } })
+    },
     getPreviewWidth (page) {
       if (page.width < page.height) {
         const num = 0.8 * page.width / page.height
@@ -53,10 +61,10 @@ export default {
       }
     },
     pageLabel (page, p) {
-      return page.label || p
+      return page.modernLabel || p
     },
     pageAltLabel (page, p) {
-      return page.name ? page.name + ' ' + p : null
+      return page.reconstructionLabel
     },
     showWzPreview (page, wz) {
       alert('Hier könnte man gut einen Modal aufmachen, in dem der jeweilige Bildausschnitt per IIIF geladen wird. Keine Overlays o.ä., einfach nur eine schnelle Voransicht, damit man sehen kann, welcher Bereich das ist.')
@@ -76,7 +84,7 @@ export default {
     pages () {
       const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
       console.log(this.activePage, pages)
-      return pages.map(p => ({ ...p, modernLabel: p.label }))
+      return pages.map((page, p) => ({ ...page, reconstructionLabel: page.document }))
     },
     writingZonesOnActivePage () {
       // TODO: das sollte natürlich über einen getter funktionieren. WritingZones nicht in pages ()
@@ -85,11 +93,14 @@ export default {
       //
       // xywh sind gerundete Pixelwerte – die müssten wir halt vorab aus den Daten berechnen.
       // Die Zahlen sind so klein, weil ich erst über Prozente nachgedacht habe.
+      /*
       return [{ id: 'asd', label: '01', xywh: '11,5,23,12', annotTrans: null },
         { id: 'sdf', label: '02', xywh: '37,6,43,15', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: true } },
         { id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false } },
         { id: 'qwe', label: '04', xywh: '14,21,23,9', annotTrans: null },
         { id: 'wer', label: '05', xywh: '38,47,32,23', annotTrans: { file: 'NK_p005_wz05_at.xml', firstZone: true } }]
+      */
+      return this.$store.getters.writingZonesOnCurrentPage
     }
   }
 }

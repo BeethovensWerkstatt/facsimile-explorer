@@ -2,7 +2,7 @@
   <div class="pageList">
     <template v-if="allDocsLoaded">
       <div class="pageBox" v-for="(page, i) in pages" :key="i" :class="{active: i === activePage}" @click="setPage(i)">
-        <h2>{{ page.label ? page.label : (i + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document}}: {{page.modernLabel}}</small></h2>
+        <h2>{{ page.label ? page.label : (i + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
         <div class="activePageContent" v-if="i === activePage && tab === 'pagesTab'">
           <span class="svg">SVG: <i class="icon" :class="{'icon-check': page.hasSvg, 'icon-cross': !page.hasSvg}"></i></span>
           <span class="fragment" title="Image URI has a fragment identifier that specifies the actual physical page">Page Size: <i class="icon" :class="{'icon-check': page.hasFragment, 'icon-cross': !page.hasFragment}"></i></span>

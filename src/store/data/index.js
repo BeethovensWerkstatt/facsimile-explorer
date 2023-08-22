@@ -1899,6 +1899,7 @@ const dataModule = {
         return []
       }
       const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
+      console.log(genDescWzArr)
 
       if (genDescWzArr.length === 0) {
         return []
