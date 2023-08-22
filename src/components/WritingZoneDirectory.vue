@@ -114,7 +114,7 @@ export default {
     },
     pages () {
       const pages = this.$store.getters.documentPagesForSidebars(this.$store.getters.filepath)
-      console.log(this.activePage, pages)
+      // console.log(this.activePage, pages)
       return pages.map((page, p) => ({ ...page, reconstructionLabel: page.document }))
     },
     writingZonesOnActivePage () {
@@ -132,7 +132,7 @@ export default {
         { id: 'wer', label: '05', xywh: '38,47,32,23', annotTrans: { file: 'NK_p005_wz05_at.xml', firstZone: true } }]
       */
       const wzArr = this.$store.getters.writingZonesOnCurrentPage
-      console.log('writing zones', wzArr)
+      // console.log('writing zones', wzArr)
       return wzArr
     }
   }
