@@ -25,15 +25,13 @@
           <p>In order to change whether an element is supplied or not, just click on it.
             All supplied elements cannot be linked to SVG shapes in a diplomatic transcript,
             and will be displayed in grey.</p>
-          <p><b>@Jan-Peter</b>: Der folgende FilePicker muss natürlich nur gezeigt werden, wenn zur gerade aktiven
-            WritingZone noch keine AnnotTrans im System ist. Und dieser Absatz kann natürlich auch weg ;-)</p>
         </div>
-        <div class="filePicker">
+        <div class="filePicker" v-if="showFilePicker">
           <h1>Add Annotated Transcript</h1>
           <p>
             Here, you can upload an MEI-encoded Annotated Transcript.
           </p>
-          <input type="file"/>
+          <input type="file" @change="uploadAnnotTrans" accept=".xml,.mei" />
         </div>
         <WritingZonesAtAnnotTrans/>
       </SideBar>
@@ -103,8 +101,14 @@ export default {
     } */
   },
   computed: {
-    ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible']),
+    ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible', 'writingZonesOnCurrentPage', 'activeWritingZone']),
+    showFilePicker () {
+      const wz = this.writingZonesOnCurrentPage?.find(wz => wz.id === this.activeWritingZone)
+      console.log(wz)
+      return wz && !wz.annotTrans
+    },
     currentAnnotTabFileName () {
+      // TODO create / retrieve filename
       return 'NK_p005_wz02_at.xml'
     }
   }
