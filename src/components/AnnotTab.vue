@@ -91,6 +91,22 @@ export default {
           path: svgPath
         })
       }
+    },
+    uploadAnnotTrans ({ target: input }) {
+      const file = input?.files[0]
+      console.log(file)
+      const reader = new FileReader()
+      // TODO Loader should be a store action, need getters for WZ index (param)
+      reader.addEventListener('load', () => {
+        const parser = new DOMParser()
+        const dom = parser.parseFromString(reader.result, 'application/xml')
+        console.log(dom)
+        const path = this.$store.getters.currentWzAtPath
+        const baseMessage = 'added Annotated Transript for <docName> p. <pageIndex>'
+        this.$store.dispatch('loadDocumentIntoStore', { path, dom })
+        this.$store.dispatch('logChange', { path, baseMessage, param: 0, xmlIDs: [], isNewDocument: true })
+      })
+      reader.readAsText(file)
     }
     /* loadAnnotTrans () {
       this.$store.dispatch('getFile', {
@@ -109,7 +125,8 @@ export default {
     },
     currentAnnotTabFileName () {
       // TODO create / retrieve filename
-      return 'NK_p005_wz02_at.xml'
+      // return 'NK_p005_wz02_at.xml'
+      return this.$store.getters.currentWzAtPath
     }
   }
 }

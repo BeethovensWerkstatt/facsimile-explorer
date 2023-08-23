@@ -1465,6 +1465,31 @@ const dataModule = {
     },
 
     /**
+     * retrieves the path of the annotated transcript for currently selected writing zone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentWzAtPath: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+
+      const wz = getters.writingZonesOnCurrentPage.find(wz => wz.id === getters.activeWritingZone)
+      if (!wz) return
+
+      const docName = page.document
+      const docPath = getters.documentPathByName(docName)
+      const meipath = docPath.split(docName + '.xml')[0] + 'annotTrans/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + wz.label.padStart(3, '0') + '_at.xml'
+      return meipath
+    },
+
+    /**
      * retrieves the svg file of the current page
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
