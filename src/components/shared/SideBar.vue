@@ -19,8 +19,10 @@ export default {
   },
   methods: {
     closeSidebar () {
-      if (this.tab === 'pagesTab') {
+      if (this.tab === 'pagesTab' && this.position === 'left') {
         this.$store.dispatch('togglePageTabSidebar')
+      } else if (this.tab === 'pagesTab' && this.position === 'right') {
+        this.$store.dispatch('togglePageTabRightSidebar')
       } else if (this.tab === 'zonesTab' && this.position === 'left') {
         this.$store.dispatch('toggleZonesTabLeftSidebar')
       } else if (this.tab === 'annotTab' && this.position === 'left') {
@@ -31,10 +33,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarWidth', 'zonesTabLeftSidebarWidth', 'zonesTabRightSidebarWidth', 'annotTabLeftSidebarWidth', 'annotTabRightSidebarWidth']),
+    ...mapGetters(['pageTabSidebarWidth', 'pageTabRightSidebarWidth', 'zonesTabLeftSidebarWidth', 'zonesTabRightSidebarWidth', 'annotTabLeftSidebarWidth', 'annotTabRightSidebarWidth']),
     localWidth () {
-      if (this.tab === 'pagesTab') {
+      if (this.tab === 'pagesTab' && this.position === 'left') {
         return this.pageTabSidebarWidth
+      } else if (this.tab === 'pagesTab' && this.position === 'right') {
+        return this.pageTabRightSidebarWidth
       } else if (this.tab === 'zonesTab' && this.position === 'left') {
         return this.zonesTabLeftSidebarWidth
       } else if (this.tab === 'zonesTab' && this.position === 'right') {
