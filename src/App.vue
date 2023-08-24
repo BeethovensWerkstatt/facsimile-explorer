@@ -3,9 +3,14 @@
     <router-view v-if="routeAuthenticate || initComplete" />
     <div v-else class="loading">loading ...</div>
   </div>
-  <div v-else>
-    <div class="externalMessages" v-if="client_id">Sie müssen sich zuerst bei GitHub <a :href="authurl">authentifizieren</a>!</div>
-    <div class="externalMessages" v-else>bitte warten ...</div>
+  <div class="login" v-else>
+    <div class="externalMessages toast toast-primary" v-if="client_id">
+      <div>To use the Facsimile Explorer you have to first<br />
+      <a class="btn btn-primary btn-lg" :href="authurl">Login to GitHub</a></div>
+    </div>
+    <div class="externalMessages toast toast-warning" v-else>
+      please wait ...<i class="icon icon-load" />
+    </div>
   </div>
 </template>
 
@@ -65,6 +70,21 @@ nav {
     &.router-link-exact-active {
       color: #42b983;
     }
+  }
+}
+div.login {
+  display: flex;
+  height: 20vw;
+  margin: auto auto;
+  justify-content: center;
+  font-size: 24pt;
+  div {
+    width: 30vw;
+    min-width: 200px;
+    height: 48pt;
+    margin: auto;
+    text-align: center;
+    vertical-align: middle;
   }
 }
 </style>
