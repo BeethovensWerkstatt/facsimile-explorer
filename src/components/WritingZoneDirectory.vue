@@ -12,7 +12,7 @@
           :key="w"
           @click="selectWritingZone(wz)"
         >
-          <span class="zoneNumber">WZ {{wz.label}}</span>
+          <span class="zoneNumber">WZ {{w + 1}}</span>
           <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
             <span class="actualPreview" :style="wzPageDimensions(page, wz.xywh)"></span>
           </span>

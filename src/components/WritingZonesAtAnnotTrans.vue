@@ -8,7 +8,7 @@
     <div class="additionalWritingZones">
       <label>Additional Writing Zones</label>
       <div v-for="(zone, z) in additionalWritingZones" :key="z">
-        <span class="wzLabel">{{docLabel(zone.page)}}, p.{{pageLabel(zone.page)}}, WZ {{zone.label}}</span>
+        <span class="wzLabel">{{docLabel(zone.page)}}, p.{{pageLabel(zone.page)}}, WZ {{z + 1}}</span>
         <span class="float-right">
           <template v-if="z !== 0">
             <i class="icon icon-upward" title="Reorder Writing Zones" @click="moveZoneUp(zone, z)"></i>

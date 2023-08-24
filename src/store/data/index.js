@@ -1480,12 +1480,17 @@ const dataModule = {
         return null
       }
 
-      const wz = getters.writingZonesOnCurrentPage.find(wz => wz.id === getters.activeWritingZone)
+      let z = -1
+      const wz = getters.writingZonesOnCurrentPage.find((wz, zi) => {
+        const found = wz.id === getters.activeWritingZone
+        if (found) z = zi
+        return found
+      })
       if (!wz) return
 
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
-      const meipath = docPath.split(docName + '.xml')[0] + 'annotTrans/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + wz.label.padStart(3, '0') + '_at.xml'
+      const meipath = docPath.split(docName + '.xml')[0] + 'annotTrans/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + String(z + 1).padStart(3, '0') + '_at.xml'
       return meipath
     },
 
