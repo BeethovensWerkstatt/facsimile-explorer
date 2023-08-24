@@ -337,7 +337,53 @@ const actions = {
         dispatch('loadDocumentIntoStore', { path, dom: svgWithUnassignedGroup })
         // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
         if (typeof callback === 'function') {
-          const data = { xml: svg }
+          const data = { xml: svg, dom }
+          callback(data)
+          callback = null
+        }
+      })
+    }
+  },
+
+  loadXmlFile (
+    { commit, dispatch, getters },
+    {
+      owner = config.repository.owner, // 'BeethovensWerkstatt',
+      repo = config.repository.repo, // 'data',
+      path,
+      ref = config.repository.branch, // 'dev'
+      callback = null // optional callback to call, when loading is finished
+    }) {
+    const contentData = getters.getContentData(path)
+
+    // console.log('\n\nYODIYAY')
+    // console.log(contentData)
+
+    if (contentData?.doc) {
+      // dispatch('setData', contentData.doc) // TODO set SVG?
+      console.log(contentData.path, 'loaded from cache')
+    } else {
+      getters.octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+        ref,
+        headers: {
+          Accept: 'application/vnd.github.v3.raw'
+        }
+      }).then(({ data }) => {
+        // console.log('received this as svg raw text')
+        // console.log(data) // , data.content)
+        const xmlText = data
+        // console.log(svgText)
+        const parser = new DOMParser()
+        const dom = parser.parseFromString(xmlText, 'application/xml')
+
+        // console.log(dom)
+        dispatch('loadDocumentIntoStore', { path, dom })
+        // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+        if (typeof callback === 'function') {
+          const data = { xml: xmlText, dom }
           callback(data)
           callback = null
         }
