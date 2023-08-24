@@ -83,7 +83,8 @@ export default {
   },
   methods: {
     /**
-     * triggered by clicking into the facsimile
+     * Triggered by clicking into the facsimile. Gathers info about pixel
+     * position and image position (mm), and the element clicked on.
      * @param  {[type]} e               [description]
      * @return {[type]}   [description]
      */
@@ -92,13 +93,11 @@ export default {
       const imagePoint = image.viewerElementToImageCoordinates(e.position)
 
       const click = {
-        x: imagePoint.x,
-        y: imagePoint.y,
-        shift: e.shift
+        image: { x: imagePoint.x, y: imagePoint.y },
+        target: e.originalTarget,
+        shift: e.shift,
+        alt: e.originalEvent.altKey
       }
-      console.log('clicked image', click)
-
-      // console.log('Position: ', e.position, e)
 
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation
@@ -111,7 +110,21 @@ export default {
       const onPage = pageRect.location.containsPoint(clickedPagePos)
 
       if (onPage) {
-        console.log('clicked page ', clickedPagePos)
+        click.page = clickedPagePos
+      }
+
+      console.log(click)
+
+      // check for click to svg shape
+      if (click.target.localName === 'path') {
+        console.log('clicked on shape ' + click.target.id)
+        this.$store.dispatch('clickedSvgShape', click.target.id)
+      }
+
+      // check for click to system
+      if (click.target.localName === 'div' && click.target.classList.contains('rotatedSystem')) {
+        const id = click.target.parentElement.getAttribute('data-id')
+        this.$store.dispatch('setActiveSystem', id)
       }
 
       /*
@@ -152,48 +165,6 @@ export default {
 
       // console.log(e)
       this.$store.dispatch('facsimileClick', click)
-    },
-
-    /**
-     * triggered by clicking onto a rastrum box
-     * @param  {[type]} e               [description]
-     * @return {[type]}   [description]
-     */
-    systemClickListener (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      const id = e.target.getAttribute('data-id')
-      console.log('clicked rastrum ' + id)
-      // this.$store.dispatch('selectSystemOnCurrentPage', n)
-    },
-
-    /**
-     * triggered by clicking onto the svg overlay; extracts the shape actually clicked on
-     * @param  {[type]} e               [description]
-     * @return {[type]}   [description]
-     */
-    svgClickListener (e) {
-      console.log('FacsimileComponent:svgClickListener()')
-      e.preventDefault()
-      e.stopPropagation()
-      // console.log(e.target)
-      if (e.target.localName === 'path') {
-        // console.log('clicked shape')
-        // console.log(e)
-        this.$store.dispatch('clickedSvgShape', e.target.id)
-      }
-    },
-
-    /**
-     * triggered by double-clicking onto the svg overlay
-     * @param  {[type]} e               [description]
-     * @return {[type]}   [description]
-     */
-    svgDoubleClickListener (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      // console.log('clicked shape')
-      // console.log(e)
     },
 
     /**
@@ -400,40 +371,30 @@ export default {
      * @return {[type]} [description]
      */
     renderShapes () {
-      console.log('FacsimileComponent:renderShapes()')
+      // console.log('FacsimileComponent:renderShapes()')
       if (!this.showSvg) {
-        console.log(0.1)
         return false
       }
       const svg = this.$store.getters.svgForCurrentPage
       const page = this.$store.getters.currentPageDimensions
 
-      console.log(svg, page, this.viewer)
-
       if (!svg || !this.viewer || !page) {
-        console.log(0.2)
         return null
       }
 
       const existingOverlay = document.querySelector('#facsimileContainer svg')
-      console.log(1)
       if (existingOverlay !== null) {
         const oldActive = existingOverlay.querySelector('.activeWritingZone')
         if (oldActive !== null) {
           oldActive.classList.remove('activeWritingZone')
         }
 
-        // existingOverlay.removeEventListener('click', this.svgClickListener)
-        // existingOverlay.removeEventListener('click', this.svgDoubleClickListener)
-
         this.viewer.removeOverlay(existingOverlay)
       }
-      console.log(2)
 
       if (!svg.documentElement) {
         console.warn('FacsimileComponent:renderShapes: Not an XMLDocument', svg)
       }
-      console.log(3)
 
       const svgClone = svg.documentElement.cloneNode(true)
       this.viewer.addOverlay({
@@ -443,7 +404,6 @@ export default {
         width: page.mmWidth,
         height: page.mmHeight
       })
-      console.log(4)
       const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
       const activeWritingZone = this.$store.getters.activeWritingZone
       const activeWritingLayer = this.$store.getters.activeWritingLayer
@@ -454,19 +414,14 @@ export default {
         svgClone.querySelector('#' + activeZone.svgGroupWzId).classList.add('activeWritingZone')
       }
 
-      if (activeWritingLayer) {
+      if (activeZone && activeWritingLayer) {
         const activeLayer = activeZone.layers.find(wl => wl.id === activeWritingLayer)
 
         if (activeLayer) {
           svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
         }
       }
-      console.log(5)
-
       // console.log('done')
-      svgClone.addEventListener('click', this.svgClickListener)
-      svgClone.addEventListener('dblclick', this.svgDoubleClickListener)
-      console.log(6)
     },
 
     /**
@@ -519,7 +474,6 @@ export default {
           const rotatedSystem = document.createElement('div')
           rotatedSystem.classList.add('rotatedSystem')
           rotatedSystem.style.transform = 'rotate(' + s.rotate + 'deg)'
-          rotatedSystem.addEventListener('click', this.systemClickListener)
           element.append(rotatedSystem)
 
           const location = new OpenSeadragon.Rect(s.x, s.y, s.w, s.h)
@@ -693,11 +647,6 @@ export default {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
-      document.querySelectorAll('#facsimileContainer svg').forEach(svg => {
-        svg.removeEventListener('click', this.svgClickListener)
-        svg.removeEventListener('click', this.svgDoubleClickListener)
-      })
-      document.querySelectorAll('.overlay.system .rotatedSystem').forEach(rs => rs.removeEventListener('click', this.systemClickListener))
     }
   },
   created () {
@@ -796,11 +745,11 @@ export default {
   svg {
     width: 100%;
     height: 100%;
-    z-index: 50;
+    z-index: 5;
   }
 
   .system.overlay {
-    z-index: 0;
+    z-index: 10;
 
     .rotatedSystem {
       background-color: #ffffff66;
