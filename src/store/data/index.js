@@ -1590,7 +1590,7 @@ const dataModule = {
         if (found) z = zi
         return found
       })
-      if (!wz) return
+      if (!wz) return null
 
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
@@ -2064,7 +2064,7 @@ const dataModule = {
         return arr
       }
 
-      genDescWzArr.forEach(genDescWz => {
+      genDescWzArr.forEach((genDescWz, zi) => {
         const genDescWzId = genDescWz.getAttribute('xml:id')
 
         const svgGroupWzId = genDescWz.getAttribute('corresp').split('#')[1]
@@ -2104,10 +2104,11 @@ const dataModule = {
 
         const wz = {}
         wz.id = genDescWzId
+        wz.index = zi
         wz.label = genDescWz.getAttribute('label')
 
         wz.totalCount = totalCount
-        wz.annotTrans = null
+        wz.annotTrans = null // TODO: path or DOM?
         wz.xywh = x + ',' + y + ',' + w + ',' + h
         wz.layers = layers
         wz.svgGroupWzId = svgGroupWzId
