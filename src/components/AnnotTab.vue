@@ -100,7 +100,7 @@ export default {
       reader.addEventListener('load', () => {
         const parser = new DOMParser()
         const dom = parser.parseFromString(reader.result, 'application/xml')
-        console.log(dom)
+        // console.log(dom)
         const path = this.$store.getters.currentWzAtPath
         const baseMessage = 'added Annotated Transript for <docName> p. <pageIndex>'
         this.$store.dispatch('loadDocumentIntoStore', { path, dom })
