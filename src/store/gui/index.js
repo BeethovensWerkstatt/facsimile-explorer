@@ -22,6 +22,8 @@ const guiModule = {
    * @property {Boolean} processing whether the app is currently processing bigger data
    * @property {Boolean} pageTabSidebarVisible if the left sidebar in pageTab is visible
    * @property {Number} pageTabSidebarWidth width of the left sidebar in pageTab
+   * @property {Boolean} pageTabRightSidebarVisible if the right sidebar in pageTab is visible
+   * @property {Number} pageTabRightSidebarWidth width of the right sidebar in pageTab
    * @property {Boolean} zonesTabLeftSidebarVisible if the left sidebar in zonesTab is visible
    * @property {Number} zonesTabLeftSidebarWidth width of the left sidebar in zonesTab
    * @property {Boolean} zonesTabRightSidebarVisible if the left sidebar in zonesTab is visible
@@ -34,7 +36,6 @@ const guiModule = {
    * @property {Number} diploTabSidebarWidth width of the left sidebar in diploTab
    * @property {String} activeWritingZone ID of the currently active writing zone
    * @property {String} activeWritingLayer ID of the currently active writing layer
-   * @property {String} facsimileClickMode whether pageMargin fragment identifier selection mode is active
    * @property {String} activeSystem ID of the currently active system
    * @property {Object} focusRect
    * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
@@ -48,19 +49,20 @@ const guiModule = {
     processing: false,
     pageTabSidebarVisible: true,
     pageTabSidebarWidth: 300,
+    pageTabRightSidebarVisible: true,
+    pageTabRightSidebarWidth: 430,
     zonesTabLeftSidebarVisible: true,
     zonesTabLeftSidebarWidth: 300,
     zonesTabRightSidebarVisible: true,
     zonesTabRightSidebarWidth: 250,
     annotTabLeftSidebarVisible: true,
-    annotTabLeftSidebarWidth: 200,
+    annotTabLeftSidebarWidth: 300,
     annotTabRightSidebarVisible: true,
     annotTabRightSidebarWidth: 300,
     diploTabSidebarVisible: true,
     diploTabSidebarWidth: 300,
     activeWritingZone: null,
     activeWritingLayer: null,
-    facsimileClickMode: 'off',
     activeSystem: null,
     focusRect: null,
     pageBorderPoints: [],
@@ -78,7 +80,12 @@ const guiModule = {
      * @param {[type]} modal  [description]
      */
     SET_MODAL (state, modal) {
-      state.modal = modal
+      try {
+        state.modal = modal
+      } catch (err) {
+        console.warn('something went wrong with modal "' + modal + '"')
+        console.log(err)
+      }
     },
 
     /**
@@ -130,6 +137,24 @@ const guiModule = {
     TOGGLE_PAGETAB_SIDEBAR_VISIBILITY (state) {
       state.pageTabSidebarVisible = !state.pageTabSidebarVisible
     },
+    /**
+     * sets width of right sidebar in pageTab
+     * @memberof store.gui.mutations
+     * @param {[type]} state  [description]
+     * @param {[type]} width  [description]
+     */
+    SET_PAGETAB_RIGHT_SIDEBAR_WIDTH (state, width) {
+      state.pageTabRightSidebarWidth = width
+    },
+    /**
+     * toggles visibility of right sidebar in pageTab
+     * @memberof store.gui.mutations
+     * @param {[type]} state  [description]
+     */
+    TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY (state) {
+      state.pageTabRightSidebarVisible = !state.pageTabRightSidebarVisible
+    },
+
     /**
      * sets width of left sidebar in zonesTab
      * @memberof store.gui.mutations
@@ -235,17 +260,6 @@ const guiModule = {
     },
 
     /**
-     * set what annotorious is supposed to do on OSD mode
-     * @param {[type]} state  [description]
-     * @param {[type]} bool   [description]
-     */
-    SET_FACSIMILE_CLICK_MODE (state, mode) {
-      state.facsimileClickMode = mode
-      state.activeSystem = null
-      state.activeWritingZone = null
-    },
-
-    /**
      * sets the active system
      * @param {[type]} state  [description]
      * @param {[type]} id     [description]
@@ -346,7 +360,6 @@ const guiModule = {
     setExplorerTab ({ commit, getters, dispatch }, val) {
       if (getters.isAuthenticated) {
         commit('SET_EXPLORER_TAB', val)
-        dispatch('disableFacsimileClicks')
       }
     },
 
@@ -359,6 +372,17 @@ const guiModule = {
     togglePageTabSidebar ({ commit }) {
       commit('TOGGLE_PAGETAB_SIDEBAR_VISIBILITY')
     },
+
+    /**
+     * toggles visibility of the pageTab right sidebar
+     * @memberof store.gui.actions
+     * @param  {[type]} commit               [description]
+     * @return {[type]}        [description]
+     */
+    togglePageTabRightSidebar ({ commit }) {
+      commit('TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY')
+    },
+
     /**
      * toggles visibility of the zonesTab left sidebar
      * @memberof store.gui.actions
@@ -434,26 +458,6 @@ const guiModule = {
     },
 
     /**
-     * set the facsimileClickMode
-     * @param  {[type]} commit                [description]
-     * @param  {[type]} getters               [description]
-     * @return {[type]}         [description]
-     */
-    setFacsimileClickMode ({ commit, getters }, mode) {
-      commit('SET_FACSIMILE_CLICK_MODE', mode)
-    },
-
-    /**
-     * deactivate annotorious
-     * @param {[type]} commit   [description]
-     * @param {[type]} getters  [description]
-     * @param {[type]} mode     [description]
-     */
-    disableFacsimileClicks ({ commit, getters }) {
-      commit('SET_FACSIMILE_CLICK_MODE', 'off')
-    },
-
-    /**
      * sets ID of active system
      * @param {[type]} commit  [description]
      * @param {[type]} id      [description]
@@ -483,9 +487,7 @@ const guiModule = {
      * @return {[type]}          [description]
      */
     facsimileClick ({ commit, getters, dispatch }, { x, y, shift }) {
-      if (getters.facsimileClickMode === 'pageMargin' && shift) {
-        dispatch('addPageBorderPoint', { x, y })
-      }
+      //
     },
 
     /**
@@ -597,6 +599,26 @@ const guiModule = {
     pageTabSidebarWidth: (state) => {
       return state.pageTabSidebarWidth
     },
+
+    /**
+     * returns visibility of right sidebar on pageTab
+     * @memberof store.gui.getters
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageTabRightSidebarVisible: (state) => {
+      return state.pageTabRightSidebarVisible
+    },
+    /**
+     * returns width of right sidebar on pageTab
+     * @memberof store.gui.getters
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageTabRightSidebarWidth: (state) => {
+      return state.pageTabRightSidebarWidth
+    },
+
     /**
      * returns visibility of left sidebar on zonesTab
      * @memberof store.gui.getters
@@ -704,15 +726,6 @@ const guiModule = {
      */
     activeWritingLayer: (state) => {
       return state.activeWritingLayer
-    },
-
-    /**
-     * returns the facsimileClickMode
-     * @param  {[type]} state               [description]
-     * @return {[type]}       [description]
-     */
-    facsimileClickMode: (state) => {
-      return state.facsimileClickMode
     },
 
     /**

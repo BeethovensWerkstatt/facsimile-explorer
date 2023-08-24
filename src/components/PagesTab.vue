@@ -6,37 +6,6 @@
           <i class="icon" :class="{'icon-arrow-left': pageTabSidebarVisible, 'icon-arrow-right': !pageTabSidebarVisible}"></i>
         </button>
       </div>
-      <div class="menuItem fileInput" title="TODO: open a filepicker and load svg">
-        <div class="customBtn" @click="addSVG"><i class="icon icon-upload"></i> Import SVG</div>
-      </div>
-      <div class="menuItem rotation" v-if="tileSource !== null">
-        <SliderInput label="Rotation" getterName="currentPageRotation" setterName="setPageRotation" :min="-5" :max="5" :step="0.1"/>
-      </div>
-      <div class="menuItem pageDimensions" v-if="tileSource !== null">
-        <SliderInput label="Width" getterName="currentPageWidthMm" setterName="setPageWidth" :min="100" :max="500" :step="0.5"/>
-        <SliderInput label="Height" getterName="currentPageHeightMm" setterName="setPageHeight" :min="100" :max="500" :step="0.5"/>
-      </div>
-      <div class="menuItem fragmentDimensions" v-if="tileSource !== null">
-        <SliderInput label="X" getterName="currentPageFragmentX" setterName="setPageFragX" :min="0" :max="currentPageDimensions.width" :step="1"/>
-        <SliderInput label="Y" getterName="currentPageFragmentY" setterName="setPageFragY" :min="0" :max="currentPageDimensions.height" :step="1"/>
-        <SliderInput label="W" getterName="currentPageFragmentW" setterName="setPageFragW" :min="0" :max="currentPageDimensions.width" :step="1"/>
-        <SliderInput label="H" getterName="currentPageFragmentH" setterName="setPageFragH" :min="0" :max="currentPageDimensions.height" :step="1"/>
-      </div>
-      <!--
-      <div class="menuItem mediaFragment" title="" :class="{ active: fragmentModeActive }">
-        <div class="customBtn" @click="setPageMargins"><i class="icon icon-bookmark"></i> Set Page Margins</div>
-      </div>
-      <div class="menuItem systems">
-        <div class="customBtn" :class="{ active: addSystemModeActive }" title="Add system" @click="addSystem"><i class="icon icon-edit"></i> Add System</div>
-        <div class="customBtn" :class="{ active: removeSystemModeActive }" title="Delete system" @click="removeSystem"><i class="icon icon-delete"></i> Remove System</div>
-      </div>
-      <div class="menuItem">
-        <span>Complete: {{!pageBorderPointsIncomplete}}</span>
-        <span :title="pageBorderPoints">Points: {{pageBorderPoints.length}}</span>
-        <span :title="currentPageAngle">Angle: {{currentPageAngle}}</span>
-      </div>
-      <div class="menuItem" id="testBtn">TEST</div>
-    -->
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
@@ -54,7 +23,38 @@
         <!--<OpenSeadragonComponent :svg="false" :annotorious="true" :pageBorders="true" :rastrums="true" :page="currentPage"/>-->
         <div><FacsimileComponent v-if="tileSource !== null"/></div>
       </MainStage>
-
+      <SideBar class="stageItem sidebarRight" position="right" tab="pagesTab" v-if="pageTabRightSidebarVisible">
+        <div class="sidebarBox">
+          <h1>SVG Shapes</h1>
+          <template v-if="svgFile === null">
+            <div class="customBtn" @click="addSVG"><i class="icon icon-upload"></i> Import SVG</div>
+          </template>
+          <template v-else>
+            <div class="denseFont">{{svgFile}}</div>
+          </template>
+        </div>
+        <div class="sidebarBox">
+          <h1>Page Dimensions <small>[values in mm]</small></h1>
+          <div class="dimensionBox pageDimensions" v-if="tileSource !== null">
+            <SliderInput label="Width" getterName="currentPageWidthMm" setterName="setPageWidth" :min="100" :max="500" :step="0.5"/>
+            <SliderInput label="Height" getterName="currentPageHeightMm" setterName="setPageHeight" :min="100" :max="500" :step="0.5"/>
+          </div>
+        </div>
+        <div class="sidebarBox">
+          <h1>Media Fragment <small>[values in px]</small></h1>
+          <div class="dimensionBox fragmentDimensions" v-if="tileSource !== null">
+            <SliderInput label="X" getterName="currentPageFragmentX" setterName="setPageFragX" :min="0" :max="currentPageDimensions.width" :step="1"/>
+            <SliderInput label="Y" getterName="currentPageFragmentY" setterName="setPageFragY" :min="0" :max="currentPageDimensions.height" :step="1"/>
+            <SliderInput label="W" getterName="currentPageFragmentW" setterName="setPageFragW" :min="0" :max="currentPageDimensions.width" :step="1"/>
+            <SliderInput label="H" getterName="currentPageFragmentH" setterName="setPageFragH" :min="0" :max="currentPageDimensions.height" :step="1"/>
+            <SliderInput label="°" getterName="currentPageRotation" setterName="setPageRotation" :min="-5" :max="5" :step="0.1"/>
+          </div>
+        </div>
+        <div class="sidebarBox">
+          <h1>Systems <small>[values in mm]</small></h1>
+          <RastrumListing/>
+        </div>
+      </SideBar>
     </div>
   </div>
 </template>
@@ -67,6 +67,7 @@ import SideBar from '@/components/shared/SideBar.vue'
 import TopMenu from '@/components/shared/TopMenu.vue'
 import PageList from '@/components/shared/PageList.vue'
 import SourceSelector from '@/components/shared/SourceSelector.vue'
+import RastrumListing from '@/components/RastrumListing.vue'
 
 import SliderInput from '@/components/SliderInput.vue'
 
@@ -82,41 +83,13 @@ export default {
     PageList,
     SourceSelector,
     FacsimileComponent,
+    RastrumListing,
     SliderInput
     // OpenSeadragonComponent
   },
   methods: {
     toggleSidebar () {
       this.$store.dispatch('togglePageTabSidebar')
-    },
-    addSystem () {
-      // alert('Hiermit in den Modus schalten, bei dem ein neues System markiert werden kann, indem ein Annotorious-Rechteck angelegt werden kann.')
-      console.log('addSystem')
-      if (!this.addSystemModeActive) {
-        console.log('activating addSystemMode')
-        this.$store.dispatch('setFacsimileClickMode', 'addSystem')
-      } else {
-        this.$store.dispatch('disableFacsimileClicks')
-      }
-    },
-    removeSystem () {
-      // alert('Hiermit wird das aktuell ausgewählte System gelöscht. Systeme werden einfach per Klick ausgewählt, und per Doppelklick wird wieder das Annotorious-Rect geladen, um sie anzupassen')
-      console.log('removeSystem')
-      if (!this.removeSystemModeActive) {
-        console.log('activating removeSystemMode')
-        this.$store.dispatch('setFacsimileClickMode', 'removeSystem')
-      } else {
-        this.$store.dispatch('disableFacsimileClicks')
-      }
-    },
-    setPageMargins () {
-      // alert('In diesem Modus wird ein Annotorious-Rechteck aufgezogen, um ein #xywh=100,120,3000,2000 - Media-Fragment zu erzeugen, mit welchem die tatsächliche Seitengröße innerhalb der Bilddatei festgelegt wird (für die dann die Angaben in mm gelten).')
-      if (!this.fragmentModeActive) {
-        console.log('activating pageMarginMode')
-        this.$store.dispatch('setFacsimileClickMode', 'pageMargin')
-      } else {
-        this.$store.dispatch('disableFacsimileClicks')
-      }
     },
     addSVG () {
       const input = document.createElement('input')
@@ -146,19 +119,28 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarVisible', 'page', 'currentPageZeroBased', 'currentPageAngle', 'pageBorderPoints', 'pageBorderPointsIncomplete', 'currentPageDimensions', 'allDocsLoaded']),
-    fragmentModeActive () {
-      return this.$store.getters.facsimileClickMode === 'pageMargin'
-    },
-    addSystemModeActive () {
-      return this.$store.getters.facsimileClickMode === 'addSystem'
-    },
-    removeSystemModeActive () {
-      return this.$store.getters.facsimileClickMode === 'removeSystem'
-    },
+    ...mapGetters(['pageTabSidebarVisible',
+      'page',
+      'currentPageZeroBased',
+      'currentPageAngle',
+      'pageBorderPoints',
+      'pageBorderPointsIncomplete',
+      'currentPageDimensions',
+      'allDocsLoaded',
+      'pageTabRightSidebarVisible',
+      'rastrumsOnCurrentPage']),
     tileSource () {
       const tileSource = this.$store.getters.osdTileSourceForCurrentPage
       return tileSource
+    },
+    svgFile () {
+      const path = this.$store.getters.currentSvgPath
+      if (path === null) {
+        return null
+      }
+      const tokens = path.split('/')
+      const name = tokens[tokens.length - 1]
+      return name
     }
   }
 }
@@ -187,6 +169,12 @@ export default {
     .sidebar {
       flex: 0 0 auto;
       order: 1;
+      height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+    }
+
+    .sidebarRight {
+      flex: 0 0 auto;
+      order: 3;
       height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
     }
 
@@ -256,18 +244,6 @@ i.showSidebar {
     }
   }
 
-  .customBtn {
-    display: inline-block;
-    margin: 0 .5rem 0 0;
-    font-weight: 100;
-    cursor: pointer;
-    i {
-      position: relative;
-      top: -2px;
-      margin-right: .2rem;
-    }
-  }
-
   &.mediaFragment.active, &.systems .customBtn.active {
     background-color: pink;
   }
@@ -281,6 +257,39 @@ i.showSidebar {
   .osdButton {
     display: inline-block;
     margin: 0 .2rem;
+  }
+}
+
+.sidebarBox {
+
+  padding: .3rem .3rem .6rem;
+
+  & + .sidebarBox {
+    border-top: $lightBorder;
+  }
+
+  .denseFont {
+    font-weight: 100;
+    font-size: .7rem;
+  }
+
+  h1 {
+    font-size: .8rem;
+    font-weight: 900;
+    margin: 0 0 .2rem;
+    padding: 0;
+  }
+
+  .customBtn {
+    display: inline-block;
+    margin: 0 .5rem 0 0;
+    font-weight: 100;
+    cursor: pointer;
+    i {
+      position: relative;
+      top: -2px;
+      margin-right: .2rem;
+    }
   }
 }
 

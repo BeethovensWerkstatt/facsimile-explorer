@@ -23,7 +23,9 @@ export default {
     setterName: String,
     min: Number,
     max: Number,
-    step: Number
+    step: Number,
+    idParam: String,
+    val: Number
   },
   components: {
     // OpenSeadragonComponent
@@ -66,10 +68,20 @@ export default {
     },
     data: {
       get () {
-        return parseFloat(this.$store.getters[this.getterName])
+        if (typeof this.getterName !== 'undefined') {
+          return parseFloat(this.$store.getters[this.getterName])
+        } else if (typeof this.val !== 'undefined') {
+          return parseFloat(this.val)
+        } else {
+          return parseFloat(this.$store.getters[this.getterName](this.idParam))
+        }
       },
       set (value) {
-        this.$store.dispatch(this.setterName, value)
+        if (typeof this.idParam === 'undefined') {
+          this.$store.dispatch(this.setterName, value)
+        } else {
+          this.$store.dispatch(this.setterName, { id: this.idParam, value })
+        }
       }
     }
   }
@@ -91,9 +103,11 @@ export default {
   border: $lightBorder;
   border-radius: 3px;
   line-height: .8rem;
-  margin: .05rem .3rem;
+  margin: .05rem .5rem .05rem 0;
   padding: 0 .2rem;
   font-size: .7rem;
+  position: relative;
+  top: -1px;
 }
 
 input[type="number"] {

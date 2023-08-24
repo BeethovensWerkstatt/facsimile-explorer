@@ -55,7 +55,7 @@ export default {
      * in which tabs of the FX shall we render svg shapes?
      * @return {[type]} [description]
      */
-    renderSvg () {
+    showSvg () {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['pages', 'zones', 'annot', 'diplo']
       return validTabs.indexOf(tab) !== -1
@@ -65,7 +65,7 @@ export default {
      * in which tabs of the FX shall we render rastrums / systems as boxes?
      * @return {[type]} [description]
      */
-    renderRastrums () {
+    showSystems () {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['pages']
       return validTabs.indexOf(tab) !== -1
@@ -159,25 +159,12 @@ export default {
      * @param  {[type]} e               [description]
      * @return {[type]}   [description]
      */
-    rastrumClickListener (e) {
+    systemClickListener (e) {
       e.preventDefault()
       e.stopPropagation()
-      const n = e.target.getAttribute('data-n')
-      // console.log('clicked rastrum ' + n)
-      this.$store.dispatch('selectSystemOnCurrentPage', n)
-    },
-
-    /**
-     * triggered by double-clicking onto a rastrum box
-     * @param  {[type]} e               [description]
-     * @return {[type]}   [description]
-     */
-    systemDoubleClickListener (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      const n = e.target.getAttribute('data-n')
-      // console.log('doubleClicked rastrum ' + n)
-      this.$store.dispatch('editSystemOnCurrentPage', n)
+      const id = e.target.getAttribute('data-id')
+      console.log('clicked rastrum ' + id)
+      // this.$store.dispatch('selectSystemOnCurrentPage', n)
     },
 
     /**
@@ -186,6 +173,7 @@ export default {
      * @return {[type]}   [description]
      */
     svgClickListener (e) {
+      console.log('FacsimileComponent:svgClickListener()')
       e.preventDefault()
       e.stopPropagation()
       // console.log(e.target)
@@ -253,6 +241,10 @@ export default {
       if (this.showPageBorders) {
         this.renderPageBorders()
       }
+
+      this.renderShapes()
+      this.renderSystems()
+
       console.log('facsimileOpened', data)
     },
 
@@ -401,6 +393,145 @@ export default {
           rotationMode: OpenSeadragon.OverlayRotationMode.NO_ROTATION
         })
       }
+    },
+
+    /**
+     * renders SVG shapes as overlay on the facsimile
+     * @return {[type]} [description]
+     */
+    renderShapes () {
+      console.log('FacsimileComponent:renderShapes()')
+      if (!this.showSvg) {
+        console.log(0.1)
+        return false
+      }
+      const svg = this.$store.getters.svgForCurrentPage
+      const page = this.$store.getters.currentPageDimensions
+
+      console.log(svg, page, this.viewer)
+
+      if (!svg || !this.viewer || !page) {
+        console.log(0.2)
+        return null
+      }
+
+      const existingOverlay = document.querySelector('#facsimileContainer svg')
+      console.log(1)
+      if (existingOverlay !== null) {
+        const oldActive = existingOverlay.querySelector('.activeWritingZone')
+        if (oldActive !== null) {
+          oldActive.classList.remove('activeWritingZone')
+        }
+
+        // existingOverlay.removeEventListener('click', this.svgClickListener)
+        // existingOverlay.removeEventListener('click', this.svgDoubleClickListener)
+
+        this.viewer.removeOverlay(existingOverlay)
+      }
+      console.log(2)
+
+      if (!svg.documentElement) {
+        console.warn('FacsimileComponent:renderShapes: Not an XMLDocument', svg)
+      }
+      console.log(3)
+
+      const svgClone = svg.documentElement.cloneNode(true)
+      this.viewer.addOverlay({
+        element: svgClone,
+        x: 0,
+        y: 0,
+        width: page.mmWidth,
+        height: page.mmHeight
+      })
+      console.log(4)
+      const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
+      const activeWritingZone = this.$store.getters.activeWritingZone
+      const activeWritingLayer = this.$store.getters.activeWritingLayer
+
+      const activeZone = writingZonesOnCurrentPage.find(wz => wz.id === activeWritingZone)
+
+      if (activeZone) {
+        svgClone.querySelector('#' + activeZone.svgGroupWzId).classList.add('activeWritingZone')
+      }
+
+      if (activeWritingLayer) {
+        const activeLayer = activeZone.layers.find(wl => wl.id === activeWritingLayer)
+
+        if (activeLayer) {
+          svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
+        }
+      }
+      console.log(5)
+
+      // console.log('done')
+      svgClone.addEventListener('click', this.svgClickListener)
+      svgClone.addEventListener('dblclick', this.svgDoubleClickListener)
+      console.log(6)
+    },
+
+    /**
+     * renders system overlays
+     * @return {[type]} [description]
+     */
+    renderSystems () {
+      if (!this.showSystems) {
+        return null
+      }
+      const systems = this.$store.getters.rastrumsOnCurrentPage
+      const activeSystemId = this.$store.getters.activeSystemId
+
+      const renderedSystems = document.querySelectorAll('.system.overlay')
+      const renderedIDs = []
+
+      renderedSystems.forEach(rs => {
+        renderedIDs.push(rs.getAttribute('data-id'))
+        const hit = systems.find(s => s.id === rs.getAttribute('data-id'))
+        if (!hit) {
+          const rotatedSystem = rs.querySelector('.rotatedSystem')
+          rotatedSystem.removeEventListener('click', this.systemClickListener)
+          this.viewer.removeOverlay(rs)
+        } else {
+          const overlay = this.viewer.getOverlayById(rs)
+          const rotatedSystem = rs.querySelector('.rotatedSystem')
+          rotatedSystem.style.transform = 'rotate(' + hit.rotate + 'deg)'
+
+          if (hit.id === activeSystemId) {
+            rs.classList.add('active')
+          } else {
+            rs.classList.remove('active')
+          }
+
+          const location = new OpenSeadragon.Rect(hit.x, hit.y, hit.w, hit.h)
+          overlay.update(location, OpenSeadragon.Placement.TOP_LEFT)
+        }
+      })
+
+      systems.forEach(s => {
+        if (renderedIDs.indexOf(s.id) === -1) {
+          const element = document.createElement('div')
+          element.classList.add('system')
+          element.classList.add('overlay')
+          if (s.id === activeSystemId) {
+            element.classList.add('active')
+          }
+          element.setAttribute('data-id', s.id)
+
+          const rotatedSystem = document.createElement('div')
+          rotatedSystem.classList.add('rotatedSystem')
+          rotatedSystem.style.transform = 'rotate(' + s.rotate + 'deg)'
+          rotatedSystem.addEventListener('click', this.systemClickListener)
+          element.append(rotatedSystem)
+
+          const location = new OpenSeadragon.Rect(s.x, s.y, s.w, s.h)
+
+          this.viewer.addOverlay({
+            element,
+            location,
+            placement: OpenSeadragon.Placement.TOP_LEFT,
+            rotationMode: OpenSeadragon.OverlayRotationMode.EXACT
+          })
+        }
+      })
     },
 
     /**
@@ -557,10 +688,16 @@ export default {
       pageRotated.style.transform = 'rotate(' + data.rotate.deg + 'deg)'
       */
     },
+
     unload () {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
+      document.querySelectorAll('#facsimileContainer svg').forEach(svg => {
+        svg.removeEventListener('click', this.svgClickListener)
+        svg.removeEventListener('click', this.svgDoubleClickListener)
+      })
+      document.querySelectorAll('.overlay.system .rotatedSystem').forEach(rs => rs.removeEventListener('click', this.systemClickListener))
     }
   },
   created () {
@@ -616,6 +753,16 @@ export default {
         }
         this.updateFacsimile(newTs, oldTs)
       })
+    this.unwatchSVG = this.$store.watch((state, getters) => getters.svgForCurrentPage,
+      (svg) => {
+        if (svg) {
+          this.renderShapes()
+        }
+      })
+    this.unwatchSystems = this.$store.watch((state, getters) => [getters.rastrumsOnCurrentPage, getters.activeSystemId],
+      ([newArr, newId], [oldArr, oldId]) => {
+        this.renderSystems()
+      })
 
     this.openFacsimile()
   },
@@ -630,6 +777,8 @@ export default {
     this.unwatchPageRotation()
     this.unwatchPageDimensions()
     this.unwatchTileSource()
+    this.unwatchSVG()
+    this.unwatchSystems()
   }
 }
 
@@ -644,9 +793,24 @@ export default {
   height: 100%;
   position: relative;
 
+  svg {
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+  }
+
   .system.overlay {
     z-index: 0;
-    background-color: rgba(70 ,255, 70, 0.6);
+
+    .rotatedSystem {
+      background-color: #ffffff66;
+      transform-origin: top left;
+      width: 100%;
+      height: 100%;
+    }
+    &.active .rotatedSystem {
+      background-color: #85b6ffcc;
+    }
   }
 
   g.sketchArea {
@@ -848,8 +1012,6 @@ export default {
 
 .overlay.pageBorder.actualPage {
   outline: 8px solid #0000ff99;
-  background: #0000ff33;
-  z-index: 1;
 }
 
 .grid {

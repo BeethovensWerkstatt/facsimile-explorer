@@ -25,7 +25,8 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <OpenSeadragonComponent :svg="true" :annotorious="false" :pageBorders="false" :rastrums="false"/>
+        <!--<OpenSeadragonComponent :svg="true" :annotorious="false" :pageBorders="false" :rastrums="false"/>-->
+        <FacsimileComponent/>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="zonesTab" v-if="zonesTabRightSidebarVisible">
         <h1>Writing Zones ({{writingZones.length}})</h1>
@@ -46,7 +47,8 @@ import TopMenu from '@/components/shared/TopMenu.vue'
 import PageList from '@/components/shared/PageList.vue'
 import SourceSelector from '@/components/shared/SourceSelector.vue'
 
-import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+// import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+import FacsimileComponent from '@/components/FacsimileComponent.vue'
 import WritingZoneListEntry from '@/components/WritingZoneListEntry.vue'
 
 export default {
@@ -57,7 +59,8 @@ export default {
     TopMenu,
     PageList,
     SourceSelector,
-    OpenSeadragonComponent,
+    // OpenSeadragonComponent,
+    FacsimileComponent,
     WritingZoneListEntry
   },
   methods: {

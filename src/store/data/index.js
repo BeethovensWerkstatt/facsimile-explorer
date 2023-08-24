@@ -1,6 +1,6 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition } from '@/tools/mei.js'
+import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
@@ -539,8 +539,6 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
-
-      dispatch('disableFacsimileClicks')
     },
 
     /**
@@ -588,7 +586,6 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [graphicId], isNewDocument: false })
-      dispatch('disableFacsimileClicks')
     },
 
     /**
@@ -884,7 +881,7 @@ const dataModule = {
      * @param {[type]} xywh      [description]
      */
     addSystem ({ commit, getters, dispatch }, xywh) {
-      if (!xywh || !xywh.x || !xywh.y || !xywh.w || !xywh.h) {
+      if (!xywh || !('x' in xywh) || !('y' in xywh) || !('w' in xywh) || !('h' in xywh) || !('rotate' in xywh)) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -896,14 +893,26 @@ const dataModule = {
       const surfaceId = getters.currentPageId
       const surface = modifiedDom.querySelector('surface[*|id="' + surfaceId + '"]')
 
+      const xmlIDs = []
+
       // create layout if necessary
       if (!surface.hasAttribute('decls')) {
         const physDesc = modifiedDom.querySelector('physDesc')
 
+        const physDescId = physDesc.hasAttribute('xml:id') ? physDesc.getAttribute('xml:id') : 'p' + uuid()
+        if (!physDesc.hasAttribute('xml:id')) {
+          physDesc.setAttribute('xml:id', physDescId)
+        }
+
+        const layoutDescId = physDesc.querySelector('layoutDesc[*|id]') ? physDesc.querySelector('layoutDesc').getAttribute('xml:id') : 'l' + uuid()
         // create layoutDesc if necessary
         if (!physDesc.querySelector('layoutDesc')) {
           const layoutDesc = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layoutDesc')
+          layoutDesc.setAttribute('xml:id', layoutDescId)
+          xmlIDs.push(physDescId)
           physDesc.append(layoutDesc)
+        } else {
+          xmlIDs.push(layoutDescId)
         }
 
         const layoutDesc = physDesc.querySelector('layoutDesc')
@@ -919,6 +928,7 @@ const dataModule = {
         layoutDesc.append(layout)
 
         surface.setAttribute('decls', '#' + layoutId)
+        xmlIDs.push(surfaceId)
       }
 
       const layoutId = surface.getAttribute('decls').substring(1)
@@ -926,19 +936,13 @@ const dataModule = {
 
       if (!layout.querySelector('rastrumDesc')) {
         const rastrumDesc = document.createElementNS('http://www.music-encoding.org/ns/mei', 'rastrumDesc')
+        const rastrumDescId = 'd' + uuid()
+        rastrumDesc.setAttribute('xml:id', rastrumDescId)
         layout.append(rastrumDesc)
       }
 
       // get relevant rastrumDesc
       const rastrumDesc = layout.querySelector('rastrumDesc')
-
-      // convert px to mm coordinates
-      const mmRect = convertRectUnits(modifiedDom, surfaceId, xywh, 'px2mm')
-      /* console.log('\n\nHELLO POOOOLLLY:')
-      console.log(xywh)
-      console.log(mmRect)
-      console.log(layout)
-      console.log(rastrumDesc) */
 
       // no rastrum so far
       if (!activeSystemId || !rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')) {
@@ -946,26 +950,24 @@ const dataModule = {
         const rastrumId = 'r' + uuid()
         rastrum.setAttribute('xml:id', rastrumId)
         rastrum.setAttribute('systems', 1)
-        rastrum.setAttribute('system.height', mmRect.h)
-        rastrum.setAttribute('width', mmRect.w)
-        rastrum.setAttribute('system.leftmar', mmRect.x)
-        rastrum.setAttribute('system.topmar', mmRect.y)
+        rastrum.setAttribute('system.height', xywh.h)
+        rastrum.setAttribute('width', xywh.w)
+        rastrum.setAttribute('system.leftmar', xywh.x)
+        rastrum.setAttribute('system.topmar', xywh.y)
+        rastrum.setAttribute('rotate', xywh.rotate)
         rastrumDesc.append(rastrum)
 
         dispatch('setActiveSystem', rastrumId)
       } else {
         const rastrum = rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')
-        rastrum.setAttribute('system.height', mmRect.h + 'mm')
-        rastrum.setAttribute('width', mmRect.w + 'mm')
-        rastrum.setAttribute('system.leftmar', mmRect.x + 'mm')
-        rastrum.setAttribute('system.topmar', mmRect.y + 'mm')
+        rastrum.setAttribute('system.height', xywh.h)
+        rastrum.setAttribute('width', xywh.w)
+        rastrum.setAttribute('system.leftmar', xywh.x)
+        rastrum.setAttribute('system.topmar', xywh.y)
+        rastrum.setAttribute('rotate', xywh.rotate)
       }
 
       sortRastrumsByVerticalPosition(rastrumDesc)
-
-      console.log('\n\nHELLO POLLY')
-      console.log(modifiedDom)
-
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
 
@@ -974,73 +976,168 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       // TODO xmlIDs
-      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [], isNewDocument: false })
-
-      dispatch('disableFacsimileClicks')
-    }
-
-    /*
-    CREATE_SYSTEM (state, rect) {
-      const xmlDoc = state.parsedXml.cloneNode(true)
-      const pageIndex = state.currentPage + 1
-      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
-      const page = xmlDoc.querySelector(pageQueryString)
-
-      const pageHeight = parseInt(page.getAttribute('page.height'))
-      const newSystemUly = pageHeight - rect.y
-      const left = rect.x
-      const right = rect.w + rect.x
-      const height = rect.h
-
-      const existingSystems = page.querySelectorAll('system')
-      let i = 0
-
-      while (existingSystems.length > i && parseInt(existingSystems[i].getAttribute('uly')) > newSystemUly) {
-        i++
-      }
-      const newSystem = generateSystemFromRect(newSystemUly, left, right)
-
-      if (existingSystems.length === 0) {
-        initializePageIfNecessary(page, height)
-        insertSystem(page, newSystem, null)
-      } else {
-        const followingSystem = existingSystems[i]
-        insertSystem(page, newSystem, followingSystem)
-      }
-
-      state.parsedXml = xmlDoc
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs, isNewDocument: false })
     },
-    SET_SELECTED_SYSTEM_ON_CURRENT_PAGE (state, i) {
-      state.selectedSystemOnCurrentPage = i
-    },
-    SET_EDITING_SYSTEM_ON_CURRENT_PAGE (state, i) {
-      console.log('working here ' + i)
-      // if (state.selectionRectEnabled) {
-      state.editingSystemOnCurrentPage = i
 
-      const xmlDoc = state.parsedXml
-      const pageIndex = state.currentPage + 1
-      const pageQueryString = 'page:nth-child(' + pageIndex + ')'
-      const page = xmlDoc.querySelector(pageQueryString)
-
-      const systemIndex = i + 1
-      const systemQueryString = 'system:nth-of-type(' + systemIndex + ')'
-      const system = page.querySelector(systemQueryString)
-      const measure = page.querySelector('measure')
-
-      const pageHeight = state.pages[state.currentPage].height
-
-      console.log(system)
-
-      const x = parseInt(measure.getAttribute('coord.x1'))
-      const y = parseInt(pageHeight - parseInt(system.getAttribute('uly')))
-      const w = parseInt(measure.getAttribute('coord.x2') - x)
-      const h = parseInt(Math.round(pageHeight / 30))
-
-      console.log('xywh:', x, y, w, h)
-      // }
-    },
+    /**
+     * set the left margin of the active system
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x         [description]
      */
+    setActiveSystemX ({ commit, getters, dispatch }, x) {
+      if (typeof x === 'undefined') {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const systemId = getters.activeSystemId
+      const rastrum = [...modifiedDom.querySelectorAll('rastrum')].find(rastrum => rastrum.getAttribute('xml:id') === systemId)
+
+      rastrum.setAttribute('system.leftmar', x)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the vertical position of the active system
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x         [description]
+     */
+    setActiveSystemY ({ commit, getters, dispatch }, y) {
+      if (typeof y === 'undefined') {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const systemId = getters.activeSystemId
+      const rastrum = [...modifiedDom.querySelectorAll('rastrum')].find(rastrum => rastrum.getAttribute('xml:id') === systemId)
+
+      rastrum.setAttribute('system.topmar', y)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the width of the active system
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x         [description]
+     */
+    setActiveSystemW ({ commit, getters, dispatch }, w) {
+      if (typeof w === 'undefined') {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const systemId = getters.activeSystemId
+      const rastrum = [...modifiedDom.querySelectorAll('rastrum')].find(rastrum => rastrum.getAttribute('xml:id') === systemId)
+
+      rastrum.setAttribute('width', w)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the height of the active system
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x         [description]
+     */
+    setActiveSystemH ({ commit, getters, dispatch }, h) {
+      if (typeof h === 'undefined') {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const systemId = getters.activeSystemId
+      const rastrum = [...modifiedDom.querySelectorAll('rastrum')].find(rastrum => rastrum.getAttribute('xml:id') === systemId)
+
+      rastrum.setAttribute('system.height', h)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * set the rotation of the active system
+     * @param {[type]} commit    [description]
+     * @param {[type]} getters   [description]
+     * @param {[type]} dispatch  [description]
+     * @param {[type]} x         [description]
+     */
+    setActiveSystemRotate ({ commit, getters, dispatch }, rotate) {
+      if (typeof rotate === 'undefined') {
+        return null
+      }
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+
+      if (!modifiedDom) {
+        return null
+      }
+
+      const systemId = getters.activeSystemId
+      const rastrum = [...modifiedDom.querySelectorAll('rastrum')].find(rastrum => rastrum.getAttribute('xml:id') === systemId)
+
+      rastrum.setAttribute('rotate', rotate)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'adjust systems on ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    }
   },
 
   /**
@@ -1280,6 +1377,12 @@ const dataModule = {
           const surfaceLabel = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : surfaceN
           const label = isReconstruction ? i : surfaceLabel
 
+          const position = (folium.getAttribute('outer.recto') === match ||
+            folium.getAttribute('inner.recto') === match ||
+            folium.getAttribute('recto') === match)
+            ? 'recto'
+            : 'verso'
+
           obj.uri = target
           obj.id = surfaceId
           obj.label = label
@@ -1293,6 +1396,7 @@ const dataModule = {
           obj.foliumId = folium.getAttribute('xml:id').trim()
           obj.mmWidth = parseFloat(folium.getAttribute('width'))
           obj.mmHeight = parseFloat(folium.getAttribute('height'))
+          obj.position = position
 
           obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
           obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
@@ -1602,6 +1706,21 @@ const dataModule = {
 
       const writingLayer = genDescWritingZone.querySelector('genState[class~="#geneticOrder_finalState"]')
       return writingLayer
+    },
+
+    /**
+     * gets the current page object from documentPagesForSidebars
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageDetails: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      return page
     },
 
     /**
@@ -2066,14 +2185,15 @@ const dataModule = {
           x: parseFloat(rastrum.getAttribute('system.leftmar')),
           y: parseFloat(rastrum.getAttribute('system.topmar')),
           w: parseFloat(rastrum.getAttribute('width')),
-          h: parseFloat(rastrum.getAttribute('system.height'))
+          h: parseFloat(rastrum.getAttribute('system.height')),
+          rotate: rastrum.hasAttribute('rotate') ? parseFloat(rastrum.getAttribute('rotate')) : 0
         }
 
         // console.log(mm)
-        const xywh = convertRectUnits(dom, surfaceId, mm, 'mm2px')
+        // const xywh = convertRectUnits(dom, surfaceId, mm, 'mm2px')
         // console.log(xywh)
 
-        arr.push({ id: rastrum.getAttribute('xml:id'), xywh })
+        arr.push({ id: rastrum.getAttribute('xml:id'), ...mm })
       })
 
       return arr
