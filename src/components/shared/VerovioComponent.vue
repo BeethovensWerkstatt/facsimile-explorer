@@ -53,7 +53,7 @@ export default {
     source: String
   },
   watch: {
-    source () {
+    sourceDOM () {
       this.render()
     }
   },
@@ -64,7 +64,7 @@ export default {
       if (this.source) {
         let mei = null
         // TODO action: documentByPath with optional loading from GH
-        let dom = this.$store.getters.documentByPath(this.source)
+        let dom = this.sourceDOM
         if (dom) {
           const serializer = new XMLSerializer()
           mei = serializer.serializeToString(dom)
@@ -98,7 +98,9 @@ export default {
     }
   },
   computed: {
-
+    sourceDOM () {
+      return this.$store.getters.documentByPath(this.source)
+    }
   },
   mounted: function () {
     // eslint-disable-next-line
@@ -114,6 +116,7 @@ export default {
         this.render()
       })
      */
+    this.render()
   }
 }
 </script>
