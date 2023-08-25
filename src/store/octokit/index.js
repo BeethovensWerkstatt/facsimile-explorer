@@ -361,7 +361,17 @@ const actions = {
 
     if (contentData?.doc) {
       // dispatch('setData', contentData.doc) // TODO set SVG?
-      console.log(contentData.path, 'loaded from cache')
+      console.log(contentData, 'loaded from cache')
+      if (typeof callback === 'function') {
+        const serializer = new XMLSerializer()
+        const dom = contentData.doc
+        const xml = serializer.serializeToString(dom)
+        if (typeof callback === 'function') {
+          const data = { xml, dom }
+          callback(data)
+          callback = null
+        }
+      }
     } else {
       getters.octokit.repos.getContent({
         owner,
@@ -374,19 +384,21 @@ const actions = {
       }).then(({ data }) => {
         // console.log('received this as svg raw text')
         // console.log(data) // , data.content)
-        const xmlText = data
-        // console.log(svgText)
+        const xml = data
+        // console.log(xmlText)
         const parser = new DOMParser()
-        const dom = parser.parseFromString(xmlText, 'application/xml')
+        const dom = parser.parseFromString(xml, 'application/xml')
 
         // console.log(dom)
         dispatch('loadDocumentIntoStore', { path, dom })
         // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
         if (typeof callback === 'function') {
-          const data = { xml: xmlText, dom }
+          const data = { xml, dom }
           callback(data)
           callback = null
         }
+      }).catch(error => {
+        console.warn(error, path + ' not found!')
       })
     }
   },

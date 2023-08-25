@@ -98,6 +98,13 @@ export default {
     selectWritingZone (wz) {
       this.$store.dispatch('setActiveWritingZone', wz.id)
       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
+      const path = this.$store.getters.currentWzAtPath
+      const callback = ({ xml, dom }) => {
+        console.log('loaded', path)
+      }
+      if (path) {
+        this.$store.dispatch('loadXmlFile', { path, callback })
+      }
     }
   },
   computed: {
@@ -117,19 +124,6 @@ export default {
       return pages.map((page, p) => ({ ...page, reconstructionLabel: page.document }))
     },
     writingZonesOnActivePage () {
-      // TODO: das sollte natürlich über einen getter funktionieren. WritingZones nicht in pages ()
-      // integriert, um die Daten separat laden zu können und damit evtl. besser mit mehreren gleichzeitig
-      // arbeiten zu können (was aber auch so nicht trivial und damit vielleicht erstmal egal ist).
-      //
-      // xywh sind gerundete Pixelwerte – die müssten wir halt vorab aus den Daten berechnen.
-      // Die Zahlen sind so klein, weil ich erst über Prozente nachgedacht habe.
-      /*
-      return [{ id: 'asd', label: '01', xywh: '11,5,23,12', annotTrans: null },
-        { id: 'sdf', label: '02', xywh: '37,6,43,15', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: true } },
-        { id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false } },
-        { id: 'qwe', label: '04', xywh: '14,21,23,9', annotTrans: null },
-        { id: 'wer', label: '05', xywh: '38,47,32,23', annotTrans: { file: 'NK_p005_wz05_at.xml', firstZone: true } }]
-      */
       const wzArr = this.$store.getters.writingZonesOnCurrentPage
       // console.log('writing zones', wzArr)
       return wzArr

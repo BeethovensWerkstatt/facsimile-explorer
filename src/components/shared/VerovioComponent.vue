@@ -45,20 +45,28 @@ export default {
   components: {
 
   },
+  data: () => ({
+    unwatchCurrentWzAtPath: null
+  }),
   props: {
     purpose: String,
     source: String
+  },
+  watch: {
+    source () {
+      this.render()
+    }
   },
   methods: {
     render () {
       this.removeListeners()
 
       if (this.source) {
-        const serializer = new XMLSerializer()
         let mei = null
         // TODO action: documentByPath with optional loading from GH
         let dom = this.$store.getters.documentByPath(this.source)
         if (dom) {
+          const serializer = new XMLSerializer()
           mei = serializer.serializeToString(dom)
           this.vrvToolkit.loadData(mei)
           const svg = this.vrvToolkit.renderToSVG(1, {})
@@ -69,6 +77,7 @@ export default {
         } else {
           // TODO load from GitHub
           dom = null
+          this.$refs.mei.innerHTML = '<div class="placeholder">no transcript available ...</div>'
         }
       }
     },
