@@ -18,7 +18,7 @@
       <MainStage class="mainStage stageItem">
         <h1>{{currentAnnotTabFileName}}</h1>
         <VerovioComponent purpose="proofreading" :source="$store.getters.currentWzAtPath"/>
-‚      </MainStage>
+      </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="annotTab" v-if="annotTabRightSidebarVisible">
         <div class="desc">
           <h1>Supplied elements</h1>
