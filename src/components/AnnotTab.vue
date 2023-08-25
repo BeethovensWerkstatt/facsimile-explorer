@@ -18,6 +18,7 @@
       <MainStage class="mainStage stageItem">
         <h1>{{currentAnnotTabFileName}}</h1>
         <VerovioComponent purpose="proofreading" :source="$store.getters.currentWzAtPath"/>
+        <ImageComponent />
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="annotTab" v-if="annotTabRightSidebarVisible">
         <div class="desc">
@@ -50,6 +51,7 @@ import SourceSelector from '@/components/shared/SourceSelector.vue'
 import WritingZoneDirectory from '@/components/WritingZoneDirectory.vue'
 import WritingZonesAtAnnotTrans from '@/components/WritingZonesAtAnnotTrans.vue'
 import VerovioComponent from '@/components/shared/VerovioComponent.vue'
+import ImageComponent from './shared/ImageComponent.vue'
 
 export default {
   name: 'AnnotTab',
@@ -60,7 +62,8 @@ export default {
     SourceSelector,
     WritingZoneDirectory,
     WritingZonesAtAnnotTrans,
-    VerovioComponent
+    VerovioComponent,
+    ImageComponent
   },
   created () {
     this.unwatchSvgVerification = this.$store.watch((state, getters) => getters.currentSvgPath,
