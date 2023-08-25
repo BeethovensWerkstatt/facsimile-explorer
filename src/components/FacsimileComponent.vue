@@ -105,13 +105,13 @@ export default {
       const originalClick = new OpenSeadragon.Point(e.originalEvent.clientX, e.originalEvent.clientY)
       const viewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(originalClick)
       const clickedPagePos = viewportCoordinates.rotate(deg, origin)
-      const pageRect = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+      // const pageRect = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
 
-      const onPage = pageRect.location.containsPoint(clickedPagePos)
+      // const onPage = pageRect.location.containsPoint(clickedPagePos)
 
-      if (onPage) {
-        click.page = clickedPagePos
-      }
+      // if (onPage) {
+      click.page = clickedPagePos
+      // }
 
       console.log(click)
 
@@ -506,7 +506,9 @@ export default {
         return null
       }
 
-      this.viewer.viewport.setRotationWithPivot(rotation, new OpenSeadragon.Point(0, 0))
+      const page = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+
+      this.viewer.viewport.setRotationWithPivot(rotation, page.location.getCenter())
     },
 
     renderPageBorders () {

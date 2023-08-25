@@ -9,17 +9,10 @@
  * @return {[type]}               [description]
  */
 export function getMediaFragmentBBoxRect (OpenSeadragon, getters) {
-  const pageDimensions = getters.currentPageDimensions
-
-  if (!pageDimensions) {
-    return null
-  }
-
-  const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
-  const placement = OpenSeadragon.Placement.CENTER
+  const fragment = getMediaFragmentRect(OpenSeadragon, getters)
   const rotationMode = OpenSeadragon.OverlayRotationMode.BOUNDING_BOX
 
-  return { location, placement, rotationMode }
+  return { location: fragment.location, rotationMode }
 }
 
 /**
@@ -29,17 +22,55 @@ export function getMediaFragmentBBoxRect (OpenSeadragon, getters) {
  * @return {[type]}                [description]
  */
 export function getMediaFragmentRect (OpenSeadragon, getters) {
-  const pageDimensions = getters.currentPageDimensions
-  // const deg = getters.currentPageRotation
+  const pageIndex = getters.currentPageZeroBased
+  const path = getters.filepath
+  const pages = getters.documentPagesForSidebars(path)
 
-  if (!pageDimensions) {
+  const page = pages[pageIndex]
+  if (!page || !page.uri) {
     return null
   }
 
-  const location = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
+  const fragmentRaw = page.uri.split('#xywh=')[1]
+  const fragment = {
+    x: 0,
+    y: 0,
+    w: parseInt(page.width),
+    h: parseInt(page.height),
+    rotate: 0
+  }
+
+  if (fragmentRaw !== undefined) {
+    const xywh = fragmentRaw.split('&rotate=')[0]
+    const rotate = fragmentRaw.split('&rotate=')[1]
+
+    fragment.x = parseFloat(xywh.split(',')[0])
+    fragment.y = parseFloat(xywh.split(',')[1])
+    fragment.w = parseFloat(xywh.split(',')[2])
+    fragment.h = parseFloat(xywh.split(',')[3])
+
+    if (rotate !== undefined) {
+      fragment.rotate = parseFloat(rotate.split(',')[0])
+    }
+  }
+
+  const deg = fragment.rotate
+
+  const pageRect = new OpenSeadragon.Rect(0, 0, page.mmWidth, page.mmHeight, deg)
+  const pageBBox = pageRect.getBoundingBox()
+
+  console.log('pageBBox from rendering', pageBBox)
+
+  // const xScale = pageBBox.width / fragment.w
+
+  // const imageOriginX = fragment.x * xScale * -1
+  // const imageOriginY = fragment.y * xScale * -1
+  // const imageOriginW = xScale * page.width
+  // const bbox = new OpenSeadragon.Rect(pageBBox.getTopLeft().x * xScale, pageBBox.getTopLeft().y * xScale, xScale * page.width, xScale * page.height)
+
   const rotationMode = OpenSeadragon.OverlayRotationMode.EXACT
 
-  return { location, rotationMode }
+  return { location: pageBBox, rotationMode }
 }
 
 /**
@@ -50,7 +81,6 @@ export function getMediaFragmentRect (OpenSeadragon, getters) {
  */
 export function getMediaFragmentInnerBoxRect (OpenSeadragon, getters) {
   const pageDimensions = getters.currentPageDimensions
-  const deg = getters.currentPageRotation
 
   if (!pageDimensions) {
     return null
@@ -59,19 +89,7 @@ export function getMediaFragmentInnerBoxRect (OpenSeadragon, getters) {
   const width = parseFloat(pageDimensions.mmWidth)
   const height = parseFloat(pageDimensions.mmHeight)
 
-  const center = new OpenSeadragon.Point(width / 2, height / 2)
-  const tl = new OpenSeadragon.Point(0, 0)
-  const centerRotated = center.rotate(deg, tl)
-
-  const offsetX = Math.abs(center.x - centerRotated.x)
-  const offsetY = Math.abs(center.y - centerRotated.y)
-
-  const irX = deg < 0 ? center.x - width / 2 + offsetX * 2 : center.x - width / 2
-  const irY = deg < 0 ? center.y - height / 2 : center.y - height / 2 + offsetY * 2
-  const irW = deg < 0 ? width - offsetX * 2 : width - offsetX * 2
-  const irH = deg < 0 ? height - offsetY * 2 : height - offsetY * 2
-
-  const location = new OpenSeadragon.Rect(irX, irY, irW, irH)
+  const location = new OpenSeadragon.Rect(0, 0, width, height)
   const rotationMode = OpenSeadragon.OverlayRotationMode.NO_ROTATION
 
   return { location, rotationMode }
@@ -87,9 +105,9 @@ export function suggestRastrum (getters) {
 
   const pageWidth = parseFloat(page.mmWidth)
 
-  let leftmar = page.position === 'verso' ? 25 : 20
-  let rightmar = page.position === 'recto' ? 25 : 20
-  let topmar = 20
+  let leftmar = page.position === 'verso' ? 34 : 23
+  let rightmar = page.position === 'recto' ? 34 : 23
+  let topmar = 15
   let height = 7
   let rotate = 0
   let systemDistance = 6

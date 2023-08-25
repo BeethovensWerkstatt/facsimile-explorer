@@ -1,5 +1,6 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
+import OpenSeadragon from 'openseadragon'
 import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1757,13 +1758,7 @@ const dataModule = {
       if (!page || !page.uri) {
         return null
       }
-      // console.log('\n\nbuilding osdTileSourceForCurrentPage for ' + page.uri)
-      // console.log('pageIndex ', pageIndex)
-      // console.log('page ', page)
-      const xScale = parseFloat(page.mmWidth) / parseFloat(page.width)
-      const yScale = parseFloat(page.mmHeight) / parseFloat(page.height)
 
-      // console.log('xScale / yScale', xScale, yScale)
       const fragmentRaw = page.uri.split('#xywh=')[1]
       const fragment = {
         x: 0,
@@ -1787,26 +1782,32 @@ const dataModule = {
         }
       }
 
-      // console.log('fragment', fragment)
+      const deg = fragment.rotate
 
-      const imageX = fragment.x * xScale * -1
-      const imageY = fragment.y * yScale * -1
-      const width = page.mmWidth * page.width / fragment.w
+      const pageRect = new OpenSeadragon.Rect(0, 0, page.mmWidth, page.mmHeight, deg)
+      const pageBBox = pageRect.getBoundingBox()
 
-      // console.log('imageX ', imageX)
-      // console.log('imageY', imageY)
-      // console.log('width', width)
+      const xScale = pageBBox.width / fragment.w
+      const yScale = pageBBox.height / fragment.h
+      console.log('xScale: ' + xScale + ', yScale: ' + yScale)
+      console.log('page', page)
+      console.log('fragment', fragment)
+      console.log('pageRect', pageRect)
+      console.log('pageBBox', pageBBox)
 
+      const imageOriginX = fragment.x * xScale * -1
+      const imageOriginY = fragment.y * xScale * -1
+      const imageOriginW = xScale * page.width
+      // console.log('imageOriginW', imageOriginW)
       const tileSource = {
         tileSource: page.uri,
-        x: imageX,
-        y: imageY,
-        width,
-        degrees: fragment.rotate
+        x: imageOriginX,
+        y: imageOriginY,
+        width: imageOriginW,
+        degrees: deg
       }
 
       // console.log('tileSource ', tileSource)
-
       return tileSource
     },
 
