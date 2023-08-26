@@ -1595,7 +1595,7 @@ const dataModule = {
 
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
-      const meipath = docPath.split(docName + '.xml')[0] + 'annotTrans/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + String(z + 1).padStart(3, '0') + '_at.xml'
+      const meipath = docPath.split(docName + '.xml')[0] + 'annotatedTranscript/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + String(z + 1).padStart(2, '0') + '_at.xml'
       return meipath
     },
 
@@ -1637,6 +1637,24 @@ const dataModule = {
       const dom = getters.documentByPath(docPath)
 
       return dom
+    },
+
+    /**
+     * retrieves the details about the current page
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentPageInfo: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+      return page
     },
 
     /**
@@ -2057,6 +2075,8 @@ const dataModule = {
       const surfaceId = getters.currentSurfaceId
       const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
       const svgDom = getters.svgForCurrentPage
+      const pageInfo = getters.currentPageInfo
+      const docName = pageInfo.document
 
       // console.log(genDescPage, genDescWzArr, surface, svgDom)
       const arr = []
@@ -2103,13 +2123,16 @@ const dataModule = {
           layers.push(wl)
         })
 
+        const wzIndexPadded = String(zi + 1).padStart(2, '0')
+        const annotTransFilePath = 'data/sources/' + docName + '/annotatedTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_at.xml'
+
         const wz = {}
         wz.id = genDescWzId
         wz.index = zi
         wz.label = genDescWz.getAttribute('label')
 
         wz.totalCount = totalCount
-        wz.annotTrans = null // TODO: path or DOM?
+        wz.annotTrans = annotTransFilePath // null // TODO: path or DOM?
         wz.xywh = x + ',' + y + ',' + w + ',' + h
         wz.layers = layers
         wz.svgGroupWzId = svgGroupWzId
