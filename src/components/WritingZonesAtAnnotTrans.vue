@@ -3,7 +3,7 @@
     <h1>Writing Zones</h1>
     <div class="firstWritingZone">
       <label>Main Writing Zone</label>
-      {{firstWritingZone.annotTrans.file}}
+      <div>{{ firstWritingZone }}</div>
     </div>
     <div class="additionalWritingZones">
       <label>Additional Writing Zones</label>
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'WritingZonesAtAnnotTrans',
@@ -85,12 +85,26 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['writingZonesOnCurrentPage', 'activeWritingZone', 'availableAnnotatedTranscripts', 'currentWritingZoneObject']),
     firstWritingZone () {
+      const wz = this.currentWritingZoneObject
+      if (!wz) {
+        return ''
+      }
+      const annotTransPath = wz.annotTrans.split('/').slice(-1)[0]
+      const sourceName = annotTransPath.substring(0, annotTransPath.length - 17)
+      // D-BNba_MH_60_Engelmann_p007_wz01_at.xml
+      const pageNum = parseInt(annotTransPath.substring(sourceName.length + 2, sourceName.length + 5))
+      const wzNum = parseInt(annotTransPath.substring(sourceName.length + 8, sourceName.length + 10))
+
+      // TODO important!: pageNum durch label ersetzen!!!
+
+      return sourceName + ', p.' + pageNum + ', WZ ' + wzNum
       // TODO: Hier am Objekt einfach noch die jeweilige Seite angehängt
-      return { id: 'sdf', label: '02', xywh: '37,6,43,15', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: true }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }
+      // return { id: 'sdf', label: '02', xywh: '37,6,43,15', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: true }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }
     },
     additionalWritingZones () {
-      return [{ id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }]
+      return [] // [{ id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }]
     },
     displayPerspective () {
       // TODO: das sollte natürlich über einen getter funktionieren

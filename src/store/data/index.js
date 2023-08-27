@@ -2267,6 +2267,24 @@ const dataModule = {
       const size = '/1000,/0/default.jpg'
 
       return baseUri + xywh + size
+    },
+
+    /**
+     * retrieve active anntoated transcription
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentWritingZoneObject: (state, getters) => {
+      const wzId = getters.activeWritingZone
+      if (!wzId) {
+        return null
+      }
+      const wzDetails = getters.writingZonesOnCurrentPage?.find(wz => wz.id === wzId)
+      if (!wzDetails) {
+        return null
+      }
+      return wzDetails
     }
   }
 }

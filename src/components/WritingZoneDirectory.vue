@@ -103,7 +103,7 @@ export default {
       const callback = ({ xml, dom }) => {
         console.log('loaded', path)
       }
-      if (path) {
+      if (path && this.availableAnnotatedTranscripts.indexOf(path) !== -1) {
         this.$store.dispatch('loadXmlFile', { path, callback })
       }
     }

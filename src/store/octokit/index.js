@@ -26,7 +26,6 @@ const state = {
 
   sources: [],
   availableAnnotatedTranscripts: [],
-  loadedAnnotatedTranscripts: {},
   documents: {},
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
@@ -66,7 +65,6 @@ const getters = {
   changesNeedBranching: state => state.changesNeedBranching,
 
   availableAnnotatedTranscripts: state => state.availableAnnotatedTranscripts,
-  annotatedTranscript: state => (path) => state.loadedAnnotatedTranscripts[path],
   // getCommit: (state, getters) => (sha) => getters.octokit.
 
   proposedCommitMessage: state => {

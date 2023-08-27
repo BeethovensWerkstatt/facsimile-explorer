@@ -19,8 +19,8 @@
         <template v-if="annotatedTranscriptForCurrentWz !== null">
           <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
         </template>
-        <template v-else>
-          not yet
+        <template v-else-if="activeWritingZone === null">
+          You need to select a writing zone on the left.
         </template>
         <template v-if="previewImageUri !== null">
           <ImageComponent :uri="previewImageUri"/>
@@ -111,7 +111,7 @@ export default {
       const atPath = this.$store.getters.currentWzAtPath
       const at = this.$store.getters.annotatedTranscriptForCurrentWz
       if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
-        this.$store.dispatch('loadAnnotatedTranscript', {
+        this.$store.dispatch('loadXmlFile', {
           path: atPath
         })
       }
@@ -141,11 +141,14 @@ export default {
     } */
   },
   computed: {
-    ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible', 'writingZonesOnCurrentPage', 'activeWritingZone']),
+    ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible', 'writingZonesOnCurrentPage', 'activeWritingZone', 'availableAnnotatedTranscripts']),
     showFilePicker () {
-      const wz = this.writingZonesOnCurrentPage?.find(wz => wz.id === this.activeWritingZone)
+      const activeWz = this.activeWritingZone
+      const availableAnnotTrans = this.availableAnnotatedTranscripts
+
+      // const wz = this.writingZonesOnCurrentPage?.find(wz => wz.id === this.activeWritingZone)
       // console.log(wz)
-      return wz && !wz.annotTrans
+      return activeWz !== null && availableAnnotTrans.indexOf(activeWz) === -1// wz && !wz.annotTrans
     },
     currentAnnotTabFileName () {
       return this.$store.getters.currentWzAtPath
