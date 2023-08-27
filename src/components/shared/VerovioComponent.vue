@@ -5,7 +5,7 @@
 </template>
 
 <script>
-// import verovio from 'verovio'
+import { draft2score } from '@/tools/mei.js'
 // import { mapGetters } from 'vuex'
 
 const verovioOptions = {
@@ -45,40 +45,36 @@ export default {
   components: {
 
   },
-  data: () => ({
-    unwatchCurrentWzAtPath: null
-  }),
   props: {
     purpose: String,
-    source: String
-  },
-  watch: {
-    sourceDOM () {
-      this.render()
-    }
+    type: String,
+    getter: String
   },
   methods: {
     render () {
-      this.removeListeners()
+      const meiDom = this.$store.getters[this.getter]
 
-      if (this.source) {
-        let mei = null
-        // TODO action: documentByPath with optional loading from GH
-        let dom = this.sourceDOM
-        if (dom) {
-          const serializer = new XMLSerializer()
-          mei = serializer.serializeToString(dom)
-          this.vrvToolkit.loadData(mei)
-          const svg = this.vrvToolkit.renderToSVG(1, {})
+      if (!meiDom) {
+        console.log('VerovioComponent:render(): No data available.')
+        this.$refs.mei.innerHTML = '<div class="placeholder">loading data…</div>'
+        return false
+      }
 
-          this.$refs.mei.innerHTML = svg
+      try {
+        this.removeListeners()
 
-          this.addListeners()
-        } else {
-          // TODO load from GitHub
-          dom = null
-          this.$refs.mei.innerHTML = '<div class="placeholder">no transcript available ...</div>'
-        }
+        const resolvedDrafts = draft2score(meiDom)[0]
+
+        const serializer = new XMLSerializer()
+        const mei = serializer.serializeToString(resolvedDrafts)
+        this.vrvToolkit.loadData(mei)
+        const svg = this.vrvToolkit.renderToSVG(1, {})
+
+        this.$refs.mei.innerHTML = svg
+
+        this.addListeners()
+      } catch (err) {
+        console.log('VerovioComponent:render(): Unable to render file: ' + err, err)
       }
     },
     removeListeners () {
@@ -97,11 +93,6 @@ export default {
       }
     }
   },
-  computed: {
-    sourceDOM () {
-      return this.$store.getters.documentByPath(this.source)
-    }
-  },
   mounted: function () {
     // eslint-disable-next-line
     // this.vrvToolkit = new verovio.toolkit()
@@ -110,6 +101,13 @@ export default {
       this.vrvToolkit.setOptions(verovioOptions)
       this.render()
     })
+
+    this.unwatchData = this.$store.watch((state, getters) => getters[this.getter],
+      (newCode, oldCode) => {
+        if (newCode !== null) {
+          this.render()
+        }
+      })
     /*
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
@@ -117,6 +115,10 @@ export default {
       })
      */
     this.render()
+  },
+  beforeUnmount () {
+    this.unwatchData()
+    this.removeListeners()
   }
 }
 </script>

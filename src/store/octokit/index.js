@@ -25,6 +25,8 @@ const state = {
   committing: false,
 
   sources: [],
+  availableAnnotatedTranscripts: [],
+  loadedAnnotatedTranscripts: {},
   documents: {},
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
@@ -63,6 +65,8 @@ const getters = {
   loggedChanges: state => state.changes,
   changesNeedBranching: state => state.changesNeedBranching,
 
+  availableAnnotatedTranscripts: state => state.availableAnnotatedTranscripts,
+  annotatedTranscript: state => (path) => state.loadedAnnotatedTranscripts[path],
   // getCommit: (state, getters) => (sha) => getters.octokit.
 
   proposedCommitMessage: state => {
@@ -153,6 +157,9 @@ const mutations = {
   },
   SET_SOURCES (state, sources) {
     state.sources = sources
+  },
+  SET_AVAILABLE_ANNOTATED_TRANSCRIPTS (state, annotatedTranscripts) {
+    state.availableAnnotatedTranscripts = annotatedTranscripts
   },
   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
     if (!doc) console.warn(`no document '${path}'`)
@@ -338,6 +345,55 @@ const actions = {
         // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
         if (typeof callback === 'function') {
           const data = { xml: svg, dom }
+          callback(data)
+          callback = null
+        }
+      })
+    }
+  },
+
+  loadAnnotatedTranscript (
+    { commit, dispatch, getters },
+    {
+      owner = config.repository.owner, // 'BeethovensWerkstatt',
+      repo = config.repository.repo, // 'data',
+      path,
+      ref = config.repository.branch, // 'dev'
+      callback = null // optional callback to call, when loading is finished
+    }) {
+    const contentData = getters.getContentData(path)
+
+    // console.log('\n\nYODIYAY')
+    // console.log(contentData)
+
+    if (contentData?.doc) {
+      // dispatch('setData', contentData.doc) // TODO set SVG?
+      console.log(contentData.path, 'loaded from cache')
+    } else {
+      getters.octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+        ref,
+        headers: {
+          Accept: 'application/vnd.github.v3.raw'
+        }
+      }).then(({ data }) => {
+        // console.log('received this as svg raw text')
+        // console.log(data) // , data.content)
+        const svgText = data
+        // console.log(svgText)
+        const parser = new DOMParser()
+        const mei = parser.parseFromString(svgText, 'image/svg+xml')
+        // const relativePath = './' + path.split('/').slice(config.root.split('/').length + 1).join('/')
+        // console.log(path, relativePath)
+        const dom = mei // .querySelector('svg')
+
+        // console.log(dom)
+        dispatch('loadDocumentIntoStore', { path, dom })
+        // dispatch('loadDocumentIntoStore', { path: relativePath, dom: svg })
+        if (typeof callback === 'function') {
+          const data = { xml: mei, dom }
           callback(data)
           callback = null
         }
@@ -747,6 +803,7 @@ const actions = {
     // console.log(repometa)
     dispatch('setLoading', true)
     const sourcefiles = []
+    const annotatedTranscripts = []
     const repo = new OctokitRepo(repometa)
     // repo.getLastCommit().then(c => console.log('latest commit', c))
     const root = await repo.folder
@@ -763,10 +820,19 @@ const actions = {
             // console.log('source:', srcfile.path)
             sourcefiles.push({ name: source.name, path: srcfile.path })
           }
+          if (srcfile.name === 'annotatedTranscripts') {
+            const transcripts = await srcfile.folder
+            for (const transcript of transcripts) {
+              if (transcript.name.endsWith('.xml') || transcript.name.endsWith('.mei')) {
+                annotatedTranscripts.push(transcript.path)
+              }
+            }
+          }
         }
       }
     }
     commit('SET_SOURCES', sourcefiles)
+    commit('SET_AVAILABLE_ANNOTATED_TRANSCRIPTS', annotatedTranscripts)
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     // build a Promise to wait for loading of all sources

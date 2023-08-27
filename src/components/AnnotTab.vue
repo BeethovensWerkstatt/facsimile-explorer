@@ -16,9 +16,15 @@
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
-        <h1>{{currentAnnotTabFileName}}</h1>
-        <VerovioComponent purpose="proofreading" :source="$store.getters.currentWzAtPath"/>
-        <ImageComponent />
+        <template v-if="annotatedTranscriptForCurrentWz !== null">
+          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
+        </template>
+        <template v-else>
+          not yet
+        </template>
+        <template v-if="previewImageUri !== null">
+          <ImageComponent :uri="previewImageUri"/>
+        </template>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="annotTab" v-if="annotTabRightSidebarVisible">
         <div class="desc">
@@ -71,7 +77,13 @@ export default {
         this.verifySvgAvailable()
       })
 
+    this.unwatchAnnotTransVerification = this.$store.watch((state, getters) => getters.currentWzAtPath,
+      (newPath, oldPath) => {
+        this.verifyAnnotTransLoaded()
+      })
+
     this.verifySvgAvailable()
+    this.verifyAnnotTransLoaded()
   },
   beforeUnmount () {
     this.unwatchSvgVerification()
@@ -92,6 +104,15 @@ export default {
         // console.log('need to do something about this…')
         this.$store.dispatch('loadSvgFile', {
           path: svgPath
+        })
+      }
+    },
+    verifyAnnotTransLoaded () {
+      const atPath = this.$store.getters.currentWzAtPath
+      const at = this.$store.getters.annotatedTranscriptForCurrentWz
+      if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
+        this.$store.dispatch('loadAnnotatedTranscript', {
+          path: atPath
         })
       }
     },
@@ -123,13 +144,17 @@ export default {
     ...mapGetters(['annotTabLeftSidebarVisible', 'annotTabRightSidebarVisible', 'writingZonesOnCurrentPage', 'activeWritingZone']),
     showFilePicker () {
       const wz = this.writingZonesOnCurrentPage?.find(wz => wz.id === this.activeWritingZone)
-      console.log(wz)
+      // console.log(wz)
       return wz && !wz.annotTrans
     },
     currentAnnotTabFileName () {
-      // TODO create / retrieve filename
-      // return 'NK_p005_wz02_at.xml'
       return this.$store.getters.currentWzAtPath
+    },
+    annotatedTranscriptForCurrentWz () {
+      return this.$store.getters.annotatedTranscriptForCurrentWz
+    },
+    previewImageUri () {
+      return this.$store.getters.currentWzImageUri
     }
   }
 }
@@ -172,6 +197,7 @@ export default {
       flex: 1 1 auto;
       order: 2;
       height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+      overflow: scroll;
     }
   }
 }

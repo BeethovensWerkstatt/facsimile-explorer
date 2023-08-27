@@ -229,3 +229,31 @@ export function sortRastrumsByVerticalPosition (rastrumDesc) {
   const reordered = rastrums.sort(sortFunc)
   reordered.forEach(rastrum => rastrumDesc.append(rastrum))
 }
+
+/**
+ * Translates draft elements to regular score elements.
+ * Generates an array of MEI DOMs, each starting with <music>
+ * @param  {[type]} meiDom               [description]
+ * @return {[type]}        [description]
+ */
+export function draft2score (meiDom) {
+  const arr = []
+  meiDom.querySelectorAll('draft').forEach(draft => {
+    const music = document.createElementNS('http://www.music-encoding.org/ns/mei', 'music')
+    music.setAttribute('meiversion', '5.0.0-dev')
+    const body = document.createElementNS('http://www.music-encoding.org/ns/mei', 'body')
+    const mdiv = document.createElementNS('http://www.music-encoding.org/ns/mei', 'mdiv')
+    const score = document.createElementNS('http://www.music-encoding.org/ns/mei', 'score')
+
+    music.append(body)
+    body.append(mdiv)
+    mdiv.append(score)
+
+    const childArr = [...draft.children]
+    childArr.forEach(child => {
+      score.append(child)
+    })
+    arr.push(music)
+  })
+  return arr
+}

@@ -17,18 +17,19 @@
             <span class="actualPreview" :style="wzPageDimensions(page, wz.xywh)"></span>
           </span>
           <span class="hasTrans float-right">
-            <template v-if="wz.annotTrans !== null">
-              <template v-if="wz.annotTrans.firstZone">
-                <span class="desc">annot</span>
-                <i class="icon icon-check" :title="wz.annotTrans.file"></i>
+            <template v-if="this.availableAnnotatedTranscripts.indexOf(wz.annotTrans) !== -1">
+              <span class="desc">Annot<br/>Trans</span>
+              <i class="icon icon-check" :title="wz.annotTrans.file"></i>
+              <!--<template v-if="wz.annotTrans.firstZone">
+
               </template>
               <template v-else>
                 <span class="desc">cont'd</span>
                 <i class="icon icon-link" :title="wz.annotTrans.file"></i>
-              </template>
+              </template>-->
             </template>
             <template v-else>
-              <span class="desc">no trans</span>
+              <span class="desc">not<br/>trans</span>
               <i class="icon icon-stop" title="Writing Zone without Annotated Transcription"></i>
             </template>
           </span>
@@ -108,7 +109,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['activeWritingZone']),
+    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts']),
     activePage () {
       return this.$store.getters.currentPageZeroBased
     },
@@ -209,7 +210,7 @@ export default {
       height: .8rem;
       border: $lightBorder;
       position: relative;
-      top: 2px;
+      top: 3px;
       cursor: pointer;
 
       .actualPreview {
@@ -222,7 +223,7 @@ export default {
       i.icon-check, i.icon-stop, i.icon-link {
         font-size: .7rem;
         position: relative;
-        top: -2px;
+        top: -3px;
         color: darken($darkFontColor, 10%);
       }
 
@@ -232,11 +233,14 @@ export default {
 
       .desc {
         font-weight: 100;
-        font-size: .6rem;
+        font-size: .5rem;
+        line-height: .5rem;
         color: lighten($darkFontColor, 40%);
         margin-right: .2rem;
         position: relative;
-        top: -1px;
+        top: 2px;
+        display: inline-block;
+        text-align: center;
       }
     }
   }

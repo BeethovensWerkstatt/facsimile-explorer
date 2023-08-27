@@ -1,6 +1,7 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
-import OpenSeadragon from 'openseadragon'
+// import OpenSeadragon from 'openseadragon'
+import { getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1585,18 +1586,19 @@ const dataModule = {
         return null
       }
 
-      let z = -1
+      // let z = -1
       const wz = getters.writingZonesOnCurrentPage.find((wz, zi) => {
         const found = wz.id === getters.activeWritingZone
-        if (found) z = zi
+        // if (found) z = zi
         return found
       })
       if (!wz) return null
 
-      const docName = page.document
+      return wz.annotTrans
+      /* const docName = page.document
       const docPath = getters.documentPathByName(docName)
       const meipath = docPath.split(docName + '.xml')[0] + 'annotatedTranscript/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + String(z + 1).padStart(2, '0') + '_at.xml'
-      return meipath
+      return meipath */
     },
 
     /**
@@ -1615,6 +1617,23 @@ const dataModule = {
       // console.log(svgFilePath, svgDom)
       // JPV: in store is now an XMLDocument *or* an Element
       return svgDom
+    },
+
+    /**
+     * retrieves an annotated transcript for a given path
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    annotatedTranscriptForCurrentWz: (state, getters) => {
+      const path = getters.currentWzAtPath
+      if (getters.availableAnnotatedTranscripts.indexOf(path) === -1) {
+        return null
+      }
+
+      const atDom = getters.documentByPath(path)
+
+      return atDom
     },
 
     /**
@@ -1801,17 +1820,16 @@ const dataModule = {
       }
 
       const deg = fragment.rotate
+      const pageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
 
-      const pageRect = new OpenSeadragon.Rect(0, 0, page.mmWidth, page.mmHeight, deg)
-      const pageBBox = pageRect.getBoundingBox()
+      const xScale = pageFragment.w / fragment.w
+      const yScale = pageFragment.height / fragment.h
 
-      const xScale = pageBBox.width / fragment.w
-      const yScale = pageBBox.height / fragment.h
+      // pageFragment
+
       console.log('xScale: ' + xScale + ', yScale: ' + yScale)
       console.log('page', page)
       console.log('fragment', fragment)
-      console.log('pageRect', pageRect)
-      console.log('pageBBox', pageBBox)
 
       const imageOriginX = fragment.x * xScale * -1
       const imageOriginY = fragment.y * xScale * -1
@@ -2222,6 +2240,33 @@ const dataModule = {
       })
 
       return arr
+    },
+
+    /**
+     * retrieve preview image for current writing zone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentWzImageUri: (state, getters) => {
+      const wzId = getters.activeWritingZone
+      if (!wzId) {
+        return null
+      }
+      const wzDetails = getters.writingZonesOnCurrentPage?.find(wz => wz.id === wzId)
+      if (!wzDetails) {
+        return null
+      }
+      const pageDetails = getters.currentPageDetails
+      if (!pageDetails) {
+        return null
+      }
+
+      const baseUri = pageDetails.uri.split('#')[0] + '/'
+      const xywh = wzDetails.xywh
+      const size = '/1000,/0/default.jpg'
+
+      return baseUri + xywh + size
     }
   }
 }
