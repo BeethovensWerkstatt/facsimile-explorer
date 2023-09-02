@@ -26,6 +26,7 @@ const state = {
 
   sources: [],
   availableAnnotatedTranscripts: [],
+  availableDiplomaticTranscripts: [],
   documents: {},
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
@@ -65,6 +66,7 @@ const getters = {
   changesNeedBranching: state => state.changesNeedBranching,
 
   availableAnnotatedTranscripts: state => state.availableAnnotatedTranscripts,
+  availableDiplomaticTranscripts: state => state.availableDiplomaticTranscripts,
   // getCommit: (state, getters) => (sha) => getters.octokit.
 
   proposedCommitMessage: state => {
@@ -158,6 +160,9 @@ const mutations = {
   },
   SET_AVAILABLE_ANNOTATED_TRANSCRIPTS (state, annotatedTranscripts) {
     state.availableAnnotatedTranscripts = annotatedTranscripts
+  },
+  SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS (state, diplomaticTranscripts) {
+    state.availableDiplomaticTranscripts = diplomaticTranscripts
   },
   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
     if (!doc) console.warn(`no document '${path}'`)
@@ -361,7 +366,7 @@ const actions = {
     }) {
     const contentData = getters.getContentData(path)
 
-    // console.log('\n\nYODIYAY')
+    console.log('\n\nYODIYAY loadAnnotatedTranscript')
     // console.log(contentData)
 
     if (contentData?.doc) {
@@ -377,7 +382,7 @@ const actions = {
           Accept: 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
-        // console.log('received this as svg raw text')
+        console.warn('received this as svg raw text, which is wrong media type!!!')
         // console.log(data) // , data.content)
         const svgText = data
         // console.log(svgText)
@@ -802,6 +807,7 @@ const actions = {
     dispatch('setLoading', true)
     const sourcefiles = []
     const annotatedTranscripts = []
+    const diplomaticTranscripts = []
     const repo = new OctokitRepo(repometa)
     // repo.getLastCommit().then(c => console.log('latest commit', c))
     const root = await repo.folder
@@ -826,11 +832,20 @@ const actions = {
               }
             }
           }
+          if (srcfile.name === 'diplomaticTranscripts') {
+            const transcripts = await srcfile.folder
+            for (const transcript of transcripts) {
+              if (transcript.name.endsWith('.xml') || transcript.name.endsWith('.mei')) {
+                diplomaticTranscripts.push(transcript.path)
+              }
+            }
+          }
         }
       }
     }
     commit('SET_SOURCES', sourcefiles)
     commit('SET_AVAILABLE_ANNOTATED_TRANSCRIPTS', annotatedTranscripts)
+    commit('SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS', diplomaticTranscripts)
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     // build a Promise to wait for loading of all sources

@@ -6,6 +6,9 @@
           <i class="icon" :class="{'icon-arrow-left': diploTabSidebarVisible, 'icon-arrow-right': !diploTabSidebarVisible}"></i>
         </button>
       </div>
+      <div class="menuItem" v-if="showInitializeButton">
+        <button class="btn">Initialize Diplomatic Transcription</button>
+      </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
@@ -16,24 +19,24 @@
       <Transition name="slide-fade">
         <SideBar class="stageItem sidebarLeft" position="left" tab="diploTab" v-if="diploTabSidebarVisible">
           <SourceSelector/>
-          <p>
-            <b>Hallo Jan-Peter</b>: Das ist hier natürlich alles noch sehr vorläufig, aber ich denke,
-            Du hast auch anderweitig genug Baustellen in der App, um die beiden nächsten Wochen zu füllen ;-)
-          </p>
+          <WritingZoneDirectory purpose="diploTrans"/>
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
         <div class="mainBox">
-          <OpenSeadragonComponent/>
+          <FacsimileComponent/>
         </div>
         <div class="mainBox">
-          <OpenSeadragonComponent/>
+          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz"/>
+          {{ diploTransActivationsInAnnotTrans.size }} xy
+          {{ diploTransActivationsInShapes.length }}
+          <!--<OpenSeadragonComponent/>-->
         </div>
-        <div class="mainBox">
+        <!--<div class="mainBox">
           <code>XML Editor goes here</code>
-        </div>
+        </div>-->
         <div class="mainBox">
-          <VerovioComponent purpose="transcribing"/>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
         </div>
       </MainStage>
     </div>
@@ -48,8 +51,9 @@ import SideBar from '@/components/shared/SideBar.vue'
 import TopMenu from '@/components/shared/TopMenu.vue'
 // import PageList from '@/components/shared/PageList.vue'
 import SourceSelector from '@/components/shared/SourceSelector.vue'
+import WritingZoneDirectory from '@/components/WritingZoneDirectory.vue'
 
-import OpenSeadragonComponent from '@/components/OpenSeadragonComponent.vue'
+import FacsimileComponent from '@/components/FacsimileComponent.vue'
 import VerovioComponent from '@/components/shared/VerovioComponent.vue'
 
 export default {
@@ -60,16 +64,82 @@ export default {
     TopMenu,
     // PageList,
     SourceSelector,
-    OpenSeadragonComponent,
+    WritingZoneDirectory,
+    FacsimileComponent,
     VerovioComponent
   },
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleDiploTabSidebar')
+    },
+    verifySvgAvailable () {
+      const svgPath = this.$store.getters.currentSvgPath
+      const svg = this.$store.getters.svgForCurrentPage
+      if (svgPath !== null && !svg) {
+        this.$store.dispatch('loadSvgFile', {
+          path: svgPath
+        })
+      }
+    },
+    verifyAnnotTransLoaded () {
+      const atPath = this.$store.getters.currentWzAtPath
+      const at = this.$store.getters.annotatedTranscriptForCurrentWz
+      if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
+        this.$store.dispatch('loadXmlFile', {
+          path: atPath
+        })
+      }
+    },
+    verifyDiploTransLoaded () {
+      const dtPath = this.$store.getters.currentWzDtPath
+      const dt = this.$store.getters.diplomaticTranscriptForCurrentWz
+      if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
+        this.$store.dispatch('loadXmlFile', {
+          path: dtPath
+        })
+      }
     }
   },
   computed: {
-    ...mapGetters(['diploTabSidebarVisible'])
+    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans']),
+    showInitializeButton () {
+      const currentWz = this.$store.getters.currentWritingZoneObject
+      if (!currentWz) {
+        return false
+      }
+
+      const annotTransLink = currentWz.annotTrans
+      const diploTransLink = currentWz.diploTrans
+
+      const annotTransAvailable = this.$store.getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
+      const diploTransAvailable = this.$store.getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
+      return annotTransAvailable && !diploTransAvailable
+    }
+  },
+  created () {
+    this.unwatchSvgVerification = this.$store.watch((state, getters) => getters.currentSvgPath,
+      (newPath, oldPath) => {
+        this.verifySvgAvailable()
+      })
+
+    this.unwatchAnnotTransVerification = this.$store.watch((state, getters) => getters.currentWzAtPath,
+      (newPath, oldPath) => {
+        this.verifyAnnotTransLoaded()
+      })
+
+    this.unwatchDiploTransVerification = this.$store.watch((state, getters) => getters.currentWzDtPath,
+      (newPath, oldPath) => {
+        this.verifyDiploTransLoaded()
+      })
+
+    this.verifySvgAvailable()
+    this.verifyAnnotTransLoaded()
+    this.verifyDiploTransLoaded()
+  },
+  beforeUnmount () {
+    this.unwatchSvgVerification()
+    this.unwatchAnnotTransVerification()
+    this.unwatchDiploTransVerification()
   }
 }
 </script>
@@ -182,7 +252,7 @@ i.showSidebar {
 }
 
 .mainBox {
-  height: 25%;
+  height: 33%;
   padding: .5rem;
 }
 

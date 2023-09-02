@@ -12,7 +12,7 @@
       <Transition name="slide-fade">
         <SideBar class="stageItem sidebarLeft" position="left" tab="annotTab" v-if="annotTabLeftSidebarVisible">
           <SourceSelector/>
-          <WritingZoneDirectory/>
+          <WritingZoneDirectory purpose="annotTrans"/>
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
@@ -87,6 +87,7 @@ export default {
   },
   beforeUnmount () {
     this.unwatchSvgVerification()
+    this.unwatchAnnotTransVerification()
   },
   methods: {
     toggleSidebar () {

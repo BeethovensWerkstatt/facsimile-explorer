@@ -127,6 +127,35 @@ export function getRectFromCenterAndRotation (center, rotate) {
   //
 }
 
+export function getOuterBoundingRect (x, y, w, h, deg) {
+  const center = {
+    x: parseFloat(x) + parseFloat(w) / 2,
+    y: parseFloat(y) + parseFloat(h) / 2
+  }
+
+  const absDeg = Math.abs(deg)
+  const rad = deg2rad(absDeg)
+  const newWidth = parseFloat(w) * Math.cos(rad) + parseFloat(h) * Math.sin(rad)
+  const newHeight = parseFloat(w) * Math.sin(rad) + parseFloat(h) * Math.cos(rad)
+
+  const tlUnrotated = {
+    x: center.x - newWidth / 2,
+    y: center.y - newHeight / 2
+  }
+
+  const tl = rotatePoint(tlUnrotated, center, deg)
+
+  const rect = {
+    x: tl.x,
+    y: tl.y,
+    w: newWidth,
+    h: newHeight
+  }
+
+  return rect
+  // (305 * Math.cos(5 * Math.PI / 180)) + (232 * Math.sin(5 * Math.PI / 180))
+}
+
 /**
  * returns the rotation between two points in degrees
  * @param  {Object} p1               the upper point, an object with x and y props

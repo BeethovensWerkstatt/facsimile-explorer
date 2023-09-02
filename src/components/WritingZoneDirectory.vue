@@ -4,7 +4,7 @@
     <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
       <!-- <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page, p)}}</small></h2> -->
       <h2 @click="setPage(p)">{{ page.label ? page.label : (p + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
-      <template v-if="p === activePage">
+      <template v-if="p === activePage && this.purpose === 'annotTrans'">
         <div
           class="wz"
           :class="{ firstZone: wz.annotTrans !== null && wz.annotTrans.firstZone, followUpZone: wz.annotTrans !== null && !wz.annotTrans.firstZone, active: wz.id === activeWritingZone }"
@@ -29,7 +29,55 @@
               </template>-->
             </template>
             <template v-else>
-              <span class="desc">not<br/>trans</span>
+              <span class="desc">not<br/>transc.</span>
+              <i class="icon icon-stop" title="Writing Zone without Annotated Transcription"></i>
+            </template>
+          </span>
+        </div>
+      </template>
+      <template v-else-if="p === activePage && this.purpose === 'diploTrans'">
+        <div
+          class="wz"
+          :class="{ active: wz.id === activeWritingZone }"
+          v-for="(wz, w) in writingZonesOnActivePage"
+          :key="w"
+          @click="selectWritingZone(wz)"
+        >
+          <span class="zoneNumber">WZ {{w + 1}}</span>
+          <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
+            <span class="actualPreview" :style="wzPageDimensions(page, wz.xywh)"></span>
+          </span>
+          <span class="hasTrans float-right">
+            <template v-if="this.availableDiplomaticTranscripts.indexOf(wz.diploTrans) !== -1">
+              <span class="desc">Diplo<br/>Trans</span>
+              <i class="icon icon-check" :title="wz.annotTrans.file"></i>
+              <!--<template v-if="wz.annotTrans.firstZone">
+
+              </template>
+              <template v-else>
+                <span class="desc">cont'd</span>
+                <i class="icon icon-link" :title="wz.annotTrans.file"></i>
+              </template>-->
+            </template>
+            <template v-else>
+              <span class="desc">not<br/>transc.</span>
+              <i class="icon icon-stop" title="Writing Zone without Diplomatic Transcription"></i>
+            </template>
+          </span>
+          <span class="hasTrans float-right" style="margin-right: 1rem;">
+            <template v-if="this.availableAnnotatedTranscripts.indexOf(wz.annotTrans) !== -1">
+              <span class="desc">Annot<br/>Trans</span>
+              <i class="icon icon-check" :title="wz.annotTrans.file"></i>
+              <!--<template v-if="wz.annotTrans.firstZone">
+
+              </template>
+              <template v-else>
+                <span class="desc">cont'd</span>
+                <i class="icon icon-link" :title="wz.annotTrans.file"></i>
+              </template>-->
+            </template>
+            <template v-else>
+              <span class="desc">not<br/>transc.</span>
               <i class="icon icon-stop" title="Writing Zone without Annotated Transcription"></i>
             </template>
           </span>
@@ -47,6 +95,9 @@ import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'WritingZoneDirectory',
+  props: {
+    purpose: String
+  },
   components: {
 
   },
@@ -57,10 +108,10 @@ export default {
       // this.$router.replace({ query: { page: i + 1 } })
     },
     getPreviewWidth (page) {
-      if (page.width < page.height) {
+      if (page.width > page.height) {
         const num = 0.8 * page.width / page.height
         return num.toFixed(2) + 'rem'
-      } else if (page.width >= page.height) {
+      } else if (page.width <= page.height) {
         const num = 0.8 * page.height / page.width
         return num.toFixed(2) + 'rem'
       } else {
@@ -74,7 +125,7 @@ export default {
       return page.reconstructionLabel
     },
     showWzPreview (page, wz) {
-      alert('Hier könnte man gut einen Modal aufmachen, in dem der jeweilige Bildausschnitt per IIIF geladen wird. Keine Overlays o.ä., einfach nur eine schnelle Voransicht, damit man sehen kann, welcher Bereich das ist.')
+      // alert('Hier könnte man gut einen Modal aufmachen, in dem der jeweilige Bildausschnitt per IIIF geladen wird. Keine Overlays o.ä., einfach nur eine schnelle Voransicht, damit man sehen kann, welcher Bereich das ist.')
     },
     wzPageDimensions (page, xywh) {
       let pageWidth
@@ -89,27 +140,37 @@ export default {
         pageWidth = '.8rem'
       }
 
-      const top = (100 / page.height * parseInt(xywh.split(',')[1])) + '%'
-      const left = (100 / page.width * parseInt(xywh.split(',')[0])) + '%'
-      const width = (100 / page.width * parseInt(xywh.split(',')[2])) + '%'
-      const height = (100 / page.height * parseInt(xywh.split(',')[3])) + '%'
+      const top = (100 / page.height * parseInt(xywh.split(',')[1])).toFixed(1) + '%'
+      const left = (100 / page.width * parseInt(xywh.split(',')[0])).toFixed(1) + '%'
+      const width = (100 / page.width * parseInt(xywh.split(',')[2])).toFixed(1) + '%'
+      const height = (100 / page.height * parseInt(xywh.split(',')[3])).toFixed(1) + '%'
 
       return { pageWidth, top, left, width, height }
     },
     selectWritingZone (wz) {
       this.$store.dispatch('setActiveWritingZone', wz.id)
       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
-      const path = this.$store.getters.currentWzAtPath
-      const callback = ({ xml, dom }) => {
-        console.log('loaded', path)
-      }
-      if (path && this.availableAnnotatedTranscripts.indexOf(path) !== -1) {
-        this.$store.dispatch('loadXmlFile', { path, callback })
+      if (this.purpose === 'annotTrans') {
+        const path = this.$store.getters.currentWzAtPath
+        const callback = ({ xml, dom }) => {
+          console.log('loaded', path)
+        }
+        if (path && this.availableAnnotatedTranscripts.indexOf(path) !== -1) {
+          this.$store.dispatch('loadXmlFile', { path, callback })
+        }
+      } else if (this.purpose === 'diploTrans') {
+        const path = this.$store.getters.currentWzDtPath
+        const callback = ({ xml, dom }) => {
+          console.log('loaded', path)
+        }
+        if (path && this.availableDiplomaticTranscripts.indexOf(path) !== -1) {
+          this.$store.dispatch('loadXmlFile', { path, callback })
+        }
       }
     }
   },
   computed: {
-    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts']),
+    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts', 'availableDiplomaticTranscripts']),
     activePage () {
       return this.$store.getters.currentPageZeroBased
     },

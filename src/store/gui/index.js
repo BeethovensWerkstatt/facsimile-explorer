@@ -41,6 +41,8 @@ const guiModule = {
    * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
    * @property {Number} awaitedPage number of the page to be opened when sufficient data is available. Used to resolve routes
    * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
+   * @property {Object} diploTransActivations an array of selected shapes and / or elements from the annotated transcription
+   * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
    */
   state: {
     explorerTab: 'home',
@@ -68,7 +70,12 @@ const guiModule = {
     pageBorderPoints: [],
     awaitedDocument: null,
     awaitedPage: -1,
-    allDocsLoaded: false
+    allDocsLoaded: false,
+    diploTransActivations: {
+      shapes: new Map(),
+      annotTrans: new Map()
+    },
+    diploTransSelectedId: null
   },
   /**
    * @namespace store.gui.mutations
@@ -319,6 +326,33 @@ const guiModule = {
      */
     SET_ALL_DOCS_LOADED (state) {
       state.allDocsLoaded = true
+    },
+
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name }) {
+      if (type === 'annotTrans') {
+        /* if (state.diploTransActivations.shapes.size > 0) {
+
+        } else */ if (state.diploTransActivations.annotTrans.has(id)) {
+          state.diploTransActivations.annotTrans.delete(id)
+        } else {
+          state.diploTransActivations.annotTrans.set(id, { id, name })
+        }
+      } else if (type === 'shape') {
+        if (state.diploTransActivations.shapes.has(id)) {
+          state.diploTransActivations.shapes.delete(id)
+        } else {
+          state.diploTransActivations.shapes.set(id, { id })
+        }
+      }
+    },
+
+    /**
+     * sets the ID of the selected item from the diplomatic transcription
+     * @param {[type]} state  [description]
+     * @param {[type]} id     [description]
+     */
+    DIPLO_TRANS_SELECT_ITEM (state, id) {
+      state.diploTransSelectId = id
     }
   },
   /**
@@ -539,6 +573,32 @@ const guiModule = {
      */
     setAllDocsLoaded ({ commit }) {
       commit('SET_ALL_DOCS_LOADED')
+    },
+
+    /**
+     * toggles an item (either SVG shape or from the annotated transcription in the selection for the diplomatic transcription
+     * @param  {[type]} commit               [description]
+     * @param  {[type]} type                 [description]
+     * @param  {[type]} id                   [description]
+     * @param  {[type]} name                 [description]
+     * @return {[type]}        [description]
+     */
+    diploTransToggle ({ commit, getters }, { type, id, name }) {
+      if (getters.activeWritingZone !== null) {
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name })
+      }
+    },
+
+    /**
+     * selects an element from the diplomatic transcription
+     * @param  {[type]} commit               [description]
+     * @param  {[type]} id                   [description]
+     * @return {[type]}        [description]
+     */
+    diploTransSelectId ({ commit, getters }, id) {
+      if (getters.activeWritingZone !== null) {
+        commit('DIPLO_TRANS_SELECT_ITEM', id)
+      }
     }
   },
   /**
@@ -829,6 +889,33 @@ const guiModule = {
      */
     allDocsLoaded: (state) => {
       return state.allDocsLoaded
+    },
+
+    /**
+     * returns an array with the IDs of all selected SVG shapes
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    diploTransActivationsInShapes: (state) => {
+      return [...state.diploTransActivations.shapes]
+    },
+
+    /**
+     * returns a Map with id (key) and id / name (value) props of all selected elements from the annotTrans
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    diploTransActivationsInAnnotTrans: (state) => {
+      return state.diploTransActivations.annotTrans
+    },
+
+    /**
+     * returns the ID of the element selected from the diplomatic transcript
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    diploTransSelectedId: (state) => {
+      return state.diploTransSelectedId
     }
   }
 }

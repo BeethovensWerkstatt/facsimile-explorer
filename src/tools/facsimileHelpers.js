@@ -2,6 +2,8 @@
  * This file contains helper functions for dealing with measurements in OpenSeadragon
  */
 
+import { getOuterBoundingRect } from '@/tools/trigonometry.js'
+
 /**
  * gets the rotated bbox _around_ the straight IIIF media fragment rect
  * @param  {[type]} OpenSeadragon         the abstract OpenSeadragon object
@@ -60,6 +62,8 @@ export function getMediaFragmentRect (OpenSeadragon, getters) {
   const pageBBox = pageRect.getBoundingBox()
 
   console.log('pageBBox from rendering', pageBBox)
+  const pageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
+  console.log('pageFragment', pageFragment)
 
   // const xScale = pageBBox.width / fragment.w
 

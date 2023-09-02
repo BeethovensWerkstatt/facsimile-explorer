@@ -1,7 +1,7 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
 // import OpenSeadragon from 'openseadragon'
-import { getOuterBoundingRect } from '@/tools/trigonometry.js'
+import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -501,6 +501,23 @@ const dataModule = {
     clickedSvgShape ({ commit, getters, dispatch }, shapeId) {
       if (getters.explorerTab === 'zones') {
         dispatch('moveShapeToCurrentWritingZone', shapeId)
+      } else if (getters.explorerTab === 'diplo') {
+        dispatch('diploTransToggle', { type: 'shape', id: shapeId })
+      }
+    },
+
+    /**
+     * called when clicking on an element rendered by Verovio
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} shapeId                [description]
+     * @return {[type]}          [description]
+     */
+    clickedVerovio ({ commit, getters, dispatch }, { id, name }) {
+      if (getters.explorerTab === 'diplo') {
+        dispatch('diploTransToggle', { type: 'annotTrans', id, name })
+        // dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
     },
 
@@ -1602,6 +1619,37 @@ const dataModule = {
     },
 
     /**
+     * retrieves the path of the diplomatic transcript for currently selected writing zone
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    currentWzDtPath: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page) {
+        return null
+      }
+
+      // let z = -1
+      const wz = getters.writingZonesOnCurrentPage.find((wz, zi) => {
+        const found = wz.id === getters.activeWritingZone
+        // if (found) z = zi
+        return found
+      })
+      if (!wz) return null
+
+      return wz.diploTrans
+      /* const docName = page.document
+      const docPath = getters.documentPathByName(docName)
+      const meipath = docPath.split(docName + '.xml')[0] + 'annotatedTranscript/' + docName + '_p' + String(pageIndex + 1).padStart(3, '0') + '_wz' + String(z + 1).padStart(2, '0') + '_at.xml'
+      return meipath */
+    },
+
+    /**
      * retrieves the svg file of the current page
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
@@ -1633,7 +1681,32 @@ const dataModule = {
 
       const atDom = getters.documentByPath(path)
 
-      return atDom
+      if (!atDom) {
+        return null
+      }
+
+      return atDom.cloneNode(true)
+    },
+
+    /**
+     * retrieves an diplomatic transcript for a given path
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    diplomaticTranscriptForCurrentWz: (state, getters) => {
+      const path = getters.currentWzDtPath
+      if (getters.availableDiplomaticTranscripts.indexOf(path) === -1) {
+        return null
+      }
+
+      const dtDom = getters.documentByPath(path)
+
+      if (!dtDom) {
+        return null
+      }
+
+      return dtDom.cloneNode(true)
     },
 
     /**
@@ -1820,10 +1893,22 @@ const dataModule = {
       }
 
       const deg = fragment.rotate
+
+      console.log('\n\n----')
+      console.log('fragment', fragment)
+      const fragmentCenter = { x: fragment.x + fragment.w / 2, y: fragment.y + fragment.h / 2 }
+      console.log('fragmentCenter', fragmentCenter)
+
+      console.log(rotatePoint)
+
       const pageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
+      console.log('pageFragment', pageFragment)
+
+      const innerPageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg * -1)
+      console.log('innerPageFragment', innerPageFragment)
 
       const xScale = pageFragment.w / fragment.w
-      const yScale = pageFragment.height / fragment.h
+      const yScale = pageFragment.h / fragment.h
 
       // pageFragment
 
@@ -2143,6 +2228,7 @@ const dataModule = {
 
         const wzIndexPadded = String(zi + 1).padStart(2, '0')
         const annotTransFilePath = 'data/sources/' + docName + '/annotatedTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_at.xml'
+        const diploTransFilePath = 'data/sources/' + docName + '/diplomaticTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_dt.xml'
 
         const wz = {}
         wz.id = genDescWzId
@@ -2151,6 +2237,7 @@ const dataModule = {
 
         wz.totalCount = totalCount
         wz.annotTrans = annotTransFilePath // null // TODO: path or DOM?
+        wz.diploTrans = diploTransFilePath
         wz.xywh = x + ',' + y + ',' + w + ',' + h
         wz.layers = layers
         wz.svgGroupWzId = svgGroupWzId

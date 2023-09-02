@@ -62,6 +62,16 @@ export default {
     },
 
     /**
+     * in which tabs of the FX shall we render th Grid?
+     * @return {[type]} [description]
+     */
+    showGrid () {
+      const tab = this.$store.getters.explorerTab
+      const validTabs = ['pages']
+      return validTabs.indexOf(tab) !== -1
+    },
+
+    /**
      * in which tabs of the FX shall we render rastrums / systems as boxes?
      * @return {[type]} [description]
      */
@@ -280,6 +290,10 @@ export default {
       document.querySelectorAll('.grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
+
+      if (!this.showGrid) {
+        return null
+      }
 
       const tiledImage = this.viewer.world.getItemAt(0)
 

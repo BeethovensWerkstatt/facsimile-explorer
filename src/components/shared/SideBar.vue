@@ -33,7 +33,13 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['pageTabSidebarWidth', 'pageTabRightSidebarWidth', 'zonesTabLeftSidebarWidth', 'zonesTabRightSidebarWidth', 'annotTabLeftSidebarWidth', 'annotTabRightSidebarWidth']),
+    ...mapGetters(['pageTabSidebarWidth',
+      'pageTabRightSidebarWidth',
+      'zonesTabLeftSidebarWidth',
+      'zonesTabRightSidebarWidth',
+      'annotTabLeftSidebarWidth',
+      'annotTabRightSidebarWidth',
+      'diploTabSidebarWidth']),
     localWidth () {
       if (this.tab === 'pagesTab' && this.position === 'left') {
         return this.pageTabSidebarWidth
@@ -47,6 +53,8 @@ export default {
         return this.annotTabLeftSidebarWidth
       } else if (this.tab === 'annotTab' && this.position === 'right') {
         return this.annotTabRightSidebarWidth
+      } else if (this.tab === 'diploTab') {
+        return this.diploTabSidebarWidth
       } else {
         return '200'
       }

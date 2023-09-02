@@ -14,6 +14,7 @@ const verovioOptions = {
   openControlEvents: true,
   svgBoundingBoxes: true,
   svgRemoveXlink: true,
+  svgHtml5: true,
   header: 'none',
   footer: 'none' //,
   // unit: 18
@@ -63,8 +64,8 @@ export default {
       try {
         this.removeListeners()
 
-        const resolvedDrafts = draft2score(meiDom)[0]
-
+        const resolvedDrafts = this.type === 'annotTrans' ? draft2score(meiDom)[0] : meiDom.querySelector('music')
+        console.log('rd ' + this.type, resolvedDrafts)
         const serializer = new XMLSerializer()
         const mei = serializer.serializeToString(resolvedDrafts)
         this.vrvToolkit.loadData(mei)
@@ -89,7 +90,10 @@ export default {
         // TODO: Hier müssen wir auf this.purpose reagieren und unterschiedliche
         // Aktionen ausführen. Hier erstmal nur zur Anschauung – das müsste
         // natürlich über die Daten koordiniert werden…
-        target.classList.toggle('supplied')
+        // target.classList.toggle('supplied')
+        const id = target.getAttribute('data-id')
+        const name = target.getAttribute('data-class')
+        this.$store.dispatch('clickedVerovio', { id, name })
       }
     }
   },
