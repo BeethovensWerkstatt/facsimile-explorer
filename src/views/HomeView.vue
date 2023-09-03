@@ -9,7 +9,6 @@
   <CommitModal/>
   <OpenFileModal/>
   <AssignSVGsModal/>
-  HALLO HOMEVIEW
 
   <HomeTab/>
   <!--<PagesTab v-else-if="explorerTab === 'pages'"/>
