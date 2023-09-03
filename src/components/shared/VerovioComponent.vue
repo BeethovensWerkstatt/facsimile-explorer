@@ -132,13 +132,13 @@ export default {
 @import '@/css/_variables.scss';
 
 .verovioComponent {
-  margin: .5rem;
-  padding: .5rem;
+  margin: 0;
+  padding: .3rem;
   border: $lightBorder;
   border-radius: .3rem;
   background-color: #ffffff;
   box-shadow: 0 0 .3rem #00000066 inset;
-  max-height: calc(100% - 1rem);
+  max-height: 100%;
   overflow: auto;
 
   svg .supplied {
@@ -151,6 +151,11 @@ export default {
     font-weight: bold;
     font-style: italic;
     color: gray;
+  }
+
+  &.transcribing svg {
+    max-width: 100%;
+    max-height: 100%;
   }
 }
 
