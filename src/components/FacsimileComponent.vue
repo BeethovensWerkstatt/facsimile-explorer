@@ -662,6 +662,22 @@ export default {
       */
     },
 
+    /**
+     * focusses the currently active writing zone
+     * @return {[type]} [description]
+     */
+    focusActiveWritingZone () {
+      const currentZone = this.$store.getters.currentWritingZoneObject
+      const xywh = currentZone.xywh.split(',')
+
+      const pixRect = new OpenSeadragon.Rect(...xywh)
+
+      const image = this.viewer.world.getItemAt(0)
+      const pos = image.imageToViewportRectangle(pixRect)
+      console.log('trying to get a rectangle for ', pos, xywh, pixRect)
+      this.viewer.viewport.fitBounds(pos)
+    },
+
     unload () {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
@@ -721,15 +737,18 @@ export default {
         }
         this.updateFacsimile(newTs, oldTs)
       })
-    this.unwatchSVG = this.$store.watch((state, getters) => getters.svgForCurrentPage,
-      (svg) => {
-        if (svg) {
-          this.renderShapes()
-        }
-      })
     this.unwatchSystems = this.$store.watch((state, getters) => [getters.rastrumsOnCurrentPage, getters.activeSystemId],
       ([newArr, newId], [oldArr, oldId]) => {
         this.renderSystems()
+      })
+    this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage],
+      ([newId, newSvg], [oldId, oldSvg]) => {
+        if (newSvg) {
+          this.renderShapes()
+        }
+        if (newId && newId !== oldId) {
+          // this.focusActiveWritingZone()
+        }
       })
 
     this.openFacsimile()
