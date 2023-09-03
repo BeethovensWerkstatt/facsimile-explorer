@@ -411,12 +411,15 @@ export default {
       }
 
       const svgClone = svg.documentElement.cloneNode(true)
+
+      const pos = this.viewer.world.getItemAt(0)?.getBounds()
+      if (!pos) {
+        return false
+      }
+
       this.viewer.addOverlay({
         element: svgClone,
-        x: 0,
-        y: 0,
-        width: page.mmWidth,
-        height: page.mmHeight
+        location: pos
       })
       const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
       const activeWritingZone = this.$store.getters.activeWritingZone
