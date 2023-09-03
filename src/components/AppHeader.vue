@@ -67,7 +67,7 @@ export default {
   computed: {
     docTitle () {
       const title = this.$store.getters.title
-      const page = this.$store.getters.page(this.$store.getters.currentPageZeroBased)?.label
+      const page = this.$store.getters.currentPageDetails?.label
 
       if (title !== '' && page !== -1) {
         return truncate(title, 30) + ', page ' + page
