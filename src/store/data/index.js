@@ -2357,7 +2357,7 @@ const dataModule = {
     },
 
     /**
-     * retrieve active anntoated transcription
+     * retrieve active annotated transcription
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
      * @return {[type]}         [description]
