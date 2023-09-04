@@ -4,9 +4,9 @@
     <div v-else class="loading">loading ...</div>
   </div>
   <div class="login" v-else>
-    <div class="externalMessages toast toast-primary" v-if="client_id">
-      <div>To use the Facsimile Explorer you have to first<br />
-      <a class="btn btn-primary btn-lg" :href="authurl">Login to GitHub</a></div>
+    <div class="externalMessages" v-if="client_id">
+      To use the Facsimile&nbsp;Explorer you have to first
+      <a class="btn btn-success btn-lg" :href="authurl">Login to GitHub</a>
     </div>
     <div class="externalMessages toast toast-warning" v-else>
       please wait ...<i class="icon icon-load" />
