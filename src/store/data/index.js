@@ -514,10 +514,16 @@ const dataModule = {
      * @param  {[type]} shapeId                [description]
      * @return {[type]}          [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { id, name }) {
-      if (getters.explorerTab === 'diplo') {
-        dispatch('diploTransToggle', { type: 'annotTrans', id, name })
-        // dispatch('moveShapeToCurrentWritingZone', shapeId)
+    clickedVerovio ({ commit, getters, dispatch }, { id, name, purpose }) {
+      switch (purpose) {
+        case 'proofreading':
+          console.log('toggle supplied', id, name)
+          break
+        default:
+          if (getters.explorerTab === 'diplo') {
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name })
+            // dispatch('moveShapeToCurrentWritingZone', shapeId)
+          }
       }
     },
 

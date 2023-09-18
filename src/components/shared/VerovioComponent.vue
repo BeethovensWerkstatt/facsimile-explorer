@@ -31,7 +31,9 @@ const rawSelectables = [
   'clef',
   'slur',
   'dynam',
-  'dir'// ,
+  'dir',
+  'keySig',
+  'meterSig'
   // 'staff',
   // 'measure'
 ]
@@ -79,10 +81,14 @@ export default {
       }
     },
     removeListeners () {
-      this.$refs.mei.removeEventListener('click', this.clickListener)
+      // this.$refs.mei.removeEventListener('click', this.clickListener)
+      const els = this.$refs.mei.querySelectorAll(selectables)
+      els.forEach((elm) => elm.removeEventListener('click', this.clickListener))
     },
     addListeners () {
-      this.$refs.mei.addEventListener('click', this.clickListener)
+      // this.$refs.mei.addEventListener('click', this.clickListener)
+      const els = this.$refs.mei.querySelectorAll(selectables)
+      els.forEach((elm) => elm.addEventListener('click', this.clickListener))
     },
     clickListener (e) {
       const target = e.target.closest(selectables)
@@ -93,7 +99,8 @@ export default {
         // target.classList.toggle('supplied')
         const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
-        this.$store.dispatch('clickedVerovio', { id, name })
+        // console.log(this.purpose, id, name)
+        this.$store.dispatch('clickedVerovio', { id, name, purpose: this.purpose })
       }
     }
   },
