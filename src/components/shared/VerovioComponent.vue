@@ -100,7 +100,14 @@ export default {
         const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
         // console.log(this.purpose, id, name)
-        this.$store.dispatch('clickedVerovio', { id, name, purpose: this.purpose })
+        const meiDom = this.$store.getters[this.getter]
+        this.$store.dispatch('clickedVerovio', {
+          meiDom,
+          id,
+          name,
+          purpose: this.purpose,
+          callback: () => { this.render() }
+        })
       }
     }
   },

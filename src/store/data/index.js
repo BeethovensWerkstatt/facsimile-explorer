@@ -514,10 +514,25 @@ const dataModule = {
      * @param  {[type]} shapeId                [description]
      * @return {[type]}          [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { id, name, purpose }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, id, name, purpose, callback }) {
+      if (!meiDom) return
+      const target = meiDom?.querySelector(`*[*|id="${id}"]`)
       switch (purpose) {
         case 'proofreading':
-          console.log('toggle supplied', id, name)
+          // console.log('toggle supplied', id, name, target)
+          if (!target) {
+            console.warn('element not found!', id)
+            return
+          }
+          if (target.getAttribute('type') === 'supplied') {
+            target.setAttribute('type', null)
+          } else {
+            target.setAttribute('type', 'supplied')
+          }
+          // console.log(target, callback)
+          // loadDocumentIntoStore ...
+          // logChange ...
+          if (typeof callback === 'function') callback()
           break
         default:
           if (getters.explorerTab === 'diplo') {
