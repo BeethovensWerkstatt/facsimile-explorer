@@ -514,7 +514,7 @@ const dataModule = {
      * @param  {[type]} shapeId                [description]
      * @return {[type]}          [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, id, name, purpose, callback }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, purpose, callback }) {
       if (!meiDom) return
       const target = meiDom?.querySelector(`*[*|id="${id}"]`)
       switch (purpose) {
@@ -530,7 +530,9 @@ const dataModule = {
             target.setAttribute('type', 'supplied')
           }
           // console.log(target, callback)
+          console.log(path, id)
           // loadDocumentIntoStore ...
+          dispatch('loadDocumentIntoStore', { path, dom: meiDom })
           // logChange ...
           if (typeof callback === 'function') callback()
           break

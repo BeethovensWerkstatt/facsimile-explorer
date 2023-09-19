@@ -101,8 +101,10 @@ export default {
         const name = target.getAttribute('data-class')
         // console.log(this.purpose, id, name)
         const meiDom = this.$store.getters[this.getter]
+        const path = this.$store.getters.currentWzAtPath
         this.$store.dispatch('clickedVerovio', {
           meiDom,
+          path,
           id,
           name,
           purpose: this.purpose,
