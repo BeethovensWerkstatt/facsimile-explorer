@@ -517,8 +517,11 @@ const dataModule = {
     clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, purpose, callback }) {
       if (!meiDom) return
       const target = meiDom?.querySelector(`*[*|id="${id}"]`)
+      let baseMessage
+      let param
       switch (purpose) {
         case 'proofreading':
+          // TODO: create action toggleSupplied
           // console.log('toggle supplied', id, name, target)
           if (!target) {
             console.warn('element not found!', id)
@@ -534,6 +537,8 @@ const dataModule = {
           // loadDocumentIntoStore ...
           dispatch('loadDocumentIntoStore', { path, dom: meiDom })
           // logChange ...
+          baseMessage = 'toggle supplied'
+          dispatch('logChange', { path, baseMessage, param, xmlIDs: [id], isNewDocument: false })
           if (typeof callback === 'function') callback()
           break
         default:
