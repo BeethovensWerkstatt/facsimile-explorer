@@ -17,7 +17,7 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <template v-if="annotatedTranscriptForCurrentWz !== null">
-          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
+          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
           You need to select a writing zone on the left.

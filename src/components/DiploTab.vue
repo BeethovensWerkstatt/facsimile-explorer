@@ -27,7 +27,7 @@
           <FacsimileComponent/>
         </div>
         <div class="mainBox">
-          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz"/>
+          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>
           {{ diploTransActivationsInAnnotTrans.size }} xy
           {{ diploTransActivationsInShapes.length }}
           <!--<OpenSeadragonComponent/>-->
@@ -36,7 +36,7 @@
           <code>XML Editor goes here</code>
         </div>-->
         <div class="mainBox">
-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </div>
       </MainStage>
     </div>

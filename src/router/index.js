@@ -18,7 +18,7 @@ const routes = [
   {
     path: '/authenticate',
     name: 'authenticate',
-    component: () => import(/* webpackChunkName: "about" */ '../views/AuthGithub.vue')
+    component: () => import(/* webpackChunkName: "authenticate" */ '../views/AuthGithub.vue')
   },
   {
     path: '/:pathMatch(.*)*',

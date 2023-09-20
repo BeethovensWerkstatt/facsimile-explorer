@@ -257,3 +257,22 @@ export function draft2score (meiDom) {
   })
   return arr
 }
+
+export const rawMEISelectables = [
+  'note',
+  'chord',
+  'syl',
+  'rest',
+  'beam',
+  'artic',
+  'accid',
+  'clef',
+  'slur',
+  'dynam',
+  'dir',
+  'keySig',
+  'meterSig',
+  'staff',
+  'measure'
+]
+export const MEIselectables = rawMEISelectables.map(elem => '.' + elem + ':not(.bounding-box').join(', ')

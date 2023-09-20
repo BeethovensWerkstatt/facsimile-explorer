@@ -447,6 +447,9 @@ const actions = {
         // console.log(xmlText)
         const parser = new DOMParser()
         const dom = parser.parseFromString(xml, 'application/xml')
+        // const selNoID = rawMEISelectables.map(elem => '.' + elem + ':not([id])').join(', ')
+        // const selNoID = rawMEISelectables.join(', ')
+        // console.log(selNoID, dom.querySelectorAll(selNoID))
 
         // console.log(dom)
         dispatch('loadDocumentIntoStore', { path, dom })

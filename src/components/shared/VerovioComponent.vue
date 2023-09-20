@@ -51,7 +51,8 @@ export default {
   props: {
     purpose: String,
     type: String,
-    getter: String
+    getter: String,
+    pathGetter: String
   },
   methods: {
     render () {
@@ -101,7 +102,7 @@ export default {
         const name = target.getAttribute('data-class')
         // console.log(this.purpose, id, name)
         const meiDom = this.$store.getters[this.getter]
-        const path = this.$store.getters.currentWzAtPath
+        const path = this.$store.getters[this.pathGetter]
         this.$store.dispatch('clickedVerovio', {
           meiDom,
           path,

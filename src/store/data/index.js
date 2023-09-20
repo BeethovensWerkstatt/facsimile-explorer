@@ -511,35 +511,18 @@ const dataModule = {
      * @param  {[type]} commit                 [description]
      * @param  {[type]} getters                [description]
      * @param  {[type]} dispatch               [description]
-     * @param  {[type]} shapeId                [description]
-     * @return {[type]}          [description]
+     * @param  {[XMLDocument]} meiDom          [description] TODO: we can fetch it with the path!
+     * @param  {[string]} path                 [description]
+     * @param  {[string]} id                   [description]
+     * @param  {[string]} id                   [description]
+     * @param  {[string]} purpose              [description]
+     * @param  {[function]} callback           [description]
      */
     clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, purpose, callback }) {
       if (!meiDom) return
-      const target = meiDom?.querySelector(`*[*|id="${id}"]`)
-      let baseMessage
-      let param
       switch (purpose) {
         case 'proofreading':
-          // TODO: create action toggleSupplied
-          // console.log('toggle supplied', id, name, target)
-          if (!target) {
-            console.warn('element not found!', id)
-            return
-          }
-          if (target.getAttribute('type') === 'supplied') {
-            target.setAttribute('type', null)
-          } else {
-            target.setAttribute('type', 'supplied')
-          }
-          // console.log(target, callback)
-          console.log(path, id)
-          // loadDocumentIntoStore ...
-          dispatch('loadDocumentIntoStore', { path, dom: meiDom })
-          // logChange ...
-          baseMessage = 'toggle supplied'
-          dispatch('logChange', { path, baseMessage, param, xmlIDs: [id], isNewDocument: false })
-          if (typeof callback === 'function') callback()
+          dispatch('suppliedToggle', { meiDom, path, id, name, callback })
           break
         default:
           if (getters.explorerTab === 'diplo') {
@@ -547,6 +530,39 @@ const dataModule = {
             // dispatch('moveShapeToCurrentWritingZone', shapeId)
           }
       }
+    },
+
+    /**
+     * toggle supplied status of MEI element
+     * @param  {[type]} dispatch               [description]
+     * @param  {[XMLDocument]} meiDom          [description]
+     * @param  {[string]} path                 [description]
+     * @param  {[string]} id                   [description]
+     * @param  {[string]} id                   [description]
+     * @param  {[string]} purpose              [description]
+     * @param  {[function]} callback           [description]
+     */
+    suppliedToggle ({ dispatch }, { meiDom, path, id, name, callback }) {
+      const target = meiDom?.querySelector(`*[*|id="${id}"]`)
+      const baseMessage = 'toggle supplied'
+      let param
+      console.log('toggle supplied', id, name, target)
+      if (!target) {
+        console.warn('element not found!', id)
+        return
+      }
+      if (target.getAttribute('type') === 'supplied') {
+        target.setAttribute('type', null)
+      } else {
+        target.setAttribute('type', 'supplied')
+      }
+      // console.log(target, callback)
+      console.log(path, id)
+      // loadDocumentIntoStore ...
+      dispatch('loadDocumentIntoStore', { path, dom: meiDom })
+      // logChange ...
+      dispatch('logChange', { path, baseMessage, param, xmlIDs: [id], isNewDocument: false })
+      if (typeof callback === 'function') callback()
     },
 
     /**
