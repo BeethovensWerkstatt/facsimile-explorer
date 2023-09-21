@@ -8,7 +8,7 @@
         Kombination mit einer annotierten Transkription eine diplomatische zu erstellen.
       </p>
     <div class="externalMessages"><SourceSelector :table="true" /></div>
-    <h2>Info</h2>
+    <!--<h2>Info</h2>
       <table class="table">
         <tr><td>Repository</td><td>{{ infoRepo }}</td></tr>
         <tr><td>Branch</td><td>{{ infoBranch }}</td></tr>
@@ -19,7 +19,7 @@
         <template v-else>
           <tr><td>GitHub API Rate Limit Reached.</td><td></td></tr>
         </template>
-      </table>
+      </table>-->
     </div>
     <!--
     <div class="internalMessages">

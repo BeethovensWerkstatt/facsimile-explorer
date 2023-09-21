@@ -65,16 +65,91 @@ export function getMediaFragmentRect (OpenSeadragon, getters) {
   const pageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
   console.log('pageFragment', pageFragment)
 
-  // const xScale = pageBBox.width / fragment.w
+  const mediaFragMM = getOuterBoundingRect(0, 0, 305, 232, -4.3)
 
-  // const imageOriginX = fragment.x * xScale * -1
-  // const imageOriginY = fragment.y * xScale * -1
-  // const imageOriginW = xScale * page.width
-  // const bbox = new OpenSeadragon.Rect(pageBBox.getTopLeft().x * xScale, pageBBox.getTopLeft().y * xScale, xScale * page.width, xScale * page.height)
+  console.log('\nHALLO TEST', mediaFragMM)
+  console.log('page.mm: ' + page.mmWidth + ' / fragment.w: ' + fragment.w)
+  const ratio = 6564.7 / mediaFragMM.w// fragment.w / page.mmWidth
+  console.log('ratio: ', ratio)
+  const imageMM = {
+    x: parseFloat(mediaFragMM.x) - 582.8 / ratio, // fragment.x / ratio,
+    y: parseFloat(mediaFragMM.y) - 426.4 / ratio, // fragment.y / ratio,
+    w: parseFloat(page.width) / ratio,
+    h: parseFloat(page.height) / ratio
+  }
+
+  // 582.8,426.4,6564.7,5191.2
+
+  console.log('imageMM:', imageMM)
+
+  const location = {
+    x: pageFragment.x,
+    y: pageFragment.y,
+    width: pageFragment.w,
+    height: pageFragment.h,
+    degrees: 0
+  }
+  console.log('location', location)
 
   const rotationMode = OpenSeadragon.OverlayRotationMode.EXACT
 
-  return { location: pageBBox, rotationMode }
+  return { location/* : pageBBox */, rotationMode }
+}
+
+/**
+ * returns all major rectangles necessary for rendering facsimiles
+ * @param  {[type]} OpenSeadragon               [description]
+ * @param  {[type]} page                     [description]
+ * @return {[type]}               [description]
+ */
+export function getOsdRects (page) {
+  if (!page || !page.uri) {
+    return null
+  }
+
+  const fragmentRaw = page.uri.split('#xywh=')[1]
+  const fragment = {
+    x: 0,
+    y: 0,
+    w: parseInt(page.width),
+    h: parseInt(page.height),
+    rotate: 0
+  }
+
+  if (fragmentRaw !== undefined) {
+    const xywh = fragmentRaw.split('&rotate=')[0]
+    const rotate = fragmentRaw.split('&rotate=')[1]
+
+    fragment.x = parseFloat(xywh.split(',')[0])
+    fragment.y = parseFloat(xywh.split(',')[1])
+    fragment.w = parseFloat(xywh.split(',')[2])
+    fragment.h = parseFloat(xywh.split(',')[3])
+
+    if (rotate !== undefined) {
+      fragment.rotate = parseFloat(rotate.split(',')[0])
+    }
+  }
+
+  const deg = fragment.rotate
+
+  const pageMM = {
+    x: 0,
+    y: 0,
+    w: page.mmWidth,
+    h: page.mmHeight
+  }
+  const mediaFragMM = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
+
+  const ratio = fragment.w / mediaFragMM.w
+
+  const image = {
+    x: parseFloat(mediaFragMM.x) - fragment.x / ratio,
+    y: parseFloat(mediaFragMM.y) - fragment.y / ratio,
+    w: parseFloat(page.width) / ratio,
+    h: parseFloat(page.height) / ratio
+  }
+
+  return { image, rotation: deg, ratio, page: pageMM, mediaFrag: mediaFragMM }
 }
 
 /**

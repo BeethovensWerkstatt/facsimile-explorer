@@ -7,7 +7,7 @@
 <script>
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint } from '@/tools/trigonometry.js'
-import { getMediaFragmentBBoxRect, getMediaFragmentRect, getMediaFragmentInnerBoxRect } from '@/tools/facsimileHelpers.js'
+import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 
 const osdOptions = {
   id: 'facsimileContainer',
@@ -123,7 +123,7 @@ export default {
       click.page = clickedPagePos
       // }
 
-      console.log(click)
+      // console.log(click)
 
       // check for click to svg shape
       if (click.target.localName === 'path') {
@@ -198,7 +198,8 @@ export default {
       // this.$store.dispatch('resetPageBorderPoints')
 
       const ts = this.tileSource
-      ts.degrees = 0
+
+      // ts.degrees = 0
       this.viewer.open(ts)
     },
 
@@ -509,23 +510,35 @@ export default {
      * rotate the page facsimile
      */
     setPageRotation () {
-      /* const tiledImage = this.viewer.world.getItemAt(0)
-      const rotation = parseFloat(this.$store.getters.currentPageRotation)
+      const tiledImage = this.viewer.world.getItemAt(0)
+      const tileSource = this.$store.getters.osdTileSourceForCurrentPage
 
-      if (!tiledImage || !rotation) {
+      if (!tiledImage || !tileSource) {
         return null
       }
 
-      tiledImage.setRotation(rotation) */
-      const rotation = parseFloat(this.$store.getters.currentPageRotation)
+      const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
+      tiledImage.setRotation(tileSource.degrees)
+      tiledImage.setPosition(newPos)
+      console.log('setPos to ', newPos)
+      /* const rotation = parseFloat(this.$store.getters.currentPageRotation)
 
       if (!rotation) {
         return null
       }
 
-      const page = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+      const pageDimensions = this.$store.getters.currentPageDimensions
 
-      this.viewer.viewport.setRotationWithPivot(rotation, page.location.getCenter())
+      if (!pageDimensions) {
+        return null
+      }
+
+      console.log('pageDim', pageDimensions)
+      const center = new OpenSeadragon.Point(parseFloat(pageDimensions.mmWidth) / 2, parseFloat(pageDimensions.mmHeight) / 2)
+
+      const page = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+      console.log('page', page) */
+      // this.viewer.viewport.setRotationWithPivot(rotation, page.location.getCenter())
     },
 
     renderPageBorders () {
@@ -547,57 +560,80 @@ export default {
         return null
       }
 
-      const outerPos = getMediaFragmentBBoxRect(OpenSeadragon, this.$store.getters)
-      const centerPos = getMediaFragmentRect(OpenSeadragon, this.$store.getters)
-      const innerPos = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
+      const pageIndex = this.$store.getters.currentPageZeroBased
+      const path = this.$store.getters.filepath
+      const pages = this.$store.getters.documentPagesForSidebars(path)
+      const page = pages[pageIndex]
 
-      if (!outerPos || !centerPos || !innerPos) {
-        // console.log('rectangles unavailable', outerPos, centerPos, innerPos)
+      if (!page) {
         return null
       }
 
-      // the bounding box of the media fragment, which could be loaded by IIIF
-      const existingBBoxOverlay = document.querySelector('.overlay.pageBorder.bbox')
+      const rects = getOsdRects(page)
 
-      if (!existingBBoxOverlay) {
+      if (!rects) {
+        // console.log('rectangles unavailable', outerPos, centerPos, innerPos)
+        return null
+      }
+      console.log('relevant rects: ', rects)
+      const invertedRot = rects.rotation * -1
+
+      // the media fragment as stored in the data
+      const existingImage = document.querySelector('.overlay.imageBorder')
+      const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
+
+      if (!existingImage) {
         const element = document.createElement('div')
         element.classList.add('overlay')
-        element.classList.add('pageBorder')
-        element.classList.add('bbox')
+        element.classList.add('imageBorder')
+
+        const innerRot = document.createElement('div')
+        innerRot.classList.add('rotatedBox')
+        innerRot.classList.add('overlay')
+        innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
+        element.append(innerRot)
 
         this.viewer.addOverlay({
           element,
-          location: outerPos.location,
-          placement: outerPos.placement,
-          rotationMode: outerPos.rotationMode
+          location: imageLocation // ,
+          // rotationMode: centerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingBBoxOverlay, outerPos.location)
+        this.viewer.updateOverlay(existingImage, imageLocation)
+        existingImage.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
       }
 
-      // the actual rectangle stored in the data
-      const existingOverlay = document.querySelector('.overlay.pageBorder.mediaFragment')
+      // the media fragment as stored in the data
+      const existingMediaFrag = document.querySelector('.overlay.pageBorder.mediaFragment')
+      const mediaFragLocation = new OpenSeadragon.Rect(rects.mediaFrag.x, rects.mediaFrag.y, rects.mediaFrag.w, rects.mediaFrag.h)
 
-      if (!existingOverlay) {
+      if (!existingMediaFrag) {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('pageBorder')
         element.classList.add('mediaFragment')
-        element.title = 'Generated IIIF Selection'
+
+        const innerRot = document.createElement('div')
+        innerRot.classList.add('rotatedBox')
+        innerRot.classList.add('overlay')
+        innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
+        element.append(innerRot)
 
         this.viewer.addOverlay({
           element,
-          location: centerPos.location,
-          rotationMode: centerPos.rotationMode
+          location: mediaFragLocation // ,
+          // rotationMode: centerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingOverlay, centerPos.location)
+        this.viewer.updateOverlay(existingMediaFrag, mediaFragLocation)
+        existingMediaFrag.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
       }
 
       // get innermost rectangle
-      const existingInnerOverlay = document.querySelector('.overlay.pageBorder.actualPage')
+      const existingPageOverlay = document.querySelector('.overlay.pageBorder.actualPage')
+      const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
 
-      if (!existingInnerOverlay) {
+      if (!existingPageOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('pageBorder')
@@ -605,11 +641,11 @@ export default {
 
         this.viewer.addOverlay({
           element,
-          location: innerPos.location,
-          rotationMode: innerPos.rotationMode
+          location: pageLocation //,
+          // rotationMode: innerPos.rotationMode
         })
       } else {
-        this.viewer.updateOverlay(existingInnerOverlay, innerPos.location)
+        this.viewer.updateOverlay(existingPageOverlay, pageLocation)
       }
 
       //
@@ -989,16 +1025,35 @@ export default {
    position: relative;
 }
 
-.overlay.pageBorder.bbox {
-  outline: 1px solid #ff00ff;
+.overlay.imageBorder {
+  // outline: 1px solid #ff00ff;
+
+  .rotatedBox.overlay {
+     transform-origin: top left;
+     position: relative;
+     outline: 1px solid #ff00ff;
+     // background-color: #ff00ff22;
+     width: 100%;
+     height: 100%;
+  }
 }
 
 .overlay.pageBorder.mediaFragment {
-  outline: 1px solid #00ffff;
+  // outline: 1px solid #00ffff;
+
+  .rotatedBox.overlay {
+     transform-origin: top left;
+     position: relative;
+     outline: 1px solid #00ffff;
+     // background-color: #00ffff22;
+     width: 100%;
+     height: 100%;
+  }
 }
 
 .overlay.pageBorder.actualPage {
-  outline: 8px solid #0000ff99;
+  outline: 5px solid #0000ff99;
+  // background-color: #0000ff22;
 }
 
 .grid {

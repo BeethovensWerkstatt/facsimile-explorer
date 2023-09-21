@@ -24,6 +24,6 @@ RUN apt-get update
 RUN apt-get install -y jq
 RUN mkdir /app
 COPY src/config.json /
-COPY nginx-ghcred/40-create-ghcred.sh /docker-entrypoint.d
+COPY 40-create-ghcred.sh /docker-entrypoint.d
 COPY --from=build-stage /app/dist /app
 COPY nginx.conf /etc/nginx/nginx.conf

@@ -1,7 +1,8 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
 // import OpenSeadragon from 'openseadragon'
-import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
+// import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
+import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -612,7 +613,7 @@ const dataModule = {
      * @param {[type]} rotation  [description]
      */
     setPageRotation ({ commit, getters, dispatch }, rotation) {
-      if (!rotation) {
+      if (!rotation && rotation !== 0) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -731,7 +732,7 @@ const dataModule = {
      * @param {[type]} x     [description]
      */
     setPageFragX ({ commit, getters, dispatch }, x) {
-      if (!x) {
+      if (!x && x !== 0) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -784,7 +785,7 @@ const dataModule = {
      * @param {[type]} y     [description]
      */
     setPageFragY ({ commit, getters, dispatch }, y) {
-      if (!y) {
+      if (!y && y !== 0) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -838,7 +839,7 @@ const dataModule = {
      * @param {[type]} w     [description]
      */
     setPageFragW ({ commit, getters, dispatch }, w) {
-      if (!w) {
+      if (!w && w !== 0) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -891,7 +892,7 @@ const dataModule = {
      * @param {[type]} h     [description]
      */
     setPageFragH ({ commit, getters, dispatch }, h) {
-      if (!h) {
+      if (!h && h !== 0) {
         return null
       }
       const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
@@ -1913,7 +1914,7 @@ const dataModule = {
         return null
       }
 
-      const fragmentRaw = page.uri.split('#xywh=')[1]
+      /* const fragmentRaw = page.uri.split('#xywh=')[1]
       const fragment = {
         x: 0,
         y: 0,
@@ -1964,12 +1965,21 @@ const dataModule = {
       const imageOriginY = fragment.y * xScale * -1
       const imageOriginW = xScale * page.width
       // console.log('imageOriginW', imageOriginW)
+
+      */
+
+      const rects = getOsdRects(page)
+
+      if (!rects) {
+        return null
+      }
+
       const tileSource = {
         tileSource: page.uri,
-        x: imageOriginX,
-        y: imageOriginY,
-        width: imageOriginW,
-        degrees: deg
+        x: rects.image.x,
+        y: rects.image.y,
+        width: rects.image.w,
+        degrees: rects.rotation * -1
       }
 
       // console.log('tileSource ', tileSource)

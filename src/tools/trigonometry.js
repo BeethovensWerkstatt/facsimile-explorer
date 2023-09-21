@@ -133,18 +133,32 @@ export function getOuterBoundingRect (x, y, w, h, deg) {
     y: parseFloat(y) + parseFloat(h) / 2
   }
 
+  if (parseFloat(deg) === 0) {
+    return { x, y, w, h }
+  }
+
   const absDeg = Math.abs(deg)
   const rad = deg2rad(absDeg)
   const newWidth = parseFloat(w) * Math.cos(rad) + parseFloat(h) * Math.sin(rad)
   const newHeight = parseFloat(w) * Math.sin(rad) + parseFloat(h) * Math.cos(rad)
+
+  /* let newX, newY
+
+  if (deg < 0) {
+    newX = parseFloat(x)
+    newY = parseFloat(y) - parseFloat(w) * Math.sin(rad)
+  } else {
+    newX = parseFloat(x) - parseFloat(h) * Math.sin(rad)
+    newY = parseFloat(y)
+  } */
 
   const tlUnrotated = {
     x: center.x - newWidth / 2,
     y: center.y - newHeight / 2
   }
 
-  const tl = rotatePoint(tlUnrotated, center, deg)
-
+  const tl = rotatePoint(tlUnrotated, center, deg * -1)
+  // console.log('x:' + tl.x + ' vs ' + newX + ' / y: ' + tl.y + ' vs ' + newY)
   const rect = {
     x: tl.x,
     y: tl.y,
