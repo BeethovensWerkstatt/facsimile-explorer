@@ -517,10 +517,13 @@ export default {
         return null
       }
 
+      // console.log(tiledImage.getBounds())
       const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
       tiledImage.setRotation(tileSource.degrees)
+      console.log('box 1a', tiledImage.getBounds())
       tiledImage.setPosition(newPos)
-      console.log('setPos to ', newPos)
+      // console.log('setPos to ', newPos)
+      console.log('box 1b', tiledImage.getBounds())
       /* const rotation = parseFloat(this.$store.getters.currentPageRotation)
 
       if (!rotation) {
@@ -575,12 +578,13 @@ export default {
         // console.log('rectangles unavailable', outerPos, centerPos, innerPos)
         return null
       }
-      console.log('relevant rects: ', rects)
+      // console.log('relevant rects: ', rects)
       const invertedRot = rects.rotation * -1
 
       // the media fragment as stored in the data
       const existingImage = document.querySelector('.overlay.imageBorder')
       const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
+      console.log('box 2', imageLocation)
 
       if (!existingImage) {
         const element = document.createElement('div')
