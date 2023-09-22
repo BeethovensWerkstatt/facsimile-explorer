@@ -517,13 +517,11 @@ export default {
         return null
       }
 
-      // console.log(tiledImage.getBounds())
-      const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
-      console.log('box 1a', tiledImage.getBounds())
-      tiledImage.setPosition(newPos, false)
-      console.log('setPos to ', newPos)
-      console.log('box 1b', tiledImage.getBounds())
+      console.log('tileSource', tileSource)
       tiledImage.setRotation(tileSource.degrees, false)
+      const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
+      // const newPos = new OpenSeadragon.Rect(tileSource.x, tileSource.y, tileSource.width, tileSource.height, tileSource.degrees)
+      tiledImage.setPosition(newPos, false)
       /* const rotation = parseFloat(this.$store.getters.currentPageRotation)
 
       if (!rotation) {

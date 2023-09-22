@@ -143,8 +143,8 @@ export function getOsdRects (page) {
   const ratio = fragment.w / mediaFragMM.w
 
   const image = {
-    x: parseFloat(mediaFragMM.x) - fragment.x / ratio,
-    y: parseFloat(mediaFragMM.y) - fragment.y / ratio,
+    x: parseFloat(mediaFragMM.x) - (fragment.x / ratio),
+    y: parseFloat(mediaFragMM.y) - (fragment.y / ratio),
     w: parseFloat(page.width) / ratio,
     h: parseFloat(page.height) / ratio
   }

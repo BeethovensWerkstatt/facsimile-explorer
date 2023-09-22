@@ -616,7 +616,7 @@ const dataModule = {
       if (!rotation && rotation !== 0) {
         return null
       }
-      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedDom = getters.documentWithCurrentPage?.cloneNode(true)
 
       if (!modifiedDom) {
         return null
