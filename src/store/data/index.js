@@ -1914,61 +1914,7 @@ const dataModule = {
         return null
       }
 
-      /* const fragmentRaw = page.uri.split('#xywh=')[1]
-      const fragment = {
-        x: 0,
-        y: 0,
-        w: parseInt(page.width),
-        h: parseInt(page.height),
-        rotate: 0
-      }
-
-      if (fragmentRaw !== undefined) {
-        const xywh = fragmentRaw.split('&rotate=')[0]
-        const rotate = fragmentRaw.split('&rotate=')[1]
-
-        fragment.x = parseFloat(xywh.split(',')[0])
-        fragment.y = parseFloat(xywh.split(',')[1])
-        fragment.w = parseFloat(xywh.split(',')[2])
-        fragment.h = parseFloat(xywh.split(',')[3])
-
-        if (rotate !== undefined) {
-          fragment.rotate = parseFloat(rotate.split(',')[0])
-        }
-      }
-
-      const deg = fragment.rotate
-
-      console.log('\n\n----')
-      console.log('fragment', fragment)
-      const fragmentCenter = { x: fragment.x + fragment.w / 2, y: fragment.y + fragment.h / 2 }
-      console.log('fragmentCenter', fragmentCenter)
-
-      console.log(rotatePoint)
-
-      const pageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg)
-      console.log('pageFragment', pageFragment)
-
-      const innerPageFragment = getOuterBoundingRect(0, 0, page.mmWidth, page.mmHeight, deg * -1)
-      console.log('innerPageFragment', innerPageFragment)
-
-      const xScale = pageFragment.w / fragment.w
-      const yScale = pageFragment.h / fragment.h
-
-      // pageFragment
-
-      console.log('xScale: ' + xScale + ', yScale: ' + yScale)
-      console.log('page', page)
-      console.log('fragment', fragment)
-
-      const imageOriginX = fragment.x * xScale * -1
-      const imageOriginY = fragment.y * xScale * -1
-      const imageOriginW = xScale * page.width
-      // console.log('imageOriginW', imageOriginW)
-
-      */
-
-      const rects = getOsdRects(page)
+      const rects = getters.osdRects
 
       if (!rects) {
         return null
@@ -1984,6 +1930,27 @@ const dataModule = {
 
       // console.log('tileSource ', tileSource)
       return tileSource
+    },
+
+    /**
+     * retrieves mm positions and dimensions of the image, the media fragment
+     * and the page, with the origin at the top left corner of the page.
+     * @param  {[type]} state                 [description]
+     * @param  {[type]} getters               [description]
+     * @return {[type]}         [description]
+     */
+    osdRects: (state, getters) => {
+      const pageIndex = getters.currentPageZeroBased
+      const path = getters.filepath
+      const pages = getters.documentPagesForSidebars(path)
+
+      const page = pages[pageIndex]
+      if (!page || !page.uri) {
+        return null
+      }
+
+      const rects = getOsdRects(page)
+      return rects
     },
 
     /**

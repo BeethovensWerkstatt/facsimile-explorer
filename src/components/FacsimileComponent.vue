@@ -392,6 +392,7 @@ export default {
       }
       const svg = this.$store.getters.svgForCurrentPage
       const page = this.$store.getters.currentPageDimensions
+      const rects = this.$store.getters.osdRects
 
       if (!svg || !this.viewer || !page) {
         return null
@@ -413,14 +414,16 @@ export default {
 
       const svgClone = svg.documentElement.cloneNode(true)
 
-      const pos = this.viewer.world.getItemAt(0)?.getBounds()
+      /* const pos = this.viewer.world.getItemAt(0)?.getBounds()
       if (!pos) {
         return false
-      }
+     } */
+
+      const loc = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h, rects.rotation)
 
       this.viewer.addOverlay({
         element: svgClone,
-        location: pos
+        location: loc
       })
       const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
       const activeWritingZone = this.$store.getters.activeWritingZone
@@ -520,8 +523,11 @@ export default {
       console.log('tileSource', tileSource)
       tiledImage.setRotation(tileSource.degrees, false)
       const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
-      // const newPos = new OpenSeadragon.Rect(tileSource.x, tileSource.y, tileSource.width, tileSource.height, tileSource.degrees)
-      tiledImage.setPosition(newPos, false)
+
+      tiledImage.setRotation(tileSource.degrees)
+      tiledImage.setPosition(newPos)
+      // tiledImage.fitBounds(rect)
+      console.log('setPos to ', newPos)
       /* const rotation = parseFloat(this.$store.getters.currentPageRotation)
 
       if (!rotation) {
