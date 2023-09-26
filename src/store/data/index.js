@@ -1,9 +1,10 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
 import { uuid } from '@/tools/uuid.js'
-// import OpenSeadragon from 'openseadragon'
+import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
+import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
@@ -1920,10 +1921,14 @@ const dataModule = {
         return null
       }
 
+      // TiledImage is rotated by center so we have to correct the position ...
+      const rotorigin = rotatePoint(new OpenSeadragon.Point(0, 0), new OpenSeadragon.Point(rects.image.w / 2, rects.image.h / 2), rects.rotation)
+      // console.log('image correction', rotorigin)
+
       const tileSource = {
         tileSource: page.uri,
-        x: rects.image.x,
-        y: rects.image.y,
+        x: rects.image.x + rotorigin.x,
+        y: rects.image.y + rotorigin.y,
         width: rects.image.w,
         degrees: rects.rotation * -1
       }
