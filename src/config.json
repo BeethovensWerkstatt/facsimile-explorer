@@ -2,7 +2,7 @@
   "repository":  {
     "owner": "BeethovensWerkstatt",
     "repo": "data",
-    "branch": "test2",
+    "branch": "dev",
     "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
   },
   "root": "data/sources"
