@@ -130,7 +130,7 @@ const mutations = {
         if (remove) remove()
       }
     } catch (err) {
-      console.error('authentication failed!')
+      console.error('authentication failed!', err)
       state.auth = ''
       state.user = {}
       if (remove) remove()
