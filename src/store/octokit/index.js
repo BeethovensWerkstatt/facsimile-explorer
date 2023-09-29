@@ -113,7 +113,8 @@ const mutations = {
     try {
       state.octokit = new Octokit({
         auth: state.auth,
-        userAgent: 'facsimile-explorer/v0.0.2'
+        userAgent: 'facsimile-explorer/v0.0.2',
+        log: console.debug
       })
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
@@ -240,7 +241,7 @@ const actions = {
       if (resp.ok) {
         resp.json().then(data => {
           const accessToken = data.access_token
-          // console.log(data, accessToken)
+          console.log('23', data, accessToken)
           if (accessToken) {
             dispatch('setAccessToken', { auth: accessToken, store, remove })
           } else {
