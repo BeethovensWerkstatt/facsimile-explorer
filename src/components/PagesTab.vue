@@ -9,6 +9,9 @@
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
+        <button class="btn" @click="toggleRightSidebar">
+          <i class="icon" :class="{'icon-arrow-right': pageTabRightSidebarVisible, 'icon-arrow-left': !pageTabRightSidebarVisible}"></i>
+        </button>
       </div>
     </TopMenu>
     <div class="flexBox">
@@ -90,6 +93,9 @@ export default {
   methods: {
     toggleSidebar () {
       this.$store.dispatch('togglePageTabSidebar')
+    },
+    toggleRightSidebar () {
+      this.$store.dispatch('togglePageTabRightSidebar')
     },
     addSVG () {
       const input = document.createElement('input')
@@ -228,7 +234,7 @@ i.showSidebar {
   cursor: e-resize;
 }
 
-.menuItem {
+.menuItem, .osdButtons {
   display: inline-block;
   margin: 0 .5rem 0 .5rem;
 
