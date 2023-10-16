@@ -7,7 +7,7 @@
         </button>
       </div>
       <div class="menuItem" v-if="showInitializeButton">
-        <button class="btn">Initialize Diplomatic Transcription</button>
+        <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
@@ -98,6 +98,9 @@ export default {
           path: dtPath
         })
       }
+    },
+    initializeDiploTrans () {
+      this.$store.dispatch('initializeDiploTrans')
     }
   },
   computed: {

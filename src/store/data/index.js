@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
+import { /* convertRectUnits, */ sortRastrumsByVerticalPosition, initializeDiploTrans } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1202,6 +1202,43 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
+     * initializes a new diplomatic transcript for the current writing zone, if none exists yet
+     * @param {*} param0
+     * @returns
+     */
+    initializeDiploTrans ({ commit, getters, dispatch }) {
+      const existingDt = getters.diplomaticTranscriptForCurrentWz
+      if (existingDt !== null) {
+        console.log('…current writing zone already has a diplomatic transcription')
+        return null
+      }
+      fetch('../assets/diplomaticTranscriptTemplate.xml')
+        .then(response => response.text())
+        .then(xmlString => {
+          const diploTemplate = parser.parseFromString(xmlString, 'application/xml')
+          console.log('Got a new diplomatic transcript: ', diploTemplate)
+
+          const diploTrans = initializeDiploTrans(diploTemplate, 'filename', 'wzId')
+
+          const dtPath = getters.currentWzDtPath
+          const writingZoneId = getters.activeWritingZone
+
+          const path = getters.currentDocPath
+          const docName = getters.documentNameByPath(path)
+
+          const pageNum = getters.currentSurfaceIndexForCurrentDoc
+          const baseMessage = 'add diplomatic transcript for ' + docName + ', p.' + pageNum + ', writingZone '
+
+          const param = writingZoneId
+
+          console.log(diploTrans, dtPath)
+          commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
+          dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
+          dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
+        })
     }
   },
 

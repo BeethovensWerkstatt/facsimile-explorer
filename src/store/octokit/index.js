@@ -165,6 +165,11 @@ const mutations = {
   SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS (state, diplomaticTranscripts) {
     state.availableDiplomaticTranscripts = diplomaticTranscripts
   },
+  ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT (state, diplomaticTranscript) {
+    if (state.availableDiplomaticTranscripts.indexOf(diplomaticTranscript) === -1) {
+      state.availableDiplomaticTranscripts.push(diplomaticTranscript)
+    }
+  },
   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
     if (!doc) console.warn(`no document '${path}'`)
     state.documents[path] = { repo, owner, ref, path, name, sha, doc }

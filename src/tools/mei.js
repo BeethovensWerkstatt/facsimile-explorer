@@ -1,5 +1,29 @@
 import { uuid } from '@/tools/uuid.js'
 
+export function initializeDiploTrans (diploTemplate, filename, genDescWzId, appVersion) {
+  diploTemplate.querySelectorAll('*[*|id]').forEach(elem => {
+    const id = elem.localName.substring(0, 1) + uuid()
+    if (elem.getAttribute('xml:id') === '%NEW-ID%') {
+      elem.setAttribute('xml:id', id)
+    }
+  })
+
+  const date = new Date().toISOString().split('T')[0]
+  const datePlaceholder = '%CURRENT-DATE%'
+  diploTemplate.querySelectorAll('change').forEach(change => {
+    if (change.getAttribute('isodate') === datePlaceholder) {
+      change.setAttribute('isodate', date)
+    }
+  })
+
+  diploTemplate.querySelector('application').setAttribute('version', appVersion)
+
+  const target = '../' + filename + '#' + genDescWzId
+  diploTemplate.querySelector('source').setAttribute('target', target)
+
+  return diploTemplate
+}
+
 export function initializePageIfNecessary (page, height) {
   const hasScoreDef = page.querySelector('score')
   if (hasScoreDef === null) {

@@ -50,7 +50,7 @@
           <span class="hasTrans float-right">
             <template v-if="this.availableDiplomaticTranscripts.indexOf(wz.diploTrans) !== -1">
               <span class="desc">Diplo<br/>Trans</span>
-              <i class="icon icon-check" :title="wz.annotTrans.file"></i>
+              <i class="icon icon-check" :title="wz.diploTrans.file"></i>
               <!--<template v-if="wz.annotTrans.firstZone">
 
               </template>
