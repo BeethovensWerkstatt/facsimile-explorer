@@ -493,6 +493,44 @@ const dataModule = {
     },
 
     /**
+     * moves the active writing layer to the last position in the current writing zone
+     * @param  {[type]} commit                 [description]
+     * @param  {[type]} getters                [description]
+     * @param  {[type]} dispatch               [description]
+     * @param  {[type]} shapeId                [description]
+     */
+    setActiveWritingLayerAsLastInZone ({ commit, getters, dispatch }) {
+      const activeLayerId = getters.activeWritingLayer
+
+      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
+      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
+
+      if (!modifiedDom || !modifiedSvgDom || !activeLayerId) {
+        return null
+      }
+
+      const genState = modifiedDom.querySelector('genState[*|id="' + activeLayerId + '"]')
+      const genDescWz = genState.closest('genDesc[class~="#geneticOrder_writingZoneLevel"]')
+      genDescWz.append(genState)
+
+      const svgGroup = modifiedSvgDom.querySelector('#' + genState.getAttribute('corresp').split('#')[1])
+      const svgWritingZone = svgGroup.closest('g.writingZone')
+      svgWritingZone.append(svgGroup)
+
+      const path = getters.currentDocPath
+      const docName = getters.documentNameByPath(path)
+
+      const svgPath = getters.currentSvgPath
+      const param = getters.currentSurfaceIndexForCurrentDoc
+      const baseMessage = 'changed order of writingLayers for ' + docName + ', p.'
+
+      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
+      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [genDescWz.getAttribute('xml:id')], isNewDocument: false })
+      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgWritingZone.getAttribute('xml:id')], isNewDocument: false })
+    },
+
+    /**
      * called by OSD when clicking on an svg path element
      * @param  {[type]} commit                 [description]
      * @param  {[type]} getters                [description]

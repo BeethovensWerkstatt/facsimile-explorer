@@ -6,8 +6,8 @@
       </span>
       <span class="shapeCount" title="Number of Shapes"><span class="sum">∑</span>{{wz.totalCount}} ({{wz.layers.length}}) <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
     <div class="writingLayer">Writing Layers:</div>
-    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}">
-      <h2 @click.stop="selectWritingLayer(wl.id)">{{this.numPrefixer(i)}}
+    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}" title="Shift-click on active layer will move it to the end.">
+      <h2 @click.stop="selectWritingLayer($event, wl.id)">{{this.numPrefixer(i)}}
         <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}} <i v-if="wz.layers.length !== 1" class="icon icon-cross" @click.stop="deleteLayer(wl.id)" title="Delete Writing Layer"></i></span>
 
       </h2>
@@ -41,9 +41,14 @@ export default {
       this.$store.dispatch('setActiveWritingZone', this.wz.id)
       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
     },
-    selectWritingLayer (id) {
-      this.$store.dispatch('setActiveWritingLayer', id)
-      // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
+    selectWritingLayer (e, id) {
+      if (this.activeLayerId === id) {
+        if (e.shiftKey) {
+          this.$store.dispatch('setActiveWritingLayerAsLastInZone')
+        }
+      } else {
+        this.$store.dispatch('setActiveWritingLayer', id)
+      }
     },
     addLayer () {
       console.log('adding layer')
@@ -67,7 +72,6 @@ export default {
     name () {
       return this.numPrefixer(this.position)
     },
-    // TODO: Hier vermutlich sinnvoller mit einem Getter arbeiten
     isActive () {
       return this.wz.id === this.$store.getters.activeWritingZone
     },
