@@ -785,8 +785,8 @@ export default {
       ([newArr, newId], [oldArr, oldId]) => {
         this.renderSystems()
       })
-    this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage],
-      ([newId, newSvg], [oldId, oldSvg]) => {
+    this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage, getters.activeWritingLayer],
+      ([newId, newSvg, newLayer], [oldId, oldSvg, oldLayer]) => {
         if (newSvg) {
           this.renderShapes()
         }
@@ -964,6 +964,8 @@ export default {
     }
     .activeWritingLayer path {
       opacity: 1;
+      fill: $svgActiveWritingLayerColor;
+      stroke: $svgActiveWritingLayerColor;
     }
   }
 }
