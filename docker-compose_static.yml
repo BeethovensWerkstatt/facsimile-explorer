@@ -4,7 +4,7 @@ services:
   fx:
     build: .
     ports:
-      - 80:80
+      - 8080:80
     environment:
       - CLIENT_ID=${CLIENT_ID}
       - CLIENT_SECRET=${CLIENT_SECRET}
