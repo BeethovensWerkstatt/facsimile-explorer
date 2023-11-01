@@ -3,7 +3,7 @@
 # 1. set up the build environment and compile the app
 # 2. run it with nginx
 #########################
-FROM node:14 as build-stage
+FROM node:16 as build-stage
 # ARG CLIENT_ID
 WORKDIR /app
 COPY package*.json ./
