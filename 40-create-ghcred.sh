@@ -7,4 +7,5 @@ set @CLIENT_ID $CLIENT_ID;
 set @CLIENT_SECRET $CLIENT_SECRET;
 EOT
 
-cat /config.json | jq --arg CLIENT_ID "$CLIENT_ID" '.repository += { "CLIENT_ID": $CLIENT_ID }' >/app/config.json
+# create config.json with CLIENT_ID
+cat /config.json |  jq --arg CLIENT_ID "$CLIENT_ID" --arg date "`date`" '. += { "date": $date } | .repository += { "CLIENT_ID": $CLIENT_ID }' >/app/config.json
