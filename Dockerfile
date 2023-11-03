@@ -9,7 +9,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY ./ .
-# RUN echo "VUE_APP_CLIENT_ID=$CLIENT_ID" >.env.production
+# COPY ./.env.static.local ./env.production
+RUN echo "VUE_APP_CLIENT_ID=$CLIENT_ID" >.env.production
 # RUN apk add git
 # RUN npm install -g gulp-cli gulp-git
 RUN npm run build
