@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 import { iiifManifest2mei, checkIiifManifest, getPageArray, fixLink } from '@/tools/iiif.js'
 import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
+import configModule from '@/store/config'
 import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
 import guiModule from '@/store/gui'
@@ -50,6 +51,7 @@ const vuexLocal = new VuexPersistence({
  */
 export default createStore({
   modules: {
+    configModule,
     octokitModule,
     dataModule,
     verovioModule,

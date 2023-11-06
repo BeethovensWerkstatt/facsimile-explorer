@@ -1,3 +1,5 @@
+console.error('don\'t use clientID.js anymore!')
+
 // if VUE_APP_CLIENT_ID is given return that, otherwise try config.json
 const CLIENT_ID = new Promise((resolve, reject) => {
   if (process.env.VUE_APP_CLIENT_ID && process.env.VUE_APP_CLIENT_ID !== '<CLIENT_ID>') {

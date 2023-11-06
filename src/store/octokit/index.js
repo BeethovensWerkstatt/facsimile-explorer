@@ -3,7 +3,7 @@ import { Octokit } from '@octokit/rest'
 import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
 // import { Base64 } from 'js-base64'
 
-import config from '@/config.json'
+// import config from '@/config.json'
 import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
 
 // export const OctokitPR = Octokit.plugin(createPullRequest)
@@ -193,6 +193,7 @@ const mutations = {
 
 const actions = {
   checkAuthenticate ({ commit, getters }, opts) {
+    const config = getters.config
     getters.octokit.auth().then(auth => {
       const authenticated = auth.type !== 'unauthenticated'
       // console.log(auth, authenticated)
@@ -265,10 +266,10 @@ const actions = {
   loadContent (
     { commit, dispatch, getters },
     {
-      owner = config.repository.owner, // 'BeethovensWerkstatt',
-      repo = config.repository.repo, // 'data',
-      path = config.repository.default,
-      ref = config.repository.branch, // 'dev'
+      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
+      repo = getters.config.repository.repo, // 'data',
+      path = getters.config.repository.default,
+      ref = getters.config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
     let contentData = getters.getContentData(path)
@@ -313,10 +314,10 @@ const actions = {
   loadSvgFile (
     { commit, dispatch, getters },
     {
-      owner = config.repository.owner, // 'BeethovensWerkstatt',
-      repo = config.repository.repo, // 'data',
+      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
+      repo = getters.config.repository.repo, // 'data',
       path,
-      ref = config.repository.branch, // 'dev'
+      ref = getters.config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
     const contentData = getters.getContentData(path)
@@ -364,10 +365,10 @@ const actions = {
   loadAnnotatedTranscript (
     { commit, dispatch, getters },
     {
-      owner = config.repository.owner, // 'BeethovensWerkstatt',
-      repo = config.repository.repo, // 'data',
+      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
+      repo = getters.config.repository.repo, // 'data',
       path,
-      ref = config.repository.branch, // 'dev'
+      ref = getters.config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
     const contentData = getters.getContentData(path)
@@ -413,10 +414,10 @@ const actions = {
   loadXmlFile (
     { commit, dispatch, getters },
     {
-      owner = config.repository.owner, // 'BeethovensWerkstatt',
-      repo = config.repository.repo, // 'data',
+      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
+      repo = getters.config.repository.repo, // 'data',
       path,
-      ref = config.repository.branch, // 'dev'
+      ref = getters.config.repository.branch, // 'dev'
       callback = null // optional callback to call, when loading is finished
     }) {
     const contentData = getters.getContentData(path)
@@ -482,7 +483,7 @@ const actions = {
    *
    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
    */
-  async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
+  async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = getters.config.repository.owner, repo = getters.config.repository.repo, branch = getters.config.repository.branch }) {
     const octoRepo = new OctokitRepo({ owner, repo, branch })
     const octokit = getters.octokit
 
@@ -661,7 +662,7 @@ const actions = {
     }
   },
 
-  deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
+  deleteBranch ({ getters }, { ref, owner = getters.config.repository.owner, repo = getters.config.repository.repo }) {
     // console.log('commit 2 GitHub: delete branch', ref)
     const octokit = getters.octokit
     octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/heads/${ref}`, {
@@ -696,7 +697,7 @@ const actions = {
    */
   async prepareGitCommit ({ commit, dispatch, getters }, param) {
     // console.log('prepareGitCommit ...', getters.loggedChanges)
-    const { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch } = param || {}
+    const { owner = getters.config.repository.owner, repo = getters.config.repository.repo, branch = getters.config.repository.branch } = param || {}
     commit('SET_COMMITTING', true)
 
     const fileStore = {}
@@ -808,9 +809,9 @@ const actions = {
   async loadSources ({ commit, dispatch, getters }) {
     const repometa = {
       octokit: getters.octokit,
-      owner: config.repository.owner,
-      repo: config.repository.repo,
-      branch: config.repository.branch
+      owner: getters.config.repository.owner,
+      repo: getters.config.repository.repo,
+      branch: getters.config.repository.branch
     }
     // console.log(repometa)
     dispatch('setLoading', true)
@@ -823,7 +824,7 @@ const actions = {
     // console.log(repo.commitUrl)
     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
     // console.log('commit', getters.commit)
-    const folder = await root.getFile(config.root)
+    const folder = await root.getFile(getters.config.root)
     const sources = await folder.folder
     for (const source of sources) {
       if (source.type === 'dir' || source.type === 'tree') {
@@ -889,9 +890,9 @@ const actions = {
   async getFile ({ getters }, { path, callback }) {
     const repometa = {
       octokit: getters.octokit,
-      owner: config.repository.owner,
-      repo: config.repository.repo,
-      branch: config.repository.branch
+      owner: getters.config.repository.owner,
+      repo: getters.config.repository.repo,
+      branch: getters.config.repository.branch
     }
     const repo = new OctokitRepo(repometa)
     const root = await repo.folder

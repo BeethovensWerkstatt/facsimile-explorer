@@ -66,7 +66,7 @@
 <script>
 import SourceSelector from '@/components/shared/SourceSelector.vue'
 // import SystemListingEntry from '@/components/SystemListingEntry.vue'
-import config from '@/config.json'
+// import config from '@/config.json'
 
 export default {
   name: 'HomeTab',
@@ -79,8 +79,14 @@ export default {
     sources () {
       return this.$store.getters.sources
     },
-    infoRepo: () => `${config.repository.owner} / ${config.repository.repo}`,
-    infoBranch: () => config.repository.branch,
+    infoRepo: () => {
+      const config = this.$store.getters.config
+      return `${config.repository.owner} / ${config.repository.repo}`
+    },
+    infoBranch: () => {
+      const config = this.$store.getters.config
+      return config.repository.branch
+    },
     infoCommit () {
       return this.$store.getters.commit
     },

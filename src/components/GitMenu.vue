@@ -58,7 +58,7 @@ import { computed, inject, onMounted } from '@vue/runtime-core'
 import { useStore } from 'vuex'
 // import fileDownload from 'js-file-download'
 import { GH_ACCESS_TOKEN } from '@/store/octokit'
-import CLIENT_ID from '@/clientID'
+// import CLIENT_ID from '@/clientID'
 
 export default {
   name: 'GitMenu',
@@ -98,10 +98,10 @@ export default {
     // const showOverview = () => store.dispatch('setModal', 'overview')
     const login = () => {
       // this page will open /authorize?code=<GH_CODE> on success
-      CLIENT_ID.then(id => {
-        const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${id}`
-        window.open(url, '_self')
-      })
+      // CLIENT_ID.then(id => {
+      const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${store.getters.config.repository.CLIENT_ID}`
+      window.open(url, '_self')
+      // })
     }
     const logout = () => {
       store.dispatch('logout', {

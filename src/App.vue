@@ -4,7 +4,7 @@
     <div v-else class="loading">loading ...</div>
   </div>
   <div class="login" v-else>
-    <div class="externalMessages" v-if="client_id">
+    <div class="externalMessages" v-if="config.repository.CLIENT_ID">
       To use the Facsimile&nbsp;Explorer you have to first
       <a class="btn btn-success btn-lg" :href="authurl">Login to GitHub</a>
     </div>
@@ -16,26 +16,20 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import CLIENT_ID from '@/clientID'
 
 export default {
   name: 'FacsimileExplorer',
-  data: () => ({
-    client_id: null
-  }),
-  created () {
-    CLIENT_ID.then(id => { this.client_id = id })
-  },
   computed: {
     ...mapGetters([
       'isAuthenticated',
-      'initComplete'
+      'initComplete',
+      'config'
     ]),
     routeAuthenticate () {
       return this.$route.name === 'authenticate'
     },
     authurl () {
-      const clientId = this.client_id
+      const clientId = this.config.repository.CLIENT_ID
       return `https://github.com/login/oauth/authorize?scope=repo&client_id=${clientId}`
     }
   },
