@@ -1046,6 +1046,10 @@ const dataModule = {
 
       // get relevant rastrumDesc
       const rastrumDesc = layout.querySelector('rastrumDesc')
+      if (xmlIDs.length === 0) { // no layoutDesc or rastrumDesc created
+        xmlIDs.push(layoutId)
+      }
+      console.log('xmlIDs', xmlIDs)
 
       // no rastrum so far
       if (!activeSystemId || !rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')) {
@@ -1078,7 +1082,6 @@ const dataModule = {
       const baseMessage = 'adjust systems on ' + docName + ', p.'
 
       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
-      // TODO xmlIDs
       dispatch('logChange', { path: path, baseMessage, param, xmlIDs, isNewDocument: false })
     },
 
