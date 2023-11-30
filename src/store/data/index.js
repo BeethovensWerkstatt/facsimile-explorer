@@ -2476,6 +2476,10 @@ const dataModule = {
     emptyPageWithRastrums: async (state, getters) => {
       const ep = await getEmptyPage(getters.documentWithCurrentPage, getters.currentSurfaceId)
 
+      if (!ep) {
+        return null
+      }
+
       const serializer = new XMLSerializer()
       const meiString = serializer.serializeToString(ep)
 
@@ -2491,8 +2495,6 @@ const dataModule = {
       const svgText = tk.renderToSVG(1, {})
       const svgDom = parser.parseFromString(svgText, 'application/xml')
 
-      console.log('rendered', svgText)
-
       svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
         barLine.remove()
       })
@@ -2503,7 +2505,6 @@ const dataModule = {
           const y = topLineCoordinates[1]
           const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
           const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-          console.log('height: ' + height)
           staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
           staff.style.transformOrigin = x + 'px ' + y + 'px'
         }

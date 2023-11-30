@@ -727,6 +727,10 @@ export default {
     async renderPageBackground () {
       const bg = await this.$store.getters.emptyPageWithRastrums
 
+      if (!bg) {
+        return null
+      }
+
       const pageIndex = this.$store.getters.currentPageZeroBased
       const path = this.$store.getters.filepath
       const pages = this.$store.getters.documentPagesForSidebars(path)

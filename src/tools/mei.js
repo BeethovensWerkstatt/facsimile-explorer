@@ -44,6 +44,10 @@ export async function initializeDiploTrans (filename, genDescWzId, appVersion) {
  * @returns the MEI document containing the empty rastrums
  */
 export async function getEmptyPage (mei, surfaceId) {
+  if (!mei || !surfaceId) {
+    return null
+  }
+
   const template = await fetch('../assets/emptyPageTemplate.xml')
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
@@ -113,7 +117,6 @@ export async function getEmptyPage (mei, surfaceId) {
     layer.textContent = ' '
   })
 
-  console.log(77)
   return template
 }
 
