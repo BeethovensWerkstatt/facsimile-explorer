@@ -1,6 +1,19 @@
 import { uuid } from '@/tools/uuid.js'
+const parser = new DOMParser()
 
-export function initializeDiploTrans (diploTemplate, filename, genDescWzId, appVersion) {
+/**
+ * takes a template for diplomatic transcriptions and initializes it by generating IDs
+ * @param {*} diploTemplate the template to be initialized
+ * @param {*} filename the filename of the document containing the page where the diplomatic transcription is located
+ * @param {*} genDescWzId the xml:id of the <genDesc> of the writingZone to which this diplomatic transcription belongs
+ * @param {*} appVersion the version of the application, as taken from package.json
+ * @returns the initialized template
+ */
+export async function initializeDiploTrans (filename, genDescWzId, appVersion) {
+  const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
+    .then(response => response.text())
+    .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
+
   diploTemplate.querySelectorAll('*[*|id]').forEach(elem => {
     const id = elem.localName.substring(0, 1) + uuid()
     if (elem.getAttribute('xml:id') === '%NEW-ID%') {
@@ -22,6 +35,86 @@ export function initializeDiploTrans (diploTemplate, filename, genDescWzId, appV
   diploTemplate.querySelector('source').setAttribute('target', target)
 
   return diploTemplate
+}
+
+/**
+ * generates an MEI that will render empty rastrums for a given page
+ * @param {*} mei the MEI document containing the page
+ * @param {*} surfaceId the xml:id of the <surface> element of the page
+ * @returns the MEI document containing the empty rastrums
+ */
+export async function getEmptyPage (mei, surfaceId) {
+  const template = await fetch('../assets/emptyPageTemplate.xml')
+    .then(response => response.text())
+    .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
+
+  const surface = [...mei.querySelectorAll('surface')].find(s => s.getAttribute('xml:id') === surfaceId)
+  const layout = [...mei.querySelectorAll('layout')].find(l => '#' + l.getAttribute('xml:id') === surface.getAttribute('decls'))
+
+  // retrieve correct folium / bifolium
+  const folium = [...mei.querySelectorAll('foliaDesc *')].find(f => {
+    if (f.getAttribute('outer.recto') === '#' + surfaceId) {
+      return true
+    }
+    if (f.getAttribute('inner.verso') === '#' + surfaceId) {
+      return true
+    }
+    if (f.getAttribute('inner.recto') === '#' + surfaceId) {
+      return true
+    }
+    if (f.getAttribute('outer.verso') === '#' + surfaceId) {
+      return true
+    }
+    if (f.getAttribute('recto') === '#' + surfaceId) {
+      return true
+    }
+    if (f.getAttribute('verso') === '#' + surfaceId) {
+      return true
+    }
+    return false
+  })
+
+  // properly set page dimensions
+  template.querySelector('page').setAttribute('page.height', folium.getAttribute('height'))
+  template.querySelector('page').setAttribute('page.width', folium.getAttribute('width'))
+
+  // determine staff height relations
+  const defaultFactor = 100 * 9 / 297 * 3 // INFO: I don't know the exact math behind the *3, but it works
+  template.querySelector('staffDef').setAttribute('scale', defaultFactor + '%')
+  const firstStaffHeight = parseFloat(layout.querySelector('rastrum').getAttribute('system.height'))
+
+  // translate rastrums to systems
+  layout.querySelectorAll('rastrum').forEach(rastrum => {
+    const system = document.createElementNS('http://www.music-encoding.org/ns/mei', 'system')
+    template.querySelector('page').append(system)
+    system.setAttribute('system.leftmar', '0')
+    system.setAttribute('system.rightmar', '0')
+
+    const measure = document.createElementNS('http://www.music-encoding.org/ns/mei', 'measure')
+    system.append(measure)
+    measure.setAttribute('n', '1')
+    measure.setAttribute('coord.x1', rastrum.getAttribute('system.leftmar'))
+    measure.setAttribute('coord.x2', parseFloat(rastrum.getAttribute('system.leftmar')) + parseFloat(rastrum.getAttribute('width')))
+
+    const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
+    measure.append(staff)
+    staff.setAttribute('n', '1')
+    staff.setAttribute('coord.y1', parseFloat(folium.getAttribute('height')) - parseFloat(rastrum.getAttribute('system.topmar')))
+
+    const rotate = rastrum.getAttribute('rotate')
+    const thisHeight = parseFloat(rastrum.getAttribute('system.height'))
+    const relativeHeight = 1 / firstStaffHeight * thisHeight
+
+    staff.setAttribute('rotateheight', rotate + ' ' + relativeHeight.toFixed(2))
+
+    const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
+    staff.append(layer)
+    layer.setAttribute('n', '1')
+    layer.textContent = ' '
+  })
+
+  console.log(77)
+  return template
 }
 
 export function initializePageIfNecessary (page, height) {
@@ -280,6 +373,14 @@ export function draft2score (meiDom) {
     arr.push(music)
   })
   return arr
+}
+
+/**
+ * Translates diplomatic transcripts (draft elements) to page-based MEI.
+ * @param {[type]} meiDom the MEI DOM of a diplomatic transcript to be converted to page-based MEI
+ */
+export function draft2page (meiDom) {
+  return meiDom
 }
 
 export const rawMEISelectables = [

@@ -89,6 +89,16 @@ export default {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['pages']
       return validTabs.indexOf(tab) !== -1
+    },
+
+    /**
+     * in which tabs of the FX shall we render the stafflines of the current page?
+     * @return {[type]} [description]
+     */
+    showRenderedStafflines () {
+      const tab = this.$store.getters.explorerTab
+      const validTabs = ['diplo']
+      return validTabs.indexOf(tab) !== -1
     }
   },
   methods: {
@@ -222,6 +232,10 @@ export default {
 
       if (this.showPageBorders) {
         this.renderPageBorders()
+      }
+
+      if (this.showRenderedStafflines) {
+        this.renderPageBackground()
       }
 
       this.renderShapes()
@@ -704,6 +718,43 @@ export default {
       pageRotated.classList.add('rotated')
       pageRotated.style.transform = 'rotate(' + data.rotate.deg + 'deg)'
       */
+    },
+
+    /**
+     * renders the background of the page (empty stafflines etc.)
+     * @return {[type]} [description]
+     */
+    async renderPageBackground () {
+      const bg = await this.$store.getters.emptyPageWithRastrums
+
+      const pageIndex = this.$store.getters.currentPageZeroBased
+      const path = this.$store.getters.filepath
+      const pages = this.$store.getters.documentPagesForSidebars(path)
+      const page = pages[pageIndex]
+
+      if (!page) {
+        return null
+      }
+
+      const rects = getOsdRects(page)
+
+      const existingPageOverlay = document.querySelector('.overlay.pageBackground')
+      const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
+
+      if (!existingPageOverlay) {
+        const element = document.createElement('div')
+        element.classList.add('overlay')
+        element.classList.add('pageBackground')
+        element.append(bg)
+
+        this.viewer.addOverlay({
+          element,
+          location: pageLocation //,
+          // rotationMode: innerPos.rotationMode
+        })
+      } else {
+        this.viewer.updateOverlay(existingPageOverlay, pageLocation)
+      }
     },
 
     /**

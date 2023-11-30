@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { /* convertRectUnits, */ sortRastrumsByVerticalPosition, initializeDiploTrans } from '@/tools/mei.js'
+import { /* convertRectUnits, */ sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1250,36 +1250,25 @@ const dataModule = {
      * @param {*} param0
      * @returns
      */
-    initializeDiploTrans ({ commit, getters, dispatch }) {
+    async initializeDiploTrans ({ commit, getters, dispatch }) {
       const existingDt = getters.diplomaticTranscriptForCurrentWz
       if (existingDt !== null) {
         console.log('…current writing zone already has a diplomatic transcription')
         return null
       }
-      fetch('../assets/diplomaticTranscriptTemplate.xml')
-        .then(response => response.text())
-        .then(xmlString => {
-          const diploTemplate = parser.parseFromString(xmlString, 'application/xml')
-          console.log('Got a new diplomatic transcript: ', diploTemplate)
 
-          const diploTrans = initializeDiploTrans(diploTemplate, 'filename', 'wzId')
+      const diploTrans = await initializeDiploTrans('filename', 'wzId')
 
-          const dtPath = getters.currentWzDtPath
-          const writingZoneId = getters.activeWritingZone
+      const dtPath = getters.currentWzDtPath
+      const baseMessage = 'add diplomatic transcript at '
+      const param = dtPath.split('/').splice(-1)[0]
 
-          const path = getters.currentDocPath
-          const docName = getters.documentNameByPath(path)
+      console.log(diploTrans, dtPath)
+      commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
+      dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
+      dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
 
-          const pageNum = getters.currentSurfaceIndexForCurrentDoc
-          const baseMessage = 'add diplomatic transcript for ' + docName + ', p.' + pageNum + ', writingZone '
-
-          const param = writingZoneId
-
-          console.log(diploTrans, dtPath)
-          commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
-          dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
-          dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
-        })
+      return diploTrans
     }
   },
 
@@ -2476,6 +2465,51 @@ const dataModule = {
         return null
       }
       return wzDetails
+    },
+
+    /**
+     * gets an MEI file representing the empty page with rastrums
+     * @param {*} state //
+     * @param {*} getters //
+     * @returns //
+     */
+    emptyPageWithRastrums: async (state, getters) => {
+      const ep = await getEmptyPage(getters.documentWithCurrentPage, getters.currentSurfaceId)
+
+      const serializer = new XMLSerializer()
+      const meiString = serializer.serializeToString(ep)
+
+      const tk = await getters.verovioToolkit()
+      const options = getters.diploPageBackgroundVerovioOptions
+      const width = ep.querySelector('page').getAttribute('page.width')
+      const height = ep.querySelector('page').getAttribute('page.height')
+      options.pageHeight = height
+      options.pageWidth = width
+
+      tk.setOptions(options)
+      tk.loadData(meiString)
+      const svgText = tk.renderToSVG(1, {})
+      const svgDom = parser.parseFromString(svgText, 'application/xml')
+
+      console.log('rendered', svgText)
+
+      svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
+        barLine.remove()
+      })
+      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+        if (!staff.classList.contains('bounding-box')) {
+          const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
+          const x = topLineCoordinates[0].substring(1)
+          const y = topLineCoordinates[1]
+          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
+          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
+          console.log('height: ' + height)
+          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
+          staff.style.transformOrigin = x + 'px ' + y + 'px'
+        }
+      })
+
+      return svgDom.querySelector('svg')
     }
   }
 }

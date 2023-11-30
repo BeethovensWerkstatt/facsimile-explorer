@@ -1,0 +1,31 @@
+<music xmlns="http://www.music-encoding.org/ns/mei">
+    <!-- 
+    This template is used to render empty systems for a given page. 
+    Dimensions will be given in millimeters. Contains the minimum 
+    information required Verovio to render. -->
+    <body>
+        <pages type="transcription">
+            <page page.width="%VALUE%" page.height="%VALUE%" page.leftmar="0" page.rightmar="0">
+                <mdivb/>
+                <secb/>
+                <score>
+                    <scoreDef>
+                        <staffGrp symbol="none">
+                            <staffDef n="1"
+                                lines="5" scale="%VALUE%"/>
+                        </staffGrp>
+                    </scoreDef>
+                </score>
+                <!-- <system system.leftmar="0" system.rightmar="0">
+                    <measure coord.x1="%VALUE%" coord.x2="%VALUE%" n="1">
+                        <staff n="1" coord.y1="%VALUE%">
+                            <layer n="1">
+                                <mSpace/>
+                            </layer>
+                        </staff>
+                    </measure>
+                </system> -->
+            </page>
+        </pages>
+    </body>
+</music>

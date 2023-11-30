@@ -5,20 +5,8 @@
 </template>
 
 <script>
-import { draft2score } from '@/tools/mei.js'
-// import { mapGetters } from 'vuex'
-
-const verovioOptions = {
-  scale: 40,
-  breaks: 'none',
-  openControlEvents: true,
-  svgBoundingBoxes: true,
-  svgRemoveXlink: true,
-  svgHtml5: true,
-  header: 'none',
-  footer: 'none' //,
-  // unit: 18
-}
+import { draft2score, draft2page } from '@/tools/mei.js'
+import { mapGetters } from 'vuex'
 
 const rawSelectables = [
   'note',
@@ -54,8 +42,11 @@ export default {
     getter: String,
     pathGetter: String
   },
+  computed: {
+    ...mapGetters(['diploPageBackgroundVerovioOptions', 'annotTransVerovioOptions'])
+  },
   methods: {
-    render () {
+    async render () {
       const meiDom = this.$store.getters[this.getter]
 
       if (!meiDom) {
@@ -67,14 +58,19 @@ export default {
       try {
         this.removeListeners()
 
-        const resolvedDrafts = this.type === 'annotTrans' ? draft2score(meiDom)[0] : meiDom.querySelector('music')
-        console.log('rd ' + this.type, resolvedDrafts)
-        const serializer = new XMLSerializer()
-        const mei = serializer.serializeToString(resolvedDrafts)
-        this.vrvToolkit.loadData(mei)
-        const svg = this.vrvToolkit.renderToSVG(1, {})
+        if (this.type === 'annotTrans') {
+          const resolvedDraft = draft2score(meiDom)[0]
 
-        this.$refs.mei.innerHTML = svg
+          const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
+          this.$refs.mei.innerHTML = svg
+        }
+
+        if (this.type === 'diploTrans') {
+          const resolvedTrans = draft2page(meiDom)
+
+          const svg = await this.$store.getters.diplomaticTranscriptForWz(resolvedTrans)
+          this.$refs.mei.innerHTML = svg
+        }
 
         this.addListeners()
       } catch (err) {
@@ -119,7 +115,7 @@ export default {
     // this.vrvToolkit = new verovio.toolkit()
     this.$store.getters.verovioToolkit().then(tk => {
       this.vrvToolkit = tk
-      this.vrvToolkit.setOptions(verovioOptions)
+      this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
       this.render()
     })
 
