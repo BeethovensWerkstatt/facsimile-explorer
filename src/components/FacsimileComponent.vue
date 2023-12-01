@@ -685,7 +685,6 @@ export default {
     async renderPageBackground () {
       const bg = await this.$store.getters.emptyPageWithRastrums
 
-      console.log('renderPageBackground: ', bg)
       if (!bg) {
         return null
       }
@@ -703,10 +702,8 @@ export default {
 
       const existingPageOverlay = this.$refs.container.querySelector('.overlay.emptyStaves')
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
-      console.log('so far, so good…')
-      console.log('existingPageOverlay', existingPageOverlay)
+
       if (!existingPageOverlay) {
-        console.log('need to render pageBackground')
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('emptyStaves')

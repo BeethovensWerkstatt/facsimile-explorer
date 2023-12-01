@@ -1,4 +1,5 @@
 import { uuid } from '@/tools/uuid.js'
+import { getOsdRects } from '@/tools/facsimileHelpers.js'
 const parser = new DOMParser()
 
 /**
@@ -6,10 +7,12 @@ const parser = new DOMParser()
  * @param {*} diploTemplate the template to be initialized
  * @param {*} filename the filename of the document containing the page where the diplomatic transcription is located
  * @param {*} genDescWzId the xml:id of the <genDesc> of the writingZone to which this diplomatic transcription belongs
+ * @param {*} surfaceId the xml:id of the <surface> on which this writing zone is transcribed
  * @param {*} appVersion the version of the application, as taken from package.json
+ * @param {*} affectedStaves the staves that are covered by this diplomatic transcription
  * @returns the initialized template
  */
-export async function initializeDiploTrans (filename, genDescWzId, appVersion) {
+export async function initializeDiploTrans (filename, genDescWzId, surfaceId, appVersion, affectedStaves) {
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
@@ -29,10 +32,33 @@ export async function initializeDiploTrans (filename, genDescWzId, appVersion) {
     }
   })
 
+  affectedStaves.forEach((obj, i) => {
+    const n = obj.n
+    const rastrum = obj.rastrum
+    const staffDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffDef')
+    staffDef.setAttribute('xml:id', 's' + uuid())
+    staffDef.setAttribute('n', (i + 1))
+    staffDef.setAttribute('label', n)
+    staffDef.setAttribute('sameas', '../' + filename + '#' + rastrum.id)
+    staffDef.setAttribute('lines', 5)
+    diploTemplate.querySelector('staffGrp').append(staffDef)
+
+    const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
+    staff.setAttribute('n', (i + 1))
+    staff.setAttribute('xml:id', 's' + uuid())
+
+    const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
+    layer.setAttribute('n', 1)
+    layer.setAttribute('xml:id', 'l' + uuid())
+    staff.append(layer)
+
+    diploTemplate.querySelector('measure').append(staff)
+  })
+
   diploTemplate.querySelector('application').setAttribute('version', appVersion)
 
-  const target = '../' + filename + '#' + genDescWzId
-  diploTemplate.querySelector('source').setAttribute('target', target)
+  diploTemplate.querySelector('source').setAttribute('target', '../' + filename + '#' + genDescWzId)
+  diploTemplate.querySelector('pb').setAttribute('target', '../' + filename + '#' + surfaceId)
 
   return diploTemplate
 }
@@ -251,9 +277,10 @@ export function verifyUnassignedGroupInSvg (svg) {
  * @param  {[type]} surfaceId               [description]
  * @param  {[type]} xywh                    [description]
  * @param  {[type]} dir                     [description]
+ * @param  {[type]} getters                 access to the store's getters
  * @return {[type]}           [description]
  */
-export function convertRectUnits (dom, surfaceId, xywh, dir) {
+export function convertRectUnits (dom, surfaceId, xywh, dir, getters) {
   if (dir !== 'px2mm' && dir !== 'mm2px') {
     console.log('Failed to provide proper translation direction on ' + surfaceId + ' for dir "' + dir + '". Rect: ', xywh)
     return false
@@ -269,12 +296,12 @@ export function convertRectUnits (dom, surfaceId, xywh, dir) {
     return false
   }
 
-  const pxOffsetX = xywhParam.split(',')[0]
-  const pxOffsetY = xywhParam.split(',')[1]
-  const pageWidthPx = xywhParam.split(',')[2]
-  const pageHeightPx = xywhParam.split(',')[3]
+  const pxOffsetX = parseFloat(xywhParam.split(',')[0])
+  const pxOffsetY = parseFloat(xywhParam.split(',')[1])
+  // const pageWidthPx = xywhParam.split(',')[2]
+  // const pageHeightPx = xywhParam.split(',')[3]
 
-  const folium = [...dom.querySelectorAll('foliaDesc *')].find(foliumLike => {
+  /* const folium = [...dom.querySelectorAll('foliaDesc *')].find(foliumLike => {
     if (foliumLike.getAttribute('outer.recto') === '#' + surfaceId) {
       return true
     }
@@ -295,12 +322,27 @@ export function convertRectUnits (dom, surfaceId, xywh, dir) {
     }
     return false
   })
+  */
 
-  const pageWidthMm = folium.getAttribute('width')
-  const pageHeightMm = folium.getAttribute('height')
+  // const pageWidthMm = folium.getAttribute('width')
+  // const pageHeightMm = folium.getAttribute('height')
 
-  const scaleFactorHeight = pageHeightMm / pageHeightPx
-  const scaleFactorWidth = pageWidthMm / pageWidthPx
+  // const scaleFactorHeight = pageHeightMm / pageHeightPx
+  // const scaleFactorWidth = pageWidthMm / pageWidthPx
+
+  const pageIndex = getters.currentPageZeroBased
+  const path = getters.filepath
+  const pages = getters.documentPagesForSidebars(path)
+  const page = pages[pageIndex]
+
+  if (!page) {
+    return null
+  }
+  // console.log('page: ', page)
+  const rects = getOsdRects(page)
+  // console.log('rects: ', rects)
+
+  const ratio = 1 / parseFloat(rects.ratio)
 
   /* // DEBUG
   console.log('pageHeightMm: ' + pageHeightMm)
@@ -314,18 +356,18 @@ export function convertRectUnits (dom, surfaceId, xywh, dir) {
 
   if (dir === 'px2mm') {
     const rect = {}
-    rect.x = parseFloat(((xywh.x - pxOffsetX) * scaleFactorWidth).toFixed(2))
-    rect.y = parseFloat(((xywh.y - pxOffsetY) * scaleFactorHeight).toFixed(2))
-    rect.w = parseFloat((xywh.w * scaleFactorWidth).toFixed(2))
-    rect.h = parseFloat((xywh.h * scaleFactorHeight).toFixed(2))
+    rect.x = parseFloat(((xywh.x - pxOffsetX) * ratio).toFixed(2))
+    rect.y = parseFloat(((xywh.y - pxOffsetY) * ratio).toFixed(2))
+    rect.w = parseFloat((xywh.w * ratio).toFixed(2))
+    rect.h = parseFloat((xywh.h * ratio).toFixed(2))
 
     return rect
   } else {
     const rect = {}
-    rect.x = Math.round(xywh.x / scaleFactorWidth + pxOffsetX)
-    rect.y = Math.round(xywh.y / scaleFactorHeight + pxOffsetY)
-    rect.w = Math.round(xywh.w / scaleFactorWidth)
-    rect.h = Math.round(xywh.h / scaleFactorHeight)
+    rect.x = Math.round((xywh.x / ratio) + pxOffsetX)
+    rect.y = Math.round((xywh.y / ratio) + pxOffsetY)
+    rect.w = Math.round(xywh.w / ratio)
+    rect.h = Math.round(xywh.h / ratio)
 
     return rect
   }

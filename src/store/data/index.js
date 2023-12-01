@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { /* convertRectUnits, */ sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1257,7 +1257,45 @@ const dataModule = {
         return null
       }
 
-      const diploTrans = await initializeDiploTrans('filename', 'wzId')
+      const appversion = await getters.config?.app?.version
+      const filename = getters.currentDocPath.split('/').splice(-1)[0]
+      const wzId = getters.genDescForCurrentWritingZone.getAttribute('xml:id')
+      const surfaceId = getters.currentPageId
+
+      const currentWritingZoneObject = getters.currentWritingZoneObject
+      const rastrums = getters.rastrumsOnCurrentPage
+
+      console.log('\n\ngot this:')
+      console.log('currentWritingZoneObject', currentWritingZoneObject)
+      console.log('rastrums', rastrums)
+      const wzBox = {
+        left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
+        top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
+        right: (parseInt(currentWritingZoneObject.xywh.split(',')[0]) + parseInt(currentWritingZoneObject.xywh.split(',')[2])),
+        bottom: (parseInt(currentWritingZoneObject.xywh.split(',')[1]) + parseInt(currentWritingZoneObject.xywh.split(',')[3]))
+      }
+
+      const affectedStaves = []
+      rastrums.forEach((rastrum, i) => {
+        const rastrumBox = {
+          left: parseInt(rastrum.px.x),
+          top: parseInt(rastrum.px.y),
+          right: (parseInt(rastrum.px.x) + parseInt(rastrum.px.w)),
+          bottom: (parseInt(rastrum.px.y) + parseInt(rastrum.px.h))
+        }
+        if (wzBox.top <= rastrumBox.top &&
+           wzBox.bottom >= rastrumBox.bottom &&
+           wzBox.left <= rastrumBox.right &&
+           wzBox.right >= rastrumBox.left) {
+          affectedStaves.push({ n: i + 1, rastrum })
+        }
+      })
+
+      console.log('affectedStaves: ', affectedStaves)
+
+      // const annotatedTranscript = getters.annotatedTranscriptForWz
+
+      const diploTrans = await initializeDiploTrans(filename, wzId, surfaceId, appversion, affectedStaves)
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'add diplomatic transcript at '
@@ -2412,11 +2450,21 @@ const dataModule = {
           rotate: rastrum.hasAttribute('rotate') ? parseFloat(rastrum.getAttribute('rotate')) : 0
         }
 
-        // console.log(mm)
-        // const xywh = convertRectUnits(dom, surfaceId, mm, 'mm2px')
+        // console.log('rastrum by mm:', mm)
+        const xywh = convertRectUnits(dom, surfaceId, mm, 'mm2px', getters)
         // console.log(xywh)
 
-        arr.push({ id: rastrum.getAttribute('xml:id'), ...mm })
+        arr.push({ id: rastrum.getAttribute('xml:id'), ...mm, px: { ...xywh } })
+      })
+
+      arr.sort((a, b) => {
+        if (a.y < b.y) {
+          return -1
+        }
+        if (a.y > b.y) {
+          return 1
+        }
+        return 0
       })
 
       return arr

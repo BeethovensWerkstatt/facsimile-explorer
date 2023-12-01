@@ -200,7 +200,21 @@
     </meiHead>
     <music>
         <body>
-            
+            <mdiv xml:id="%NEW-ID%">
+                <drafts xml:id="%NEW-ID%">
+                    <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
+                        <scoreDef xml:id="%NEW-ID%">
+                            <staffGrp symbol="none" xml:id="%NEW-ID%"></staffGrp>
+                        </scoreDef>
+                        <pb xml:id="%NEW-ID%" target="%FILEPATH%#%SURFACE-ID%"/>
+                        <section xml:id="%NEW-ID%">
+                            <measure xml:id="%NEW-ID%">
+                                
+                            </measure>
+                        </section>
+                    </draft>
+                </drafts>
+            </mdiv>
         </body>
     </music>
 </mei>

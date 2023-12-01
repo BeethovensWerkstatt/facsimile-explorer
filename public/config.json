@@ -5,5 +5,8 @@
     "branch": "dev",
     "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
   },
-  "root": "data/sources"
+  "root": "data/sources",
+  "app": {
+    "version": "0.1.0" 
+  }
 }
