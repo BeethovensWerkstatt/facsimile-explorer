@@ -24,10 +24,11 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <div class="mainBox">
-          <FacsimileComponent/>
+          <FacsimileComponent type="facsimile"/>
         </div>
         <div class="mainBox">
-          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>
+          <FacsimileComponent type="diploTrans"/>
+          <!--<VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>-->
           {{ diploTransActivationsInAnnotTrans.size }} xy
           {{ diploTransActivationsInShapes.length }}
           <!--<OpenSeadragonComponent/>-->

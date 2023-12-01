@@ -1,5 +1,5 @@
 <template>
-   <div id="facsimileContainer" :class="explorerTab">
+   <div ref="container" class="facsimileContainer" :class="[ explorerTab, { diploTrans: this.type === 'diploTrans' }]">
       <!--<div style="position: absolute; top: 1em; left: 1em; right: 1em; border: .5px solid red; z-index: 20; padding: .3rem; background-color: #ffffff66;">TileSource: {{ tileSource }}</div>-->
    </div>
 </template>
@@ -10,7 +10,6 @@ import OpenSeadragon from 'openseadragon'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 
 const osdOptions = {
-  id: 'facsimileContainer',
   preserveViewport: false,
   visibilityRatio: 0.8,
   sequenceMode: false,
@@ -30,7 +29,7 @@ const osdOptions = {
 export default {
   name: 'FacsimileComponent',
   props: {
-
+    type: String // default: 'facsimile', 'diploTrans'
   },
   computed: {
     /**
@@ -58,7 +57,7 @@ export default {
     showSvg () {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['pages', 'zones', 'annot', 'diplo']
-      return validTabs.indexOf(tab) !== -1
+      return validTabs.indexOf(tab) !== -1 && (!this.type || this.type !== 'diploTrans')
     },
 
     /**
@@ -87,8 +86,8 @@ export default {
      */
     showPageBorders () {
       const tab = this.$store.getters.explorerTab
-      const validTabs = ['pages']
-      return validTabs.indexOf(tab) !== -1
+      const validTabs = ['pages', 'diplo']
+      return validTabs.indexOf(tab) !== -1 && this.type === 'diploTrans'
     },
 
     /**
@@ -98,7 +97,7 @@ export default {
     showRenderedStafflines () {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['diplo']
-      return validTabs.indexOf(tab) !== -1
+      return validTabs.indexOf(tab) !== -1 && this.type === 'diploTrans'
     }
   },
   methods: {
@@ -209,6 +208,10 @@ export default {
 
       const ts = this.tileSource
 
+      if (this.type && this.type === 'diploTrans') {
+        ts.opacity = 0.6
+      }
+
       // ts.degrees = 0
       this.viewer.open(ts)
     },
@@ -302,7 +305,7 @@ export default {
         return null
       } */
 
-      document.querySelectorAll('.grid').forEach(overlay => {
+      this.$refs.container.querySelectorAll('.grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
 
@@ -412,7 +415,7 @@ export default {
         return null
       }
 
-      const existingOverlay = document.querySelector('#facsimileContainer svg')
+      const existingOverlay = this.$refs.container.querySelector('svg')
       if (existingOverlay !== null) {
         const oldActive = existingOverlay.querySelector('.activeWritingZone')
         if (oldActive !== null) {
@@ -456,7 +459,6 @@ export default {
           svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
         }
       }
-      // console.log('done')
     },
 
     /**
@@ -470,7 +472,7 @@ export default {
       const systems = this.$store.getters.rastrumsOnCurrentPage
       const activeSystemId = this.$store.getters.activeSystemId
 
-      const renderedSystems = document.querySelectorAll('.system.overlay')
+      const renderedSystems = this.$refs.container.querySelectorAll('.system.overlay')
       const renderedIDs = []
 
       renderedSystems.forEach(rs => {
@@ -599,66 +601,71 @@ export default {
       // console.log('relevant rects: ', rects)
       const invertedRot = rects.rotation * -1
 
-      // the media fragment as stored in the data
-      const existingImage = document.querySelector('.overlay.imageBorder')
-      const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
-      console.log('box 2', imageLocation)
+      if (!this.type || this.type !== 'diploTrans') {
+        // the media fragment as stored in the data
+        const existingImage = this.$refs.container.querySelector('.overlay.imageBorder')
+        const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
 
-      if (!existingImage) {
-        const element = document.createElement('div')
-        element.classList.add('overlay')
-        element.classList.add('imageBorder')
+        if (!existingImage) {
+          const element = document.createElement('div')
+          element.classList.add('overlay')
+          element.classList.add('imageBorder')
 
-        const innerRot = document.createElement('div')
-        innerRot.classList.add('rotatedBox')
-        innerRot.classList.add('overlay')
-        innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
-        element.append(innerRot)
+          const innerRot = document.createElement('div')
+          innerRot.classList.add('rotatedBox')
+          innerRot.classList.add('overlay')
+          innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
+          element.append(innerRot)
 
-        this.viewer.addOverlay({
-          element,
-          location: imageLocation // ,
-          // rotationMode: centerPos.rotationMode
-        })
-      } else {
-        this.viewer.updateOverlay(existingImage, imageLocation)
-        existingImage.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
-      }
+          this.viewer.addOverlay({
+            element,
+            location: imageLocation // ,
+            // rotationMode: centerPos.rotationMode
+          })
+        } else {
+          this.viewer.updateOverlay(existingImage, imageLocation)
+          existingImage.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
+        }
 
-      // the media fragment as stored in the data
-      const existingMediaFrag = document.querySelector('.overlay.pageBorder.mediaFragment')
-      const mediaFragLocation = new OpenSeadragon.Rect(rects.mediaFrag.x, rects.mediaFrag.y, rects.mediaFrag.w, rects.mediaFrag.h)
+        // the media fragment as stored in the data
+        const existingMediaFrag = this.$refs.container.querySelector('.overlay.pageBorder.mediaFragment')
+        const mediaFragLocation = new OpenSeadragon.Rect(rects.mediaFrag.x, rects.mediaFrag.y, rects.mediaFrag.w, rects.mediaFrag.h)
 
-      if (!existingMediaFrag) {
-        const element = document.createElement('div')
-        element.classList.add('overlay')
-        element.classList.add('pageBorder')
-        element.classList.add('mediaFragment')
+        if (!existingMediaFrag) {
+          const element = document.createElement('div')
+          element.classList.add('overlay')
+          element.classList.add('pageBorder')
+          element.classList.add('mediaFragment')
 
-        const innerRot = document.createElement('div')
-        innerRot.classList.add('rotatedBox')
-        innerRot.classList.add('overlay')
-        innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
-        element.append(innerRot)
+          const innerRot = document.createElement('div')
+          innerRot.classList.add('rotatedBox')
+          innerRot.classList.add('overlay')
+          innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
+          element.append(innerRot)
 
-        this.viewer.addOverlay({
-          element,
-          location: mediaFragLocation // ,
-          // rotationMode: centerPos.rotationMode
-        })
-      } else {
-        this.viewer.updateOverlay(existingMediaFrag, mediaFragLocation)
-        existingMediaFrag.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
+          this.viewer.addOverlay({
+            element,
+            location: mediaFragLocation // ,
+            // rotationMode: centerPos.rotationMode
+          })
+        } else {
+          this.viewer.updateOverlay(existingMediaFrag, mediaFragLocation)
+          existingMediaFrag.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
+        }
       }
 
       // get innermost rectangle
-      const existingPageOverlay = document.querySelector('.overlay.pageBorder.actualPage')
+      const existingPageOverlay = this.$refs.container.querySelector('.overlay.pageBorder.actualPage')
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
 
       if (!existingPageOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
-        element.classList.add('pageBorder')
+        if (this.type && this.type === 'diploTrans') {
+          element.classList.add('pageBackground')
+        } else {
+          element.classList.add('pageBorder')
+        }
         element.classList.add('actualPage')
 
         this.viewer.addOverlay({
@@ -669,55 +676,6 @@ export default {
       } else {
         this.viewer.updateOverlay(existingPageOverlay, pageLocation)
       }
-
-      //
-      /* document.querySelectorAll('.pageBorderPoint.overlay, .fragmentFrame, .pageBorder.overlay').forEach(overlay => {
-        this.viewer.removeOverlay(overlay)
-      }) */
-
-      /* const xScale = parseFloat(pageDimensions.mmWidth) / parseFloat(pageDimensions.width)
-      const yScale = parseFloat(pageDimensions.mmHeight) / parseFloat(pageDimensions.height)
-
-      // const pageBorderPoints = this.$store.getters.pageBorderPoints
-      const data = this.$store.getters.currentPageFragIdRect
-
-      const renderPoint = ({ x, y }, className) => {
-        const element = document.createElement('div')
-        element.classList.add('overlay')
-        element.classList.add('point')
-        element.classList.add(className)
-
-        this.viewer.addOverlay({
-          element,
-          location: new OpenSeadragon.Point(parseInt(x) * xScale, parseInt(y) * yScale),
-          width: 3,
-          height: 3,
-          placement: 'CENTER'
-        })
-      }
-
-      renderPoint(data.center, 'center')
-      renderPoint(data.inner.ul, 'ul')
-      renderPoint(data.inner.ur, 'ur')
-      renderPoint(data.inner.lr, 'lr')
-      renderPoint(data.inner.ll, 'll')
-      renderPoint(data.rotate.handle, 'rotate')
-      */
-
-      /* const pageUnrotated = document.createElement('div')
-      const pageRotated = document.createElement('div')
-      pageUnrotated.append(pageRotated)
-      const loc = new OpenSeadragon.Rect(0, 0, parseFloat(pageDimensions.mmWidth), parseFloat(pageDimensions.mmHeight))
-
-      console.log('rect: ', loc)
-      // inner.classList.add('unrotatedFrame')
-      // inner.classList.add('fragmentFrame')
-
-      pageUnrotated.classList.add('pageBorder')
-      pageUnrotated.classList.add('overlay')
-      pageRotated.classList.add('rotated')
-      pageRotated.style.transform = 'rotate(' + data.rotate.deg + 'deg)'
-      */
     },
 
     /**
@@ -727,6 +685,7 @@ export default {
     async renderPageBackground () {
       const bg = await this.$store.getters.emptyPageWithRastrums
 
+      console.log('renderPageBackground: ', bg)
       if (!bg) {
         return null
       }
@@ -742,13 +701,15 @@ export default {
 
       const rects = getOsdRects(page)
 
-      const existingPageOverlay = document.querySelector('.overlay.pageBackground')
+      const existingPageOverlay = this.$refs.container.querySelector('.overlay.emptyStaves')
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
-
+      console.log('so far, so good…')
+      console.log('existingPageOverlay', existingPageOverlay)
       if (!existingPageOverlay) {
+        console.log('need to render pageBackground')
         const element = document.createElement('div')
         element.classList.add('overlay')
-        element.classList.add('pageBackground')
+        element.classList.add('emptyStaves')
         element.append(bg)
 
         this.viewer.addOverlay({
@@ -800,6 +761,7 @@ export default {
   },
   mounted () {
     console.log('FacsimileComponent:mounted()')
+    osdOptions.element = this.$refs.container
     this.viewer = OpenSeadragon(osdOptions)
     this.viewer.addHandler('open', (data) => {
       this.facsimileOpened(data)
@@ -874,10 +836,14 @@ export default {
 <style lang="scss">
 @import '@/css/_variables.scss';
 
-#facsimileContainer {
+.facsimileContainer {
   width: 100%;
   height: 100%;
   position: relative;
+
+  &.diploTrans {
+    background: #ffffff;
+  }
 
   svg {
     width: 100%;
@@ -1119,6 +1085,11 @@ export default {
 .overlay.pageBorder.actualPage {
   outline: 5px solid #0000ff99;
   // background-color: #0000ff22;
+}
+
+.overlay.pageBackground.actualPage {
+  background-color: #ffffff99;
+  outline: 1px solid #0000ff;
 }
 
 .grid {
