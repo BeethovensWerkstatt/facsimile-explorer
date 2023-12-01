@@ -24,7 +24,7 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <!--<OpenSeadragonComponent :svg="false" :annotorious="true" :pageBorders="true" :rastrums="true" :page="currentPage"/>-->
-        <div><FacsimileComponent v-if="tileSource !== null"/></div>
+        <div><FacsimileComponent type="facsimile" v-if="tileSource !== null"/></div>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="pagesTab" v-if="pageTabRightSidebarVisible">
         <div class="sidebarBox">
