@@ -43,6 +43,7 @@ const guiModule = {
    * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
    * @property {Object} diploTransActivations an array of selected shapes and / or elements from the annotated transcription
    * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
+   * @property {Object} diploTransOsdBounds the OSD bounds currenlty viewed in both facsimile viewers
    */
   state: {
     explorerTab: 'home',
@@ -75,7 +76,8 @@ const guiModule = {
       shapes: new Map(),
       annotTrans: new Map()
     },
-    diploTransSelectedId: null
+    diploTransSelectedId: null,
+    diploTransOsdBounds: null
   },
   /**
    * @namespace store.gui.mutations
@@ -122,6 +124,7 @@ const guiModule = {
       const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
       if (allowedTabs.indexOf(val) !== -1) {
         state.explorerTab = val
+        state.diploTransBounds = null
       } else {
         console.error('Unknown application tab: ' + val)
       }
@@ -353,6 +356,15 @@ const guiModule = {
      */
     DIPLO_TRANS_SELECT_ITEM (state, id) {
       state.diploTransSelectId = id
+    },
+
+    /**
+     * sets the OSD bounds of the facsimile viewers
+     * @param {[type]} state  [description]
+     * @param {[type]} obj    [description]
+     */
+    SET_DIPLOTRANS_OSD_BOUNDS (state, obj) {
+      state.diploTransOsdBounds = obj
     }
   },
   /**
@@ -599,6 +611,17 @@ const guiModule = {
       if (getters.activeWritingZone !== null) {
         commit('DIPLO_TRANS_SELECT_ITEM', id)
       }
+    },
+
+    /**
+     * sets the OSD bounds of the facsimile viewers
+     * @param  {[type]} commit               [description]
+     * @param  {[type]} originOsd            [description]
+     * @param  {[type]} bounds               [description]
+     * @return {[type]}        [description]
+     */
+    setDiploTransOsdBounds ({ commit }, { originOsd, bounds }) {
+      commit('SET_DIPLOTRANS_OSD_BOUNDS', { originOsd, bounds })
     }
   },
   /**
@@ -916,6 +939,15 @@ const guiModule = {
      */
     diploTransSelectedId: (state) => {
       return state.diploTransSelectedId
+    },
+
+    /**
+     * returns the OSD bounds of the facsimile viewers
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    diploTransOsdBounds: (state) => {
+      return state.diploTransOsdBounds
     }
   }
 }

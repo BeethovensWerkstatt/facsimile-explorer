@@ -770,6 +770,16 @@ export default {
       this.facsimileClickListener(data)
     })
 
+    this.viewer.addHandler('viewport-change', (data) => {
+      if (this.explorerTab === 'diplo') {
+        const viewer = data.eventSource
+        const bounds = viewer.viewport.getBounds(false)
+
+        const originOsd = this.type
+        this.$store.dispatch('setDiploTransOsdBounds', { originOsd, bounds })
+      }
+    })
+
     /* this.unwatchPageBorders = this.$store.watch(
       (state, getters) => [getters.currentPageFragIdRect, getters.pageBorderPointsLength],
       ([newRect, newPoints], [oldRect, oldPoints]) => {
@@ -802,6 +812,18 @@ export default {
       ([newArr, newId], [oldArr, oldId]) => {
         this.renderSystems()
       })
+    if (this.explorerTab === 'diplo') {
+      this.unwatchDiploTransOsdBounds = this.$store.watch(
+        (state, getters) => getters.diploTransOsdBounds,
+        (newObj, oldObj) => {
+          if (newObj.originOsd !== this.type) {
+            const viewer = this.viewer
+            const bounds = newObj.bounds
+            viewer.viewport.fitBoundsWithConstraints(bounds, true)
+          }
+        })
+    }
+
     this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage, getters.activeWritingLayer],
       ([newId, newSvg, newLayer], [oldId, oldSvg, oldLayer]) => {
         if (newSvg) {
@@ -827,6 +849,9 @@ export default {
     this.unwatchTileSource()
     this.unwatchSVG()
     this.unwatchSystems()
+    if (this.explorerTab === 'diplo') {
+      this.unwatchDiploTransOsdBounds()
+    }
   }
 }
 
