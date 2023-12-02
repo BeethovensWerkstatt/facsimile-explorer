@@ -839,15 +839,19 @@ export default {
   },
   beforeUnmount () {
     console.log('FacsimileComponent:beforeUnmount()')
-    this.unload()
-    // this.unwatchPageBorders()
-    this.unwatchPageRotation()
-    this.unwatchPageDimensions()
-    this.unwatchTileSource()
-    this.unwatchSVG()
-    this.unwatchSystems()
-    if (this.explorerTab === 'diplo') {
-      this.unwatchDiploTransOsdBounds()
+    try {
+      this.unload()
+      // this.unwatchPageBorders()
+      this.unwatchPageRotation()
+      this.unwatchPageDimensions()
+      this.unwatchTileSource()
+      this.unwatchSVG()
+      this.unwatchSystems()
+      if (this.explorerTab === 'diplo') {
+        this.unwatchDiploTransOsdBounds()
+      }
+    } catch (err) {
+      console.warn('FacsimileComponent:beforeUnmount(): ' + err, err)
     }
   }
 }
