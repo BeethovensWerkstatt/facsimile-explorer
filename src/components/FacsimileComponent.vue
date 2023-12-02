@@ -727,12 +727,10 @@ export default {
       const currentZone = this.$store.getters.currentWritingZoneObject
       const xywh = currentZone.xywh.split(',')
 
-      const pixRect = new OpenSeadragon.Rect(...xywh)
-
       const image = this.viewer.world.getItemAt(0)
-      const pos = image.imageToViewportRectangle(pixRect)
-      console.log('trying to get a rectangle for ', pos, xywh, pixRect)
-      this.viewer.viewport.fitBounds(pos)
+      const pos = image.imageToViewportRectangle(parseInt(xywh[0]), parseInt(xywh[1]), parseInt(xywh[2]), parseInt(xywh[3]))
+
+      this.viewer.viewport.fitBoundsWithConstraints(pos)
     },
 
     unload () {
@@ -827,7 +825,7 @@ export default {
           this.renderShapes()
         }
         if (newId && newId !== oldId) {
-          // this.focusActiveWritingZone()
+          this.focusActiveWritingZone()
         }
       })
 
