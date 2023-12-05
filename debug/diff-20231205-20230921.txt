@@ -1,0 +1,1112 @@
+diff --git a/src/App.vue b/src/App.vue
+index 44e3c0c..d16a215 100644
+--- a/src/App.vue
++++ b/src/App.vue
+@@ -4,7 +4,7 @@
+     <div v-else class="loading">loading ...</div>
+   </div>
+   <div class="login" v-else>
+-    <div class="externalMessages" v-if="client_id">
++    <div class="externalMessages" v-if="config.repository.CLIENT_ID">
+       To use the Facsimile&nbsp;Explorer you have to first
+       <a class="btn btn-success btn-lg" :href="authurl">Login to GitHub</a>
+     </div>
+@@ -16,26 +16,20 @@
+ 
+ <script>
+ import { mapGetters } from 'vuex'
+-import CLIENT_ID from '@/clientID'
+ 
+ export default {
+   name: 'FacsimileExplorer',
+-  data: () => ({
+-    client_id: null
+-  }),
+-  created () {
+-    CLIENT_ID.then(id => { this.client_id = id })
+-  },
+   computed: {
+     ...mapGetters([
+       'isAuthenticated',
+-      'initComplete'
++      'initComplete',
++      'config'
+     ]),
+     routeAuthenticate () {
+       return this.$route.name === 'authenticate'
+     },
+     authurl () {
+-      const clientId = this.client_id
++      const clientId = this.config.repository.CLIENT_ID
+       return `https://github.com/login/oauth/authorize?scope=repo&client_id=${clientId}`
+     }
+   },
+diff --git a/src/clientID.js b/src/clientID.js
+index 485c204..23cd4e6 100644
+--- a/src/clientID.js
++++ b/src/clientID.js
+@@ -1,3 +1,5 @@
++console.error('don\'t use clientID.js anymore!')
++
+ // if VUE_APP_CLIENT_ID is given return that, otherwise try config.json
+ const CLIENT_ID = new Promise((resolve, reject) => {
+   if (process.env.VUE_APP_CLIENT_ID && process.env.VUE_APP_CLIENT_ID !== '<CLIENT_ID>') {
+diff --git a/src/components/AnnotTab.vue b/src/components/AnnotTab.vue
+index 7889f86..2eec705 100644
+--- a/src/components/AnnotTab.vue
++++ b/src/components/AnnotTab.vue
+@@ -17,7 +17,7 @@
+       </Transition>
+       <MainStage class="mainStage stageItem">
+         <template v-if="annotatedTranscriptForCurrentWz !== null">
+-          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
++          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
+         </template>
+         <template v-else-if="activeWritingZone === null">
+           You need to select a writing zone on the left.
+diff --git a/src/components/DiploTab.vue b/src/components/DiploTab.vue
+index da83be5..e12226f 100644
+--- a/src/components/DiploTab.vue
++++ b/src/components/DiploTab.vue
+@@ -7,7 +7,7 @@
+         </button>
+       </div>
+       <div class="menuItem" v-if="showInitializeButton">
+-        <button class="btn">Initialize Diplomatic Transcription</button>
++        <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
+       </div>
+       <div class="osdButtons">
+         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
+@@ -27,7 +27,7 @@
+           <FacsimileComponent/>
+         </div>
+         <div class="mainBox">
+-          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz"/>
++          <VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>
+           {{ diploTransActivationsInAnnotTrans.size }} xy
+           {{ diploTransActivationsInShapes.length }}
+           <!--<OpenSeadragonComponent/>-->
+@@ -36,7 +36,7 @@
+           <code>XML Editor goes here</code>
+         </div>-->
+         <div class="mainBox">
+-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz"/>
++          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
+         </div>
+       </MainStage>
+     </div>
+@@ -98,6 +98,9 @@ export default {
+           path: dtPath
+         })
+       }
++    },
++    initializeDiploTrans () {
++      this.$store.dispatch('initializeDiploTrans')
+     }
+   },
+   computed: {
+diff --git a/src/components/FacsimileComponent.vue b/src/components/FacsimileComponent.vue
+index 1331517..9986290 100644
+--- a/src/components/FacsimileComponent.vue
++++ b/src/components/FacsimileComponent.vue
+@@ -32,6 +32,7 @@ export default {
+   props: {
+ 
+   },
++
+   computed: {
+     /**
+      * the tileSource for the current page
+@@ -68,7 +69,8 @@ export default {
+     showGrid () {
+       const tab = this.$store.getters.explorerTab
+       const validTabs = ['pages']
+-      return validTabs.indexOf(tab) !== -1
++      const gridFlag = this.$store.getters.pageShowGrid
++      return gridFlag && validTabs.indexOf(tab) !== -1
+     },
+ 
+     /**
+@@ -520,6 +522,8 @@ export default {
+         return null
+       }
+ 
++      console.log('tileSource', tileSource)
++      tiledImage.setRotation(tileSource.degrees, false)
+       const newPos = new OpenSeadragon.Point(tileSource.x, tileSource.y)
+ 
+       tiledImage.setRotation(tileSource.degrees)
+@@ -580,12 +584,13 @@ export default {
+         // console.log('rectangles unavailable', outerPos, centerPos, innerPos)
+         return null
+       }
+-      console.log('relevant rects: ', rects)
++      // console.log('relevant rects: ', rects)
+       const invertedRot = rects.rotation * -1
+ 
+       // the media fragment as stored in the data
+       const existingImage = document.querySelector('.overlay.imageBorder')
+       const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
++      console.log('box 2', imageLocation)
+ 
+       if (!existingImage) {
+         const element = document.createElement('div')
+@@ -782,8 +787,8 @@ export default {
+       ([newArr, newId], [oldArr, oldId]) => {
+         this.renderSystems()
+       })
+-    this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage],
+-      ([newId, newSvg], [oldId, oldSvg]) => {
++    this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage, getters.activeWritingLayer],
++      ([newId, newSvg, newLayer], [oldId, oldSvg, oldLayer]) => {
+         if (newSvg) {
+           this.renderShapes()
+         }
+@@ -791,6 +796,10 @@ export default {
+           // this.focusActiveWritingZone()
+         }
+       })
++    this.unwatchGrid = this.$store.watch((state, getters) => getters.pageShowGrid,
++      (newVal, oldVal) => {
++        this.renderGrid()
++      })
+ 
+     this.openFacsimile()
+   },
+@@ -807,6 +816,7 @@ export default {
+     this.unwatchTileSource()
+     this.unwatchSVG()
+     this.unwatchSystems()
++    this.unwatchGrid()
+   }
+ }
+ 
+@@ -961,6 +971,8 @@ export default {
+     }
+     .activeWritingLayer path {
+       opacity: 1;
++      fill: $svgActiveWritingLayerColor;
++      stroke: $svgActiveWritingLayerColor;
+     }
+   }
+ }
+diff --git a/src/components/GitMenu.vue b/src/components/GitMenu.vue
+index da1ba37..6dd93b2 100644
+--- a/src/components/GitMenu.vue
++++ b/src/components/GitMenu.vue
+@@ -58,7 +58,7 @@ import { computed, inject, onMounted } from '@vue/runtime-core'
+ import { useStore } from 'vuex'
+ // import fileDownload from 'js-file-download'
+ import { GH_ACCESS_TOKEN } from '@/store/octokit'
+-import CLIENT_ID from '@/clientID'
++// import CLIENT_ID from '@/clientID'
+ 
+ export default {
+   name: 'GitMenu',
+@@ -98,8 +98,10 @@ export default {
+     // const showOverview = () => store.dispatch('setModal', 'overview')
+     const login = () => {
+       // this page will open /authorize?code=<GH_CODE> on success
+-      const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${CLIENT_ID}`
++      // CLIENT_ID.then(id => {
++      const url = `https://github.com/login/oauth/authorize?scope=repo&client_id=${store.getters.config.repository.CLIENT_ID}`
+       window.open(url, '_self')
++      // })
+     }
+     const logout = () => {
+       store.dispatch('logout', {
+diff --git a/src/components/HomeTab.vue b/src/components/HomeTab.vue
+index 793cce9..0ec772a 100644
+--- a/src/components/HomeTab.vue
++++ b/src/components/HomeTab.vue
+@@ -66,7 +66,7 @@
+ <script>
+ import SourceSelector from '@/components/shared/SourceSelector.vue'
+ // import SystemListingEntry from '@/components/SystemListingEntry.vue'
+-import config from '@/config.json'
++// import config from '@/config.json'
+ 
+ export default {
+   name: 'HomeTab',
+@@ -79,8 +79,14 @@ export default {
+     sources () {
+       return this.$store.getters.sources
+     },
+-    infoRepo: () => `${config.repository.owner} / ${config.repository.repo}`,
+-    infoBranch: () => config.repository.branch,
++    infoRepo: () => {
++      const config = this.$store.getters.config
++      return `${config.repository.owner} / ${config.repository.repo}`
++    },
++    infoBranch: () => {
++      const config = this.$store.getters.config
++      return config.repository.branch
++    },
+     infoCommit () {
+       return this.$store.getters.commit
+     },
+diff --git a/src/components/PagesTab.vue b/src/components/PagesTab.vue
+index 86fa452..8baf6eb 100644
+--- a/src/components/PagesTab.vue
++++ b/src/components/PagesTab.vue
+@@ -6,9 +6,17 @@
+           <i class="icon" :class="{'icon-arrow-left': pageTabSidebarVisible, 'icon-arrow-right': !pageTabSidebarVisible}"></i>
+         </button>
+       </div>
++      <div class="menuItem">
++        <button class="btn" @click="$store.dispatch('togglePageShowGrid')">
++          {{ pageShowGrid ? 'Hide Grid' : 'Show Grid' }}
++        </button>
++      </div>
+       <div class="osdButtons">
+         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
+         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
++        <button class="btn" @click="toggleRightSidebar">
++          <i class="icon" :class="{'icon-arrow-right': pageTabRightSidebarVisible, 'icon-arrow-left': !pageTabRightSidebarVisible}"></i>
++        </button>
+       </div>
+     </TopMenu>
+     <div class="flexBox">
+@@ -91,6 +99,9 @@ export default {
+     toggleSidebar () {
+       this.$store.dispatch('togglePageTabSidebar')
+     },
++    toggleRightSidebar () {
++      this.$store.dispatch('togglePageTabRightSidebar')
++    },
+     addSVG () {
+       const input = document.createElement('input')
+       input.type = 'file'
+@@ -125,6 +136,7 @@ export default {
+       'currentPageAngle',
+       'pageBorderPoints',
+       'pageBorderPointsIncomplete',
++      'pageShowGrid',
+       'currentPageDimensions',
+       'allDocsLoaded',
+       'pageTabRightSidebarVisible',
+@@ -228,7 +240,7 @@ i.showSidebar {
+   cursor: e-resize;
+ }
+ 
+-.menuItem {
++.menuItem, .osdButtons {
+   display: inline-block;
+   margin: 0 .5rem 0 .5rem;
+ 
+diff --git a/src/components/WritingZoneDirectory.vue b/src/components/WritingZoneDirectory.vue
+index 0c16c71..1dee026 100644
+--- a/src/components/WritingZoneDirectory.vue
++++ b/src/components/WritingZoneDirectory.vue
+@@ -50,7 +50,7 @@
+           <span class="hasTrans float-right">
+             <template v-if="this.availableDiplomaticTranscripts.indexOf(wz.diploTrans) !== -1">
+               <span class="desc">Diplo<br/>Trans</span>
+-              <i class="icon icon-check" :title="wz.annotTrans.file"></i>
++              <i class="icon icon-check" :title="wz.diploTrans.file"></i>
+               <!--<template v-if="wz.annotTrans.firstZone">
+ 
+               </template>
+diff --git a/src/components/WritingZoneListEntry.vue b/src/components/WritingZoneListEntry.vue
+index 6b43fbb..be28de3 100644
+--- a/src/components/WritingZoneListEntry.vue
++++ b/src/components/WritingZoneListEntry.vue
+@@ -6,8 +6,8 @@
+       </span>
+       <span class="shapeCount" title="Number of Shapes"><span class="sum">∑</span>{{wz.totalCount}} ({{wz.layers.length}}) <i class="icon icon-cross" @click.stop="deleteZone" title="Delete Writing Zone"></i></span></h1>
+     <div class="writingLayer">Writing Layers:</div>
+-    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}">
+-      <h2 @click.stop="selectWritingLayer(wl.id)">{{this.numPrefixer(i)}}
++    <div v-for="(wl, i) in wz.layers" :key="i" class="writingLayer" :class="{active: wl.id === activeLayerId}" title="Shift-click on active layer will move it to the end.">
++      <h2 @click.stop="selectWritingLayer($event, wl.id)">{{this.numPrefixer(i)}}
+         <span class="shapeCount" title="Number of Shapes"># {{wl.shapes.length}} <i v-if="wz.layers.length !== 1" class="icon icon-cross" @click.stop="deleteLayer(wl.id)" title="Delete Writing Layer"></i></span>
+ 
+       </h2>
+@@ -41,9 +41,14 @@ export default {
+       this.$store.dispatch('setActiveWritingZone', this.wz.id)
+       // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
+     },
+-    selectWritingLayer (id) {
+-      this.$store.dispatch('setActiveWritingLayer', id)
+-      // alert('Jetzt sollte die WritingZone mit der ID ' + this.wz.id + ' aktiviert werden.')
++    selectWritingLayer (e, id) {
++      if (this.activeLayerId === id) {
++        if (e.shiftKey) {
++          this.$store.dispatch('setActiveWritingLayerAsLastInZone')
++        }
++      } else {
++        this.$store.dispatch('setActiveWritingLayer', id)
++      }
+     },
+     addLayer () {
+       console.log('adding layer')
+@@ -67,7 +72,6 @@ export default {
+     name () {
+       return this.numPrefixer(this.position)
+     },
+-    // TODO: Hier vermutlich sinnvoller mit einem Getter arbeiten
+     isActive () {
+       return this.wz.id === this.$store.getters.activeWritingZone
+     },
+diff --git a/src/components/shared/VerovioComponent.vue b/src/components/shared/VerovioComponent.vue
+index d2493d3..84982dd 100644
+--- a/src/components/shared/VerovioComponent.vue
++++ b/src/components/shared/VerovioComponent.vue
+@@ -31,7 +31,9 @@ const rawSelectables = [
+   'clef',
+   'slur',
+   'dynam',
+-  'dir'// ,
++  'dir',
++  'keySig',
++  'meterSig'
+   // 'staff',
+   // 'measure'
+ ]
+@@ -49,7 +51,8 @@ export default {
+   props: {
+     purpose: String,
+     type: String,
+-    getter: String
++    getter: String,
++    pathGetter: String
+   },
+   methods: {
+     render () {
+@@ -79,10 +82,14 @@ export default {
+       }
+     },
+     removeListeners () {
+-      this.$refs.mei.removeEventListener('click', this.clickListener)
++      // this.$refs.mei.removeEventListener('click', this.clickListener)
++      const els = this.$refs.mei.querySelectorAll(selectables)
++      els.forEach((elm) => elm.removeEventListener('click', this.clickListener))
+     },
+     addListeners () {
+-      this.$refs.mei.addEventListener('click', this.clickListener)
++      // this.$refs.mei.addEventListener('click', this.clickListener)
++      const els = this.$refs.mei.querySelectorAll(selectables)
++      els.forEach((elm) => elm.addEventListener('click', this.clickListener))
+     },
+     clickListener (e) {
+       const target = e.target.closest(selectables)
+@@ -93,7 +100,17 @@ export default {
+         // target.classList.toggle('supplied')
+         const id = target.getAttribute('data-id')
+         const name = target.getAttribute('data-class')
+-        this.$store.dispatch('clickedVerovio', { id, name })
++        // console.log(this.purpose, id, name)
++        const meiDom = this.$store.getters[this.getter]
++        const path = this.$store.getters[this.pathGetter]
++        this.$store.dispatch('clickedVerovio', {
++          meiDom,
++          path,
++          id,
++          name,
++          purpose: this.purpose,
++          callback: () => { this.render() }
++        })
+       }
+     }
+   },
+diff --git a/src/config.json b/src/config.json
+deleted file mode 100644
+index 5f1a6c2..0000000
+--- a/src/config.json
++++ /dev/null
+@@ -1,9 +0,0 @@
+-{
+-  "repository":  {
+-    "owner": "BeethovensWerkstatt",
+-    "repo": "data",
+-    "branch": "test2",
+-    "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
+-  },
+-  "root": "data/sources"
+-}
+diff --git a/src/config/index.js b/src/config/index.js
+new file mode 100644
+index 0000000..9594f12
+--- /dev/null
++++ b/src/config/index.js
+@@ -0,0 +1,15 @@
++/**
++ * load config from BASE_URL/config.json and export as a promise
++ */
++export const config = new Promise((resolve, reject) => {
++  console.log('load config.json ...')
++  const configURL = process.env.BASE_URL + 'config.json'
++  fetch(configURL).then(resp => resp.json()).then(config => {
++    if (!config.repository.CLIENT_ID && process.env.VUE_APP_CLIENT_ID && process.env.VUE_APP_CLIENT_ID !== '<CLIENT_ID>') {
++      config.repository.CLIENT_ID = process.env.VUE_APP_CLIENT_ID
++    }
++    console.log(config)
++    resolve(config)
++  }).catch(err => reject(err))
++})
++export default config
+diff --git a/src/css/_variables.scss b/src/css/_variables.scss
+index 5a807f3..1458ad8 100644
+--- a/src/css/_variables.scss
++++ b/src/css/_variables.scss
+@@ -28,3 +28,4 @@ $svgSuppliedColor: #999999;
+ $svgUnassignedShapeColor: #ff00ff;
+ 
+ $svgActiveWritingZoneColor: $highlightColor06; //#468ffc;
++$svgActiveWritingLayerColor: $highlightColor05;
+diff --git a/src/main.js b/src/main.js
+index 36f8fb7..99a70ee 100644
+--- a/src/main.js
++++ b/src/main.js
+@@ -3,15 +3,23 @@ import VueCookies from 'vue-cookies'
+ import App from './App.vue'
+ import store from './store'
+ import router from './router'
++import config from './config'
+ 
+ import 'spectre.css/dist/spectre-exp.css'
+ import 'spectre.css/dist/spectre-icons.css'
+ import 'spectre.css/dist/spectre.css'
+ import { GH_ACCESS_TOKEN } from './store/octokit'
+ 
+-createApp(App).use(router).use(store).use(VueCookies).mount('#app')
++// console.log(config)
+ 
+-store.dispatch('initVerovio')
+-const token = VueCookies.get(GH_ACCESS_TOKEN)
+-// console.log(token)
+-store.dispatch('setAccessToken', { auth: token })
++// config is a promise...
++config.then(config => {
++  // create app, when config is fully loaded
++  // TODO use Vue-plugin?
++  store.dispatch('set_config', config)
++  store.dispatch('initVerovio')
++  createApp(App).use(router).use(store).use(VueCookies).mount('#app')
++  const token = VueCookies.get(GH_ACCESS_TOKEN)
++  // console.log(token)
++  store.dispatch('setAccessToken', { auth: token })
++})
+diff --git a/src/router/index.js b/src/router/index.js
+index 83f27a3..744e6db 100644
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -18,7 +18,7 @@ const routes = [
+   {
+     path: '/authenticate',
+     name: 'authenticate',
+-    component: () => import(/* webpackChunkName: "about" */ '../views/AuthGithub.vue')
++    component: () => import(/* webpackChunkName: "authenticate" */ '../views/AuthGithub.vue')
+   },
+   {
+     path: '/:pathMatch(.*)*',
+diff --git a/src/store/config/index.js b/src/store/config/index.js
+new file mode 100644
+index 0000000..9403736
+--- /dev/null
++++ b/src/store/config/index.js
+@@ -0,0 +1,22 @@
++const configModule = {
++  state: {
++    config: {}
++  },
++  mutations: {
++    SET_CONFIG (state, config) {
++      state.config = config
++    }
++  },
++  actions: {
++    set_config ({ commit }, config) {
++      commit('SET_CONFIG', config)
++    }
++  },
++  getters: {
++    config (state) {
++      return state.config
++    }
++  }
++}
++
++export default configModule
+diff --git a/src/store/data/index.js b/src/store/data/index.js
+index d410560..51fa8be 100644
+--- a/src/store/data/index.js
++++ b/src/store/data/index.js
+@@ -1,9 +1,10 @@
+ // import { dom2base64, str2base64 } from '@/tools/github'
+ import { uuid } from '@/tools/uuid.js'
+-// import OpenSeadragon from 'openseadragon'
++import OpenSeadragon from 'openseadragon'
+ // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
+ import { getOsdRects } from '@/tools/facsimileHelpers.js'
+-import { /* convertRectUnits, */ sortRastrumsByVerticalPosition } from '@/tools/mei.js'
++import { /* convertRectUnits, */ sortRastrumsByVerticalPosition, initializeDiploTrans } from '@/tools/mei.js'
++import { rotatePoint } from '@/tools/trigonometry'
+ // import { getRectFromFragment } from '@/tools/trigonometry.js'
+ // import { Base64 } from 'js-base64'
+ 
+@@ -491,6 +492,44 @@ const dataModule = {
+       dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgId], isNewDocument: false })
+     },
+ 
++    /**
++     * moves the active writing layer to the last position in the current writing zone
++     * @param  {[type]} commit                 [description]
++     * @param  {[type]} getters                [description]
++     * @param  {[type]} dispatch               [description]
++     * @param  {[type]} shapeId                [description]
++     */
++    setActiveWritingLayerAsLastInZone ({ commit, getters, dispatch }) {
++      const activeLayerId = getters.activeWritingLayer
++
++      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
++      const modifiedSvgDom = getters.svgForCurrentPage.cloneNode(true)
++
++      if (!modifiedDom || !modifiedSvgDom || !activeLayerId) {
++        return null
++      }
++
++      const genState = modifiedDom.querySelector('genState[*|id="' + activeLayerId + '"]')
++      const genDescWz = genState.closest('genDesc[class~="#geneticOrder_writingZoneLevel"]')
++      genDescWz.append(genState)
++
++      const svgGroup = modifiedSvgDom.querySelector('#' + genState.getAttribute('corresp').split('#')[1])
++      const svgWritingZone = svgGroup.closest('g.writingZone')
++      svgWritingZone.append(svgGroup)
++
++      const path = getters.currentDocPath
++      const docName = getters.documentNameByPath(path)
++
++      const svgPath = getters.currentSvgPath
++      const param = getters.currentSurfaceIndexForCurrentDoc
++      const baseMessage = 'changed order of writingLayers for ' + docName + ', p.'
++
++      dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
++      dispatch('loadDocumentIntoStore', { path: svgPath, dom: modifiedSvgDom })
++      dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [genDescWz.getAttribute('xml:id')], isNewDocument: false })
++      dispatch('logChange', { path: svgPath, baseMessage, param, xmlIDs: [svgWritingZone.getAttribute('xml:id')], isNewDocument: false })
++    },
++
+     /**
+      * called by OSD when clicking on an svg path element
+      * @param  {[type]} commit                 [description]
+@@ -512,16 +551,60 @@ const dataModule = {
+      * @param  {[type]} commit                 [description]
+      * @param  {[type]} getters                [description]
+      * @param  {[type]} dispatch               [description]
+-     * @param  {[type]} shapeId                [description]
+-     * @return {[type]}          [description]
++     * @param  {[XMLDocument]} meiDom          [description] TODO: we can fetch it with the path!
++     * @param  {[string]} path                 [description]
++     * @param  {[string]} id                   [description]
++     * @param  {[string]} id                   [description]
++     * @param  {[string]} purpose              [description]
++     * @param  {[function]} callback           [description]
+      */
+-    clickedVerovio ({ commit, getters, dispatch }, { id, name }) {
+-      if (getters.explorerTab === 'diplo') {
+-        dispatch('diploTransToggle', { type: 'annotTrans', id, name })
+-        // dispatch('moveShapeToCurrentWritingZone', shapeId)
++    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, purpose, callback }) {
++      if (!meiDom) return
++      switch (purpose) {
++        case 'proofreading':
++          dispatch('suppliedToggle', { meiDom, path, id, name, callback })
++          break
++        default:
++          if (getters.explorerTab === 'diplo') {
++            dispatch('diploTransToggle', { type: 'annotTrans', id, name })
++            // dispatch('moveShapeToCurrentWritingZone', shapeId)
++          }
+       }
+     },
+ 
++    /**
++     * toggle supplied status of MEI element
++     * @param  {[type]} dispatch               [description]
++     * @param  {[XMLDocument]} meiDom          [description]
++     * @param  {[string]} path                 [description]
++     * @param  {[string]} id                   [description]
++     * @param  {[string]} id                   [description]
++     * @param  {[string]} purpose              [description]
++     * @param  {[function]} callback           [description]
++     */
++    suppliedToggle ({ dispatch }, { meiDom, path, id, name, callback }) {
++      const target = meiDom?.querySelector(`*[*|id="${id}"]`)
++      const baseMessage = 'toggle supplied'
++      let param
++      console.log('toggle supplied', id, name, target)
++      if (!target) {
++        console.warn('element not found!', id)
++        return
++      }
++      if (target.getAttribute('type') === 'supplied') {
++        target.setAttribute('type', null)
++      } else {
++        target.setAttribute('type', 'supplied')
++      }
++      // console.log(target, callback)
++      console.log(path, id)
++      // loadDocumentIntoStore ...
++      dispatch('loadDocumentIntoStore', { path, dom: meiDom })
++      // logChange ...
++      dispatch('logChange', { path, baseMessage, param, xmlIDs: [id], isNewDocument: false })
++      if (typeof callback === 'function') callback()
++    },
++
+     /**
+      * sets the fragment identifier for pages, describing the actual page size within an image
+      * @param  {[type]} commit                 [description]
+@@ -572,7 +655,7 @@ const dataModule = {
+       if (!rotation && rotation !== 0) {
+         return null
+       }
+-      const modifiedDom = getters.documentWithCurrentPage.cloneNode(true)
++      const modifiedDom = getters.documentWithCurrentPage?.cloneNode(true)
+ 
+       if (!modifiedDom) {
+         return null
+@@ -963,6 +1046,10 @@ const dataModule = {
+ 
+       // get relevant rastrumDesc
+       const rastrumDesc = layout.querySelector('rastrumDesc')
++      if (xmlIDs.length === 0) { // no layoutDesc or rastrumDesc created
++        xmlIDs.push(layoutId)
++      }
++      console.log('xmlIDs', xmlIDs)
+ 
+       // no rastrum so far
+       if (!activeSystemId || !rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')) {
+@@ -995,7 +1082,6 @@ const dataModule = {
+       const baseMessage = 'adjust systems on ' + docName + ', p.'
+ 
+       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+-      // TODO xmlIDs
+       dispatch('logChange', { path: path, baseMessage, param, xmlIDs, isNewDocument: false })
+     },
+ 
+@@ -1157,6 +1243,43 @@ const dataModule = {
+ 
+       dispatch('loadDocumentIntoStore', { path: path, dom: modifiedDom })
+       dispatch('logChange', { path: path, baseMessage, param, xmlIDs: [rastrum.getAttribute('xml:id')], isNewDocument: false })
++    },
++
++    /**
++     * initializes a new diplomatic transcript for the current writing zone, if none exists yet
++     * @param {*} param0
++     * @returns
++     */
++    initializeDiploTrans ({ commit, getters, dispatch }) {
++      const existingDt = getters.diplomaticTranscriptForCurrentWz
++      if (existingDt !== null) {
++        console.log('…current writing zone already has a diplomatic transcription')
++        return null
++      }
++      fetch('../assets/diplomaticTranscriptTemplate.xml')
++        .then(response => response.text())
++        .then(xmlString => {
++          const diploTemplate = parser.parseFromString(xmlString, 'application/xml')
++          console.log('Got a new diplomatic transcript: ', diploTemplate)
++
++          const diploTrans = initializeDiploTrans(diploTemplate, 'filename', 'wzId')
++
++          const dtPath = getters.currentWzDtPath
++          const writingZoneId = getters.activeWritingZone
++
++          const path = getters.currentDocPath
++          const docName = getters.documentNameByPath(path)
++
++          const pageNum = getters.currentSurfaceIndexForCurrentDoc
++          const baseMessage = 'add diplomatic transcript for ' + docName + ', p.' + pageNum + ', writingZone '
++
++          const param = writingZoneId
++
++          console.log(diploTrans, dtPath)
++          commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
++          dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
++          dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
++        })
+     }
+   },
+ 
+@@ -1876,10 +1999,14 @@ const dataModule = {
+         return null
+       }
+ 
++      // TiledImage is rotated by center so we have to correct the position ...
++      const rotorigin = rotatePoint(new OpenSeadragon.Point(0, 0), new OpenSeadragon.Point(rects.image.w / 2, rects.image.h / 2), rects.rotation)
++      // console.log('image correction', rotorigin)
++
+       const tileSource = {
+         tileSource: page.uri,
+-        x: rects.image.x,
+-        y: rects.image.y,
++        x: rects.image.x + rotorigin.x,
++        y: rects.image.y + rotorigin.y,
+         width: rects.image.w,
+         degrees: rects.rotation * -1
+       }
+diff --git a/src/store/gui/index.js b/src/store/gui/index.js
+index 6bc3d90..0429e49 100644
+--- a/src/store/gui/index.js
++++ b/src/store/gui/index.js
+@@ -50,19 +50,20 @@ const guiModule = {
+     loading: false,
+     processing: false,
+     pageTabSidebarVisible: true,
+-    pageTabSidebarWidth: 300,
++    pageTabSidebarWidth: 310,
+     pageTabRightSidebarVisible: true,
+     pageTabRightSidebarWidth: 430,
++    pageShowGrid: true,
+     zonesTabLeftSidebarVisible: true,
+-    zonesTabLeftSidebarWidth: 300,
++    zonesTabLeftSidebarWidth: 310,
+     zonesTabRightSidebarVisible: true,
+     zonesTabRightSidebarWidth: 250,
+     annotTabLeftSidebarVisible: true,
+-    annotTabLeftSidebarWidth: 300,
++    annotTabLeftSidebarWidth: 310,
+     annotTabRightSidebarVisible: true,
+     annotTabRightSidebarWidth: 300,
+     diploTabSidebarVisible: true,
+-    diploTabSidebarWidth: 300,
++    diploTabSidebarWidth: 310,
+     activeWritingZone: null,
+     activeWritingLayer: null,
+     activeSystem: null,
+@@ -161,6 +162,14 @@ const guiModule = {
+     TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY (state) {
+       state.pageTabRightSidebarVisible = !state.pageTabRightSidebarVisible
+     },
++    /**
++     * toggles visibility of grid in pageTab
++     * @memberof store.gui.mutations
++     * @param {[type]} state  [description]
++     */
++    TOGGLE_PAGE_SHOW_GRID (state) {
++      state.pageShowGrid = !state.pageShowGrid
++    },
+ 
+     /**
+      * sets width of left sidebar in zonesTab
+@@ -416,6 +425,21 @@ const guiModule = {
+     togglePageTabRightSidebar ({ commit }) {
+       commit('TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY')
+     },
++    /**
++     * toggles visibility of the zonesTab left sidebar
++     * @memberof store.gui.actions
++     * @param  {[type]} commit               [description]
++     * @return {[type]}        [description]
++     */
++    togglePageTabLeftSidebar ({ commit }) {
++      commit('TOGGLE_PAGETAB_SIDEBAR_VISIBILITY')
++    },
++    /**
++     * toggles visibility of the grid on the pageTab
++     */
++    togglePageShowGrid ({ commit }) {
++      commit('TOGGLE_PAGE_SHOW_GRID')
++    },
+ 
+     /**
+      * toggles visibility of the zonesTab left sidebar
+@@ -678,6 +702,15 @@ const guiModule = {
+     pageTabRightSidebarWidth: (state) => {
+       return state.pageTabRightSidebarWidth
+     },
++    /**
++     * returns visibility of grid on pageTab
++     * @memberof store.gui.getters
++     * @param  {[type]} state               [description]
++     * @return {[type]}       [description]
++     */
++    pageShowGrid: (state) => {
++      return state.pageShowGrid
++    },
+ 
+     /**
+      * returns visibility of left sidebar on zonesTab
+diff --git a/src/store/index.js b/src/store/index.js
+index 20d038b..94b84a9 100644
+--- a/src/store/index.js
++++ b/src/store/index.js
+@@ -1,6 +1,7 @@
+ import { createStore } from 'vuex'
+ import { iiifManifest2mei, checkIiifManifest, getPageArray, fixLink } from '@/tools/iiif.js'
+ import { initializePageIfNecessary, generateSystemFromRect, insertSystem } from '@/tools/mei.js'
++import configModule from '@/store/config'
+ import octokitModule from '@/store/octokit'
+ import verovioModule from '@/store/vrv'
+ import guiModule from '@/store/gui'
+@@ -50,6 +51,7 @@ const vuexLocal = new VuexPersistence({
+  */
+ export default createStore({
+   modules: {
++    configModule,
+     octokitModule,
+     dataModule,
+     verovioModule,
+diff --git a/src/store/octokit/index.js b/src/store/octokit/index.js
+index 6b7d195..dd25d44 100644
+--- a/src/store/octokit/index.js
++++ b/src/store/octokit/index.js
+@@ -3,7 +3,7 @@ import { Octokit } from '@octokit/rest'
+ import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
+ // import { Base64 } from 'js-base64'
+ 
+-import config from '@/config.json'
++// import config from '@/config.json'
+ import { verifyUnassignedGroupInSvg } from '@/tools/mei.js'
+ 
+ // export const OctokitPR = Octokit.plugin(createPullRequest)
+@@ -113,7 +113,8 @@ const mutations = {
+     try {
+       state.octokit = new Octokit({
+         auth: state.auth,
+-        userAgent: 'facsimile-explorer/v0.0.2'
++        userAgent: 'facsimile-explorer/v0.0.2',
++        log: console.debug
+       })
+       if (state.auth) {
+         state.octokit.users.getAuthenticated().then(({ data }) => {
+@@ -130,7 +131,7 @@ const mutations = {
+         if (remove) remove()
+       }
+     } catch (err) {
+-      console.error('authentication failed!')
++      console.error('authentication failed!', err)
+       state.auth = ''
+       state.user = {}
+       if (remove) remove()
+@@ -164,6 +165,11 @@ const mutations = {
+   SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS (state, diplomaticTranscripts) {
+     state.availableDiplomaticTranscripts = diplomaticTranscripts
+   },
++  ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT (state, diplomaticTranscript) {
++    if (state.availableDiplomaticTranscripts.indexOf(diplomaticTranscript) === -1) {
++      state.availableDiplomaticTranscripts.push(diplomaticTranscript)
++    }
++  },
+   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
+     if (!doc) console.warn(`no document '${path}'`)
+     state.documents[path] = { repo, owner, ref, path, name, sha, doc }
+@@ -187,6 +193,7 @@ const mutations = {
+ 
+ const actions = {
+   checkAuthenticate ({ commit, getters }, opts) {
++    const config = getters.config
+     getters.octokit.auth().then(auth => {
+       const authenticated = auth.type !== 'unauthenticated'
+       // console.log(auth, authenticated)
+@@ -240,7 +247,7 @@ const actions = {
+       if (resp.ok) {
+         resp.json().then(data => {
+           const accessToken = data.access_token
+-          // console.log(data, accessToken)
++          console.log('23', data, accessToken)
+           if (accessToken) {
+             dispatch('setAccessToken', { auth: accessToken, store, remove })
+           } else {
+@@ -259,10 +266,10 @@ const actions = {
+   loadContent (
+     { commit, dispatch, getters },
+     {
+-      owner = config.repository.owner, // 'BeethovensWerkstatt',
+-      repo = config.repository.repo, // 'data',
+-      path = config.repository.default,
+-      ref = config.repository.branch, // 'dev'
++      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
++      repo = getters.config.repository.repo, // 'data',
++      path = getters.config.repository.default,
++      ref = getters.config.repository.branch, // 'dev'
+       callback = null // optional callback to call, when loading is finished
+     }) {
+     let contentData = getters.getContentData(path)
+@@ -307,10 +314,10 @@ const actions = {
+   loadSvgFile (
+     { commit, dispatch, getters },
+     {
+-      owner = config.repository.owner, // 'BeethovensWerkstatt',
+-      repo = config.repository.repo, // 'data',
++      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
++      repo = getters.config.repository.repo, // 'data',
+       path,
+-      ref = config.repository.branch, // 'dev'
++      ref = getters.config.repository.branch, // 'dev'
+       callback = null // optional callback to call, when loading is finished
+     }) {
+     const contentData = getters.getContentData(path)
+@@ -358,10 +365,10 @@ const actions = {
+   loadAnnotatedTranscript (
+     { commit, dispatch, getters },
+     {
+-      owner = config.repository.owner, // 'BeethovensWerkstatt',
+-      repo = config.repository.repo, // 'data',
++      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
++      repo = getters.config.repository.repo, // 'data',
+       path,
+-      ref = config.repository.branch, // 'dev'
++      ref = getters.config.repository.branch, // 'dev'
+       callback = null // optional callback to call, when loading is finished
+     }) {
+     const contentData = getters.getContentData(path)
+@@ -407,10 +414,10 @@ const actions = {
+   loadXmlFile (
+     { commit, dispatch, getters },
+     {
+-      owner = config.repository.owner, // 'BeethovensWerkstatt',
+-      repo = config.repository.repo, // 'data',
++      owner = getters.config.repository.owner, // 'BeethovensWerkstatt',
++      repo = getters.config.repository.repo, // 'data',
+       path,
+-      ref = config.repository.branch, // 'dev'
++      ref = getters.config.repository.branch, // 'dev'
+       callback = null // optional callback to call, when loading is finished
+     }) {
+     const contentData = getters.getContentData(path)
+@@ -447,6 +454,9 @@ const actions = {
+         // console.log(xmlText)
+         const parser = new DOMParser()
+         const dom = parser.parseFromString(xml, 'application/xml')
++        // const selNoID = rawMEISelectables.map(elem => '.' + elem + ':not([id])').join(', ')
++        // const selNoID = rawMEISelectables.join(', ')
++        // console.log(selNoID, dom.querySelectorAll(selNoID))
+ 
+         // console.log(dom)
+         dispatch('loadDocumentIntoStore', { path, dom })
+@@ -473,7 +483,7 @@ const actions = {
+    *
+    * to commit multiple files in one commit, a new commit is created with the given files and with the current head as parent commit.
+    */
+-  async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch }) {
++  async commit2GitHub ({ commit, dispatch, getters }, { message, files, owner = getters.config.repository.owner, repo = getters.config.repository.repo, branch = getters.config.repository.branch }) {
+     const octoRepo = new OctokitRepo({ owner, repo, branch })
+     const octokit = getters.octokit
+ 
+@@ -652,7 +662,7 @@ const actions = {
+     }
+   },
+ 
+-  deleteBranch ({ getters }, { ref, owner = config.repository.owner, repo = config.repository.repo }) {
++  deleteBranch ({ getters }, { ref, owner = getters.config.repository.owner, repo = getters.config.repository.repo }) {
+     // console.log('commit 2 GitHub: delete branch', ref)
+     const octokit = getters.octokit
+     octokit.request(`DELETE /repos/${owner}/${repo}/git/refs/heads/${ref}`, {
+@@ -687,7 +697,7 @@ const actions = {
+    */
+   async prepareGitCommit ({ commit, dispatch, getters }, param) {
+     // console.log('prepareGitCommit ...', getters.loggedChanges)
+-    const { owner = config.repository.owner, repo = config.repository.repo, branch = config.repository.branch } = param || {}
++    const { owner = getters.config.repository.owner, repo = getters.config.repository.repo, branch = getters.config.repository.branch } = param || {}
+     commit('SET_COMMITTING', true)
+ 
+     const fileStore = {}
+@@ -799,9 +809,9 @@ const actions = {
+   async loadSources ({ commit, dispatch, getters }) {
+     const repometa = {
+       octokit: getters.octokit,
+-      owner: config.repository.owner,
+-      repo: config.repository.repo,
+-      branch: config.repository.branch
++      owner: getters.config.repository.owner,
++      repo: getters.config.repository.repo,
++      branch: getters.config.repository.branch
+     }
+     // console.log(repometa)
+     dispatch('setLoading', true)
+@@ -814,7 +824,7 @@ const actions = {
+     // console.log(repo.commitUrl)
+     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
+     // console.log('commit', getters.commit)
+-    const folder = await root.getFile(config.root)
++    const folder = await root.getFile(getters.config.root)
+     const sources = await folder.folder
+     for (const source of sources) {
+       if (source.type === 'dir' || source.type === 'tree') {
+@@ -880,9 +890,9 @@ const actions = {
+   async getFile ({ getters }, { path, callback }) {
+     const repometa = {
+       octokit: getters.octokit,
+-      owner: config.repository.owner,
+-      repo: config.repository.repo,
+-      branch: config.repository.branch
++      owner: getters.config.repository.owner,
++      repo: getters.config.repository.repo,
++      branch: getters.config.repository.branch
+     }
+     const repo = new OctokitRepo(repometa)
+     const root = await repo.folder
+diff --git a/src/tools/facsimileHelpers.js b/src/tools/facsimileHelpers.js
+index 1a7e302..c99fb8e 100644
+--- a/src/tools/facsimileHelpers.js
++++ b/src/tools/facsimileHelpers.js
+@@ -143,8 +143,8 @@ export function getOsdRects (page) {
+   const ratio = fragment.w / mediaFragMM.w
+ 
+   const image = {
+-    x: parseFloat(mediaFragMM.x) - fragment.x / ratio,
+-    y: parseFloat(mediaFragMM.y) - fragment.y / ratio,
++    x: parseFloat(mediaFragMM.x) - (fragment.x / ratio),
++    y: parseFloat(mediaFragMM.y) - (fragment.y / ratio),
+     w: parseFloat(page.width) / ratio,
+     h: parseFloat(page.height) / ratio
+   }
+diff --git a/src/tools/mei.js b/src/tools/mei.js
+index 1c4553c..0ba1718 100644
+--- a/src/tools/mei.js
++++ b/src/tools/mei.js
+@@ -1,5 +1,29 @@
+ import { uuid } from '@/tools/uuid.js'
+ 
++export function initializeDiploTrans (diploTemplate, filename, genDescWzId, appVersion) {
++  diploTemplate.querySelectorAll('*[*|id]').forEach(elem => {
++    const id = elem.localName.substring(0, 1) + uuid()
++    if (elem.getAttribute('xml:id') === '%NEW-ID%') {
++      elem.setAttribute('xml:id', id)
++    }
++  })
++
++  const date = new Date().toISOString().split('T')[0]
++  const datePlaceholder = '%CURRENT-DATE%'
++  diploTemplate.querySelectorAll('change').forEach(change => {
++    if (change.getAttribute('isodate') === datePlaceholder) {
++      change.setAttribute('isodate', date)
++    }
++  })
++
++  diploTemplate.querySelector('application').setAttribute('version', appVersion)
++
++  const target = '../' + filename + '#' + genDescWzId
++  diploTemplate.querySelector('source').setAttribute('target', target)
++
++  return diploTemplate
++}
++
+ export function initializePageIfNecessary (page, height) {
+   const hasScoreDef = page.querySelector('score')
+   if (hasScoreDef === null) {
+@@ -257,3 +281,22 @@ export function draft2score (meiDom) {
+   })
+   return arr
+ }
++
++export const rawMEISelectables = [
++  'note',
++  'chord',
++  'syl',
++  'rest',
++  'beam',
++  'artic',
++  'accid',
++  'clef',
++  'slur',
++  'dynam',
++  'dir',
++  'keySig',
++  'meterSig',
++  'staff',
++  'measure'
++]
++export const MEIselectables = rawMEISelectables.map(elem => '.' + elem + ':not(.bounding-box').join(', ')
