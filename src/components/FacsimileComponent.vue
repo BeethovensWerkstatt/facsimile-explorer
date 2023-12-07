@@ -438,10 +438,15 @@ export default {
         return false
      } */
 
-      const loc = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h, rects.rotation)
+      const loc = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h, 0)
+
+      const svgContainer = document.createElement('div')
+      svgClone.setAttribute('style', 'transform: rotate(' + (rects.rotation * -1) + 'deg); transform-origin: top left;')
+
+      svgContainer.append(svgClone)
 
       this.viewer.addOverlay({
-        element: svgClone,
+        element: svgContainer,
         location: loc
       })
       const writingZonesOnCurrentPage = this.$store.getters.writingZonesOnCurrentPage
