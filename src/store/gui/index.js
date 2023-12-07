@@ -54,6 +54,7 @@ const guiModule = {
     pageTabSidebarWidth: 310,
     pageTabRightSidebarVisible: true,
     pageTabRightSidebarWidth: 450,
+    pageShowGrid: true,
     zonesTabLeftSidebarVisible: true,
     zonesTabLeftSidebarWidth: 310,
     zonesTabRightSidebarVisible: true,
@@ -163,6 +164,14 @@ const guiModule = {
      */
     TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY (state) {
       state.pageTabRightSidebarVisible = !state.pageTabRightSidebarVisible
+    },
+    /**
+     * toggles visibility of grid in pageTab
+     * @memberof store.gui.mutations
+     * @param {[type]} state  [description]
+     */
+    TOGGLE_PAGE_SHOW_GRID (state) {
+      state.pageShowGrid = !state.pageShowGrid
     },
 
     /**
@@ -427,6 +436,21 @@ const guiModule = {
      */
     togglePageTabRightSidebar ({ commit }) {
       commit('TOGGLE_PAGETAB_RIGHT_SIDEBAR_VISIBILITY')
+    },
+    /**
+     * toggles visibility of the zonesTab left sidebar
+     * @memberof store.gui.actions
+     * @param  {[type]} commit               [description]
+     * @return {[type]}        [description]
+     */
+    togglePageTabLeftSidebar ({ commit }) {
+      commit('TOGGLE_PAGETAB_SIDEBAR_VISIBILITY')
+    },
+    /**
+     * toggles visibility of the grid on the pageTab
+     */
+    togglePageShowGrid ({ commit }) {
+      commit('TOGGLE_PAGE_SHOW_GRID')
     },
 
     /**
@@ -700,6 +724,15 @@ const guiModule = {
      */
     pageTabRightSidebarWidth: (state) => {
       return state.pageTabRightSidebarWidth
+    },
+    /**
+     * returns visibility of grid on pageTab
+     * @memberof store.gui.getters
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    pageShowGrid: (state) => {
+      return state.pageShowGrid
     },
 
     /**

@@ -6,6 +6,11 @@
           <i class="icon" :class="{'icon-arrow-left': pageTabSidebarVisible, 'icon-arrow-right': !pageTabSidebarVisible}"></i>
         </button>
       </div>
+      <div class="menuItem">
+        <button class="btn" @click="$store.dispatch('togglePageShowGrid')">
+          {{ pageShowGrid ? 'Hide Grid' : 'Show Grid' }}
+        </button>
+      </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
@@ -131,6 +136,7 @@ export default {
       'currentPageAngle',
       'pageBorderPoints',
       'pageBorderPointsIncomplete',
+      'pageShowGrid',
       'currentPageDimensions',
       'allDocsLoaded',
       'pageTabRightSidebarVisible',

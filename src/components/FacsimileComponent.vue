@@ -31,6 +31,7 @@ export default {
   props: {
     type: String // default: 'facsimile', 'diploTrans'
   },
+
   computed: {
     /**
      * the tileSource for the current page
@@ -67,7 +68,8 @@ export default {
     showGrid () {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['pages']
-      return validTabs.indexOf(tab) !== -1
+      const gridFlag = this.$store.getters.pageShowGrid
+      return gridFlag && validTabs.indexOf(tab) !== -1
     },
 
     /**
@@ -828,6 +830,10 @@ export default {
           this.focusActiveWritingZone()
         }
       })
+    this.unwatchGrid = this.$store.watch((state, getters) => getters.pageShowGrid,
+      (newVal, oldVal) => {
+        this.renderGrid()
+      })
 
     this.openFacsimile()
   },
@@ -845,6 +851,7 @@ export default {
       this.unwatchTileSource()
       this.unwatchSVG()
       this.unwatchSystems()
+      this.unwatchGrid()
       if (this.explorerTab === 'diplo') {
         this.unwatchDiploTransOsdBounds()
       }
