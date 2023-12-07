@@ -737,7 +737,8 @@ export default {
       const image = this.viewer.world.getItemAt(0)
       const pos = image.imageToViewportRectangle(parseInt(xywh[0]), parseInt(xywh[1]), parseInt(xywh[2]), parseInt(xywh[3]))
 
-      this.viewer.viewport.fitBoundsWithConstraints(pos)
+      console.log('FacsimileComponent.vue: skipping focusActiveWritingZone()', pos)
+      // this.viewer.viewport.fitBoundsWithConstraints(pos)
     },
 
     unload () {
