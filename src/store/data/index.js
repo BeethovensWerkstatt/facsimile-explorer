@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, getRenderableDiplomaticTranscript } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -564,11 +564,14 @@ const dataModule = {
         case 'proofreading':
           dispatch('suppliedToggle', { meiDom, path, id, name, callback })
           break
-        default:
+        case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name })
-            // dispatch('moveShapeToCurrentWritingZone', shapeId)
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, path })
           }
+          break
+        default:
+          console.warn('clickedVerovio: unknown purpose', purpose)
+            // dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
     },
 
@@ -1265,9 +1268,9 @@ const dataModule = {
       const currentWritingZoneObject = getters.currentWritingZoneObject
       const rastrums = getters.rastrumsOnCurrentPage
 
-      console.log('\n\ngot this:')
-      console.log('currentWritingZoneObject', currentWritingZoneObject)
-      console.log('rastrums', rastrums)
+      // console.log('\n\ngot this:')
+      // console.log('currentWritingZoneObject', currentWritingZoneObject)
+      // console.log('rastrums', rastrums)
       const wzBox = {
         left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
         top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
@@ -1291,7 +1294,7 @@ const dataModule = {
         }
       })
 
-      console.log('affectedStaves: ', affectedStaves)
+      // console.log('affectedStaves: ', affectedStaves)
 
       // const annotatedTranscript = getters.annotatedTranscriptForWz
 
@@ -1301,12 +1304,113 @@ const dataModule = {
       const baseMessage = 'add diplomatic transcript at '
       const param = dtPath.split('/').splice(-1)[0]
 
-      console.log(diploTrans, dtPath)
+      // console.log(diploTrans, dtPath)
       commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
       dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
 
       return diploTrans
+    },
+
+    /**
+     * generates a diplomatic transcript from the current annotated transcript and one or more shapes
+     * @param {*} param0
+     */
+    async diploTranscribe ({ commit, getters, dispatch }) {
+      const shapesRefs = getters.diploTransActivationsInShapes
+      const annotElemRef = getters.diploTransActivationsInAnnotTrans
+
+      if (shapesRefs.length === 0 || !annotElemRef) {
+        return false
+      }
+      const currentWz = getters.currentWritingZoneObject
+      if (!currentWz) {
+        return false
+      }
+      const atDoc = getters.annotatedTranscriptForCurrentWz
+      const dtDoc = getters.diplomaticTranscriptForCurrentWz
+      const svgDoc = getters.svgForCurrentPage
+      // const meiDoc = getters.documentWithCurrentPage
+
+      if (!atDoc || !dtDoc || !svgDoc) {
+        // console.log(atDoc, dtDoc, svgDoc)
+        return false
+      }
+
+      const annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
+
+      // check if element is already transcribed
+      if (annotElem.hasAttribute('corresp')) {
+        return null
+      }
+
+      const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
+      // console.log('annotElem', annotElem)
+      // console.log('shapes', shapes)
+
+      const annotStaffN = annotElem.closest('staff').getAttribute('n')
+      // console.log('annotStaffN', annotStaffN)
+
+      const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
+      // console.log('diploStaffN', diploStaffN)
+      // console.log('staffDef', dtDoc.querySelector('staffDef'))
+
+      const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
+      // console.log('rastrum', rastrum)
+
+      const rects = getters.osdRects
+      // console.log('rects', rects)
+
+      let x = 1000000
+      shapes.forEach(shape => {
+        const rendered = document.querySelector('path#' + shape.id)
+        const bbox = rendered.getBBox()
+        // console.log('comparing x=' + x + ' to ' + bbox.x)
+        if (parseFloat(bbox.x) < x) {
+          x = parseFloat(bbox.x)
+        }
+      })
+
+      // console.log('x', x)
+      const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
+      // console.log('mm', mm)
+
+      const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
+
+      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath)
+      console.log('diplomaticElement', diplomaticElement)
+
+      const diploLayer = dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
+
+      // Convert child nodes of diploLayer into an array
+      const children = Array.from(diploLayer.childNodes)
+
+      // Find the index of the first child node with a greater coord.x1 value
+      const index = children.findIndex(child => parseFloat(child.getAttribute('coord.x1')) > parseFloat(mm))
+
+      if (index !== -1) {
+        // If such a node is found, insert diplomaticElement before this node
+        diploLayer.insertBefore(diplomaticElement, children[index])
+      } else {
+        // If no such node is found, append diplomaticElement as the last child
+        diploLayer.appendChild(diplomaticElement)
+      }
+
+      // todo: prevent the same element to be encoded multiple times
+
+      const dtPath = getters.currentWzDtPath
+      const baseMessage = 'generate diplomatic transcription at '
+      const param = dtPath.split('/').splice(-1)[0]
+
+      annotElem.setAttribute('corresp', '../diplomaticTranscripts/' + param + '#' + diplomaticElement.getAttribute('xml:id'))
+
+      const atPath = getters.currentWzAtPath
+
+      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc.cloneNode(true) })
+      dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploLayer.getAttribute('xml:id')], isNewDocument: false })
+
+      dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc.cloneNode(true) })
+      dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [diploLayer.getAttribute('xml:id')], isNewDocument: false })
     }
   },
 
@@ -2559,6 +2663,45 @@ const dataModule = {
       })
 
       return svgDom.querySelector('svg')
+    },
+
+    /**
+     * gets an array with all diplomatic transcripts for the current page, including the MEI code
+     * to render diplomatically, and positional information
+     * @param {*} state
+     * @param {*} getters
+     */
+    diplomaticTranscriptsOnCurrentPage: async (state, getters) => {
+      const allWz = getters.writingZonesOnCurrentPage
+      const arr = []
+
+      const meiDoc = getters.documentWithCurrentPage
+      const surface = getters.currentSurfaceId
+
+      const emptyPage = await getEmptyPage(meiDoc, surface)
+
+      console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
+
+      allWz.forEach(async wzDetails => {
+        const dtPath = wzDetails.diploTrans
+        const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
+
+        if (available) {
+          const dtDoc = await getters.documentByPath(wzDetails.diploTrans)
+          console.log(772, dtDoc)
+          arr.push({ wzDetails, dtDoc })
+        }
+      })
+      console.warn('now starting…')
+      arr.forEach(async wz => {
+        console.log('wz', wz)
+        const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage)
+        wz.renderable = renderableDiplomaticTranscript
+      })
+
+      // await console.log('got it')
+
+      return arr
     }
   }
 }

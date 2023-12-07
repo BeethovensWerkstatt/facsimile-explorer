@@ -62,14 +62,16 @@ export default {
           const resolvedDraft = draft2score(meiDom)[0]
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
-          this.$refs.mei.innerHTML = svg
+          const localCopy = svg.repeat(1)
+          this.$refs.mei.innerHTML = localCopy
         }
 
         if (this.type === 'diploTrans') {
           const resolvedTrans = draft2page(meiDom)
 
           const svg = await this.$store.getters.diplomaticTranscriptForWz(resolvedTrans)
-          this.$refs.mei.innerHTML = svg
+          const localCopy = svg.repeat(1)
+          this.$refs.mei.innerHTML = localCopy
         }
 
         this.addListeners()
@@ -78,14 +80,14 @@ export default {
       }
     },
     removeListeners () {
-      // this.$refs.mei.removeEventListener('click', this.clickListener)
-      const els = this.$refs.mei.querySelectorAll(selectables)
-      els.forEach((elm) => elm.removeEventListener('click', this.clickListener))
+      this.$refs.mei.removeEventListener('click', this.clickListener)
+      /* const els = this.$refs.mei.querySelectorAll(selectables)
+      els.forEach((elm) => elm.removeEventListener('click', this.clickListener)) */
     },
     addListeners () {
-      // this.$refs.mei.addEventListener('click', this.clickListener)
-      const els = this.$refs.mei.querySelectorAll(selectables)
-      els.forEach((elm) => elm.addEventListener('click', this.clickListener))
+      this.$refs.mei.addEventListener('click', this.clickListener)
+      /* const els = this.$refs.mei.querySelector('selectables')
+      els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
     clickListener (e) {
       const target = e.target.closest(selectables)
@@ -96,7 +98,7 @@ export default {
         // target.classList.toggle('supplied')
         const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
-        // console.log(this.purpose, id, name)
+
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
         this.$store.dispatch('clickedVerovio', {
@@ -107,6 +109,25 @@ export default {
           purpose: this.purpose,
           callback: () => { this.render() }
         })
+      }
+    },
+    /**
+     * adds a highlighted class to the element with the given id
+     * @param {*} newActivation
+     * @param {*} oldActivation
+     */
+    activateElement (newActivation, oldActivation) {
+      if ((!newActivation && oldActivation) || (oldActivation && newActivation !== oldActivation)) {
+        const oldEl = this.$refs.mei.querySelector('*[data-id="' + oldActivation.id + '"]')
+        if (oldEl) {
+          oldEl.classList.remove('highlighted')
+        }
+      }
+      if (newActivation) {
+        const newEl = this.$refs.mei.querySelector('*[data-id="' + newActivation.id + '"]')
+        if (newEl) {
+          newEl.classList.add('highlighted')
+        }
       }
     }
   },
@@ -125,6 +146,13 @@ export default {
           this.render()
         }
       })
+
+    this.unwatchActivations = this.$store.watch((state, getters) => getters.diploTransActivationsInAnnotTrans,
+      (newActivation, oldActivation) => {
+        if (this.purpose === 'transcribing') {
+          this.activateElement(newActivation, oldActivation)
+        }
+      })
     /*
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
@@ -136,6 +164,7 @@ export default {
   beforeUnmount () {
     this.unwatchData()
     this.removeListeners()
+    this.unwatchActivations()
   }
 }
 </script>
@@ -157,6 +186,11 @@ export default {
   svg .supplied {
     fill: $svgSuppliedColor;
     stroke: $svgSuppliedColor;
+  }
+
+  svg .highlighted {
+    fill: $scoreHighlightedColor;
+    stroke: $scoreHighlightedColor;
   }
 
   .placeholder {

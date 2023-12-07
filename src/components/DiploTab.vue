@@ -20,6 +20,7 @@
         <SideBar class="stageItem sidebarLeft" position="left" tab="diploTab" v-if="diploTabSidebarVisible">
           <SourceSelector/>
           <WritingZoneDirectory purpose="diploTrans"/>
+          {{ diplomaticTranscriptsOnCurrentPage }}
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
@@ -29,8 +30,6 @@
         <div class="mainBox">
           <FacsimileComponent type="diploTrans"/>
           <!--<VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>-->
-          {{ diploTransActivationsInAnnotTrans.size }} xy
-          {{ diploTransActivationsInShapes.length }}
           <!--<OpenSeadragonComponent/>-->
         </div>
         <!--<div class="mainBox">
@@ -102,10 +101,36 @@ export default {
     },
     initializeDiploTrans () {
       this.$store.dispatch('initializeDiploTrans')
+    },
+    autoTranscribe (newShapes, oldShapes, newAnnotated, oldAnnotated) {
+      if (newShapes.length === 0 || !newAnnotated) {
+        return false
+      }
+
+      const currentWz = this.$store.getters.currentWritingZoneObject
+      if (!currentWz) {
+        return false
+      }
+
+      const atDoc = this.$store.getters.documentByPath(currentWz.annotTrans)
+      const dtDoc = this.$store.getters.documentByPath(currentWz.diploTrans)
+
+      if (!atDoc || !dtDoc) {
+        return false
+      }
+
+      console.log('DiploTab: autoTranscribe()')
+
+      if (newAnnotated === oldAnnotated && newShapes.length > oldShapes.length && oldShapes.length > 0) {
+        // add shape to existing diploTrans
+      } else {
+        console.log('dispatching…')
+        this.$store.dispatch('diploTranscribe')
+      }
     }
   },
   computed: {
-    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans']),
+    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage']),
     showInitializeButton () {
       const currentWz = this.$store.getters.currentWritingZoneObject
       if (!currentWz) {
@@ -136,6 +161,11 @@ export default {
         this.verifyDiploTransLoaded()
       })
 
+    this.unwatchDiploActivations = this.$store.watch((state, getters) => [getters.diploTransActivationsInShapes, getters.diploTransActivationsInAnnotTrans],
+      ([newShapes, newAnnotated], [oldShapes, oldAnnotated]) => {
+        this.autoTranscribe(newShapes, oldShapes, newAnnotated, oldAnnotated)
+      })
+
     this.verifySvgAvailable()
     this.verifyAnnotTransLoaded()
     this.verifyDiploTransLoaded()
@@ -144,6 +174,7 @@ export default {
     this.unwatchSvgVerification()
     this.unwatchAnnotTransVerification()
     this.unwatchDiploTransVerification()
+    this.unwatchDiploActivations()
   }
 }
 </script>

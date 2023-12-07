@@ -41,7 +41,7 @@ const guiModule = {
    * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
    * @property {Number} awaitedPage number of the page to be opened when sufficient data is available. Used to resolve routes
    * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
-   * @property {Object} diploTransActivations an array of selected shapes and / or elements from the annotated transcription
+   * @property {Object} diploTransActivations an object of selected shapes and / or elements from the annotated transcription
    * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
    * @property {Object} diploTransOsdBounds the OSD bounds currenlty viewed in both facsimile viewers
    */
@@ -340,20 +340,20 @@ const guiModule = {
       state.allDocsLoaded = true
     },
 
-    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name }) {
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, path }) {
       if (type === 'annotTrans') {
-        /* if (state.diploTransActivations.shapes.size > 0) {
-
-        } else */ if (state.diploTransActivations.annotTrans.has(id)) {
+        state.diploTransActivations.shapes.clear()
+        if (state.diploTransActivations.annotTrans.has(id)) {
           state.diploTransActivations.annotTrans.delete(id)
         } else {
-          state.diploTransActivations.annotTrans.set(id, { id, name })
+          state.diploTransActivations.annotTrans.clear()
+          state.diploTransActivations.annotTrans.set(id, { id, name, path })
         }
       } else if (type === 'shape') {
         if (state.diploTransActivations.shapes.has(id)) {
           state.diploTransActivations.shapes.delete(id)
         } else {
-          state.diploTransActivations.shapes.set(id, { id })
+          state.diploTransActivations.shapes.set(id, { id, path })
         }
       }
     },
@@ -617,11 +617,12 @@ const guiModule = {
      * @param  {[type]} type                 [description]
      * @param  {[type]} id                   [description]
      * @param  {[type]} name                 [description]
+     * @param  {[type]} path                 [description]
      * @return {[type]}        [description]
      */
-    diploTransToggle ({ commit, getters }, { type, id, name }) {
+    diploTransToggle ({ commit, getters }, { type, id, name, path }) {
       if (getters.activeWritingZone !== null) {
-        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name })
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, path })
       }
     },
 
@@ -953,7 +954,7 @@ const guiModule = {
      * @return {[type]}       [description]
      */
     diploTransActivationsInShapes: (state) => {
-      return [...state.diploTransActivations.shapes]
+      return [...state.diploTransActivations.shapes.values()]
     },
 
     /**
@@ -962,7 +963,10 @@ const guiModule = {
      * @return {[type]}       [description]
      */
     diploTransActivationsInAnnotTrans: (state) => {
-      return state.diploTransActivations.annotTrans
+      if (state.diploTransActivations.annotTrans.size === 0) {
+        return null
+      }
+      return [...state.diploTransActivations.annotTrans.values()][0]
     },
 
     /**

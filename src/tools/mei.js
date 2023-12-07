@@ -3,6 +3,105 @@ import { getOsdRects } from '@/tools/facsimileHelpers.js'
 const parser = new DOMParser()
 
 /**
+ * generates a diplomatic transcription from a given annotated transcription and a list of shapes
+ * @param {*} annotElem the annotated transcription to be converted
+ * @param {*} shapes the shapes to be converted
+ * @param {*} x the x coordinate of the new element, relative to the staff and given in mm
+ * @returns the generated diplomatic transcription
+ */
+export function generateDiplomaticElement (annotElem, shapes, x, svgPath) {
+  const name = annotElem.localName
+  const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
+  elem.setAttribute('xml:id', 'd' + uuid())
+  elem.setAttribute('coord.x1', x)
+
+  const facs = []
+  shapes.forEach(shape => {
+    facs.push(svgPath + '#' + shape.getAttribute('id'))
+  })
+  elem.setAttribute('facs', facs.join(' '))
+
+  if (name === 'note') {
+    getDiplomaticNote(annotElem, elem)
+  } else {
+    console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
+  }
+
+  return elem
+}
+
+/**
+ * translates an annotated note to a diplpomatic note
+ * @param {*} annotElem the annotated note to be translated
+ * @param {*} note the diplomatic note to be translated
+ */
+function getDiplomaticNote (annotElem, note) {
+  const staffN = annotElem.closest('staff').getAttribute('n')
+  const clefs = [...annotElem.closest('music').querySelectorAll('staff[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"][clef\\.line], *[*|id="' + annotElem.getAttribute('xml:id') + '"]')]
+  clefs.sort((a, b) => {
+    if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) {
+      return -1
+    } else {
+      return 1
+    }
+  })
+
+  const annotIndex = clefs.indexOf(annotElem)
+  const lastClef = clefs[annotIndex - 1]
+
+  const clefShape = lastClef.hasAttribute('clef.shape') ? lastClef.getAttribute('clef.shape') : lastClef.getAttribute('shape')
+  const clefLine = lastClef.hasAttribute('clef.line') ? lastClef.getAttribute('clef.line') : lastClef.getAttribute('line')
+  // const clefDis = lastClef.hasAttribute('clef.dis') ? lastClef.getAttribute('clef.dis') : lastClef.getAttribute('dis')
+
+  const pitches = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
+  const pitchValue = pitches.indexOf(annotElem.getAttribute('pname'))
+  const octaveValue = parseInt(annotElem.getAttribute('oct'))
+
+  let loc = 4
+
+  if (clefShape === 'G' && clefLine === '2') {
+    loc = (octaveValue - 4) * 7 + pitchValue - 2
+  } else if (clefShape === 'F' && clefLine === '4') {
+    loc = (octaveValue - 3) * 7 + pitchValue + 3
+  } else if (clefShape === 'C' && clefLine === '3') {
+    loc = (octaveValue - 4) * 7 + pitchValue
+  }
+
+  // F4 in treble should be 1: (4-4) * 7 + 3 - 2
+  // C4 in treble should be -2: (4-4) * 7 + 0 - 2
+  // B3 in treble should be -3: (3-4) * 7 + 6 - 2
+
+  // B3 in bass clef should be 9: (3-3) * 7 + 6 + 3
+  // C3 in bass clef should be 3: (3-3) * 7 + 0 + 3
+  // G2 in bass clef should be 0: (2-3) * 7 + 4 + 3
+
+  note.setAttribute('loc', loc)
+
+  // head shape
+  let headshape
+  const dur = annotElem.getAttribute('dur')
+  if (dur === '1') {
+    headshape = 'whole'
+  } else if (dur === '2') {
+    headshape = 'half'
+  } else if (parseInt(dur) > 4) {
+    headshape = 'quarter'
+  }
+  if (annotElem.hasAttribute('head.shape')) {
+    headshape = annotElem.getAttribute('head.shape')
+  }
+  note.setAttribute('head.shape', headshape)
+  note.setAttribute('dur', dur)
+
+  // stem direction
+  if (dur !== '1') {
+    note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
+  }
+
+  console.log('diplomatic note:', note)
+}
+
+/**
  * takes a template for diplomatic transcriptions and initializes it by generating IDs
  * @param {*} diploTemplate the template to be initialized
  * @param {*} filename the filename of the document containing the page where the diplomatic transcription is located
@@ -109,7 +208,7 @@ export async function getEmptyPage (mei, surfaceId) {
   template.querySelector('page').setAttribute('page.width', folium.getAttribute('width'))
 
   // determine staff height relations
-  const defaultFactor = 100 * 9 / 297 * 3 // INFO: I don't know the exact math behind the *3, but it works
+  const defaultFactor = 100 * 9 / 297 * 3 // TODO: I don't know the exact math behind the *3, but it works. Use //page/@ppu insteads
   template.querySelector('staffDef').setAttribute('scale', defaultFactor + '%')
   const firstStaffHeight = parseFloat(layout.querySelector('rastrum').getAttribute('system.height'))
 
@@ -426,6 +525,42 @@ export function draft2score (meiDom) {
  */
 export function draft2page (meiDom) {
   return meiDom
+}
+
+export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, emptyPage) {
+  console.log('hello, emptyPage is ' + typeof emptyPage)
+  console.log('hello, dtDoc is ' + typeof dtDoc)
+  console.log('not trying to make sense out of ', wzDetails)
+
+  console.log('emptyPage', emptyPage)
+  const requiredStaves = []
+
+  if (!dtDoc) {
+    console.log('no dtDoc')
+    return null
+  }
+
+  dtDoc.querySelectorAll('staffDef').forEach(staffDef => {
+    requiredStaves.push(staffDef.getAttribute('label'))
+  })
+
+  const clonedPage = emptyPage.cloneNode(true)
+  const clonedDt = dtDoc.cloneNode(true)
+
+  clonedPage.querySelectorAll('system').forEach((system, i) => {
+    if (requiredStaves.indexOf((i + 1).toString()) === -1) {
+      system.remove()
+    } else {
+      const staffDef = clonedDt.querySelector('staffDef[label="' + (i + 1) + '"]')
+      const dtLayer = clonedDt.querySelector('staff[n="' + staffDef.getAttribute('n') + '"] layer')
+      const systemLayer = system.querySelector('layer')
+      dtLayer.querySelectorAll('*').forEach(node => {
+        systemLayer.append(node)
+      })
+    }
+  })
+
+  console.log('clonedPage', clonedPage)
 }
 
 export const rawMEISelectables = [

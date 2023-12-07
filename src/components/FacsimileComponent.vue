@@ -185,7 +185,7 @@ export default {
       */
 
       // console.log(e)
-      this.$store.dispatch('facsimileClick', click)
+      // this.$store.dispatch('facsimileClick', click)
     },
 
     /**
