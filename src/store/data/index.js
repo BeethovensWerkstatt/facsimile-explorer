@@ -2444,8 +2444,11 @@ const dataModule = {
           const svgGroupId = svgGroupFullLink.split('#')[1]
 
           const svgGroup = svgDom.querySelector('g[id="' + svgGroupId + '"')
+          if (!svgGroup) {
+            console.error('svgGroup not found: ' + svgGroupId)
+          }
           const shapes = []
-          svgGroup?.querySelectorAll('path').forEach(path => {
+          svgGroup.querySelectorAll('path').forEach(path => {
             shapes.push(path.getAttribute('id'))
           })
 
