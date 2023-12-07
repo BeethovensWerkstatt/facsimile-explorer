@@ -2445,7 +2445,7 @@ const dataModule = {
 
           const svgGroup = svgDom.querySelector('g[id="' + svgGroupId + '"')
           const shapes = []
-          svgGroup.querySelectorAll('path').forEach(path => {
+          svgGroup?.querySelectorAll('path').forEach(path => {
             shapes.push(path.getAttribute('id'))
           })
 
