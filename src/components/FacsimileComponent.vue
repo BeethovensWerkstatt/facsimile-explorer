@@ -1000,6 +1000,7 @@ export default {
   .unassigned path {
     fill: $svgUnassignedShapeColor;
     stroke: $svgUnassignedShapeColor;
+    fill-rule: evenodd;
     &:hover {
       stroke-width: 10px;
       stroke: lighten($svgUnassignedShapeColor, 15%);
@@ -1009,6 +1010,7 @@ export default {
   .writingZone path {
     fill: #666666;
     stroke: #666666;
+    fill-rule: evenodd;
     &:hover {
       stroke-width: 10px;
       stroke: azure;
