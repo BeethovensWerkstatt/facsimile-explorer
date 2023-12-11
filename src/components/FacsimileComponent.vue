@@ -422,9 +422,11 @@ export default {
         return null
       }
 
-      const existingOverlay = this.$refs.container.querySelector('svg')
+      const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
+
       if (existingOverlay !== null) {
         const oldActive = existingOverlay.querySelector('.activeWritingZone')
+
         if (oldActive !== null) {
           oldActive.classList.remove('activeWritingZone')
         }
@@ -446,6 +448,8 @@ export default {
       const loc = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h, 0)
 
       const svgContainer = document.createElement('div')
+      svgContainer.classList.add('svgContainer')
+      svgContainer.classList.add('shapes')
       svgClone.setAttribute('style', 'transform: rotate(' + (rects.rotation * -1) + 'deg); transform-origin: top left;')
 
       svgContainer.append(svgClone)
