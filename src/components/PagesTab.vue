@@ -54,7 +54,7 @@
             <SliderInput label="X" getterName="currentPageFragmentX" setterName="setPageFragX" :min="0" :max="currentPageDimensions.width" :step="1"/>
             <SliderInput label="Y" getterName="currentPageFragmentY" setterName="setPageFragY" :min="0" :max="currentPageDimensions.height" :step="1"/>
             <SliderInput label="W" getterName="currentPageFragmentW" setterName="setPageFragW" :min="0" :max="currentPageDimensions.width" :step="1"/>
-            <SliderInput label="H" getterName="currentPageFragmentH" setterName="setPageFragH" :min="0" :max="currentPageDimensions.height" :step="1"/>
+            <SliderInput label="H" getterName="currentPageFragmentH" setterName="setPageFragH" :min="0" :max="currentPageDimensions.height" :step="1" :readOnly="true"/>
             <SliderInput label="°" getterName="currentPageRotation" setterName="setPageRotation" :min="-5" :max="5" :step="0.1"/>
           </div>
         </div>

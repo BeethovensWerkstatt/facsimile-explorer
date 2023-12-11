@@ -8,6 +8,7 @@
       :min="min"
       :max="max"
       :step="step"
+      :disabled="readOnly"
       :style="{ background: 'linear-gradient(to right, #999 ' + percent + '%, #ccc ' + percent + '%)'}"/>
   </div>
 </template>
@@ -25,7 +26,8 @@ export default {
     max: Number,
     step: Number,
     idParam: String,
-    val: Number
+    val: Number,
+    readOnly: { type: Boolean, default: false }
   },
   components: {
     // OpenSeadragonComponent
