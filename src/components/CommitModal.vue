@@ -27,7 +27,7 @@
 
           <div class="statusMessage success" v-if="commitSuccess">
             <h1>Changes successfully committed.</h1>
-            <p>You're changes have been successfully committed. You may close this modal
+            <p>Your changes have been successfully committed. You may close this modal
             and continue your work.</p>
           </div>
 
