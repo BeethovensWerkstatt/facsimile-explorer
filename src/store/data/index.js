@@ -794,11 +794,12 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh')[1]
+      const existingRotate = fragment.split('rotate=')[1]
+
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
         fragment = '#xywh=' + x + ',' + xywh.split(',')[1] + ',' + xywh.split(',')[2] + ',' + xywh.split(',')[3]
 
-        const existingRotate = fragment.split('&rotate=')[1]
         if (existingRotate !== undefined) {
           rotate = '&rotate=' + existingRotate
         }
@@ -847,11 +848,12 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
+      const existingRotate = fragment.split('rotate=')[1]
+
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
         fragment = '#xywh=' + xywh.split(',')[0] + ',' + y + ',' + xywh.split(',')[2] + ',' + xywh.split(',')[3]
 
-        const existingRotate = fragment.split('&rotate=')[1]
         if (existingRotate !== undefined) {
           rotate = '&rotate=' + existingRotate
         }
@@ -901,11 +903,12 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
+      const existingRotate = fragment.split('rotate=')[1]
+
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
         fragment = '#xywh=' + xywh.split(',')[0] + ',' + xywh.split(',')[1] + ',' + w + ',' + xywh.split(',')[3]
 
-        const existingRotate = fragment.split('&rotate=')[1]
         if (existingRotate !== undefined) {
           rotate = '&rotate=' + existingRotate
         }
@@ -954,11 +957,12 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
+      const existingRotate = fragment.split('rotate=')[1]
+
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
         fragment = '#xywh=' + xywh.split(',')[0] + ',' + xywh.split(',')[1] + ',' + xywh.split(',')[2] + ',' + h
 
-        const existingRotate = fragment.split('&rotate=')[1]
         if (existingRotate !== undefined) {
           rotate = '&rotate=' + existingRotate
         }
