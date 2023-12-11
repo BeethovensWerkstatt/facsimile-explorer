@@ -14,6 +14,7 @@
            <SliderInput label="W" :val="rastrum.w" setterName="setActiveSystemW" :min="0" :max="currentPageDimensions.mmWidth" :step="0.1"/>
            <SliderInput label="H" :val="rastrum.h" setterName="setActiveSystemH" :min="0" :max="currentPageDimensions.mmHeight" :step="0.1"/>
            <SliderInput label="°" :val="rastrum.rotate" setterName="setActiveSystemRotate" :min="-180" :max="180" :step="0.1"/>
+           <i class="icon icon-cross" @click.stop="deleteRastrum(rastrum)" title="Delete System"></i>
          </template>
        </div>
      </div>
@@ -42,6 +43,10 @@ export default {
     },
     setActiveRastrum (id) {
       this.$store.dispatch('setActiveSystem', id)
+    },
+    deleteRastrum (rastrum) {
+      // this.$store.dispatch('deleteSystem', rastrum.id)
+      console.log('deleteRastrum', rastrum)
     }
   },
   computed: {
@@ -83,6 +88,17 @@ export default {
     margin: 0 .4rem 0 0;
     padding: 0 .4rem 0 0;
     border-right: 1px solid #666666;
+  }
+
+  .icon-cross {
+    font-size: .6rem;
+    position: relative;
+    top: -2px;
+    cursor: pointer;
+
+    &:hover {
+      color: #cc3333;
+    }
   }
 }
 
