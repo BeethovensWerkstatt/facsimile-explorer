@@ -88,8 +88,13 @@ export default {
      */
     showPageBorders () {
       const tab = this.$store.getters.explorerTab
-      const validTabs = ['pages', 'diplo']
-      return validTabs.indexOf(tab) !== -1 && this.type === 'diploTrans'
+      if (tab === 'pages') {
+        return true
+      }
+      if (tab === 'diplo' && this.type === 'diploTrans') {
+        return true
+      }
+      return false
     },
 
     /**
