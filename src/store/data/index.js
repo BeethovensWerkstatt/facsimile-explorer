@@ -794,7 +794,7 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh')[1]
-      const existingRotate = fragment.split('rotate=')[1]
+      const existingRotate = fragment?.split('rotate=')[1]
 
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
@@ -848,7 +848,7 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
-      const existingRotate = fragment.split('rotate=')[1]
+      const existingRotate = fragment?.split('rotate=')[1]
 
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
@@ -903,7 +903,7 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
-      const existingRotate = fragment.split('rotate=')[1]
+      const existingRotate = fragment?.split('rotate=')[1]
 
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
@@ -957,7 +957,7 @@ const dataModule = {
       let rotate = '&rotate=0'
 
       let fragment = existingTarget.split('#xywh=')[1]
-      const existingRotate = fragment.split('rotate=')[1]
+      const existingRotate = fragment?.split('rotate=')[1]
 
       if (fragment !== undefined) {
         const xywh = fragment.split('&rotate=')[0]
