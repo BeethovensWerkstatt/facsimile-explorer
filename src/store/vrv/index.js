@@ -129,7 +129,8 @@ const verovioModule = {
         svgRemoveXlink: true,
         svgHtml5: true,
         header: 'none',
-        footer: 'none' //,
+        footer: 'none',
+        svgAdditionalAttribute: 'staff@rotateheight' //,
         // unit: 18
       }
 

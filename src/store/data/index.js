@@ -1331,8 +1331,8 @@ const dataModule = {
       if (!currentWz) {
         return false
       }
-      const atDoc = getters.annotatedTranscriptForCurrentWz
-      const dtDoc = getters.diplomaticTranscriptForCurrentWz
+      const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
+      const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
 
@@ -1382,25 +1382,30 @@ const dataModule = {
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
 
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath)
-      console.log('diplomaticElement', diplomaticElement)
 
+      const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
+      console.log('diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
       const diploLayer = dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
+      const diploMeasure = diploLayer.closest('measure')
 
-      // Convert child nodes of diploLayer into an array
-      const children = Array.from(diploLayer.childNodes)
-
-      // Find the index of the first child node with a greater coord.x1 value
-      const index = children.findIndex(child => parseFloat(child.getAttribute('coord.x1')) > parseFloat(mm))
-
-      if (index !== -1) {
-        // If such a node is found, insert diplomaticElement before this node
-        diploLayer.insertBefore(diplomaticElement, children[index])
+      if (isControlEvent) {
+        console.log('hello', diploLayer.closest('measure'))
+        diploMeasure.appendChild(diplomaticElement)
+        console.log('hello2', diploLayer.closest('measure'))
       } else {
-        // If no such node is found, append diplomaticElement as the last child
-        diploLayer.appendChild(diplomaticElement)
-      }
+        // Convert child nodes of diploLayer into an array
+        const children = Array.from(diploLayer.children)
 
-      // todo: prevent the same element to be encoded multiple times
+        // Find the index of the first child node with a greater coord.x1 value
+        const index = children.findIndex(child => child.hasAttribute('coord.x1') && (parseFloat(child.getAttribute('coord.x1')) > parseFloat(mm)))
+        if (index !== -1) {
+          // If such a node is found, insert diplomaticElement before this node
+          diploLayer.insertBefore(diplomaticElement, children[index])
+        } else {
+          // If no such node is found, append diplomaticElement as the last child
+          diploLayer.appendChild(diplomaticElement)
+        }
+      }
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'generate diplomatic transcription at '
@@ -1410,11 +1415,11 @@ const dataModule = {
 
       const atPath = getters.currentWzAtPath
 
-      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc.cloneNode(true) })
-      dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploLayer.getAttribute('xml:id')], isNewDocument: false })
+      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc })
+      dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
 
-      dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc.cloneNode(true) })
-      dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [diploLayer.getAttribute('xml:id')], isNewDocument: false })
+      dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+      dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
     }
   },
 
@@ -2129,7 +2134,6 @@ const dataModule = {
       }
 
       const rects = getters.osdRects
-
       if (!rects) {
         return null
       }
@@ -2684,29 +2688,55 @@ const dataModule = {
 
       const meiDoc = getters.documentWithCurrentPage
       const surface = getters.currentSurfaceId
-
+      const osdRects = getters.osdRects
+      const currentPageInfo = getters.currentPageInfo
       const emptyPage = await getEmptyPage(meiDoc, surface)
 
-      console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
+      // console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
 
       allWz.forEach(async wzDetails => {
         const dtPath = wzDetails.diploTrans
         const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
 
         if (available) {
-          const dtDoc = await getters.documentByPath(wzDetails.diploTrans)
-          console.log(772, dtDoc)
+          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
+
           arr.push({ wzDetails, dtDoc })
         }
       })
-      console.warn('now starting…')
-      arr.forEach(async wz => {
-        console.log('wz', wz)
-        const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage)
-        wz.renderable = renderableDiplomaticTranscript
-      })
 
-      // await console.log('got it')
+      await Promise.all(arr.map(async wz => {
+        try {
+          const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
+          wz.renderable = renderableDiplomaticTranscript
+        } catch (error) {
+          console.error('Error getting renderableDiplomaticTranscript for wz', wz, error)
+        }
+      }))
+
+      return arr
+    },
+
+    /**
+     * returns an array of paths of all available diplomatic transcripts for the current page
+     * @param {*} state
+     * @param {*} getters
+     */
+    renderableDiplomaticTranscriptsOnCurrentPage: async (state, getters) => {
+      const allWz = getters.writingZonesOnCurrentPage
+      const arr = []
+
+      allWz.forEach(async wzDetails => {
+        const dtPath = wzDetails.diploTrans
+        const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
+
+        if (available) {
+          const dtDoc = getters.documentByPath(wzDetails.diploTrans)
+          if (dtDoc) {
+            arr.push(wzDetails.diploTrans)
+          }
+        }
+      })
 
       return arr
     }

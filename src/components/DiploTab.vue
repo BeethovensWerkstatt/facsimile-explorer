@@ -90,14 +90,34 @@ export default {
         })
       }
     },
-    verifyDiploTransLoaded () {
-      const dtPath = this.$store.getters.currentWzDtPath
-      const dt = this.$store.getters.diplomaticTranscriptForCurrentWz
-      if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
-        this.$store.dispatch('loadXmlFile', {
-          path: dtPath
-        })
+    async verifyDiploTransLoaded () {
+      console.warn('\n\n\nDiploTab: verifyDiploTransLoaded()')
+
+      const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
+
+      console.warn('dtOnPage', dtOnPage)
+      console.warn('this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
+
+      for (const dt of dtOnPage) {
+        const path = dt.wzDetails.diploTrans
+        if (availableDiplomaticTranscripts.indexOf(path) !== -1) {
+          console.log(' … going for ' + path)
+          const callback = async () => {
+            const arr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+            console.warn('\n\n\nreceived callback from verifyDiploTransLoaded() for ' + path, arr)
+          }
+          this.$store.dispatch('loadXmlFile', { path, callback })
+        }
       }
+      /*
+        if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
+          console.log(' … going for ' + dtPath)
+          this.$store.dispatch('loadXmlFile', {
+            path: dtPath
+          })
+        }
+      */
     },
     initializeDiploTrans () {
       this.$store.dispatch('initializeDiploTrans')
@@ -156,8 +176,8 @@ export default {
         this.verifyAnnotTransLoaded()
       })
 
-    this.unwatchDiploTransVerification = this.$store.watch((state, getters) => getters.currentWzDtPath,
-      (newPath, oldPath) => {
+    this.unwatchDiploTransVerification = this.$store.watch((state, getters) => getters.diplomaticTranscriptsOnCurrentPage,
+      (newArr, oldArr) => {
         this.verifyDiploTransLoaded()
       })
 

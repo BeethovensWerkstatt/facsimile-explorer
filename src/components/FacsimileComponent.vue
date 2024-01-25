@@ -6,6 +6,7 @@
 
 <script>
 import OpenSeadragon from 'openseadragon'
+import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 
@@ -33,6 +34,8 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['diploTransVerovioOptions']),
+
     /**
      * the tileSource for the current page
      * @return {[type]} [description]
@@ -246,6 +249,7 @@ export default {
 
       if (this.showRenderedStafflines) {
         this.renderPageBackground()
+        this.renderDiploTransOnPage()
       }
 
       this.renderShapes()
@@ -736,6 +740,130 @@ export default {
     },
 
     /**
+     * renders all diplomatic transcriptions on current page
+     */
+    async renderDiploTransOnPage () {
+      console.warn('\n\n\nFacsimileComponent: renderDiploTransOnPage()')
+      if (!this.showRenderedStafflines) {
+        return null
+      }
+
+      const pageIndex = this.$store.getters.currentPageZeroBased
+      const path = this.$store.getters.filepath
+      const pages = this.$store.getters.documentPagesForSidebars(path)
+      const page = pages[pageIndex]
+
+      if (!page) {
+        return null
+      }
+
+      // const rects = getOsdRects(page)
+      // const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
+
+      const dtArr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      const existingOverlays = this.$refs.container.querySelectorAll('.overlay.diploTrans')
+
+      existingOverlays.forEach(overlay => {
+        const needsRendering = dtArr.findIndex(dt => dt.wzDetails.diploTrans === overlay.getAttribute('data-diploTrans')) !== -1
+
+        if (!needsRendering) {
+          console.log('removing overlay for ' + overlay.getAttribute('data-diploTrans'))
+          this.viewer.removeOverlay(overlay)
+        }
+      })
+
+      dtArr.forEach(dt => {
+        if (dt.renderable) {
+          const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === dt.wzDetails.diploTrans)
+
+          this.$store.getters.verovioToolkit().then(tk => {
+            tk.setOptions(this.diploTransVerovioOptions)
+            const diplo = this.renderDiploTrans(tk, dt.wzDetails, dt.renderable)
+            const activeWritingZone = this.$store.getters.activeWritingZone
+
+            diplo.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+              if (!staff.classList.contains('bounding-box')) {
+                const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
+                const x = topLineCoordinates[0].substring(1)
+                const y = topLineCoordinates[1]
+                const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
+                const height = staff.getAttribute('data-rotateheight').split(' ')[1]
+                const pivotOffsetX = staff.getAttribute('data-rotateheight').split(' ')[2]
+                const pivotX = parseFloat(x) - parseFloat(pivotOffsetX)
+                const origin = pivotX + 'px ' + y + 'px'
+                staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
+                staff.style.transformOrigin = origin
+              }
+            })
+
+            if (!existingOverlay) {
+              console.log('adding overlay for ' + dt.wzDetails.diploTrans)
+              const element = document.createElement('div')
+              element.classList.add('overlay')
+              element.classList.add('diploTrans')
+              if (dt.wzDetails.id === activeWritingZone) {
+                element.classList.add('activeDiploTrans')
+              }
+              element.setAttribute('data-diploTrans', dt.wzDetails.id)
+              element.append(diplo)
+
+              const x = parseFloat(dt.renderable.querySelector('page').getAttribute('fx.leftmar'))
+              const y = parseFloat(dt.renderable.querySelector('page').getAttribute('fx.topmar'))
+              const w = parseFloat(dt.renderable.querySelector('page').getAttribute('page.width'))
+              const h = parseFloat(dt.renderable.querySelector('page').getAttribute('page.height'))
+              const location = new OpenSeadragon.Rect(x, y, w, h)
+
+              this.viewer.addOverlay({
+                element,
+                location//,
+                // rotationMode: innerPos.rotationMode
+              })
+            } else {
+              console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
+              existingOverlay.replaceChild(diplo, existingOverlay.firstChild)
+              const x = parseFloat(dt.renderable.querySelector('page').getAttribute('fx.leftmar'))
+              const y = parseFloat(dt.renderable.querySelector('page').getAttribute('fx.topmar'))
+              const w = parseFloat(dt.renderable.querySelector('page').getAttribute('page.width'))
+              const h = parseFloat(dt.renderable.querySelector('page').getAttribute('page.height'))
+              const location = new OpenSeadragon.Rect(x, y, w, h)
+              if (dt.wzDetails.id === activeWritingZone) {
+                existingOverlay.classList.add('activeDiploTrans')
+              }
+              this.viewer.updateOverlay(existingOverlay, location)
+            }
+          })
+        } else {
+          // console.log('not rendering ', dt)
+        }
+      })
+    },
+
+    renderDiploTrans (toolkit, wzDetails, meiDom) {
+      const meiString = new XMLSerializer().serializeToString(meiDom)
+      toolkit.loadData(meiString)
+      const svgText = toolkit.renderToSVG(1, {})
+      const parser = new DOMParser()
+      const svgDom = parser.parseFromString(svgText, 'application/xml')
+
+      svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
+        barLine.remove()
+      })
+      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+        if (!staff.classList.contains('bounding-box')) {
+          const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
+          const x = topLineCoordinates[0].substring(1)
+          const y = topLineCoordinates[1]
+          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
+          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
+          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
+          staff.style.transformOrigin = x + 'px ' + y + 'px'
+        }
+      })
+
+      return svgDom.querySelector('svg')
+    },
+
+    /**
      * focusses the currently active writing zone
      * @return {[type]} [description]
      */
@@ -748,6 +876,18 @@ export default {
 
       console.log('FacsimileComponent.vue: skipping focusActiveWritingZone()', pos)
       // this.viewer.viewport.fitBoundsWithConstraints(pos)
+
+      const oldActive = this.$refs.container.querySelector('.activeDiploTrans')
+
+      if (oldActive !== null) {
+        oldActive.classList.remove('activeDiploTrans')
+      }
+      const activeWritingZone = this.$store.getters.activeWritingZone
+
+      const newActiveZone = this.$refs.container.querySelector('[data-diploTrans="' + activeWritingZone + '"]')
+      if (newActiveZone !== null) {
+        newActiveZone.classList.add('activeDiploTrans')
+      }
     },
 
     unload () {
@@ -845,9 +985,15 @@ export default {
           this.focusActiveWritingZone()
         }
       })
+
     this.unwatchGrid = this.$store.watch((state, getters) => getters.pageShowGrid,
       (newVal, oldVal) => {
         this.renderGrid()
+      })
+
+    this.unwatchDiploTranscriptsOnCurrentPage = this.$store.watch((state, getters) => getters.renderableDiplomaticTranscriptsOnCurrentPage,
+      (newArr, oldArr) => {
+        this.renderDiploTransOnPage()
       })
 
     this.openFacsimile()
@@ -869,6 +1015,7 @@ export default {
       this.unwatchGrid()
       if (this.explorerTab === 'diplo') {
         this.unwatchDiploTransOsdBounds()
+        this.unwatchDiploTranscriptsOnCurrentPage()
       }
     } catch (err) {
       console.warn('FacsimileComponent:beforeUnmount(): ' + err, err)
@@ -1138,6 +1285,16 @@ export default {
 .overlay.pageBackground.actualPage {
   background-color: #ffffff99;
   outline: 1px solid #0000ff;
+}
+
+.overlay.diploTrans {
+  &.activeDiploTrans {
+    outline: 5px solid $svgActiveWritingLayerColor;
+  }
+  g.staff > path {
+    fill: $svgActiveWritingZoneColor; //transparent;
+    stroke: $svgActiveWritingZoneColor; //transparent;
+  }
 }
 
 .grid {

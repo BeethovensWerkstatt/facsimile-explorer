@@ -10,19 +10,31 @@ const parser = new DOMParser()
  * @returns the generated diplomatic transcription
  */
 export function generateDiplomaticElement (annotElem, shapes, x, svgPath) {
-  const name = annotElem.localName
+  let name = annotElem.localName
+
+  if (name === 'beam') {
+    name = 'beamSpan'
+  }
+
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
   elem.setAttribute('xml:id', 'd' + uuid())
   elem.setAttribute('coord.x1', x)
 
   const facs = []
   shapes.forEach(shape => {
-    facs.push(svgPath + '#' + shape.getAttribute('id'))
+    if (shape.hasAttribute('id')) {
+      facs.push(svgPath + '#' + shape.getAttribute('id'))
+    } else {
+      console.warn('WARNING: Spotted a shape without an ID:', shape)
+    }
   })
   elem.setAttribute('facs', facs.join(' '))
+  elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
+  } else if (name === 'beamSpan') {
+    getDiplomaticBeam(annotElem, elem)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -31,74 +43,106 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath) {
 }
 
 /**
- * translates an annotated note to a diplpomatic note
+ * translates an annotated note to a diplomatic note
  * @param {*} annotElem the annotated note to be translated
  * @param {*} note the diplomatic note to be translated
  */
 function getDiplomaticNote (annotElem, note) {
-  const staffN = annotElem.closest('staff').getAttribute('n')
-  const clefs = [...annotElem.closest('music').querySelectorAll('staff[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"][clef\\.line], *[*|id="' + annotElem.getAttribute('xml:id') + '"]')]
-  clefs.sort((a, b) => {
-    if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) {
-      return -1
-    } else {
-      return 1
+  try {
+    const staffN = annotElem.closest('staff').getAttribute('n')
+    if (!staffN) {
+      console.warn('WARNING: Could not determine staff number for ' + annotElem)
+    }
+    const clefs = [...annotElem.closest('music').querySelectorAll('staff[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"][clef\\.line], *[*|id="' + annotElem.getAttribute('xml:id') + '"]')]
+    clefs.sort((a, b) => {
+      if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) {
+        return -1
+      } else {
+        return 1
+      }
+    })
+
+    const annotIndex = clefs.indexOf(annotElem)
+    const lastClef = clefs[annotIndex - 1]
+
+    if (!lastClef) {
+      console.warn('WARNING: Could not determine last clef for ' + annotElem)
+    }
+
+    const clefShape = lastClef.hasAttribute('clef.shape') ? lastClef.getAttribute('clef.shape') : lastClef.getAttribute('shape')
+    const clefLine = lastClef.hasAttribute('clef.line') ? lastClef.getAttribute('clef.line') : lastClef.getAttribute('line')
+    // const clefDis = lastClef.hasAttribute('clef.dis') ? lastClef.getAttribute('clef.dis') : lastClef.getAttribute('dis')
+
+    const pitches = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
+    const pitchValue = pitches.indexOf(annotElem.getAttribute('pname'))
+    const octaveValue = parseInt(annotElem.getAttribute('oct'))
+
+    let loc = 4
+
+    if (clefShape === 'G' && clefLine === '2') {
+      loc = (octaveValue - 4) * 7 + pitchValue - 2
+    } else if (clefShape === 'F' && clefLine === '4') {
+      loc = (octaveValue - 3) * 7 + pitchValue + 3
+    } else if (clefShape === 'C' && clefLine === '3') {
+      loc = (octaveValue - 4) * 7 + pitchValue
+    }
+
+    // F4 in treble should be 1: (4-4) * 7 + 3 - 2
+    // C4 in treble should be -2: (4-4) * 7 + 0 - 2
+    // B3 in treble should be -3: (3-4) * 7 + 6 - 2
+
+    // B3 in bass clef should be 9: (3-3) * 7 + 6 + 3
+    // C3 in bass clef should be 3: (3-3) * 7 + 0 + 3
+    // G2 in bass clef should be 0: (2-3) * 7 + 4 + 3
+
+    note.setAttribute('loc', loc)
+
+    // head shape
+    let headshape
+    const dur = annotElem.getAttribute('dur')
+    if (dur === '1') {
+      headshape = 'whole'
+    } else if (dur === '2') {
+      headshape = 'half'
+    } else if (parseInt(dur) > 4) {
+      headshape = 'quarter'
+    }
+    if (annotElem.hasAttribute('head.shape')) {
+      headshape = annotElem.getAttribute('head.shape')
+    }
+    note.setAttribute('head.shape', headshape)
+    note.setAttribute('dur', dur)
+
+    // stem direction
+    if (annotElem.hasAttribute('stem.dir')) {
+      note.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
+    } else if (dur !== '1') {
+      note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
+    }
+
+    console.log('diplomatic note:', note)
+  } catch (err) {
+    console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
+  }
+}
+
+/**
+ * translates an annotated note to a diplomatic note
+ * @param {*} annotElem the annotated note to be translated
+ * @param {*} beam the diplomatic beam to be translated
+ */
+function getDiplomaticBeam (annotElem, beam) {
+  const targets = []
+  annotElem.querySelectorAll('*').forEach(elem => {
+    if (elem.localName === 'note' && !elem.closest('chord') && elem.hasAttribute('corresp')) {
+      targets.push('#' + elem.getAttribute('corresp').split('#')[1])
     }
   })
-
-  const annotIndex = clefs.indexOf(annotElem)
-  const lastClef = clefs[annotIndex - 1]
-
-  const clefShape = lastClef.hasAttribute('clef.shape') ? lastClef.getAttribute('clef.shape') : lastClef.getAttribute('shape')
-  const clefLine = lastClef.hasAttribute('clef.line') ? lastClef.getAttribute('clef.line') : lastClef.getAttribute('line')
-  // const clefDis = lastClef.hasAttribute('clef.dis') ? lastClef.getAttribute('clef.dis') : lastClef.getAttribute('dis')
-
-  const pitches = ['c', 'd', 'e', 'f', 'g', 'a', 'b']
-  const pitchValue = pitches.indexOf(annotElem.getAttribute('pname'))
-  const octaveValue = parseInt(annotElem.getAttribute('oct'))
-
-  let loc = 4
-
-  if (clefShape === 'G' && clefLine === '2') {
-    loc = (octaveValue - 4) * 7 + pitchValue - 2
-  } else if (clefShape === 'F' && clefLine === '4') {
-    loc = (octaveValue - 3) * 7 + pitchValue + 3
-  } else if (clefShape === 'C' && clefLine === '3') {
-    loc = (octaveValue - 4) * 7 + pitchValue
-  }
-
-  // F4 in treble should be 1: (4-4) * 7 + 3 - 2
-  // C4 in treble should be -2: (4-4) * 7 + 0 - 2
-  // B3 in treble should be -3: (3-4) * 7 + 6 - 2
-
-  // B3 in bass clef should be 9: (3-3) * 7 + 6 + 3
-  // C3 in bass clef should be 3: (3-3) * 7 + 0 + 3
-  // G2 in bass clef should be 0: (2-3) * 7 + 4 + 3
-
-  note.setAttribute('loc', loc)
-
-  // head shape
-  let headshape
-  const dur = annotElem.getAttribute('dur')
-  if (dur === '1') {
-    headshape = 'whole'
-  } else if (dur === '2') {
-    headshape = 'half'
-  } else if (parseInt(dur) > 4) {
-    headshape = 'quarter'
-  }
-  if (annotElem.hasAttribute('head.shape')) {
-    headshape = annotElem.getAttribute('head.shape')
-  }
-  note.setAttribute('head.shape', headshape)
-  note.setAttribute('dur', dur)
-
-  // stem direction
-  if (dur !== '1') {
-    note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
-  }
-
-  console.log('diplomatic note:', note)
+  beam.setAttribute('plist', targets.join(' '))
+  beam.setAttribute('startid', targets[0])
+  beam.setAttribute('endid', targets.splice(-1)[0])
+  beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
+  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
 }
 
 /**
@@ -233,7 +277,6 @@ export async function getEmptyPage (mei, surfaceId) {
     const rotate = rastrum.getAttribute('rotate')
     const thisHeight = parseFloat(rastrum.getAttribute('system.height'))
     const relativeHeight = 1 / firstStaffHeight * thisHeight
-
     staff.setAttribute('rotateheight', rotate + ' ' + relativeHeight.toFixed(2))
 
     const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
@@ -527,12 +570,13 @@ export function draft2page (meiDom) {
   return meiDom
 }
 
-export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, emptyPage) {
-  console.log('hello, emptyPage is ' + typeof emptyPage)
-  console.log('hello, dtDoc is ' + typeof dtDoc)
-  console.log('not trying to make sense out of ', wzDetails)
+export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, emptyPage, osdRects, currentPageInfo) {
+  console.log('hello, emptyPage is ' + typeof emptyPage, emptyPage)
+  console.log('hello, dtDoc is ' + typeof dtDoc, dtDoc)
+  // console.log('hello, osdRects is ' + typeof osdRects, osdRects)
+  console.log('hello, currentPageInfo is ' + typeof currentPageInfo, currentPageInfo)
+  console.log('starting to make sense out of ', wzDetails)
 
-  console.log('emptyPage', emptyPage)
   const requiredStaves = []
 
   if (!dtDoc) {
@@ -547,20 +591,113 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
   const clonedPage = emptyPage.cloneNode(true)
   const clonedDt = dtDoc.cloneNode(true)
 
+  const bbox = {}
+  bbox.x = parseFloat(wzDetails.xywh.split(',')[0])
+  bbox.y = parseFloat(wzDetails.xywh.split(',')[1])
+  bbox.w = parseFloat(wzDetails.xywh.split(',')[2])
+  bbox.h = parseFloat(wzDetails.xywh.split(',')[3])
+
+  // const pagePixWidth = parseInt(currentPageInfo.width)
+  // const pagePixHeight = parseInt(currentPageInfo.height)
+  const pageHeight = parseFloat(currentPageInfo.mmHeight)
+
+  const margin = 10
+  const pixMargin = osdRects.ratio * margin // 10mm margin
+  const pixBox = {}
+  pixBox.x = bbox.x - pixMargin
+  pixBox.y = bbox.y - pixMargin
+  pixBox.w = bbox.w + pixMargin * 3
+  pixBox.h = bbox.h + pixMargin * 3
+
+  const mmBox = {}
+  mmBox.x = parseFloat((pixBox.x / osdRects.ratio + osdRects.image.x).toFixed(8))
+  mmBox.y = parseFloat((pixBox.y / osdRects.ratio + osdRects.image.y).toFixed(8))
+  mmBox.w = parseFloat((pixBox.w / osdRects.ratio + osdRects.image.x).toFixed(8))
+  mmBox.h = parseFloat((pixBox.h / osdRects.ratio + osdRects.image.y).toFixed(8))
+
+  const pageElem = clonedPage.querySelector('page')
+  pageElem.setAttribute('page.height', mmBox.h)
+  pageElem.setAttribute('page.width', mmBox.w)
+  pageElem.setAttribute('page.topmar', margin)
+  pageElem.setAttribute('page.leftmar', margin)
+  pageElem.setAttribute('fx.topmar', mmBox.y)
+  pageElem.setAttribute('fx.leftmar', mmBox.x)
+  pageElem.removeAttribute('page.rightmar')
+
+  const baseOffX = parseFloat(mmBox.x) + margin
+  const baseOffY = pageHeight - parseFloat(mmBox.y) - parseFloat(mmBox.h) // - margin – probably not???
+
   clonedPage.querySelectorAll('system').forEach((system, i) => {
     if (requiredStaves.indexOf((i + 1).toString()) === -1) {
       system.remove()
     } else {
       const staffDef = clonedDt.querySelector('staffDef[label="' + (i + 1) + '"]')
       const dtLayer = clonedDt.querySelector('staff[n="' + staffDef.getAttribute('n') + '"] layer')
+      const staff = system.querySelector('staff')
+      const newStaffY = (parseFloat(staff.getAttribute('coord.y1')) - baseOffY).toFixed(8)
+
+      staff.setAttribute('coord.y1', newStaffY)
+      const newVal = staff.getAttribute('rotateheight') + ' ' + baseOffY.toFixed(8)
+      staff.setAttribute('rotateheight', newVal)
       const systemLayer = system.querySelector('layer')
+      const measure = systemLayer.closest('measure')
+      measure.setAttribute('coord.x1', 0) // todo
+      measure.setAttribute('coord.x2', (parseFloat(measure.getAttribute('coord.x2')) - baseOffX).toFixed(8)) // (parseFloat(system.getAttribute('coord.x1')) - baseOffX / 2).toFixed(2)
+
+      // const existingMeasureLeft = parseFloat(measure.getAttribute('coord.x1'))
+      // const existingMeasureRight = parseFloat(measure.getAttribute('coord.x2'))
+
+      // const newMeasureLeft = Math.max(existingMeasureLeft - mmBox.x, 0)
+
       dtLayer.querySelectorAll('*').forEach(node => {
-        systemLayer.append(node)
+        systemLayer.append(convertDiploTransEvent(node))
+
+        const offX = parseFloat(measure.getAttribute('coord.x1')) - baseOffX + margin * 2
+        const coord = parseFloat(node.getAttribute('coord.x1'))
+        const newCoord = (coord + offX).toFixed(8)
+
+        node.setAttribute('coord.x1', newCoord)
       })
+
+      /* const measure = system.querySelector('measure')
+
+      console.log('leftMost: ' + leftMost + ' | rightMost: ' + rightMost + ' | leftMar: ' + leftMar)
+      const xDiff = (leftMost - 10).toFixed(2)
+      measure.setAttribute('coord.x1', (leftMost - 10).toFixed(2))
+      measure.setAttribute('coord.x2', (Math.min(rightMost + 10, rightMar)).toFixed(2))
+      */
     }
   })
+  console.log('diplomatic transcript for fragment', clonedPage)
 
-  console.log('clonedPage', clonedPage)
+  return clonedPage
+}
+
+function convertDiploTransEvent (event) {
+  const name = event.localName
+
+  if (name === 'note') {
+    getRenderableDiplomaticNote(event)
+  }
+
+  return event
+}
+
+/**
+ * converts a diplomatic note to something renderable
+ * @param {*} note the diplomatic note to be translated
+ */
+function getRenderableDiplomaticNote (note) {
+  /* const headshape = note.getAttribute('head.shape')
+  let dur = 4
+  if (headshape === 'whole') {
+    dur = 1
+  } else if (headshape === 'half') {
+    dur = 2
+  } */
+
+  // TODO DIPLOTRANS: Wie mit kürzeren Notenwerten umgehen? überhaupt wichtig?
+  // note.setAttribute('dur', dur)
 }
 
 export const rawMEISelectables = [
