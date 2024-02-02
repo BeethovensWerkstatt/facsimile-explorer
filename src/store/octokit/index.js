@@ -116,7 +116,7 @@ const mutations = {
         userAgent: 'facsimile-explorer/v0.0.2',
         log: console.debug
       })
-      console.log(31, state.octokit)
+      // console.log(31, state.octokit)
       if (state.auth) {
         state.octokit.users.getAuthenticated().then(({ data }) => {
           state.user = data
@@ -131,7 +131,7 @@ const mutations = {
         state.user = {}
         if (remove) remove()
       }
-      console.log(32)
+      // console.log(32)
     } catch (err) {
       console.error('authentication failed!', err)
       state.auth = ''
