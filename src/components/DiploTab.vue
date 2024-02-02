@@ -91,21 +91,19 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
-      console.warn('\n\n\nDiploTab: verifyDiploTransLoaded()')
-
       const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
 
-      console.warn('dtOnPage', dtOnPage)
-      console.warn('this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
+      // console.warn('dtOnPage', dtOnPage)
+      // console.warn('this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
 
       for (const dt of dtOnPage) {
         const path = dt.wzDetails.diploTrans
         if (availableDiplomaticTranscripts.indexOf(path) !== -1) {
-          console.log(' … going for ' + path)
+          // console.log(' … going for ' + path)
           const callback = async () => {
-            const arr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
-            console.warn('\n\n\nreceived callback from verifyDiploTransLoaded() for ' + path, arr)
+            // const arr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+            // console.warn('\n\n\nreceived callback from verifyDiploTransLoaded() for ' + path, arr)
           }
           this.$store.dispatch('loadXmlFile', { path, callback })
         }
@@ -139,12 +137,12 @@ export default {
         return false
       }
 
-      console.log('DiploTab: autoTranscribe()')
+      // console.log('DiploTab: autoTranscribe()')
 
       if (newAnnotated === oldAnnotated && newShapes.length > oldShapes.length && oldShapes.length > 0) {
         // add shape to existing diploTrans
+        console.log('TODO: add shape to existing diploTrans')
       } else {
-        console.log('dispatching…')
         this.$store.dispatch('diploTranscribe')
       }
     }

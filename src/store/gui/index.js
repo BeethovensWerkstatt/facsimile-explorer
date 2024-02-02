@@ -340,14 +340,14 @@ const guiModule = {
       state.allDocsLoaded = true
     },
 
-    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, path }) {
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
       if (type === 'annotTrans') {
         state.diploTransActivations.shapes.clear()
         if (state.diploTransActivations.annotTrans.has(id)) {
           state.diploTransActivations.annotTrans.delete(id)
         } else {
           state.diploTransActivations.annotTrans.clear()
-          state.diploTransActivations.annotTrans.set(id, { id, name, path })
+          state.diploTransActivations.annotTrans.set(id, { id, name, measure, path })
         }
       } else if (type === 'shape') {
         if (state.diploTransActivations.shapes.has(id)) {
@@ -620,9 +620,9 @@ const guiModule = {
      * @param  {[type]} path                 [description]
      * @return {[type]}        [description]
      */
-    diploTransToggle ({ commit, getters }, { type, id, name, path }) {
+    diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
       if (getters.activeWritingZone !== null) {
-        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, path })
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
       }
     },
 

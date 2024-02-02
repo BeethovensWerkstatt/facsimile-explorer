@@ -21,7 +21,8 @@ const rawSelectables = [
   'dynam',
   'dir',
   'keySig',
-  'meterSig'
+  'meterSig',
+  'barLine'
   // 'staff',
   // 'measure'
 ]
@@ -96,8 +97,12 @@ export default {
         // Aktionen ausführen. Hier erstmal nur zur Anschauung – das müsste
         // natürlich über die Daten koordiniert werden…
         // target.classList.toggle('supplied')
+
+        // const isBarline = target.classList.contains('barLine')
+
         const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
+        const measure = target.closest('.measure').getAttribute('data-id')
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
@@ -106,6 +111,7 @@ export default {
           path,
           id,
           name,
+          measure,
           purpose: this.purpose,
           callback: () => { this.render() }
         })
@@ -191,6 +197,16 @@ export default {
   svg .highlighted {
     fill: $scoreHighlightedColor;
     stroke: $scoreHighlightedColor;
+  }
+
+  svg .barLine.highlighted path {
+    fill: $scoreHighlightedColor;
+    stroke: $scoreHighlightedColor;
+    stroke-width: 60;
+  }
+
+  svg .barLine path:hover {
+    stroke-width: 80;
   }
 
   .placeholder {

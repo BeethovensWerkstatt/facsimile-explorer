@@ -40,7 +40,9 @@ const dataModule = {
      * @param {[type]} dom    The DOM of the document
      */
     LOAD_DOCUMENT_INTO_STORE (state, { path, dom }) {
-      if (!dom.documentElement) console.warn('load:', path, dom, new Error())
+      if (!dom.documentElement) {
+        console.warn('load:', path, dom, new Error())
+      }
       state.documents[path] = dom // = { ...state.documents, [path]: dom } // reactivity ?
     },
 
@@ -327,7 +329,9 @@ const dataModule = {
 
       // console.log('get svg id', modifiedSvgDom.getAttribute('id'))
       const svgId = modifiedSvgDom.querySelector('svg')?.getAttribute('id')
-      if (typeof svgId !== 'string') console.warn('no svgId')
+      if (typeof svgId !== 'string') {
+        // console.warn('no svgId')
+      }
 
       const path = getters.currentDocPath
       const docName = getters.documentNameByPath(path)
@@ -360,7 +364,7 @@ const dataModule = {
       const renderedWritingZones = document.querySelectorAll('svg .writingZone')
       renderedWritingZones.forEach(svgWz => {
         const bbox = svgWz.getBBox()
-        console.log('shapeCount:' + svgWz.querySelectorAll('path').length)
+        // console.log('shapeCount:' + svgWz.querySelectorAll('path').length)
         const wzGenDesc = [...wzGenDescArr].find(wz => wz.getAttribute('corresp').split('#')[1] === svgWz.getAttribute('id'))
         const zone = surface.querySelector('zone[data="#' + wzGenDesc.getAttribute('xml:id') + '"]')
         zone.setAttribute('ulx', Math.round(bbox.x))
@@ -558,20 +562,20 @@ const dataModule = {
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, purpose, callback }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, purpose, callback }) {
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
-          dispatch('suppliedToggle', { meiDom, path, id, name, callback })
+          dispatch('suppliedToggle', { meiDom, path, id, name, measure, callback })
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, path })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, path })
           }
           break
         default:
-          console.warn('clickedVerovio: unknown purpose', purpose)
-            // dispatch('moveShapeToCurrentWritingZone', shapeId)
+          // console.warn('clickedVerovio: unknown purpose', purpose)
+          // dispatch('moveShapeToCurrentWritingZone', shapeId)
       }
     },
 
@@ -589,9 +593,9 @@ const dataModule = {
       const target = meiDom?.querySelector(`*[*|id="${id}"]`)
       const baseMessage = 'toggle supplied'
       let param
-      console.log('toggle supplied', id, name, target)
+      // console.log('toggle supplied', id, name, target)
       if (!target) {
-        console.warn('element not found!', id)
+        // console.warn('element not found!', id)
         return
       }
       if (target.getAttribute('type') === 'supplied') {
@@ -600,7 +604,7 @@ const dataModule = {
         target.setAttribute('type', 'supplied')
       }
       // console.log(target, callback)
-      console.log(path, id)
+      // console.log(path, id)
       // loadDocumentIntoStore ...
       dispatch('loadDocumentIntoStore', { path, dom: meiDom })
       // logChange ...
@@ -862,7 +866,7 @@ const dataModule = {
         fragment = '#xywh=0,' + y + ',' + pageDim.width + ',' + pageDim.height
       }
 
-      console.log('setting to ' + fragment + rotate)
+      // console.log('setting to ' + fragment + rotate)
       graphic.setAttribute('target', basePath + fragment + rotate)
 
       const path = getters.currentDocPath
@@ -1056,7 +1060,7 @@ const dataModule = {
       if (xmlIDs.length === 0) { // no layoutDesc or rastrumDesc created
         xmlIDs.push(layoutId)
       }
-      console.log('xmlIDs', xmlIDs)
+      // console.log('xmlIDs', xmlIDs)
 
       // no rastrum so far
       if (!activeSystemId || !rastrumDesc.querySelector('rastrum[*|id="' + activeSystemId + '"]')) {
@@ -1302,6 +1306,22 @@ const dataModule = {
 
       // const annotatedTranscript = getters.annotatedTranscriptForWz
 
+      // -----------------
+
+      /*
+
+        Diplo-Codierung ist bezogen auf die Seite, enthält aber nur die Systeme,
+        die Teil der Writing Zone sind, und nur die dazu gehörigen Noten. Enthält
+        alle Positionsangaben.
+
+        Für die Darstellung wird dann die emptyPage geladen, und alle Noten werden
+        da positionsgetreu reingeladen. Für die Anzeige wird dann die ganze Seite
+        mit Verovio gerendert, und nur die viewBox auf das nötige Rechteck gesetzt.
+
+      */
+
+      // -----------------
+
       const diploTrans = await initializeDiploTrans(filename, wzId, surfaceId, appversion, affectedStaves)
 
       const dtPath = getters.currentWzDtPath
@@ -1341,10 +1361,17 @@ const dataModule = {
         return false
       }
 
-      const annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
+      let annotElem
+
+      if (annotElemRef.name === 'barLine') {
+        annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
+      } else {
+        annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
+      }
 
       // check if element is already transcribed
       if (annotElem.hasAttribute('corresp')) {
+        console.warn('element already transcribed', annotElem)
         return null
       }
 
@@ -1352,7 +1379,12 @@ const dataModule = {
       // console.log('annotElem', annotElem)
       // console.log('shapes', shapes)
 
-      const annotStaffN = annotElem.closest('staff').getAttribute('n')
+      let annotStaffN
+      if (annotElemRef.name === 'barLine') {
+        annotStaffN = 1
+      } else {
+        annotStaffN = annotElem.closest('staff').getAttribute('n')
+      }
       // console.log('annotStaffN', annotStaffN)
 
       const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
@@ -1381,7 +1413,7 @@ const dataModule = {
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
 
-      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath)
+      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, annotElemRef)
 
       const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
       console.log('diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
@@ -1389,9 +1421,7 @@ const dataModule = {
       const diploMeasure = diploLayer.closest('measure')
 
       if (isControlEvent) {
-        console.log('hello', diploLayer.closest('measure'))
         diploMeasure.appendChild(diplomaticElement)
-        console.log('hello2', diploLayer.closest('measure'))
       } else {
         // Convert child nodes of diploLayer into an array
         const children = Array.from(diploLayer.children)

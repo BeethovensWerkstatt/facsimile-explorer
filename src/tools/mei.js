@@ -9,11 +9,13 @@ const parser = new DOMParser()
  * @param {*} x the x coordinate of the new element, relative to the staff and given in mm
  * @returns the generated diplomatic transcription
  */
-export function generateDiplomaticElement (annotElem, shapes, x, svgPath) {
+export function generateDiplomaticElement (annotElem, shapes, x, svgPath, annotElemRef) {
   let name = annotElem.localName
 
   if (name === 'beam') {
     name = 'beamSpan'
+  } else if (name === 'measure') {
+    name = 'barLine'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -33,8 +35,12 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath) {
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
-  } else if (name === 'beamSpan') {
+  } else if (name === 'beamSpan' || name === 'beam') {
     getDiplomaticBeam(annotElem, elem)
+  } else if (name === 'accid') {
+    getDiplomaticAccid(annotElem, elem)
+  } else if (name === 'barLine') {
+    getDiplomaticBarline(annotElem, elem)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -120,7 +126,7 @@ function getDiplomaticNote (annotElem, note) {
       note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
     }
 
-    console.log('diplomatic note:', note)
+    // log('diplomatic note:', note)
   } catch (err) {
     console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
   }
@@ -142,7 +148,27 @@ function getDiplomaticBeam (annotElem, beam) {
   beam.setAttribute('startid', targets[0])
   beam.setAttribute('endid', targets.splice(-1)[0])
   beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
-  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+  // console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+}
+
+/**
+ * translates an annotated accidental to a diplomatic accidental
+ * @param {*} annotElem the annotated accidental to be translated
+ * @param {*} accid the diplomatic accid to be translated
+ */
+function getDiplomaticAccid (annotElem, accid) {
+  accid.setAttribute('accid', annotElem.getAttribute('accid'))
+  // console.log(411, '\n', accid, '\n', annotElem)
+}
+
+/**
+ * translates an annotated barLine to a diplomatic barLine
+ * @param {*} annotElem the annotated barLine to be translated
+ * @param {*} barLine the diplomatic barLine to be translated
+ */
+function getDiplomaticBarline (annotElem, barLine) {
+  barLine.setAttribute('form', 'single')
+  // console.log(364, '\n', barLine, '\n', annotElem)
 }
 
 /**
@@ -571,11 +597,11 @@ export function draft2page (meiDom) {
 }
 
 export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, emptyPage, osdRects, currentPageInfo) {
-  console.log('hello, emptyPage is ' + typeof emptyPage, emptyPage)
-  console.log('hello, dtDoc is ' + typeof dtDoc, dtDoc)
+  // console.log('hello, emptyPage is ' + typeof emptyPage, emptyPage)
+  // console.log('hello, dtDoc is ' + typeof dtDoc, dtDoc)
   // console.log('hello, osdRects is ' + typeof osdRects, osdRects)
-  console.log('hello, currentPageInfo is ' + typeof currentPageInfo, currentPageInfo)
-  console.log('starting to make sense out of ', wzDetails)
+  // console.log('hello, currentPageInfo is ' + typeof currentPageInfo, currentPageInfo)
+  // console.log('starting to make sense out of ', wzDetails)
 
   const requiredStaves = []
 
@@ -599,7 +625,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
 
   // const pagePixWidth = parseInt(currentPageInfo.width)
   // const pagePixHeight = parseInt(currentPageInfo.height)
-  const pageHeight = parseFloat(currentPageInfo.mmHeight)
+  // const pageHeight = parseFloat(currentPageInfo.mmHeight)
 
   const margin = 10
   const pixMargin = osdRects.ratio * margin // 10mm margin
@@ -615,17 +641,14 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
   mmBox.w = parseFloat((pixBox.w / osdRects.ratio + osdRects.image.x).toFixed(8))
   mmBox.h = parseFloat((pixBox.h / osdRects.ratio + osdRects.image.y).toFixed(8))
 
-  const pageElem = clonedPage.querySelector('page')
-  pageElem.setAttribute('page.height', mmBox.h)
-  pageElem.setAttribute('page.width', mmBox.w)
-  pageElem.setAttribute('page.topmar', margin)
-  pageElem.setAttribute('page.leftmar', margin)
-  pageElem.setAttribute('fx.topmar', mmBox.y)
-  pageElem.setAttribute('fx.leftmar', mmBox.x)
-  pageElem.removeAttribute('page.rightmar')
+  const factor = 10
+  const pos1 = (mmBox.x * factor).toFixed(2)
+  const pos2 = (mmBox.y * factor).toFixed(2)
+  const pos3 = (mmBox.x * factor + mmBox.w * factor).toFixed(2)
+  const pos4 = (mmBox.y * factor + mmBox.h * factor).toFixed(2)
 
-  const baseOffX = parseFloat(mmBox.x) + margin
-  const baseOffY = pageHeight - parseFloat(mmBox.y) - parseFloat(mmBox.h) // - margin – probably not???
+  const pageElem = clonedPage.querySelector('page')
+  pageElem.setAttribute('viewBox', pos1 + ' ' + pos2 + ' ' + pos3 + ' ' + pos4)
 
   clonedPage.querySelectorAll('system').forEach((system, i) => {
     if (requiredStaves.indexOf((i + 1).toString()) === -1) {
@@ -633,39 +656,12 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
     } else {
       const staffDef = clonedDt.querySelector('staffDef[label="' + (i + 1) + '"]')
       const dtLayer = clonedDt.querySelector('staff[n="' + staffDef.getAttribute('n') + '"] layer')
-      const staff = system.querySelector('staff')
-      const newStaffY = (parseFloat(staff.getAttribute('coord.y1')) - baseOffY).toFixed(8)
 
-      staff.setAttribute('coord.y1', newStaffY)
-      const newVal = staff.getAttribute('rotateheight') + ' ' + baseOffY.toFixed(8)
-      staff.setAttribute('rotateheight', newVal)
       const systemLayer = system.querySelector('layer')
-      const measure = systemLayer.closest('measure')
-      measure.setAttribute('coord.x1', 0) // todo
-      measure.setAttribute('coord.x2', (parseFloat(measure.getAttribute('coord.x2')) - baseOffX).toFixed(8)) // (parseFloat(system.getAttribute('coord.x1')) - baseOffX / 2).toFixed(2)
-
-      // const existingMeasureLeft = parseFloat(measure.getAttribute('coord.x1'))
-      // const existingMeasureRight = parseFloat(measure.getAttribute('coord.x2'))
-
-      // const newMeasureLeft = Math.max(existingMeasureLeft - mmBox.x, 0)
 
       dtLayer.querySelectorAll('*').forEach(node => {
         systemLayer.append(convertDiploTransEvent(node))
-
-        const offX = parseFloat(measure.getAttribute('coord.x1')) - baseOffX + margin * 2
-        const coord = parseFloat(node.getAttribute('coord.x1'))
-        const newCoord = (coord + offX).toFixed(8)
-
-        node.setAttribute('coord.x1', newCoord)
       })
-
-      /* const measure = system.querySelector('measure')
-
-      console.log('leftMost: ' + leftMost + ' | rightMost: ' + rightMost + ' | leftMar: ' + leftMar)
-      const xDiff = (leftMost - 10).toFixed(2)
-      measure.setAttribute('coord.x1', (leftMost - 10).toFixed(2))
-      measure.setAttribute('coord.x2', (Math.min(rightMost + 10, rightMar)).toFixed(2))
-      */
     }
   })
   console.log('diplomatic transcript for fragment', clonedPage)
