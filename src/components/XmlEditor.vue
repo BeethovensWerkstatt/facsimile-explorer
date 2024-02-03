@@ -13,6 +13,7 @@
 
 <script>
 import { Codemirror } from 'vue-codemirror'
+import { EditorView } from '@codemirror/view'
 // import { javascript } from '@codemirror/lang-javascript'
 import { xml } from '@codemirror/lang-xml'
 import { oneDark } from '@codemirror/theme-one-dark'
@@ -21,11 +22,15 @@ import { oneDark } from '@codemirror/theme-one-dark'
 
 export default {
   name: 'XmlEditor',
+  props: {
+    filePath: String,
+    id: String
+  },
   components: {
     Codemirror
   },
   data: () => {
-    const extensions = [xml(), oneDark]
+    const extensions = [xml(), oneDark, EditorView.lineWrapping]
     return {
       extensions,
       log: console.log
@@ -36,11 +41,11 @@ export default {
   computed: {
     code: {
       get () {
-        return this.$store.getters.xmlCode
+        return this.$store.getters.xmlSnippet({ filePath: this.filePath, id: this.id })
       },
       set (val) {
         // console.log('changing editor to ', val)
-        this.$store.dispatch('setXmlByEditor', val)
+        this.$store.dispatch('modifyXml', { filePath: this.filePath, id: this.id, val })
       }
     }
   }

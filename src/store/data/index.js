@@ -15,6 +15,12 @@ import { rotatePoint } from '@/tools/trigonometry'
 const parser = new DOMParser()
 
 /**
+ * An XML Serializer for converting back to string
+ * @type {XMLSerializer}
+ */
+const serializer = new XMLSerializer()
+
+/**
  * @namespace store.data
  */
 const dataModule = {
@@ -25,7 +31,9 @@ const dataModule = {
    */
   state: {
     documents: {},
-    documentNamePathMapping: []
+    documentNamePathMapping: [],
+    temporaryXMLCode: '',
+    isWellformed: true
   },
 
   /**
@@ -59,6 +67,24 @@ const dataModule = {
 
     ADD_REFERENCE_TO_SVG_FILE_FOR_SURFACE (state, { path, modifiedDom }) {
       state.documents[path] = modifiedDom
+    },
+
+    /**
+     * sets whether the current XML code is wellformed
+     * @param {*} state
+     * @param {*} bool
+     */
+    SET_IS_WELLFORMED (state, bool) {
+      state.isWellformed = bool
+    },
+
+    /**
+     * sets the temporary (invalid) XML code
+     * @param {*} state
+     * @param {*} string
+     */
+    SET_TEMPORARY_XML_CODE (state, string) {
+      state.temporaryXMLCode = string
     }
   },
 
@@ -1450,6 +1476,37 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
       dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
+    },
+
+    modifyXml ({ commit, getters, state, dispatch }, { filePath, id, val }) {
+      const snippet = parser.parseFromString(val, 'application/xml')
+
+      const errorNode = snippet.querySelector('parsererror')
+      if (errorNode) {
+        console.log('error while parsing')
+        commit('SET_IS_WELLFORMED', false)
+        commit('SET_TEMPORARY_XML_CODE', val)
+        return
+      } else {
+        commit('SET_IS_WELLFORMED', true)
+        commit('SET_TEMPORARY_XML_CODE', '')
+      }
+
+      const file = getters.documentByPath(filePath).cloneNode(true)
+      const elem = file.querySelector('*[*|id="' + id + '"]')
+
+      if (!elem) {
+        console.error('@/store/data/index.js:modifyXml(): No element found with ID "#' + id + '" in file "' + filePath + '"') // eslint-disable-line no-console
+        return
+      }
+
+      elem.replaceWith(snippet.documentElement)
+
+      const baseMessage = 'manually adjust XML for '
+      const param = '//' + elem.localName + '#' + id
+
+      dispatch('loadDocumentIntoStore', { path: filePath, dom: file })
+      dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [id], isNewDocument: false })
     }
   },
 
@@ -2769,6 +2826,36 @@ const dataModule = {
       })
 
       return arr
+    },
+
+    /**
+     * getter for the XML code for the current page
+     * @param  {Object} state store
+     * @return {string} MEI serialized to string
+     */
+    xmlSnippet: (state, getters) => ({ filePath, id }) => {
+      if (!filePath || !id) {
+        return ''
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return ''
+      }
+
+      if (!state.isWellformed) {
+        return state.temporaryXMLCode
+      }
+
+      const elem = doc.querySelector('*[*|id="' + id + '"]')
+
+      if (!elem) {
+        return ''
+      }
+
+      // console.log('found elem:\n', elem)
+
+      return serializer.serializeToString(elem)
     }
   }
 }

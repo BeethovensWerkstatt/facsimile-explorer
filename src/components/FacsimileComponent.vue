@@ -28,6 +28,30 @@ const osdOptions = {
   silenceMultiImageWarnings: true
 }
 
+const rawSelectables = [
+  'note',
+  'chord',
+  'syl',
+  'rest',
+  'beam',
+  'artic',
+  'accid',
+  'clef',
+  'slur',
+  'dynam',
+  'dir',
+  'keySig',
+  'meterSig',
+  'barLine'
+  // 'staff',
+  // 'measure'
+]
+let selectables = []
+rawSelectables.forEach(elem => {
+  selectables.push('.' + elem + ':not(.bounding-box)')
+})
+selectables = selectables.join(', ')
+
 export default {
   name: 'FacsimileComponent',
   props: {
@@ -143,7 +167,7 @@ export default {
       click.page = clickedPagePos
       // }
 
-      // console.log(click)
+      console.log('-------------\n\nCLICK\n\n------------\n', click)
 
       // check for click to svg shape
       if (click.target.localName === 'path') {
@@ -155,6 +179,17 @@ export default {
       if (click.target.localName === 'div' && click.target.classList.contains('rotatedSystem')) {
         const id = click.target.parentElement.getAttribute('data-id')
         this.$store.dispatch('setActiveSystem', id)
+      }
+
+      if (click.target.closest('.diploTrans') && click.target.closest('.measure')) {
+        const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
+        const target = click.target.closest(selectables)
+        if (target) {
+          const id = target.getAttribute('data-id')
+          this.$store.dispatch('setActiveWritingZone', wzId)
+          this.$store.dispatch('setActiveDiploTransElementId', id)
+          console.log('selecting activeDiploTransElementId: ', id)
+        }
       }
 
       /*
@@ -822,6 +857,7 @@ export default {
               element.classList.add('activeDiploTrans')
             }
             element.setAttribute('data-diploTrans', dt.wzDetails.id)
+            element.setAttribute('data-filePath', dt.wzDetails.diploTrans)
             element.append(diplo)
 
             /* const x = viewBox.split(' ')[0]

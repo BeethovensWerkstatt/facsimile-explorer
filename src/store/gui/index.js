@@ -78,7 +78,8 @@ const guiModule = {
       annotTrans: new Map()
     },
     diploTransSelectedId: null,
-    diploTransOsdBounds: null
+    diploTransOsdBounds: null,
+    activeDiploTransElementId: null
   },
   /**
    * @namespace store.gui.mutations
@@ -374,6 +375,15 @@ const guiModule = {
      */
     SET_DIPLOTRANS_OSD_BOUNDS (state, obj) {
       state.diploTransOsdBounds = obj
+    },
+
+    /**
+     * sets the ID of the active element in the diplomatic transcription
+     * @param {*} state
+     * @param {*} id
+     */
+    SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID (state, id) {
+      state.activeDiploTransElementId = id
     }
   },
   /**
@@ -647,6 +657,14 @@ const guiModule = {
      */
     setDiploTransOsdBounds ({ commit }, { originOsd, bounds }) {
       commit('SET_DIPLOTRANS_OSD_BOUNDS', { originOsd, bounds })
+    },
+
+    /**
+     * sets the ID of the active element in the diplomatic transcription
+     * @param {*} id
+     */
+    setActiveDiploTransElementId ({ commit }, id) {
+      commit('SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID', id)
     }
   },
   /**
@@ -985,6 +1003,15 @@ const guiModule = {
      */
     diploTransOsdBounds: (state) => {
       return state.diploTransOsdBounds
+    },
+
+    /**
+     * returns the ID of the currently active element in the diplomatic transcription
+     * @param {*} state
+     * @returns
+     */
+    activeDiploTransElementId: (state) => {
+      return state.activeDiploTransElementId
     }
   }
 }

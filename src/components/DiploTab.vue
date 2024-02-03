@@ -32,9 +32,9 @@
           <!--<VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>-->
           <!--<OpenSeadragonComponent/>-->
         </div>
-        <!--<div class="mainBox">
-          <code>XML Editor goes here</code>
-        </div>-->
+        <div class="mainBox">
+          <XmlEditor :filePath="editorSettings.filePath" :id="editorSettings.id"/>
+        </div>
         <div class="mainBox">
           <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </div>
@@ -55,6 +55,7 @@ import WritingZoneDirectory from '@/components/WritingZoneDirectory.vue'
 
 import FacsimileComponent from '@/components/FacsimileComponent.vue'
 import VerovioComponent from '@/components/shared/VerovioComponent.vue'
+import XmlEditor from '@/components/XmlEditor.vue'
 
 export default {
   name: 'DiploTab',
@@ -66,7 +67,8 @@ export default {
     SourceSelector,
     WritingZoneDirectory,
     FacsimileComponent,
-    VerovioComponent
+    VerovioComponent,
+    XmlEditor
   },
   methods: {
     toggleSidebar () {
@@ -148,7 +150,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage']),
+    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage', 'activeDiploTransElementId']),
     showInitializeButton () {
       const currentWz = this.$store.getters.currentWritingZoneObject
       if (!currentWz) {
@@ -161,6 +163,12 @@ export default {
       const annotTransAvailable = this.$store.getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
       const diploTransAvailable = this.$store.getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
       return annotTransAvailable && !diploTransAvailable
+    },
+    editorSettings () {
+      return {
+        filePath: this.$store.getters.currentWritingZoneObject?.diploTrans,
+        id: this.$store.getters.activeDiploTransElementId
+      }
     }
   },
   created () {
@@ -305,7 +313,7 @@ i.showSidebar {
 }
 
 .mainBox {
-  height: 33%;
+  height: 25%;
   padding: .5rem;
 }
 
