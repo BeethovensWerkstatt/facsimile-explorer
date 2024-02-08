@@ -1407,6 +1407,7 @@ const dataModule = {
 
       let annotStaffN
       if (annotElemRef.name === 'barLine') {
+        // todo: find better value for staff of the barline
         annotStaffN = 1
       } else {
         annotStaffN = annotElem.closest('staff').getAttribute('n')
@@ -1476,6 +1477,25 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
       dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
+
+      dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
+    },
+
+    /**
+     * sets shapes of the current active element
+     * @param {*} param0
+     * @param {*} shapes
+     */
+    diploTranscribe_setShapes ({ commit, getters, dispatch }, { annotElem, shapes }) {
+      console.log('diploTranscribe_setShapes', annotElem, shapes)
+
+      const atDoc = getters.annotatedTranscriptForCurrentWz
+      // const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
+
+      const atElem = atDoc.querySelector(annotElem.name + '[*|id="' + annotElem.id + '"]')
+      const corresp = atElem.getAttribute('corresp')
+
+      console.log('searching for corresponding element in diplomatic transcript: ' + corresp)
     },
 
     modifyXml ({ commit, getters, state, dispatch }, { filePath, id, val }) {
@@ -1507,6 +1527,41 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: filePath, dom: file })
       dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [id], isNewDocument: false })
+    },
+
+    /**
+     * sets an attribute value of the currently active element in the
+     * XML editor of the DiploTab
+     * @param {*} param0
+     * @param {*} param1
+     * @returns
+     */
+    setActiveDiploTransElementAttValue ({ getters, dispatch }, { id, value }) {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      const elemId = getters.activeDiploTransElementId
+      const attName = id
+
+      if (!filePath || !elemId) {
+        return
+      }
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return
+      }
+
+      const newDoc = doc.cloneNode(true)
+      const elem = newDoc.querySelector('*[*|id="' + elemId + '"]')
+
+      if (!elem) {
+        return
+      }
+
+      elem.setAttribute(attName, value)
+      const baseMessage = 'adjust XML for '
+      const param = '//' + elem.localName + '#' + elemId
+
+      dispatch('loadDocumentIntoStore', { path: filePath, dom: newDoc })
+      dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [elemId], isNewDocument: false })
     }
   },
 
@@ -2835,27 +2890,121 @@ const dataModule = {
      */
     xmlSnippet: (state, getters) => ({ filePath, id }) => {
       if (!filePath || !id) {
-        return ''
+        return 'error 1'
       }
 
-      const doc = getters.documentByPath(filePath)
+      // const doc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
+      const doc = getters.documentByPath(filePath).cloneNode(true)
       if (!doc) {
-        return ''
+        return 'error 2'
       }
 
       if (!state.isWellformed) {
         return state.temporaryXMLCode
       }
 
-      const elem = doc.querySelector('*[*|id="' + id + '"]')
+      console.log('------\nid: ' + id)
+      console.log(doc.querySelector('layer'))
+
+      const allElems = doc.querySelectorAll('layer *[*|id]')
+      console.log([...allElems])
+      const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
+
+      // const elem = doc.querySelector('*[*|id="' + id + '"]')
 
       if (!elem) {
-        return ''
+        console.log('found doc:\n', doc.querySelector('layer'))
+        return 'error 3'
       }
 
       // console.log('found elem:\n', elem)
 
       return serializer.serializeToString(elem)
+    },
+
+    /**
+     * retrieves the name of the element currently activated in the XML editor of DiploTab
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeDiploTransElementName: (state, getters) => {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      const elemId = getters.activeDiploTransElementId
+      if (!filePath || !elemId) {
+        return null
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return null
+      }
+      const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+
+      if (!elem) {
+        return null
+      }
+
+      return elem.localName
+    },
+
+    /**
+     * retrieves the attribute value of the element currently
+     * activated in the XML editor of DiploTab
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeDiploTransElementAttValue: (state, getters) => (attName) => {
+      // const attName = 'coord.x1'
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      const elemId = getters.activeDiploTransElementId
+      if (!filePath || !elemId) {
+        return null
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return null
+      }
+      const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+
+      if (!elem) {
+        return null
+      }
+
+      if (!elem.hasAttribute(attName)) {
+        return null
+      }
+
+      return elem.getAttribute(attName)
+    },
+
+    /**
+     * returns a list of all SVG paths referenced by the current diplomatic transcript
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeDiploTransUsedShapes: (state, getters) => {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      if (!filePath) {
+        return []
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return []
+      }
+
+      const arr = []
+      doc.querySelectorAll('*[facs]').forEach(elem => {
+        const shapes = elem.getAttribute('facs').trim().replace(/\s+/g, ' ').split(' ')
+        shapes.forEach(uri => {
+          arr.push(uri.split('#')[1])
+        })
+      })
+      return arr
     }
   }
 }

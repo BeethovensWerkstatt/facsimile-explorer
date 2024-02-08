@@ -33,6 +33,7 @@
           <!--<OpenSeadragonComponent/>-->
         </div>
         <div class="mainBox">
+          <DiploTabMenu :filePath="editorSettings.filePath" :id="editorSettings.id"/>
           <XmlEditor :filePath="editorSettings.filePath" :id="editorSettings.id"/>
         </div>
         <div class="mainBox">
@@ -57,6 +58,8 @@ import FacsimileComponent from '@/components/FacsimileComponent.vue'
 import VerovioComponent from '@/components/shared/VerovioComponent.vue'
 import XmlEditor from '@/components/XmlEditor.vue'
 
+import DiploTabMenu from '@/components/DiploTabMenu.vue'
+
 export default {
   name: 'DiploTab',
   components: {
@@ -68,7 +71,8 @@ export default {
     WritingZoneDirectory,
     FacsimileComponent,
     VerovioComponent,
-    XmlEditor
+    XmlEditor,
+    DiploTabMenu
   },
   methods: {
     toggleSidebar () {
@@ -139,11 +143,12 @@ export default {
         return false
       }
 
-      // console.log('DiploTab: autoTranscribe()')
+      console.log('DiploTab: autoTranscribe()', newShapes, oldShapes, newAnnotated, oldAnnotated)
 
       if (newAnnotated === oldAnnotated && newShapes.length > oldShapes.length && oldShapes.length > 0) {
         // add shape to existing diploTrans
         console.log('TODO: add shape to existing diploTrans')
+        this.$store.dispatch('diploTranscribe_setShapes', { annotElem: newAnnotated, shapes: newShapes })
       } else {
         this.$store.dispatch('diploTranscribe')
       }

@@ -8,7 +8,7 @@
       :min="min"
       :max="max"
       :step="step"
-      :disabled="readOnly"
+      :disabled="disabled"
       :style="{ background: 'linear-gradient(to right, #999 ' + percent + '%, #ccc ' + percent + '%)'}"/>
   </div>
 </template>
@@ -62,20 +62,43 @@ export default {
   },
   computed: {
     percent () {
-      const val = parseFloat(this.$store.getters[this.getterName])
+      let val
+
+      try {
+        if (this.idParam === 'undefined') {
+          val = parseFloat(this.$store.getters[this.getterName])
+        } else {
+          val = parseFloat(this.$store.getters[this.getterName](this.idParam))
+        }
+      } catch (e) {
+        val = parseFloat(this.$store.getters[this.getterName])
+      }
       const dist = this.max - this.min
       const pos = val - this.min
       const percent = parseInt(100 / dist * pos)
       return percent
     },
+    disabled () {
+      if (this.readOnly) {
+        return this.readOnly
+      }
+      return this.data === null || isNaN(this.data)
+    },
     data: {
       get () {
-        if (typeof this.getterName !== 'undefined') {
+        try {
+          // console.warn('----\nSliderInput\ngetterName: ', this.getterName, '\nidParam: ', this.idParam, '\nval: ', this.$store.getters[this.getterName](this.idParam))
+          if (this.getterName !== 'undefined' && this.idParam !== 'undefined') {
+            return parseFloat(this.$store.getters[this.getterName](this.idParam))
+          } else if (typeof this.getterName !== 'undefined') {
+            return parseFloat(this.$store.getters[this.getterName])
+          } else if (typeof this.val !== 'undefined') {
+            return parseFloat(this.val)
+          } else {
+            return parseFloat(this.$store.getters[this.getterName](this.idParam))
+          }
+        } catch (e) {
           return parseFloat(this.$store.getters[this.getterName])
-        } else if (typeof this.val !== 'undefined') {
-          return parseFloat(this.val)
-        } else {
-          return parseFloat(this.$store.getters[this.getterName](this.idParam))
         }
       },
       set (value) {
@@ -100,7 +123,7 @@ export default {
 
 }
 .simplifiedSlider {
-  width: 3em;
+  width: 3.6em;
   text-align: center;
   border: $lightBorder;
   border-radius: 3px;

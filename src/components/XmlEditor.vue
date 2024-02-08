@@ -6,6 +6,7 @@
       :autofocus="true"
       :indent-with-tab="true"
       :tab-size="2"
+      :disabled="disabled"
       :extensions="extensions"
     />
   </div>
@@ -47,6 +48,9 @@ export default {
         // console.log('changing editor to ', val)
         this.$store.dispatch('modifyXml', { filePath: this.filePath, id: this.id, val })
       }
+    },
+    disabled () {
+      return this.code === ''
     }
   }
 }

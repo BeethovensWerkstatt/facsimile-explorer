@@ -167,7 +167,7 @@ export default {
       click.page = clickedPagePos
       // }
 
-      console.log('-------------\n\nCLICK\n\n------------\n', click)
+      // console.log('-------------\n\nCLICK\n\n------------\n', click)
 
       // check for click to svg shape
       if (click.target.localName === 'path') {
@@ -506,6 +506,7 @@ export default {
 
       if (activeZone) {
         svgClone.querySelector('#' + activeZone.svgGroupWzId).classList.add('activeWritingZone')
+        this.indicateUsedShapes()
       }
 
       if (activeZone && activeWritingLayer) {
@@ -514,6 +515,41 @@ export default {
         if (activeLayer) {
           svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
         }
+      }
+    },
+
+    /**
+     * indicates which shapes are already used in the active diploTrans
+     * @return {[type]} [description]
+     */
+    indicateUsedShapes () {
+      const arr = [...this.$store.getters.activeDiploTransUsedShapes]
+      console.log('FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
+      const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
+
+      if (existingOverlay !== null) {
+        console.log('found an overlay')
+        existingOverlay.querySelectorAll('.activeWritingZone .usedShape').forEach(shape => {
+          const id = shape.getAttribute('data-id')
+          const index = arr.indexOf(id)
+          if (index === -1) {
+            console.log('removing usedShape from ' + id)
+            shape.classList.remove('usedShape')
+          } else {
+            arr.splice(index, 1)
+          }
+        })
+
+        console.log('\n\nNEED TO ADD in following array\n', arr)
+        arr.forEach(id => {
+          const elem = existingOverlay.querySelector('.activeWritingZone path[id="' + id + '"]')
+          if (elem) {
+            console.log('adding usedShape to ' + id)
+            elem.classList.add('usedShape')
+          } else {
+            console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
+          }
+        })
       }
     },
 
@@ -1064,6 +1100,11 @@ export default {
         this.renderDiploTransOnPage()
       })
 
+    this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
+      (newArr, oldArr) => {
+        this.indicateUsedShapes()
+      })
+
     this.openFacsimile()
   },
   updated () {
@@ -1085,6 +1126,7 @@ export default {
         this.unwatchDiploTransOsdBounds()
         this.unwatchDiploTranscriptsOnCurrentPage()
       }
+      this.unwatchUsedShapes()
     } catch (err) {
       console.warn('FacsimileComponent:beforeUnmount(): ' + err, err)
     }
@@ -1250,6 +1292,16 @@ export default {
       opacity: 1;
       fill: $svgActiveWritingLayerColor;
       stroke: $svgActiveWritingLayerColor;
+
+      &.usedShape {
+        fill: $svgUsedShapeColor;
+        stroke: $svgUsedShapeColor;
+      }
+    }
+
+    .usedShape {
+      fill: $svgUsedShapeColor;
+      stroke: $svgUsedShapeColor;
     }
   }
 }
@@ -1357,7 +1409,7 @@ export default {
 
 .overlay.diploTrans {
   &.activeDiploTrans {
-    outline: 5px solid $svgActiveWritingLayerColor;
+    // outline: 5px solid $svgActiveWritingLayerColor;
   }
   g.staff > path {
     fill: $svgActiveWritingZoneColor; //transparent;

@@ -189,6 +189,11 @@ export default {
   max-height: 100%;
   overflow: auto;
 
+  svg *[data-corresp] {
+    fill: $svgUsedShapeColor;
+    stroke: $svgUsedShapeColor;
+  }
+
   svg .supplied {
     fill: $svgSuppliedColor;
     stroke: $svgSuppliedColor;
