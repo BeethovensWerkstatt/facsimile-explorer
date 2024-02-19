@@ -1472,6 +1472,12 @@ const dataModule = {
 
       const atPath = getters.currentWzAtPath
 
+      for (const elem of [...dtDoc.querySelectorAll('*[*|id]')]) {
+        if (elem.getAttribute('xml:id') === diplomaticElement.getAttribute('xml:id')) {
+          console.log('found:', elem)
+        }
+      }
+
       dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
 
@@ -2893,8 +2899,10 @@ const dataModule = {
         return 'error 1'
       }
 
+      const origdoc = getters.documentByPath(filePath)
+      // console.log(origdoc.querySelector('#' + id))
       // const doc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
-      const doc = getters.documentByPath(filePath).cloneNode(true)
+      const doc = origdoc.cloneNode(true)
       if (!doc) {
         return 'error 2'
       }
@@ -2904,7 +2912,7 @@ const dataModule = {
       }
 
       console.log('------\nid: ' + id)
-      console.log(doc.querySelector('layer'))
+      console.log([...doc.querySelectorAll('layer')])
 
       const allElems = doc.querySelectorAll('layer *[*|id]')
       console.log([...allElems])
