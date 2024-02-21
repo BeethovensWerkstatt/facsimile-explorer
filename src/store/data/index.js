@@ -1464,6 +1464,11 @@ const dataModule = {
         }
       }
 
+      const deid = diplomaticElement.getAttribute('xml:id')
+      console.log(deid, dtDoc.querySelector('*[*|id="' + deid + '"]'))
+      const deids = Array.from(dtDoc.querySelectorAll('*[*|id]')).map(e => e.getAttribute('xml:id')).filter(s => s.substring(0, 1) === 'd')
+      console.log(deids, deid)
+
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'generate diplomatic transcription at '
       const param = dtPath.split('/').splice(-1)[0]
