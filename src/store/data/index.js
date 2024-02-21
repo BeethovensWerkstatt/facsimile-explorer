@@ -1465,8 +1465,11 @@ const dataModule = {
       }
 
       const deid = diplomaticElement.getAttribute('xml:id')
-      console.log(deid, dtDoc.querySelector('*[*|id="' + deid + '"]'))
-      const deids = Array.from(dtDoc.querySelectorAll('*[*|id]')).map(e => e.getAttribute('xml:id')).filter(s => s.substring(0, 1) === 'd')
+      const dtstr = new XMLSerializer().serializeToString(dtDoc)
+      console.log(dtstr.indexOf(deid))
+      const dtDoc2 = new DOMParser().parseFromString(dtstr, 'application/xml')
+      console.log(deid, dtDoc2.querySelector('*[*|id="' + deid + '"]'))
+      const deids = Array.from(dtDoc2.querySelectorAll('*[*|id]')).map(e => e.getAttribute('xml:id')).filter(s => s.substring(0, 1) === 'd')
       console.log(deids, deid)
 
       const dtPath = getters.currentWzDtPath
@@ -1483,7 +1486,7 @@ const dataModule = {
         }
       }
 
-      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc })
+      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc2 })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
 
       dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
