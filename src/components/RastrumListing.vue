@@ -9,7 +9,7 @@
          @click="setActiveRastrum(rastrum.id)">
          <span class="rastrumNumber">{{ i + 1 }}</span>
          <template v-if="currentPageDimensions !== null">
-           <SliderInput label="X" :val="rastrum.x" setterName="setActiveSystemX" :min="0" :max="currentPageDimensions.wwWidth" :step="0.1"/>
+           <SliderInput label="X" :val="rastrum.x" setterName="setActiveSystemX" :min="0" :max="currentPageDimensions.mmWidth" :step="0.1"/>
            <SliderInput label="Y" :val="rastrum.y" setterName="setActiveSystemY" :min="0" :max="currentPageDimensions.mmHeight" :step="0.1"/>
            <SliderInput label="W" :val="rastrum.w" setterName="setActiveSystemW" :min="0" :max="currentPageDimensions.mmWidth" :step="0.1"/>
            <SliderInput label="H" :val="rastrum.h" setterName="setActiveSystemH" :min="0" :max="currentPageDimensions.mmHeight" :step="0.1"/>
