@@ -88,7 +88,7 @@ export default {
       get () {
         try {
           // console.warn('----\nSliderInput\ngetterName: ', this.getterName, '\nidParam: ', this.idParam, '\nval: ', this.$store.getters[this.getterName](this.idParam))
-          if (this.getterName !== 'undefined' && this.idParam !== 'undefined') {
+          if (typeof this.getterName !== 'undefined' && typeof this.idParam !== 'undefined') {
             return parseFloat(this.$store.getters[this.getterName](this.idParam))
           } else if (typeof this.getterName !== 'undefined') {
             return parseFloat(this.$store.getters[this.getterName])
@@ -98,6 +98,7 @@ export default {
             return parseFloat(this.$store.getters[this.getterName](this.idParam))
           }
         } catch (e) {
+          // console.error('----E: ' + this.getterName + '\n', e)
           return parseFloat(this.$store.getters[this.getterName])
         }
       },
