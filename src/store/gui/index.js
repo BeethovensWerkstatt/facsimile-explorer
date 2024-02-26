@@ -53,7 +53,7 @@ const guiModule = {
     pageTabSidebarVisible: true,
     pageTabSidebarWidth: 310,
     pageTabRightSidebarVisible: true,
-    pageTabRightSidebarWidth: 480,
+    pageTabRightSidebarWidth: 490,
     pageShowGrid: true,
     zonesTabLeftSidebarVisible: true,
     zonesTabLeftSidebarWidth: 310,
