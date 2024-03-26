@@ -8,6 +8,7 @@
       :tab-size="2"
       :disabled="disabled"
       :extensions="extensions"
+      @ready="handleReady"
     />
   </div>
 </template>
@@ -18,6 +19,7 @@ import { EditorView } from '@codemirror/view'
 // import { javascript } from '@codemirror/lang-javascript'
 import { xml } from '@codemirror/lang-xml'
 import { oneDark } from '@codemirror/theme-one-dark'
+import readOnlyRangesExtension from 'codemirror-readonly-ranges'
 
 // import { EditorState } from '@codemirror/state'
 
@@ -30,14 +32,29 @@ export default {
   components: {
     Codemirror
   },
-  data: () => {
-    const extensions = [xml(), oneDark, EditorView.lineWrapping]
+  data () {
+    const extensions = [xml(), oneDark, EditorView.lineWrapping, readOnlyRangesExtension(this.readOnly)]
     return {
       extensions,
-      log: console.log
+      log: console.log,
+      view: null
     }
   },
   methods: {
+    handleReady (payload) {
+      this.view = payload.view
+    },
+    readOnly (state) {
+      const re = /<.* (xml:)?id="([^"]+)"/g
+      const ro = []
+      const s = state.doc.toString()
+      let m
+      while ((m = re.exec(s)) !== null) {
+        ro.push({ from: m.indices[0][0], to: m.indices[0][1] })
+      }
+      // console.log(ro)
+      return ro
+    }
   },
   computed: {
     code: {

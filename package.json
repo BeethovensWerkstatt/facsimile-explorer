@@ -16,6 +16,7 @@
     "@recogito/annotorious-openseadragon": "^2.7.6",
     "caniuse-lite": "^1.0.30001449",
     "codemirror": "^6.0.0",
+    "codemirror-readonly-ranges": "^0.1.0-alpha.2",
     "core-js": "^3.8.3",
     "js-file-download": "^0.4.12",
     "octokit": "^3.1.1",
