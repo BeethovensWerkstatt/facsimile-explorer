@@ -9,6 +9,9 @@
       :disabled="disabled"
       :extensions="extensions"
       @ready="handleReady"
+      v-if="filePath && id"
+      @focusin="lock=true"
+      @focusout="lock=false"
     />
   </div>
 </template>
@@ -37,7 +40,8 @@ export default {
     return {
       extensions,
       log: console.log,
-      view: null
+      view: null,
+      lock: false
     }
   },
   methods: {
@@ -45,21 +49,33 @@ export default {
       this.view = payload.view
     },
     readOnly (state) {
-      const re = /<.* (xml:)?id="([^"]+)"/g
+      // console.log('read only ...')
       const ro = []
-      const s = state.doc.toString()
-      let m
-      while ((m = re.exec(s)) !== null) {
-        ro.push({ from: m.indices[0][0], to: m.indices[0][1] })
+      if (this.lock) {
+        try {
+          // eslint-disable-next-line no-empty-character-class
+          const re = /((xmlns|(xml:)?id|facs)="([^"]+)")/gd
+          const s = state.doc.toString()
+          let m
+          while ((m = re.exec(s)) !== null) {
+            const indices = m.indices
+            if (indices) {
+              ro.push({ from: indices[1][0], to: indices[1][1] })
+            }
+          }
+          // console.log('read only:', ro)
+        } catch (e) {
+          console.error(e)
+        }
       }
-      // console.log(ro)
       return ro
     }
   },
   computed: {
     code: {
       get () {
-        return this.$store.getters.xmlSnippet({ filePath: this.filePath, id: this.id })
+        const snippet = this.$store.getters.xmlSnippet({ filePath: this.filePath, id: this.id })
+        return snippet
       },
       set (val) {
         // console.log('changing editor to ', val)

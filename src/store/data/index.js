@@ -2643,7 +2643,7 @@ const dataModule = {
         wz.xywh = x + ',' + y + ',' + w + ',' + h
         wz.layers = layers
         wz.svgGroupWzId = svgGroupWzId
-
+        // console.log(wz)
         arr.push(wz)
       })
 
@@ -2919,17 +2919,17 @@ const dataModule = {
         return state.temporaryXMLCode
       }
 
-      console.log('------\nid: ' + id)
-      console.log([...doc.querySelectorAll('layer')])
+      // console.log('------\nid: ' + id)
+      // console.log([...doc.querySelectorAll('layer')])
 
       const allElems = doc.querySelectorAll('layer *[*|id]')
-      console.log([...allElems])
+      // console.log([...allElems])
       const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
 
       // const elem = doc.querySelector('*[*|id="' + id + '"]')
 
       if (!elem) {
-        console.log('found doc:\n', doc.querySelector('layer'))
+        // console.log('found doc:\n', doc.querySelector('layer'))
         return 'error 3'
       }
 
