@@ -10,8 +10,8 @@
       :extensions="extensions"
       @ready="handleReady"
       v-if="filePath && id"
-      @focusin="lock=true"
-      @focusout="lock=false"
+      @change="lock=true"
+      @focus="lock=true"
     />
   </div>
 </template>
@@ -40,8 +40,7 @@ export default {
     return {
       extensions,
       log: console.log,
-      view: null,
-      lock: false
+      view: null
     }
   },
   methods: {
@@ -53,6 +52,7 @@ export default {
       const ro = []
       if (this.lock) {
         try {
+          // look for locked attributes
           // eslint-disable-next-line no-empty-character-class
           const re = /((xmlns|(xml:)?id|facs)="([^"]+)")/gd
           const s = state.doc.toString()
@@ -60,6 +60,7 @@ export default {
           while ((m = re.exec(s)) !== null) {
             const indices = m.indices
             if (indices) {
+              // add indices of attribute to list of locked ranges
               ro.push({ from: indices[1][0], to: indices[1][1] })
             }
           }
@@ -80,6 +81,14 @@ export default {
       set (val) {
         // console.log('changing editor to ', val)
         this.$store.dispatch('modifyXml', { filePath: this.filePath, id: this.id, val })
+      }
+    },
+    lock: {
+      get () {
+        return this.$store.getters.xmlReadOnlyLock
+      },
+      set (val) {
+        this.$store.dispatch('setXmlReadOnlyLock', val)
       }
     },
     disabled () {

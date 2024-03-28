@@ -1551,6 +1551,7 @@ const dataModule = {
      * @returns
      */
     setActiveDiploTransElementAttValue ({ getters, dispatch }, { id, value }) {
+      dispatch('setXmlReadOnlyLock', false)
       const filePath = getters.currentWritingZoneObject?.diploTrans
       const elemId = getters.activeDiploTransElementId
       const attName = id

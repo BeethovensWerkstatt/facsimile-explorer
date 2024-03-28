@@ -79,7 +79,8 @@ const guiModule = {
     },
     diploTransSelectedId: null,
     diploTransOsdBounds: null,
-    activeDiploTransElementId: null
+    activeDiploTransElementId: null,
+    lockXml: false // activate read only ranges in XmlEditor
   },
   /**
    * @namespace store.gui.mutations
@@ -384,6 +385,12 @@ const guiModule = {
      */
     SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID (state, id) {
       state.activeDiploTransElementId = id
+    },
+    /**
+     * activates read only ranges in XmlEditor
+     */
+    SET_XML_READONLY_LOCK (state, lock) {
+      state.lockXml = lock
     }
   },
   /**
@@ -664,7 +671,15 @@ const guiModule = {
      * @param {*} id
      */
     setActiveDiploTransElementId ({ commit }, id) {
+      commit('SET_XML_READONLY_LOCK', false)
       commit('SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID', id)
+    },
+    /**
+     * activate readonly ranges in XmlEditor
+     * @param {*} lock
+     */
+    setXmlReadOnlyLock ({ commit }, lock) {
+      commit('SET_XML_READONLY_LOCK', lock)
     }
   },
   /**
@@ -1012,6 +1027,14 @@ const guiModule = {
      */
     activeDiploTransElementId: (state) => {
       return state.activeDiploTransElementId
+    },
+    /**
+     * returns true, if read only is activated
+     * @param {*} state
+     * @returns
+     */
+    xmlReadOnlyLock: (state) => {
+      return state.lockXml
     }
   }
 }
