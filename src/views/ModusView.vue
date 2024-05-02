@@ -9,6 +9,7 @@
   <CommitModal/>
   <OpenFileModal/>
   <AssignSVGsModal/>
+  <ContextMenu/>
 
   <!-- HELLO MODUSVIEW -->
 
@@ -59,6 +60,8 @@ import CommitModal from '@/components/CommitModal.vue'
 import OpenFileModal from '@/components/OpenFileModal.vue'
 import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 
+import ContextMenu from '@/components/shared/ContextMenu.vue'
+
 import HomeTab from '@/components/HomeTab.vue'
 import PagesTab from '@/components/PagesTab.vue'
 import ZonesTab from '@/components/ZonesTab.vue'
@@ -87,7 +90,8 @@ export default {
     PagesTab,
     ZonesTab,
     AnnotTab,
-    DiploTab
+    DiploTab,
+    ContextMenu
   },
   created () {
     console.log('ModusView:created()')

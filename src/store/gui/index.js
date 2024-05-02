@@ -44,6 +44,7 @@ const guiModule = {
    * @property {Object} diploTransActivations an object of selected shapes and / or elements from the annotated transcription
    * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
    * @property {Object} diploTransOsdBounds the OSD bounds currenlty viewed in both facsimile viewers
+   * @property {Object} contextMenu the context menu currently shown
    */
   state: {
     explorerTab: 'home',
@@ -79,8 +80,19 @@ const guiModule = {
     },
     diploTransSelectedId: null,
     diploTransOsdBounds: null,
-    activeDiploTransElementId: null,
-    lockXml: false // activate read only ranges in XmlEditor
+    activeDiploTransElementId: null, // todo: was ist das???
+    lockXml: false, // activate read only ranges in XmlEditor
+    contextMenu: null
+
+    /**
+     * contextMenu sample: {
+     *  pos: { x: 100, y: 200 },
+     *  items: [
+     *    { label: 'Item 1', action: 'callBackFunc1', disabled: false },
+     *    { label: 'Item 2', action: 'callBackFunc2', disabled: false }
+     *  ]
+     * }
+     */
   },
   /**
    * @namespace store.gui.mutations
@@ -391,6 +403,13 @@ const guiModule = {
      */
     SET_XML_READONLY_LOCK (state, lock) {
       state.lockXml = lock
+    },
+    /**
+     * sets the context menu
+     * @param {Object} state  the contextMenu to show
+     */
+    SET_CONTEXT_MENU (state, obj) {
+      state.contextMenu = obj
     }
   },
   /**
@@ -630,6 +649,7 @@ const guiModule = {
 
     /**
      * toggles an item (either SVG shape or from the annotated transcription in the selection for the diplomatic transcription
+     * TODO: remove this???
      * @param  {[type]} commit               [description]
      * @param  {[type]} type                 [description]
      * @param  {[type]} id                   [description]
@@ -680,6 +700,23 @@ const guiModule = {
      */
     setXmlReadOnlyLock ({ commit }, lock) {
       commit('SET_XML_READONLY_LOCK', lock)
+    },
+    /**
+     * closes the context menu
+     */
+    closeContextMenu ({ commit }) {
+      commit('SET_CONTEXT_MENU', null)
+    },
+
+    /**
+     * sets the context menu
+     * @param  {[type]} commit               [description]
+     * @param  {[type]} obj                  [description]
+     */
+    setContextMenu ({ commit }, obj) {
+      if ('pos' in obj && 'items' in obj && obj.items.length > 0) {
+        commit('SET_CONTEXT_MENU', obj)
+      }
     }
   },
   /**
@@ -982,6 +1019,26 @@ const guiModule = {
     },
 
     /**
+     * returns the state of the diplomatic transcription app
+     * @param {[]} state
+     */
+    diploTransState: (state) => {
+      // 'awaitStart' : waiting for the user to select a shape in facsimile view
+      // 'awaitAT' : shape is selected, waiting for the user to select an element in the annotated transcription
+      // 'selectedDT' : an existing element in the diplomatic transcription is selected
+      const selected = state.diploTransSelectedId !== null
+      const shapeSelected = state.diploTransActivations.shapes.size !== 0
+
+      if (selected) {
+        return 'selectedDT'
+      } else if (shapeSelected) {
+        return 'awaitAT'
+      } else {
+        return 'awaitStart'
+      }
+    },
+
+    /**
      * returns an array with the IDs of all selected SVG shapes
      * @param  {[type]} state               [description]
      * @return {[type]}       [description]
@@ -1035,6 +1092,23 @@ const guiModule = {
      */
     xmlReadOnlyLock: (state) => {
       return state.lockXml
+    },
+    /**
+     * returns the context menu
+     * @param {*} state
+     * @returns
+     */
+    contextMenu: (state) => {
+      return state.contextMenu
+    },
+
+    /**
+     * returns whether the context menu is visible
+     * @param {*} state
+     * @returns
+     */
+    contextMenuVisible: (state) => {
+      return state.contextMenu !== null
     }
   }
 }

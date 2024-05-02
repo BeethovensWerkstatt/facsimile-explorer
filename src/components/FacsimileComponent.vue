@@ -167,12 +167,66 @@ export default {
       click.page = clickedPagePos
       // }
 
-      // console.log('-------------\n\nCLICK\n\n------------\n', click)
-
       // check for click to svg shape
       if (click.target.localName === 'path') {
-        console.log('clicked on shape ' + click.target.id)
-        this.$store.dispatch('clickedSvgShape', click.target.id)
+        // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
+        if (this.type === 'facsimile' && this.explorerTab === 'diplo') {
+          const selectFunc = () => {
+            this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id })
+          }
+          const func = () => {
+            console.log('clicked on shape ' + click.target.id)
+          }
+
+          const usedShape = click.target.classList.contains('usedShape')
+
+          const addShapeEntry = {
+            label: 'Add shape to current DiploTrans element',
+            action: () => {
+              console.log('TODO: add shape to current DiploTrans element')
+            },
+            disabled: this.$store.getters.diploTransSelectedId === null
+          }
+
+          const activateDTEntry = {
+            label: 'Activate element in DiploTrans',
+            action: () => {
+              console.log('TODO: activate element in DiploTrans')
+            },
+            disabled: !usedShape
+          }
+
+          const adjustFunctionEntry = {
+            label: 'Adjust function of shape in DiploTrans',
+            action: () => {
+              console.log('TODO: adjust function of shape in DiploTrans')
+            },
+            // TODO: only possible for some element types, like notes, but not slurs
+            disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
+          }
+
+          const contextMenu = {
+            pos: { x: e.originalEvent.clientX, y: e.originalEvent.clientY },
+            items: [
+              { label: 'Select for automatic transcription', action: selectFunc, disabled: false },
+              {
+                label: 'Transcribe shape without AnnotTrans',
+                disabled: false,
+                items: [
+                  { label: 'Deletion', action: func, disabled: false },
+                  { label: 'Pitch Clarification Letter', action: func, disabled: false },
+                  { label: 'Navigational Sign', action: func, disabled: false }
+                ]
+              },
+              addShapeEntry,
+              activateDTEntry,
+              adjustFunctionEntry
+            ]
+          }
+          this.$store.dispatch('setContextMenu', contextMenu)
+        } else {
+          this.$store.dispatch('clickedSvgShape', click.target.id)
+        }
       }
 
       // check for click to system
@@ -191,45 +245,6 @@ export default {
           console.log('selecting activeDiploTransElementId: ', id)
         }
       }
-
-      /*
-      const counterRotate = this.viewer.viewport.getRotation()// this.tileSource.degrees * -1
-      const center = { x: 0, y: 0 }
-      console.log('counterRotate: ', counterRotate, this.tileSource.degrees * -1)
-      console.log(e)
-
-      const pageOverlay = this.viewer.getOverlayById(document.querySelector('.overlay.pageBorder'))
-      const pageOverlayViewportBounds = pageOverlay.getBounds(this.viewer.viewport)
-
-      console.log('pageOverlayViewportBounds', pageOverlayViewportBounds)
-
-      const clientPos = new OpenSeadragon.Point(e.clientX, e.clientY)// { x: e.clientX, y: e.clientY }
-
-      // const imagePoint = image.viewerElementToImageCoordinates(clientPos)
-      // const viewerPoint = this.viewer.viewport.viewportToViewerElementCoordinates(clientPos)
-      // const viewPoint = this.viewer.viewport.viewerElementToViewportCoordinates(clientPos)
-      // const pointFromPixel = this.viewer.viewport.pointFromPixel(clientPos)
-      // const pointFromPixelNoRotate = this.viewer.viewport.pointFromPixelNoRotate(clientPos)
-      // const windowToImageCoordinates = this.viewer.viewport.windowToImageCoordinates(clientPos)
-      const windowToViewportCoordinates = this.viewer.viewport.windowToViewportCoordinates(clientPos)
-      const click = {
-        x: clientPos.x,
-        y: clientPos.y,
-        shift: e.shift
-      }
-
-      console.log('clicked page', click)
-      // console.log('unrotated imagePoint ', imagePoint, rotatePoint(imagePoint, center, counterRotate))
-      // console.log('unrotated viewerPoint ', viewerPoint, rotatePoint(viewerPoint, center, counterRotate))
-      // console.log('unrotated viewPoint ', viewPoint, rotatePoint(viewPoint, center, counterRotate))
-      // console.log('unrotated pointFromPixel ', pointFromPixel, rotatePoint(pointFromPixel, center, counterRotate))
-      // console.log('pointFromPixelNoRotate', pointFromPixelNoRotate)
-      // console.log('windowToImageCoordinates ', windowToImageCoordinates, rotatePoint(windowToImageCoordinates, center, counterRotate))
-      console.log('windowToViewportCoordinates ', windowToViewportCoordinates, rotatePoint(windowToViewportCoordinates, center, counterRotate), windowToViewportCoordinates.rotate(counterRotate, center))
-      */
-
-      // console.log(e)
-      // this.$store.dispatch('facsimileClick', click)
     },
 
     /**

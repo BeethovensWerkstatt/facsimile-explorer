@@ -1,5 +1,10 @@
 <template>
   <div class="diploTabMenu">
+    <div class="entry right">
+      <div class="cancel button" title="Cancel [Esc]">⛌</div>
+      <label>Next</label>
+      <div class="value" :title="stateTitle">{{ stateLabel }}</div>
+    </div>
     <div class="entry">
         <label>@xml:id</label>
         <div class="value string">{{elementId}}</div>
@@ -49,6 +54,30 @@ export default {
     }
   },
   computed: {
+    diploTransState () {
+      return this.$store.getters.diploTransState
+    },
+    stateLabel () {
+      const state = this.diploTransState
+      console.log('773: ' + state + ' – ' + this.$store.getters.diploTransState)
+      if (state === 'awaitStart') {
+        return 'Select Shape in Facsimile'
+      } else if (state === 'awaitAT') {
+        return 'Select from Annotated Transcription'
+      } else {
+        return 'Modify Diplomatic Transcription'
+      }
+    },
+    stateTitle () {
+      const state = this.diploTransState
+      if (state === 'awaitStart') {
+        return 'Select Shape in Facsimile'
+      } else if (state === 'awaitAT') {
+        return 'Select from Annotated Transcription'
+      } else {
+        return 'Modify Diplomatic Transcription or select new shape in Facsimile'
+      }
+    },
     elementId () {
       return this.$store.getters.activeDiploTransElementId
     },
@@ -110,6 +139,19 @@ export default {
       &:hover {
         text-decoration: underline;
       }
+    }
+
+    .cancel {
+      cursor: pointer;
+      float: right;
+      font-size: .7rem;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    &.right {
+      float: right;
     }
   }
 }

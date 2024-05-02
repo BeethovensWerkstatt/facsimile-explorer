@@ -1504,12 +1504,13 @@ const dataModule = {
       console.log('diploTranscribe_setShapes', annotElem, shapes)
 
       const atDoc = getters.annotatedTranscriptForCurrentWz
-      // const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
+      const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
 
       const atElem = atDoc.querySelector(annotElem.name + '[*|id="' + annotElem.id + '"]')
       const corresp = atElem.getAttribute('corresp')
 
-      console.log('searching for corresponding element in diplomatic transcript: ' + corresp)
+      const dtElem = dtDoc.querySelector('*[*|id="' + corresp.split('#')[1] + '"]')
+      console.log('searching for corresponding element in diplomatic transcript: ' + corresp + ', found this:\n', dtElem)
     },
 
     modifyXml ({ commit, getters, state, dispatch }, { filePath, id, val }) {
