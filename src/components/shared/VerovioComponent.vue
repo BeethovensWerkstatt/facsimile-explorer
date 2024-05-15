@@ -52,7 +52,7 @@ export default {
 
       if (!meiDom) {
         console.log('VerovioComponent:render(): No data available.')
-        this.$refs.mei.innerHTML = '<div class="placeholder">loading data…</div>'
+        this.$refs.mei.innerHTML = '<div class="placeholder"><!-- loading data… -->select writing zone ...</div>'
         return false
       }
 

@@ -194,6 +194,7 @@ export default {
 
     this.unwatchDiploActivations = this.$store.watch((state, getters) => [getters.diploTransActivationsInShapes, getters.diploTransActivationsInAnnotTrans],
       ([newShapes, newAnnotated], [oldShapes, oldAnnotated]) => {
+        console.log('selected shapes:', newShapes.target)
         this.autoTranscribe(newShapes, oldShapes, newAnnotated, oldAnnotated)
       })
 

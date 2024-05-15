@@ -54,6 +54,12 @@ router.beforeEach((to, from) => {
         store.dispatch('setAwaitedDocument', to.params.source)
         if (to.query.page && parseInt(to.query.page).toFixed(0) === to.query.page) {
           store.dispatch('setAwaitedPage', parseInt(to.query.page))
+          if (to.query.zone) {
+            store.dispatch('setAwaitedZone', parseInt(to.query.zone))
+            if (to.query.layer) {
+              store.dispatch('setAwaitedLayer', parseInt(to.query.layer))
+            }
+          }
         }
       } else {
         console.log('opening content')

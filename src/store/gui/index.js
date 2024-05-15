@@ -40,6 +40,8 @@ const guiModule = {
    * @property {Object} focusRect
    * @property {String} awaitedDocument name of a document to be opened when sufficient data is available. Used to resolve routes
    * @property {Number} awaitedPage number of the page to be opened when sufficient data is available. Used to resolve routes
+   * @property {Number} awaitedZone number of the writing zone to be activated when sufficient data is available. Used to resolve routes
+   * @property {Number} awaitedLayer number of the writing layer to be activated when sufficient data is available. Used to resolve routes
    * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
    * @property {Object} diploTransActivations an object of selected shapes and / or elements from the annotated transcription
    * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
@@ -73,6 +75,8 @@ const guiModule = {
     pageBorderPoints: [],
     awaitedDocument: null,
     awaitedPage: -1,
+    awaitedZone: -1,
+    awaitedLayer: -1,
     allDocsLoaded: false,
     diploTransActivations: {
       shapes: new Map(),
@@ -280,6 +284,7 @@ const guiModule = {
      * @param {[type]} id     [description]
      */
     SET_ACTIVE_WRITINGZONE (state, id) {
+      console.log('set active writing zone', id)
       state.activeWritingZone = id
     },
 
@@ -347,6 +352,24 @@ const guiModule = {
     },
 
     /**
+     * sets the awaited zone number (to be openend as soon as data is loaded)
+     * @param {[type]} state    [description]
+     * @param {[type]} pageNum  [description]
+     */
+    SET_AWAITED_ZONE (state, zoneNum) {
+      state.awaitedZone = parseInt(zoneNum)
+    },
+
+    /**
+     * sets the awaited layer number (to be openend as soon as data is loaded)
+     * @param {[type]} state    [description]
+     * @param {[type]} pageNum  [description]
+     */
+    SET_AWAITED_LAYER (state, layerNum) {
+      state.awaitedLayer = parseInt(layerNum)
+    },
+
+    /**
      * called once as soon as all documents are properly loaded
      * @param {[type]} state  [description]
      */
@@ -355,8 +378,9 @@ const guiModule = {
     },
 
     TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
+      console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
       if (type === 'annotTrans') {
-        state.diploTransActivations.shapes.clear()
+        // state.diploTransActivations.shapes.clear()
         if (state.diploTransActivations.annotTrans.has(id)) {
           state.diploTransActivations.annotTrans.delete(id)
         } else {
@@ -364,6 +388,7 @@ const guiModule = {
           state.diploTransActivations.annotTrans.set(id, { id, name, measure, path })
         }
       } else if (type === 'shape') {
+        // state.diploTransActivations.annotTrans.clear()
         if (state.diploTransActivations.shapes.has(id)) {
           state.diploTransActivations.shapes.delete(id)
         } else {
@@ -636,6 +661,28 @@ const guiModule = {
     setAwaitedPage ({ commit }, pageNum) {
       if (pageNum === parseInt(pageNum)) {
         commit('SET_AWAITED_PAGE', pageNum)
+      }
+    },
+
+    /**
+     * keeps the number of hte page to be openend when data is loaded
+     * @param {[type]} commit   [description]
+     * @param {[type]} zoneNum  [description]
+     */
+    setAwaitedZone ({ commit }, zoneNum) {
+      if (zoneNum === parseInt(zoneNum)) {
+        commit('SET_AWAITED_ZONE', zoneNum)
+      }
+    },
+
+    /**
+     * keeps the number of hte page to be openend when data is loaded
+     * @param {[type]} commit   [description]
+     * @param {[type]} layerNum  [description]
+     */
+    setAwaitedLayer ({ commit }, layerNum) {
+      if (layerNum === parseInt(layerNum)) {
+        commit('SET_AWAITED_PAGE', layerNum)
       }
     },
 

@@ -47,7 +47,7 @@ export default {
       console.log('\n\nopenDocument', doc)
       this.$store.dispatch('loadContent', doc)
       console.log(doc.name, this.$route.params.modus || 'pages')
-      this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' }, query: { page: 1 } })
+      this.$router.push({ name: 'modus', params: { source: doc.name, modus: this.$route.params.modus || 'pages' }, query: { page: 1, wz: 1 } })
       if (this.table) {
         this.$store.dispatch('setExplorerTab', 'pages')
       }

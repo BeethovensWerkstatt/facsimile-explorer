@@ -121,7 +121,8 @@ export default {
       const path = this.$store.getters.getPathByName(this.$route.params.source)
       const modus = this.$route.params.modus
       const page = this.$route.query.page
-      console.log('ModusView: sourceParam="' + this.$route.params.source + '", resulting path="' + path + '", modus="' + modus + '", page="' + page + '"')
+      const zone = this.$route.query.zone
+      console.log('ModusView: sourceParam="' + this.$route.params.source + '", resulting path="' + path + '", modus="' + modus + '", page="' + page + '", writing zone="' + zone + '"')
       if (path && this.$store.getters.filePath !== path) {
         this.$store.dispatch('loadContent', { path })
       }
@@ -129,8 +130,12 @@ export default {
         this.$store.dispatch('setExplorerTab', modus)
       }
       if (page && this.$store.getters.currentPageOneBased !== page) {
-        console.log('setCurrentPage', +page - 1)
-        this.$store.dispatch('setCurrentPage', +page - 1)
+        const currentPage = { page: +page - 1 }
+        if (zone) {
+          currentPage.zone = +zone - 1
+        }
+        console.log('setCurrentPage', currentPage)
+        this.$store.dispatch('setCurrentPage', currentPage)
       }
     }
   },

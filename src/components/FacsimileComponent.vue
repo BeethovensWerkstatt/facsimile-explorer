@@ -167,6 +167,8 @@ export default {
       click.page = clickedPagePos
       // }
 
+      console.log(click)
+
       // check for click to svg shape
       if (click.target.localName === 'path') {
         // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
@@ -174,8 +176,8 @@ export default {
           const selectFunc = () => {
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id })
           }
-          const func = () => {
-            console.log('clicked on shape ' + click.target.id)
+          const func = (type) => () => {
+            console.log('make "' + click.target.id + '" a ' + type)
           }
 
           const usedShape = click.target.classList.contains('usedShape')
@@ -213,9 +215,9 @@ export default {
                 label: 'Transcribe shape without AnnotTrans',
                 disabled: false,
                 items: [
-                  { label: 'Deletion', action: func, disabled: false },
-                  { label: 'Pitch Clarification Letter', action: func, disabled: false },
-                  { label: 'Navigational Sign', action: func, disabled: false }
+                  { label: 'Deletion', action: func('deletion'), disabled: false },
+                  { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: false },
+                  { label: 'Navigational Sign', action: func('nav sign'), disabled: false }
                 ]
               },
               addShapeEntry,
@@ -1311,6 +1313,9 @@ export default {
       &.usedShape {
         fill: $svgUsedShapeColor;
         stroke: $svgUsedShapeColor;
+      }
+      &.selectedShape {
+        box-shadow: $svgSelectedShapeColor;
       }
     }
 
