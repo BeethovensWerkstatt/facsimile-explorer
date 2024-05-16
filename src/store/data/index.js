@@ -1997,6 +1997,9 @@ const dataModule = {
       const surfaceId = page.id
       const docPath = getters.documentPathByName(docName)
       const dom = getters.documentByPath(docPath)
+      if (!dom) {
+        return null
+      }
 
       const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
       const svgGraphic = surface.querySelector('graphic[type="shapes"]')
@@ -2696,6 +2699,10 @@ const dataModule = {
       const docName = page.document
       const docPath = getters.documentPathByName(docName)
       const dom = getters.documentByPath(docPath)
+      if (!dom) {
+        console.warn(`no rastrums for "${docPath}"!`)
+        return []
+      }
       const surfaceId = getters.currentSurfaceId
       const surface = dom.querySelector('surface[*|id="' + surfaceId + '"]')
 
