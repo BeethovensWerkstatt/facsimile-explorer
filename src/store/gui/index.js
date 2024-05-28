@@ -392,6 +392,8 @@ const guiModule = {
         if (state.diploTransActivations.shapes.has(id)) {
           state.diploTransActivations.shapes.delete(id)
         } else {
+          // TODO activate WZ if not active
+          state.diploTransActivations.shapes.clear()
           state.diploTransActivations.shapes.set(id, { id, path })
         }
       }
