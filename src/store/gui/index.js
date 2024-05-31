@@ -384,6 +384,7 @@ const guiModule = {
         if (state.diploTransActivations.annotTrans.has(id)) {
           state.diploTransActivations.annotTrans.delete(id)
         } else {
+          // TODO we don't need a dict/object if it only contains one item
           state.diploTransActivations.annotTrans.clear()
           state.diploTransActivations.annotTrans.set(id, { id, name, measure, path })
         }
@@ -392,7 +393,6 @@ const guiModule = {
         if (state.diploTransActivations.shapes.has(id)) {
           state.diploTransActivations.shapes.delete(id)
         } else {
-          // TODO activate WZ if not active
           state.diploTransActivations.shapes.clear()
           state.diploTransActivations.shapes.set(id, { id, path })
         }
@@ -707,6 +707,9 @@ const guiModule = {
      * @return {[type]}        [description]
      */
     diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
+      if (type === 'shape') {
+        console.log('TODO: search for WZ')
+      }
       if (getters.activeWritingZone !== null) {
         commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
       }
