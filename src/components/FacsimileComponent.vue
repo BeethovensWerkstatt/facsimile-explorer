@@ -174,11 +174,12 @@ export default {
         // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
         if (this.type === 'facsimile' && this.explorerTab === 'diplo') {
           const svgGroupWzId = click.target.closest('.writingZone')?.id
+          const genDescWzId = this.$store.getters.genWzIdForShape(svgGroupWzId)
+          const wzActive = genDescWzId && genDescWzId === this.$store.getters.activeWritingZone
 
           const selectWzFunc = () => {
-            console.log('select', svgGroupWzId, this.$store.getters.genWzIdForShape(svgGroupWzId))
-            this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })
-            // this.$store.dispatch('setActiveWritingZone', this.$store.getters.genWzIdForShape(svgGroupWzId))
+            // this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })
+            this.$store.dispatch('setActiveWritingZone', genDescWzId)
           }
 
           const selectFunc = () => {
@@ -189,7 +190,7 @@ export default {
           }
 
           const usedShape = click.target.classList.contains('usedShape')
-          console.log('WRITING ZONE:', svgGroupWzId)
+          console.log('WRITING ZONE:', genDescWzId)
 
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
@@ -219,15 +220,15 @@ export default {
           const contextMenu = {
             pos: { x: e.originalEvent.clientX, y: e.originalEvent.clientY },
             items: [
-              { label: 'select writing zone', action: selectWzFunc, disable: false },
-              { label: 'Select for automatic transcription', action: selectFunc, disabled: false },
+              { label: 'select writing zone', action: selectWzFunc, disabled: wzActive },
+              { label: 'Select for automatic transcription', action: selectFunc, disabled: !wzActive },
               {
                 label: 'Transcribe shape without AnnotTrans',
-                disabled: false,
+                disabled: !wzActive,
                 items: [
-                  { label: 'Deletion', action: func('deletion'), disabled: false },
-                  { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: false },
-                  { label: 'Navigational Sign', action: func('nav sign'), disabled: false }
+                  { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
+                  { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
+                  { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
                 ]
               },
               addShapeEntry,
