@@ -707,11 +707,23 @@ const guiModule = {
      * @return {[type]}        [description]
      */
     diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
-      if (type === 'shape') {
-        console.log('TODO: search for WZ')
-      }
       if (getters.activeWritingZone !== null) {
         commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
+      }
+    },
+
+    /**
+     * select WritingZone for shape in facsimile
+     * @param {string} type type of group
+     * @param {string} wzgroup id of svg group element of writingzone
+     */
+    setActiveWritingZoneForShape ({ dispatch, getters }, { type, wzgroup }) {
+      if (type === 'shape' && wzgroup) {
+        const genDescWzId = getters.genWzIdForShape(wzgroup)
+        console.log(genDescWzId)
+        if (genDescWzId && genDescWzId !== getters.activeWritingZone) {
+          dispatch('setActiveWritingZone', genDescWzId)
+        }
       }
     },
 
@@ -1071,6 +1083,29 @@ const guiModule = {
     },
 
     /**
+     * return writing zon id for given shape
+     * @param {type} state               [description]
+     * @param {type} getters             [description]
+     * @returns writing zone for given shape
+     */
+    genWzIdForShape: (state, getters) => (wzgroup) => {
+      const genDescPage = getters.genDescForCurrentPage // dom.querySelector('genDesc[corresp="#' + surfaceId + '"]')
+      if (!genDescPage) {
+        return null
+      }
+      const genDescWzArr = genDescPage.querySelectorAll('genDesc[class="#geneticOrder_writingZoneLevel"]')
+      let ret = null
+      genDescWzArr.forEach((genDescWz) => {
+        const svgGroupWzId = genDescWz.getAttribute('corresp').split('#')[1]
+        if (wzgroup === svgGroupWzId) {
+          const genDescWzId = genDescWz.getAttribute('xml:id')
+          ret = genDescWzId
+        }
+      })
+      return ret
+    },
+
+    /**
      * returns the state of the diplomatic transcription app
      * @param {[]} state
      */
@@ -1137,6 +1172,7 @@ const guiModule = {
     activeDiploTransElementId: (state) => {
       return state.activeDiploTransElementId
     },
+
     /**
      * returns true, if read only is activated
      * @param {*} state

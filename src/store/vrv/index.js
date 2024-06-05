@@ -106,7 +106,7 @@ const verovioModule = {
     annotatedTranscriptForWz: (state, getters) => async (dom) => {
       const serializer = new XMLSerializer()
       const vrvToolkit = await getters.verovioToolkit()
-
+      console.log('annotatedTranscriptForWz', dom)
       const mei = serializer.serializeToString(dom)
       vrvToolkit.setOptions(getters.annotTransVerovioOptions)
       vrvToolkit.loadData(mei)

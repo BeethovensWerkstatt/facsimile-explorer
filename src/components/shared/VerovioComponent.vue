@@ -61,6 +61,7 @@ export default {
 
         if (this.type === 'annotTrans') {
           const resolvedDraft = draft2score(meiDom)[0]
+          console.log('VerovioComponent', meiDom, resolvedDraft)
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
           const localCopy = svg.repeat(1)
@@ -77,7 +78,7 @@ export default {
 
         this.addListeners()
       } catch (err) {
-        console.log('VerovioComponent:render(): Unable to render file: ' + err, err)
+        console.warn('VerovioComponent:render(): Unable to render file: ' + err, err)
       }
     },
     removeListeners () {

@@ -173,14 +173,23 @@ export default {
       if (click.target.localName === 'path') {
         // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
         if (this.type === 'facsimile' && this.explorerTab === 'diplo') {
+          const svgGroupWzId = click.target.closest('.writingZone')?.id
+
+          const selectWzFunc = () => {
+            console.log('select', svgGroupWzId, this.$store.getters.genWzIdForShape(svgGroupWzId))
+            this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })
+            // this.$store.dispatch('setActiveWritingZone', this.$store.getters.genWzIdForShape(svgGroupWzId))
+          }
+
           const selectFunc = () => {
-            this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id })
+            this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
           const func = (type) => () => {
-            console.log('make "' + click.target.id + '" a ' + type)
+            console.log('make "' + click.target.id + '" a ' + type + ' (wz: ' + svgGroupWzId + ')')
           }
 
           const usedShape = click.target.classList.contains('usedShape')
+          console.log('WRITING ZONE:', svgGroupWzId)
 
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
@@ -210,6 +219,7 @@ export default {
           const contextMenu = {
             pos: { x: e.originalEvent.clientX, y: e.originalEvent.clientY },
             items: [
+              { label: 'select writing zone', action: selectWzFunc, disable: false },
               { label: 'Select for automatic transcription', action: selectFunc, disabled: false },
               {
                 label: 'Transcribe shape without AnnotTrans',
@@ -1322,6 +1332,9 @@ export default {
     .usedShape {
       fill: $svgUsedShapeColor;
       stroke: $svgUsedShapeColor;
+    }
+    .selectedShape {
+      box-shadow: $svgSelectedShapeColor;
     }
   }
 }

@@ -585,6 +585,25 @@ export function draft2score (meiDom) {
     })
     arr.push(music)
   })
+  // console.log(arr)
+  if (arr.length === 0) {
+    console.warn('draft2score: try to add score elements ...')
+    meiDom.querySelectorAll('score').forEach(score => {
+      const music = document.createElementNS('http://www.music-encoding.org/ns/mei', 'music')
+      music.setAttribute('meiversion', '5.0.0-dev')
+      const body = document.createElementNS('http://www.music-encoding.org/ns/mei', 'body')
+      const mdiv = document.createElementNS('http://www.music-encoding.org/ns/mei', 'mdiv')
+
+      music.append(body)
+      body.append(mdiv)
+      mdiv.append(score.cloneNode(true))
+
+      arr.push(music)
+    })
+  }
+  if (arr.length === 0) {
+    console.error('draft2score: no scores!')
+  }
   return arr
 }
 
