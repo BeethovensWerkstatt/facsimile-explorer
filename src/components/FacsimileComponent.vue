@@ -1364,7 +1364,7 @@ export default {
         stroke: $svgUsedShapeColor;
       }
       &.selectedShape {
-        filter: drop-shadow(5px 5px 2px rgb(255 255 0 / 0.8));
+        filter: drop-shadow(0px 0px 5px rgb(255 255 0 / 0.9));
       }
     }
 
