@@ -1165,7 +1165,7 @@ export default {
 
     this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
       (newValue, oldValue) => {
-        console.log(`select: '${oldValue}' => '${newValue}'`)
+        console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedShapes()
       })
 
@@ -1364,7 +1364,9 @@ export default {
         stroke: $svgUsedShapeColor;
       }
       &.selectedShape {
-        filter: drop-shadow(0px 0px 5px rgb(255 255 0 / 0.9));
+        filter: drop-shadow(0px 0px 5px $svgSelectedShapeColor);
+        stroke: $svgSelectedShapeColor;
+        stroke-width: 3px;
       }
     }
 
@@ -1373,7 +1375,9 @@ export default {
       stroke: $svgUsedShapeColor;
     }
     .selectedShape {
-      box-shadow: $svgSelectedShapeColor;
+      filter: drop-shadow(0px 0px 5px $svgSelectedShapeColor);
+      stroke: $svgSelectedShapeColor;
+      stroke-width: 3px;
     }
   }
 }
