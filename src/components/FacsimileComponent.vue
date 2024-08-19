@@ -544,6 +544,11 @@ export default {
           svgClone.querySelector('#' + activeLayer.svgGroupWlId).classList.add('activeWritingLayer')
         }
       }
+
+      if (this.$store.getters.diploTransActivationsInShapes.length > 0) {
+        console.log(this.$store.getters.diploTransActivationsInShapes)
+        this.indicateSelectedShapes()
+      }
     },
 
     /**
@@ -574,6 +579,31 @@ export default {
           if (elem) {
             console.log('adding usedShape to ' + id)
             elem.classList.add('usedShape')
+          } else {
+            console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
+          }
+        })
+      }
+    },
+
+    /**
+     * indicates which shape is selected
+     */
+    indicateSelectedShapes () {
+      const arr2 = [...this.$store.getters.diploTransActivationsInShapes.map(dt => dt.id)]
+      console.log('FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
+      const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
+
+      if (existingOverlay !== null) {
+        console.log('found an overlay')
+        existingOverlay.querySelectorAll('.activeWritingZone .selectedShape').forEach(shape => {
+          shape.classList.remove('selectedShape')
+        })
+        arr2.forEach(id => {
+          const elem = existingOverlay.querySelector('.activeWritingZone path[id="' + id + '"]')
+          if (elem) {
+            console.log('selected shape ' + id)
+            elem.classList.add('selectedShape')
           } else {
             console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
           }
@@ -1133,6 +1163,12 @@ export default {
         this.indicateUsedShapes()
       })
 
+    this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
+      (newValue, oldValue) => {
+        console.log(`select: '${oldValue}' => '${newValue}'`)
+        this.indicateSelectedShapes()
+      })
+
     this.openFacsimile()
   },
   updated () {
@@ -1150,11 +1186,13 @@ export default {
       this.unwatchSVG()
       this.unwatchSystems()
       this.unwatchGrid()
+      // TODO watch/unwatch on diplo tab ...
       if (this.explorerTab === 'diplo') {
         this.unwatchDiploTransOsdBounds()
         this.unwatchDiploTranscriptsOnCurrentPage()
       }
       this.unwatchUsedShapes()
+      this.unwatchSelectedId()
     } catch (err) {
       console.warn('FacsimileComponent:beforeUnmount(): ' + err, err)
     }
@@ -1326,7 +1364,7 @@ export default {
         stroke: $svgUsedShapeColor;
       }
       &.selectedShape {
-        box-shadow: $svgSelectedShapeColor;
+        filter: drop-shadow(5px 5px 2px rgb(255 255 0 / 0.8));
       }
     }
 
