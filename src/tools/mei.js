@@ -569,6 +569,7 @@ export function sortRastrumsByVerticalPosition (rastrumDesc) {
 export function draft2score (meiDom) {
   const arr = []
   meiDom.querySelectorAll('draft').forEach(draft => {
+    console.warn('draft:', draft)
     const music = document.createElementNS('http://www.music-encoding.org/ns/mei', 'music')
     music.setAttribute('meiversion', '5.0.0-dev')
     const body = document.createElementNS('http://www.music-encoding.org/ns/mei', 'body')

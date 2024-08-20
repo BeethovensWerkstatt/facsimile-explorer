@@ -1486,6 +1486,7 @@ export default {
 .overlay.diploTrans {
   &.activeDiploTrans {
     // outline: 5px solid $svgActiveWritingLayerColor;
+    stroke: $svgActiveWritingLayerColor;
   }
   g.staff > path {
     fill: $svgActiveWritingZoneColor; //transparent;

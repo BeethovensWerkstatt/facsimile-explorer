@@ -2917,6 +2917,10 @@ const dataModule = {
       }
 
       const origdoc = getters.documentByPath(filePath)
+      if (!origdoc) {
+        console.error(`'${filePath}' not found!`)
+        return ''
+      }
       // console.log(origdoc.querySelector('#' + id))
       // const doc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const doc = origdoc.cloneNode(true)
