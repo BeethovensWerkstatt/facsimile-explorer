@@ -656,7 +656,7 @@ const guiModule = {
     },
 
     /**
-     * keeps the number of hte page to be openend when data is loaded
+     * keeps the number of the page to be openend when data is loaded
      * @param {[type]} commit   [description]
      * @param {[type]} pageNum  [description]
      */
@@ -667,7 +667,7 @@ const guiModule = {
     },
 
     /**
-     * keeps the number of hte page to be openend when data is loaded
+     * keeps the number of the writing zone to be openend when data is loaded
      * @param {[type]} commit   [description]
      * @param {[type]} zoneNum  [description]
      */
@@ -678,7 +678,7 @@ const guiModule = {
     },
 
     /**
-     * keeps the number of hte page to be openend when data is loaded
+     * keeps the number of the writing layer to be openend when data is loaded
      * @param {[type]} commit   [description]
      * @param {[type]} layerNum  [description]
      */
