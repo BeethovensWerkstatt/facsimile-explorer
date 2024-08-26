@@ -17,6 +17,7 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <template v-if="annotatedTranscriptForCurrentWz !== null">
+          <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn" target="_blank" v-if="currentAnnotTabFileName">edit AT</a>
           <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
@@ -153,6 +154,13 @@ export default {
     },
     currentAnnotTabFileName () {
       return this.$store.getters.currentWzAtPath
+    },
+    currentAnnotTabMEIFriendURL () {
+      // https://mei-friend.mdw.ac.at/?file=https://raw.githubusercontent.com/BeethovensWerkstatt/data/dev/data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p005_wz01_at.xml&scale=55&breaks=auto&page=1&speed=true&notationOrientation=bottom&notationProportion=0.50
+      if (this.currentAnnotTabFileName) {
+        return `https://mei-friend.mdw.ac.at/?file=https://raw.githubusercontent.com/BeethovensWerkstatt/data/dev/${this.currentAnnotTabFileName}`
+      }
+      return ''
     },
     annotatedTranscriptForCurrentWz () {
       return this.$store.getters.annotatedTranscriptForCurrentWz
