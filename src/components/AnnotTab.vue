@@ -17,7 +17,10 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <template v-if="annotatedTranscriptForCurrentWz !== null">
-          <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn btn-sm btn-primary" target="_blank" v-if="currentAnnotTabFileName"><i class="icon icon-edit"></i> edit AT</a>
+          <div v-if="currentAnnotTabFileName">
+            <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn btn-sm btn-primary" target="_blank"><i class="icon icon-edit"></i> edit AT</a>
+            <div class="AT-fileinfo">{{ currentAnnotTabFileName }}</div>
+          </div>
           <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
@@ -310,6 +313,15 @@ i.showSidebar {
       margin: 0;
     }
   }
+}
+
+.AT-fileinfo {
+  display: inline-block;
+  padding-left: 1em;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 80%;
+  font-weight: bold;
+  color: gray;
 }
 
 </style>
