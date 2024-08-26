@@ -17,7 +17,7 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <template v-if="annotatedTranscriptForCurrentWz !== null">
-          <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn" target="_blank" v-if="currentAnnotTabFileName">edit AT</a>
+          <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn btn-sm btn-primary" target="_blank" v-if="currentAnnotTabFileName"><i class="icon icon-edit"></i> edit AT</a>
           <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
