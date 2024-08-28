@@ -17,6 +17,10 @@
       </Transition>
       <MainStage class="mainStage stageItem">
         <template v-if="annotatedTranscriptForCurrentWz !== null">
+          <div v-if="currentAnnotTabFileName">
+            <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn btn-sm btn-primary" target="_blank"><i class="icon icon-edit"></i> edit AT</a>
+            <div class="AT-fileinfo">{{ currentAnnotTabFileName }}</div>
+          </div>
           <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
@@ -153,6 +157,13 @@ export default {
     },
     currentAnnotTabFileName () {
       return this.$store.getters.currentWzAtPath
+    },
+    currentAnnotTabMEIFriendURL () {
+      // https://mei-friend.mdw.ac.at/?file=https://raw.githubusercontent.com/BeethovensWerkstatt/data/dev/data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p005_wz01_at.xml&scale=55&breaks=auto&page=1&speed=true&notationOrientation=bottom&notationProportion=0.50
+      if (this.currentAnnotTabFileName) {
+        return `https://mei-friend.mdw.ac.at/?file=https://raw.githubusercontent.com/BeethovensWerkstatt/data/dev/${this.currentAnnotTabFileName}`
+      }
+      return ''
     },
     annotatedTranscriptForCurrentWz () {
       return this.$store.getters.annotatedTranscriptForCurrentWz
@@ -302,6 +313,15 @@ i.showSidebar {
       margin: 0;
     }
   }
+}
+
+.AT-fileinfo {
+  display: inline-block;
+  padding-left: 1em;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 80%;
+  font-weight: bold;
+  color: gray;
 }
 
 </style>
