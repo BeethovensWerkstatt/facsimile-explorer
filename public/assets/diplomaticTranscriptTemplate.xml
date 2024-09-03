@@ -35,7 +35,7 @@
                     xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
-        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="%NEW-ID%">
+        <encodingDesc class="#bw_diplomatic_transcript #bw_module4" xml:id="%NEW-ID%">
             <appInfo xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="%NEW-ID%">
                 <application version="%APP-VERSION%" xml:id="facsimileExplorer">
                     <name>Facsimile Explorer</name>
