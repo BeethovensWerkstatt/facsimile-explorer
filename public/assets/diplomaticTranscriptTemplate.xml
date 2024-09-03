@@ -3,9 +3,10 @@
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
 <mei xmlns:svg="http://www.w3.org/2000/svg"
     xmlns="http://www.music-encoding.org/ns/mei"
-    meiversion="5.0.0-dev"
+    xmlns:bw="https://www.beethovens-werkstatt.de/ns/mei/proposal"
+    meiversion="6.0+beethovensWerkstatt"
     xml:id="%NEW-ID%">
-    <meiHead meiversion="5.0.0-dev" xml:id="%NEW-ID%">
+    <meiHead xml:id="%NEW-ID%">
         <fileDesc xml:id="%NEW-ID%">
             <titleStmt xml:id="%NEW-ID%">
                 <title xml:id="%NEW-ID%">
@@ -34,7 +35,7 @@
                     xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
-        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="%NEW-ID%">
+        <encodingDesc class="#bw_diplomatic_transcript #bw_module4" xml:id="%NEW-ID%">
             <appInfo xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="%NEW-ID%">
                 <application version="%APP-VERSION%" xml:id="facsimileExplorer">
                     <name>Facsimile Explorer</name>
@@ -201,8 +202,8 @@
     <music>
         <body>
             <mdiv xml:id="%NEW-ID%">
-                <drafts xml:id="%NEW-ID%">
-                    <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
+                <bw:drafts xml:id="%NEW-ID%">
+                    <bw:draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
                         <scoreDef xml:id="%NEW-ID%">
                             <staffGrp symbol="none" xml:id="%NEW-ID%"></staffGrp>
                         </scoreDef>
@@ -212,8 +213,8 @@
                                 
                             </measure>
                         </section>
-                    </draft>
-                </drafts>
+                    </bw:draft>
+                </bw:drafts>
             </mdiv>
         </body>
     </music>
