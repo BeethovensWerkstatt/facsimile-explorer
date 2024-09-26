@@ -1,0 +1,39 @@
+```{dot}
+digraph {
+  rankdir=LR;
+  node [label="A: ----",style=filled,color=blue,fontcolor=white] a;
+  node [label="B: W---",color=yellow,fontcolor=black] b;
+  node [label="C: WF--"] c;
+  node [label="D: WFD-"] d;
+  node [label="E: WFDA"] e;
+  node [shape=record];
+  node [label="menu | 1: select auto trans \n 2: trans wo anno",
+        color=green] m1;
+  node [label="menu | 1: select auto trans \n 2: trans wo anno \n 3: add shape to diplo \n 4: adjust function"] m2;
+
+  node [label="WZ"color=white] aWZb;
+  node [label="WZ"color=white] cWZb;
+  node [label="WZ"color=white] dWZb;
+  node [label="WZ"color=white] eWZb;
+  node [label="FX"color=white] aFXm1;
+  node [label="FX"color=white] bFXm1;
+  node [label="FX"color=white] eFXm2;
+  node [label="AT"color=white] cATe;
+  
+  node [label="\N"];
+
+  edge [len=3] a -> aWZb -> b;
+  edge [] c -> cWZb -> b;
+  edge [] d -> dWZb -> b;
+  edge [] e -> eWZb -> b;
+  edge [] a -> aFXm1 -> m1; b -> bFXm1 -> m1;
+  edge [label=1] m1 -> c;
+  edge [label=2] m1 -> d;
+  edge [] c -> cATe -> e;
+  edge [] e -> eFXm2 -> m2
+  edge [label=1] m2 -> c;
+  edge [label=2] m2 -> d;
+  edge [label=3] m2 -> e;
+  edge [label=4] m2 -> e;
+}
+```
