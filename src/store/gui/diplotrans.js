@@ -1,13 +1,15 @@
+import { defineStore } from 'pinia'
 
-export class DiploTransManager {
-    static State = class {
-
+export const useDiploTrans = defineStore('diplotrans', {
+  state: () => ({
+    selections: {
+      facs: {},
+      diplo: {},
+      anno: {}
     }
-
-    __shapes = new Map()
-    __annotTrans = new Map()
-
-    constructor () {
-      console.log('DiploTransManager')
-    }
-}
+  }),
+  getters: {
+  },
+  actions: {
+  }
+})
