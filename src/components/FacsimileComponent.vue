@@ -184,12 +184,14 @@ export default {
           const selectWzFunc = () => {
             // this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })
             this.$store.dispatch('setActiveWritingZone', genDescWzId)
+            dtstore.selections.wz = genDescWzId
           }
 
           const selectFunc = () => {
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
+            dtstore.selectShape({ id: click.target.id, svgGroupWzId })
           }
-          const func = (type) => () => {
+          const setShapeType = (type) => () => {
             console.log('make "' + click.target.id + '" a ' + type + ' (wz: ' + svgGroupWzId + ')')
           }
 
@@ -230,9 +232,9 @@ export default {
                 label: 'Transcribe shape without AnnotTrans',
                 disabled: !wzActive,
                 items: [
-                  { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
-                  { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
-                  { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
+                  { label: 'Deletion', action: setShapeType('deletion'), disabled: !wzActive },
+                  { label: 'Pitch Clarification Letter', action: setShapeType('clarification letter'), disabled: !wzActive },
+                  { label: 'Navigational Sign', action: setShapeType('nav sign'), disabled: !wzActive }
                 ]
               },
               addShapeEntry,

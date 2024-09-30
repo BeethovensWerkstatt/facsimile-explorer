@@ -4,6 +4,7 @@
       <div class="menuItem">
         <button class="btn" @click="toggleSidebar">
           <i class="icon" :class="{'icon-arrow-left': diploTabSidebarVisible, 'icon-arrow-right': !diploTabSidebarVisible}"></i>
+          {{ facSelCount }}
         </button>
       </div>
       <div class="menuItem" v-if="showInitializeButton">
@@ -60,6 +61,8 @@ import XmlEditor from '@/components/XmlEditor.vue'
 
 import DiploTabMenu from '@/components/DiploTabMenu.vue'
 
+import { useDiploTrans } from '@/store/gui/diplotrans'
+
 export default {
   name: 'DiploTab',
   components: {
@@ -74,6 +77,9 @@ export default {
     XmlEditor,
     DiploTabMenu
   },
+  data: () => ({
+    diploTransStore: useDiploTrans()
+  }),
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleDiploTabSidebar')
@@ -174,6 +180,9 @@ export default {
         filePath: this.$store.getters.currentWritingZoneObject?.diploTrans,
         id: this.$store.getters.activeDiploTransElementId
       }
+    },
+    facSelCount () {
+      return this.diploTransStore.facsLength
     }
   },
   created () {
