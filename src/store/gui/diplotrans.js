@@ -16,6 +16,10 @@ export const useDiploTrans = defineStore('diplotrans', {
     }
   },
   actions: {
+    onclick (props) {
+      const { click, type, ...payload } = props
+      console.log('click', click, type, payload)
+    },
     selectWZ (wzid) {
       this.wz = wzid
     },

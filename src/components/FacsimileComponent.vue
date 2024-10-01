@@ -59,6 +59,10 @@ export default {
     type: String // default: 'facsimile', 'diploTrans'
   },
 
+  data: () => ({
+    dtstore: useDiploTrans()
+  }),
+
   computed: {
     ...mapGetters(['diploTransVerovioOptions']),
 
@@ -154,8 +158,7 @@ export default {
         alt: e.originalEvent.altKey
       }
 
-      const dtstore = useDiploTrans()
-      console.log(dtstore.selections.facs)
+      const dtstore = this.dtstore // useDiploTrans()
 
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation
@@ -180,6 +183,8 @@ export default {
           const svgGroupWzId = click.target.closest('.writingZone')?.id
           const genDescWzId = this.$store.getters.genWzIdForShape(svgGroupWzId)
           const wzActive = genDescWzId && genDescWzId === this.$store.getters.activeWritingZone
+
+          dtstore.onclick({ event: e, click, type: 'facs', svgGroupWzId, genDescWzId, wzActive })
 
           const selectWzFunc = () => {
             // this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })

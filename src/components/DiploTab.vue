@@ -4,7 +4,6 @@
       <div class="menuItem">
         <button class="btn" @click="toggleSidebar">
           <i class="icon" :class="{'icon-arrow-left': diploTabSidebarVisible, 'icon-arrow-right': !diploTabSidebarVisible}"></i>
-          {{ facSelCount }}
         </button>
       </div>
       <div class="menuItem" v-if="showInitializeButton">
@@ -180,9 +179,6 @@ export default {
         filePath: this.$store.getters.currentWritingZoneObject?.diploTrans,
         id: this.$store.getters.activeDiploTransElementId
       }
-    },
-    facSelCount () {
-      return this.diploTransStore.facsLength
     }
   },
   created () {
