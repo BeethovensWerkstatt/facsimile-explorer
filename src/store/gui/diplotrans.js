@@ -13,7 +13,8 @@ export const useDiploTrans = defineStore('diplotrans', {
   getters: {
     facsLength (state) {
       return Object.keys(state.selections.facs).length
-    }
+    },
+    genWzIdForShape: (state) => (wzgroup) => store.getters.genWzIdForShape(wzgroup)
   },
   actions: {
     onclick (props) {
