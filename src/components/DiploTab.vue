@@ -315,7 +315,7 @@ i.showSidebar {
 
 .osdButtons {
   float: right;
-  display: inline-block;
+  // display: inline-block;
 
   .osdButton {
     display: inline-block;
