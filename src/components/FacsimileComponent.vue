@@ -184,7 +184,7 @@ export default {
           const genDescWzId = this.$store.getters.genWzIdForShape(svgGroupWzId)
           const wzActive = genDescWzId && genDescWzId === this.$store.getters.activeWritingZone
 
-          dtstore.onclick({ event: e, click, type: 'facs', svgGroupWzId, genDescWzId, wzActive })
+          dtstore.onclick({ event: e, click, type: this.type, svgGroupWzId, genDescWzId, wzActive })
 
           const selectWzFunc = () => {
             // this.$store.dispatch('setActiveWritingZoneForShape', { type: 'shape', svgGroupWzId })
