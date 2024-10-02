@@ -42,9 +42,22 @@ export const useDiploTrans = defineStore('diplotrans', {
     onclick (props) {
       const { click, type, ...payload } = props
       console.log('click', click, type, payload)
-      if (type === 'facsimile') {
-        const { genDescWzId } = payload
-        console.log('facs click', genDescWzId, this.activeWritingZone)
+      const { genDescWzId } = payload
+      switch (type) {
+        case 'facsimile':
+          {
+            console.log('facs click ...')
+            const wzactive = this.activeWritingZone && genDescWzId === this.activeWritingZone
+            if (wzactive) {
+              console.log('wz active')
+            }
+            // TODO generate context menu
+          }
+          break
+        case 'diploTrans':
+          break
+        case 'annotTrans':
+          break
       }
     },
     selectWZ (wzid) {

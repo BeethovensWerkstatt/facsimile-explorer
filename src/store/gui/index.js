@@ -1,3 +1,5 @@
+import { useDiploTrans } from './diplotrans'
+
 const angleFunc = (p1, p2, direction) => {
   const dy = p2.y - p1.y
   const dx = p2.x - p1.x
@@ -82,6 +84,7 @@ const guiModule = {
       shapes: new Map(),
       annotTrans: new Map()
     },
+    diploTransPinia: null,
     diploTransSelectedId: null,
     diploTransOsdBounds: null,
     activeDiploTransElementId: null, // todo: was ist das???
@@ -399,6 +402,12 @@ const guiModule = {
       }
     },
 
+    USE_DIPLO_TRANS_PINIA (state) {
+      if (!state.diploTransPinia) {
+        state.diploTransPinia = useDiploTrans()
+      }
+    },
+
     /**
      * sets the ID of the selected item from the diplomatic transcription
      * @param {[type]} state  [description]
@@ -709,6 +718,7 @@ const guiModule = {
     diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
       if (getters.activeWritingZone !== null) {
         commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
+        commit('USE_DIPLO_TRANS_PINIA')
       }
     },
 
@@ -1124,6 +1134,8 @@ const guiModule = {
         return 'awaitStart'
       }
     },
+
+    diploTransPinia: (state) => state.diploTransPinia,
 
     /**
      * returns an array with the IDs of all selected SVG shapes
