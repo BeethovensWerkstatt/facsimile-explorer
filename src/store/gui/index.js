@@ -84,7 +84,6 @@ const guiModule = {
       shapes: new Map(),
       annotTrans: new Map()
     },
-    diploTransPinia: null,
     diploTransSelectedId: null,
     diploTransOsdBounds: null,
     activeDiploTransElementId: null, // todo: was ist das???
@@ -289,6 +288,8 @@ const guiModule = {
     SET_ACTIVE_WRITINGZONE (state, id) {
       console.log('set active writing zone', id)
       state.activeWritingZone = id
+      const diploTransPinia = useDiploTrans()
+      diploTransPinia.selections.wz = id
     },
 
     /**
@@ -298,6 +299,8 @@ const guiModule = {
      */
     SET_ACTIVE_WRITINGLAYER (state, id) {
       state.activeWritingLayer = id
+      const diploTransPinia = useDiploTrans()
+      diploTransPinia.selections.wl = id
     },
 
     /**
@@ -382,6 +385,7 @@ const guiModule = {
 
     TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
       console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
+      // const diploTransPinia = useDiploTrans()
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
         if (state.diploTransActivations.annotTrans.has(id)) {
@@ -399,12 +403,6 @@ const guiModule = {
           state.diploTransActivations.shapes.clear()
           state.diploTransActivations.shapes.set(id, { id, path })
         }
-      }
-    },
-
-    USE_DIPLO_TRANS_PINIA (state) {
-      if (!state.diploTransPinia) {
-        state.diploTransPinia = useDiploTrans()
       }
     },
 
@@ -718,7 +716,6 @@ const guiModule = {
     diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
       if (getters.activeWritingZone !== null) {
         commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
-        commit('USE_DIPLO_TRANS_PINIA')
       }
     },
 
@@ -1134,8 +1131,6 @@ const guiModule = {
         return 'awaitStart'
       }
     },
-
-    diploTransPinia: (state) => state.diploTransPinia,
 
     /**
      * returns an array with the IDs of all selected SVG shapes

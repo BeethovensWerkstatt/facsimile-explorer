@@ -1,13 +1,27 @@
 import { defineStore } from 'pinia'
 import store from '@/store'
 
+/**
+ * pinia store for diplo trans GUI states
+ */
 export const useDiploTrans = defineStore('diplotrans', {
   state: () => ({
+    /**
+     * selections
+     * wz 0|1
+     * (wl 0|1)
+     * facs 0-n
+     * diplo 0|1 n?
+     * anno 0-n
+     *
+     * wz=1
+     */
     selections: {
-      wz: null,
-      facs: {},
-      diplo: {},
-      anno: {}
+      wz: null, // writing zone
+      wl: null, // writing layer
+      facs: {}, // selected facsimile elements
+      diplo: {}, // selected diplo trans elements
+      anno: {} // selected annot trans elements
     }
   }),
   getters: {
