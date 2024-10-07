@@ -574,6 +574,7 @@ const guiModule = {
      */
     setActiveWritingZone ({ commit, getters }, id) {
       commit('SET_ACTIVE_WRITINGZONE', id)
+      const dtstore = useDiploTrans()
 
       if (id !== null) {
         const genDescWritingZone = getters.genDescForCurrentWritingZone
@@ -581,8 +582,10 @@ const guiModule = {
         const genDescWlId = genDescWritingLayer.getAttribute('xml:id')
 
         commit('SET_ACTIVE_WRITINGLAYER', genDescWlId)
+        dtstore.selections.wz = genDescWlId
       } else {
         commit('SET_ACTIVE_WRITINGLAYER', null)
+        dtstore.selections.wz = null
       }
     },
 
@@ -972,7 +975,9 @@ const guiModule = {
      * @return {[type]}       [description]
      */
     activeWritingZone: (state) => {
-      return state.activeWritingZone
+      const dtstore = useDiploTrans()
+      return dtstore.selections.wz
+      // return state.activeWritingZone
     },
 
     /**

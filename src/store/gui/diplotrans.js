@@ -20,7 +20,7 @@ export const useDiploTrans = defineStore('diplotrans', {
       wz: null, // writing zone
       wl: null, // writing layer
       facs: {}, // selected facsimile elements
-      diplo: {}, // selected diplo trans elements
+      diplo: null, // selected diplo trans element
       anno: {} // selected annot trans elements
     }
   }),
@@ -30,10 +30,10 @@ export const useDiploTrans = defineStore('diplotrans', {
     },
     // proxy essential getters from vuex
     genWzIdForShape: (state) => (wzgroup) => store.getters.genWzIdForShape(wzgroup),
-    diploTransActivationsInShapes: (state) => store.getters.diploTransActivationsInShapes,
-    diploTransActivationsInAnnotTrans: (state) => store.getters.diploTransActivationsInAnnotTrans,
-    activeWritingZone: (state) => store.getters.activeWritingZone,
-    activeDiploTransElementId: (state) => store.getters.activeDiploTransElementId,
+    diploTransActivationsInShapes: (state) => Object.keys(state.selections.facs),
+    diploTransActivationsInAnnotTrans: (state) => Object.keys(state.selections.anno),
+    activeWritingZone: (state) => state.selections.wz,
+    activeDiploTransElementId: (state) => state.selections.diplo,
     contextMenu: (state) => store.getters.contextMenu,
     contextMenuVisible: (state) => store.getters.contextMenuVisible,
 
