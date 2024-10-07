@@ -46,7 +46,6 @@ const guiModule = {
    * @property {Number} awaitedLayer number of the writing layer to be activated when sufficient data is available. Used to resolve routes
    * @property {Boolean} allDocsLoaded boolean if all docs / sources are successfully loaded
    * @property {Object} diploTransActivations an object of selected shapes and / or elements from the annotated transcription
-   * @property {String} diploTransSelectedId ID of the currently selected element from the current diplomatic transcription
    * @property {Object} diploTransOsdBounds the OSD bounds currenlty viewed in both facsimile viewers
    * @property {Object} contextMenu the context menu currently shown
    */
@@ -84,7 +83,6 @@ const guiModule = {
       shapes: new Map(),
       annotTrans: new Map()
     },
-    diploTransSelectedId: null,
     diploTransOsdBounds: null,
     activeDiploTransElementId: null, // todo: was ist das???
     lockXml: false, // activate read only ranges in XmlEditor
@@ -1120,7 +1118,7 @@ const guiModule = {
       // 'awaitStart' : waiting for the user to select a shape in facsimile view
       // 'awaitAT' : shape is selected, waiting for the user to select an element in the annotated transcription
       // 'selectedDT' : an existing element in the diplomatic transcription is selected
-      const selected = state.diploTransSelectedId !== null
+      const selected = state.activeDiploTransElementId !== null
       const shapeSelected = state.diploTransActivations.shapes.size !== 0
 
       if (selected) {
@@ -1151,15 +1149,6 @@ const guiModule = {
         return null
       }
       return [...state.diploTransActivations.annotTrans.values()][0]
-    },
-
-    /**
-     * returns the ID of the element selected from the diplomatic transcript
-     * @param  {[type]} state               [description]
-     * @return {[type]}       [description]
-     */
-    diploTransSelectedId: (state) => {
-      return state.diploTransSelectedId
     },
 
     /**

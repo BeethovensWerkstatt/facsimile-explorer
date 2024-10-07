@@ -32,7 +32,6 @@ export const useDiploTrans = defineStore('diplotrans', {
     genWzIdForShape: (state) => (wzgroup) => store.getters.genWzIdForShape(wzgroup),
     diploTransActivationsInShapes: (state) => store.getters.diploTransActivationsInShapes,
     diploTransActivationsInAnnotTrans: (state) => store.getters.diploTransActivationsInAnnotTrans,
-    diploTransSelectedId: (state) => store.getters.diploTransSelectedId,
     activeWritingZone: (state) => store.getters.activeWritingZone,
     activeDiploTransElementId: (state) => store.getters.activeDiploTransElementId,
     contextMenu: (state) => store.getters.contextMenu,

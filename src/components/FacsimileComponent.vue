@@ -208,7 +208,7 @@ export default {
             action: () => {
               console.log('TODO: add shape to current DiploTrans element')
             },
-            disabled: this.$store.getters.diploTransSelectedId === null
+            disabled: this.$store.getters.activeDiploTransSelectedId === null
           }
 
           const activateDTEntry = {
@@ -225,7 +225,7 @@ export default {
               console.log('TODO: adjust function of shape in DiploTrans')
             },
             // TODO: only possible for some element types, like notes, but not slurs
-            disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
+            disabled: this.$store.getters.activeDiploTransSelectedId === null && !usedShape
           }
 
           const contextMenu = {

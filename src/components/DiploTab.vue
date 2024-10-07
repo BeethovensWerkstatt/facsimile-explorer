@@ -9,6 +9,7 @@
       <div class="menuItem" v-if="showInitializeButton">
         <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
+      <div class="menuItem">ADT: {{ $store.getters.activeDiploTransElementId }}</div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
