@@ -573,8 +573,10 @@ const guiModule = {
      * @param {[type]} id      [description]
      */
     setActiveWritingZone ({ commit, getters }, id) {
+      console.trace('select writing zone vuex')
       commit('SET_ACTIVE_WRITINGZONE', id)
       const dtstore = useDiploTrans()
+      dtstore.selections.wz = id
 
       if (id !== null) {
         const genDescWritingZone = getters.genDescForCurrentWritingZone
@@ -582,10 +584,10 @@ const guiModule = {
         const genDescWlId = genDescWritingLayer.getAttribute('xml:id')
 
         commit('SET_ACTIVE_WRITINGLAYER', genDescWlId)
-        dtstore.selections.wz = genDescWlId
+        dtstore.selections.wl = genDescWlId
       } else {
         commit('SET_ACTIVE_WRITINGLAYER', null)
-        dtstore.selections.wz = null
+        dtstore.selections.wl = null
       }
     },
 
