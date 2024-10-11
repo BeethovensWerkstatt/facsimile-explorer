@@ -383,9 +383,10 @@ const guiModule = {
 
     TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
       console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
-      // const diploTransPinia = useDiploTrans()
+      const diploTransPinia = useDiploTrans()
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
+        diploTransPinia.selections.anno[id] = [...Object.keys(diploTransPinia.selections.facs)]
         if (state.diploTransActivations.annotTrans.has(id)) {
           state.diploTransActivations.annotTrans.delete(id)
         } else {
