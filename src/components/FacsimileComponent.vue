@@ -10,6 +10,7 @@ import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 import { getEmptyPage } from '@/tools/mei.js'
+import { useDiploTrans } from '@/store/gui/diplotrans'
 
 const osdOptions = {
   preserveViewport: false,
@@ -152,6 +153,9 @@ export default {
         shift: e.shift,
         alt: e.originalEvent.altKey
       }
+
+      const dtstore = useDiploTrans()
+      console.log(dtstore.selections.facs)
 
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation

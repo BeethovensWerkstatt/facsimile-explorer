@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>gui-dfa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="GUI-DFA_files/libs/clipboard/clipboard.min.js"></script>
+<script src="GUI-DFA_files/libs/quarto-html/quarto.js"></script>
+<script src="GUI-DFA_files/libs/quarto-html/popper.min.js"></script>
+<script src="GUI-DFA_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="GUI-DFA_files/libs/quarto-html/anchor.min.js"></script>
+<link href="GUI-DFA_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="GUI-DFA_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="GUI-DFA_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="GUI-DFA_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="GUI-DFA_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="states-of-the-gui" class="level1">
+<h1>States of the GUI</h1>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 1475.82 394.30" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 390.3)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-390.3 1471.82,-390.3 1471.82,4 -4,4"></polygon>
+<!-- a -->
+<g id="node1" class="node">
+<title>a</title>
+<ellipse fill="blue" stroke="blue" cx="35.97" cy="-146.5" rx="35.94" ry="18"></ellipse>
+<text text-anchor="middle" x="35.97" y="-142.3" font-family="Times,serif" font-size="14.00" fill="white">A: ----</text>
+</g>
+<!-- aWZb -->
+<g id="node8" class="node">
+<title>aWZb</title>
+<polygon fill="white" stroke="white" points="108.94,-99.5 108.94,-135.5 162.94,-135.5 162.94,-99.5 108.94,-99.5"></polygon>
+<text text-anchor="middle" x="135.94" y="-113.4" font-family="Times,serif" font-size="14.00">WZ</text>
+</g>
+<!-- a&#45;&gt;aWZb -->
+<g id="edge1" class="edge">
+<title>a-&gt;aWZb</title>
+<path fill="none" stroke="black" d="M67.43,-137.48C77.48,-134.51 88.74,-131.18 99.15,-128.09"></path>
+<polygon fill="black" stroke="black" points="100.2,-131.43 108.8,-125.24 98.21,-124.72 100.2,-131.43"></polygon>
+</g>
+<!-- aFXm1 -->
+<g id="node12" class="node">
+<title>aFXm1</title>
+<polygon fill="white" stroke="white" points="180.94,-155.5 180.94,-191.5 234.94,-191.5 234.94,-155.5 180.94,-155.5"></polygon>
+<text text-anchor="middle" x="207.94" y="-169.4" font-family="Times,serif" font-size="14.00">FX</text>
+</g>
+<!-- a&#45;&gt;aFXm1 -->
+<g id="edge9" class="edge">
+<title>a-&gt;aFXm1</title>
+<path fill="none" stroke="black" d="M70.55,-151.83C99.54,-156.44 141.32,-163.08 170.99,-167.79"></path>
+<polygon fill="black" stroke="black" points="170.51,-171.26 180.93,-169.37 171.6,-164.34 170.51,-171.26"></polygon>
+</g>
+<!-- b -->
+<g id="node2" class="node">
+<title>b</title>
+<ellipse fill="yellow" stroke="yellow" cx="294.28" cy="-82.5" rx="41.17" ry="18"></ellipse>
+<text text-anchor="middle" x="294.28" y="-78.3" font-family="Times,serif" font-size="14.00">B: W---</text>
+</g>
+<!-- bFXm1 -->
+<g id="node13" class="node">
+<title>bFXm1</title>
+<polygon fill="white" stroke="white" points="372.62,-111.5 372.62,-147.5 426.62,-147.5 426.62,-111.5 372.62,-111.5"></polygon>
+<text text-anchor="middle" x="399.62" y="-125.4" font-family="Times,serif" font-size="14.00">FX</text>
+</g>
+<!-- b&#45;&gt;bFXm1 -->
+<g id="edge11" class="edge">
+<title>b-&gt;bFXm1</title>
+<path fill="none" stroke="black" d="M323.52,-95.34C335.83,-100.94 350.39,-107.56 363.4,-113.48"></path>
+<polygon fill="black" stroke="black" points="361.99,-116.69 372.54,-117.64 364.89,-110.31 361.99,-116.69"></polygon>
+</g>
+<!-- c -->
+<g id="node3" class="node">
+<title>c</title>
+<ellipse fill="yellow" stroke="yellow" cx="674.18" cy="-197.5" rx="43.48" ry="18"></ellipse>
+<text text-anchor="middle" x="674.18" y="-193.3" font-family="Times,serif" font-size="14.00">C: WF--</text>
+</g>
+<!-- cWZb -->
+<g id="node9" class="node">
+<title>cWZb</title>
+<polygon fill="white" stroke="white" points="760.68,-73.5 760.68,-109.5 814.68,-109.5 814.68,-73.5 760.68,-73.5"></polygon>
+<text text-anchor="middle" x="787.68" y="-87.4" font-family="Times,serif" font-size="14.00">WZ</text>
+</g>
+<!-- c&#45;&gt;cWZb -->
+<g id="edge3" class="edge">
+<title>c-&gt;cWZb</title>
+<path fill="none" stroke="black" d="M692.6,-180.94C710.71,-163.72 739.28,-136.56 760.19,-116.68"></path>
+<polygon fill="black" stroke="black" points="762.67,-119.15 767.51,-109.72 757.85,-114.08 762.67,-119.15"></polygon>
+</g>
+<!-- cATe -->
+<g id="node15" class="node">
+<title>cATe</title>
+<polygon fill="white" stroke="white" points="760.68,-186.5 760.68,-222.5 814.68,-222.5 814.68,-186.5 760.68,-186.5"></polygon>
+<text text-anchor="middle" x="787.68" y="-200.4" font-family="Times,serif" font-size="14.00">AT</text>
+</g>
+<!-- c&#45;&gt;cATe -->
+<g id="edge15" class="edge">
+<title>c-&gt;cATe</title>
+<path fill="none" stroke="black" d="M717.33,-200.15C728.25,-200.83 739.9,-201.56 750.48,-202.23"></path>
+<polygon fill="black" stroke="black" points="750.44,-205.73 760.64,-202.87 750.88,-198.75 750.44,-205.73"></polygon>
+<text text-anchor="middle" x="739.18" y="-205.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- d -->
+<g id="node4" class="node">
+<title>d</title>
+<ellipse fill="yellow" stroke="yellow" cx="1329.04" cy="-114.5" rx="47.57" ry="18"></ellipse>
+<text text-anchor="middle" x="1329.04" y="-110.3" font-family="Times,serif" font-size="14.00">D: WFD-</text>
+</g>
+<!-- dWZb -->
+<g id="node10" class="node">
+<title>dWZb</title>
+<polygon fill="white" stroke="white" points="1413.82,-0.5 1413.82,-36.5 1467.82,-36.5 1467.82,-0.5 1413.82,-0.5"></polygon>
+<text text-anchor="middle" x="1440.82" y="-14.4" font-family="Times,serif" font-size="14.00">WZ</text>
+</g>
+<!-- d&#45;&gt;dWZb -->
+<g id="edge5" class="edge">
+<title>d-&gt;dWZb</title>
+<path fill="none" stroke="black" d="M1349.16,-97.78C1366.33,-82.76 1391.77,-60.52 1411.34,-43.41"></path>
+<polygon fill="black" stroke="black" points="1413.83,-45.88 1419.05,-36.66 1409.22,-40.61 1413.83,-45.88"></polygon>
+</g>
+<!-- e -->
+<g id="node5" class="node">
+<title>e</title>
+<ellipse fill="yellow" stroke="yellow" cx="908.14" cy="-216.5" rx="50.43" ry="18"></ellipse>
+<text text-anchor="middle" x="908.14" y="-212.3" font-family="Times,serif" font-size="14.00">E: WFDA</text>
+</g>
+<!-- eWZb -->
+<g id="node11" class="node">
+<title>eWZb</title>
+<polygon fill="white" stroke="white" points="1001.61,-143.5 1001.61,-179.5 1055.61,-179.5 1055.61,-143.5 1001.61,-143.5"></polygon>
+<text text-anchor="middle" x="1028.61" y="-157.4" font-family="Times,serif" font-size="14.00">WZ</text>
+</g>
+<!-- e&#45;&gt;eWZb -->
+<g id="edge7" class="edge">
+<title>e-&gt;eWZb</title>
+<path fill="none" stroke="black" d="M939.65,-202.34C955.58,-194.94 975.17,-185.84 991.82,-178.12"></path>
+<polygon fill="black" stroke="black" points="993.63,-181.13 1001.23,-173.75 990.68,-174.78 993.63,-181.13"></polygon>
+</g>
+<!-- eFXm2 -->
+<g id="node14" class="node">
+<title>eFXm2</title>
+<polygon fill="white" stroke="white" points="1001.61,-251.5 1001.61,-287.5 1055.61,-287.5 1055.61,-251.5 1001.61,-251.5"></polygon>
+<text text-anchor="middle" x="1028.61" y="-265.4" font-family="Times,serif" font-size="14.00">FX</text>
+</g>
+<!-- e&#45;&gt;eFXm2 -->
+<g id="edge17" class="edge">
+<title>e-&gt;eFXm2</title>
+<path fill="none" stroke="black" d="M940.27,-230.43C956.2,-237.55 975.66,-246.26 992.17,-253.64"></path>
+<polygon fill="black" stroke="black" points="990.94,-256.93 1001.5,-257.82 993.8,-250.54 990.94,-256.93"></polygon>
+<text text-anchor="middle" x="980.11" y="-252.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- m1 -->
+<g id="node6" class="node">
+<title>m1</title>
+<polygon fill="green" stroke="green" points="463.62,-134.3 463.62,-200.7 587.69,-200.7 587.69,-134.3 463.62,-134.3"></polygon>
+<text text-anchor="middle" x="525.65" y="-184.1" font-family="Times,serif" font-size="14.00">menu</text>
+<polyline fill="none" stroke="green" points="463.62,-175.9 587.69,-175.9 "></polyline>
+<text text-anchor="middle" x="525.65" y="-159.3" font-family="Times,serif" font-size="14.00">1: select auto trans </text>
+<text text-anchor="middle" x="525.65" y="-142.5" font-family="Times,serif" font-size="14.00"> 2: trans wo anno</text>
+</g>
+<!-- m1&#45;&gt;c -->
+<g id="edge13" class="edge">
+<title>m1-&gt;c</title>
+<path fill="none" stroke="black" d="M587.95,-180.05C600.2,-182.56 612.91,-185.16 624.66,-187.57"></path>
+<polygon fill="black" stroke="black" points="624.2,-191.04 634.7,-189.62 625.61,-184.19 624.2,-191.04"></polygon>
+<text text-anchor="middle" x="609.19" y="-187.7" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- m1&#45;&gt;d -->
+<g id="edge14" class="edge">
+<title>m1-&gt;d</title>
+<path fill="none" stroke="black" d="M587.74,-162.87C678.15,-156.07 852.91,-143.15 1001.61,-133.5 1096.25,-127.36 1206.38,-121.14 1271.49,-117.56"></path>
+<polygon fill="black" stroke="black" points="1271.75,-121.05 1281.54,-117.01 1271.36,-114.06 1271.75,-121.05"></polygon>
+<text text-anchor="middle" x="908.14" y="-147.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- m2 -->
+<g id="node7" class="node">
+<title>m2</title>
+<polygon fill="green" stroke="green" points="1098.61,-219.5 1098.61,-319.5 1238.26,-319.5 1238.26,-219.5 1098.61,-219.5"></polygon>
+<text text-anchor="middle" x="1168.43" y="-302.9" font-family="Times,serif" font-size="14.00">menu</text>
+<polyline fill="none" stroke="green" points="1098.61,-294.7 1238.26,-294.7 "></polyline>
+<text text-anchor="middle" x="1168.43" y="-278.1" font-family="Times,serif" font-size="14.00">1: select auto trans </text>
+<text text-anchor="middle" x="1168.43" y="-261.3" font-family="Times,serif" font-size="14.00"> 2: trans wo anno </text>
+<text text-anchor="middle" x="1168.43" y="-244.5" font-family="Times,serif" font-size="14.00"> 3: add shape to diplo </text>
+<text text-anchor="middle" x="1168.43" y="-227.7" font-family="Times,serif" font-size="14.00"> 4: adjust function</text>
+</g>
+<!-- m2&#45;&gt;c -->
+<g id="edge19" class="edge">
+<title>m2-&gt;c</title>
+<path fill="none" stroke="black" d="M1126.61,-319.79C1101.64,-344.69 1067.3,-369.5 1029.61,-369.5 786.68,-369.5 786.68,-369.5 786.68,-369.5 718.88,-369.5 690.24,-274.24 680.03,-225.5"></path>
+<polygon fill="black" stroke="black" points="683.44,-224.71 678.07,-215.58 676.57,-226.07 683.44,-224.71"></polygon>
+<text text-anchor="middle" x="908.14" y="-373.7" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- m2&#45;&gt;d -->
+<g id="edge20" class="edge">
+<title>m2-&gt;d</title>
+<path fill="none" stroke="black" d="M1220.93,-219.18C1248.6,-192.13 1281.44,-160.03 1303.4,-138.58"></path>
+<polygon fill="black" stroke="black" points="1305.98,-140.95 1310.69,-131.46 1301.09,-135.94 1305.98,-140.95"></polygon>
+<text text-anchor="middle" x="1259.76" y="-186.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- m2&#45;&gt;e -->
+<g id="edge21" class="edge">
+<title>m2-&gt;e</title>
+<path fill="none" stroke="black" d="M1098.38,-238.62C1084.46,-233.5 1069.76,-228.83 1055.61,-225.7 1027.49,-219.47 995.64,-216.95 968.84,-216.07"></path>
+<polygon fill="black" stroke="black" points="968.92,-212.58 958.83,-215.82 968.74,-219.57 968.92,-212.58"></polygon>
+<text text-anchor="middle" x="1028.61" y="-229.7" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- m2&#45;&gt;e -->
+<g id="edge22" class="edge">
+<title>m2-&gt;e</title>
+<path fill="none" stroke="black" d="M1098.51,-296.93C1068.1,-305.05 1032.35,-309.06 1001.61,-297.5 972.07,-286.39 945.8,-261.09 928.89,-241.7"></path>
+<polygon fill="black" stroke="black" points="931.35,-239.19 922.22,-233.81 926,-243.71 931.35,-239.19"></polygon>
+<text text-anchor="middle" x="1028.61" y="-308.7" font-family="Times,serif" font-size="14.00">4</text>
+</g>
+<!-- aWZb&#45;&gt;b -->
+<g id="edge2" class="edge">
+<title>aWZb-&gt;b</title>
+<path fill="none" stroke="black" d="M163.11,-111.64C186.02,-106.51 219.85,-98.94 247.28,-92.8"></path>
+<polygon fill="black" stroke="black" points="248.07,-96.21 257.06,-90.61 246.54,-89.38 248.07,-96.21"></polygon>
+</g>
+<!-- cWZb&#45;&gt;b -->
+<g id="edge4" class="edge">
+<title>cWZb-&gt;b</title>
+<path fill="none" stroke="black" d="M760.59,-88.2C738.03,-85.63 704.51,-82.5 675.18,-82.5 398.62,-82.5 398.62,-82.5 398.62,-82.5 381.53,-82.5 362.86,-82.5 346.14,-82.5"></path>
+<polygon fill="black" stroke="black" points="346.02,-79 336.02,-82.5 346.02,-86 346.02,-79"></polygon>
+</g>
+<!-- dWZb&#45;&gt;b -->
+<g id="edge6" class="edge">
+<title>dWZb-&gt;b</title>
+<path fill="none" stroke="black" d="M1413.74,-14.03C1391.55,-10.62 1358.8,-6.5 1330.04,-6.5 398.62,-6.5 398.62,-6.5 398.62,-6.5 363.51,-6.5 332.45,-35.32 313.77,-57.46"></path>
+<polygon fill="black" stroke="black" points="311.04,-55.28 307.47,-65.25 316.48,-59.68 311.04,-55.28"></polygon>
+</g>
+<!-- eWZb&#45;&gt;b -->
+<g id="edge8" class="edge">
+<title>eWZb-&gt;b</title>
+<path fill="none" stroke="black" d="M1019.63,-143.48C1003.73,-110.66 964.79,-44.5 909.14,-44.5 398.62,-44.5 398.62,-44.5 398.62,-44.5 374.14,-44.5 348.3,-54.01 328.58,-63.51"></path>
+<polygon fill="black" stroke="black" points="326.77,-60.5 319.42,-68.13 329.92,-66.75 326.77,-60.5"></polygon>
+</g>
+<!-- aFXm1&#45;&gt;m1 -->
+<g id="edge10" class="edge">
+<title>aFXm1-&gt;m1</title>
+<path fill="none" stroke="black" d="M235.05,-173C282.33,-172.11 383.68,-170.18 453.01,-168.86"></path>
+<polygon fill="black" stroke="black" points="453.49,-172.35 463.42,-168.66 453.36,-165.35 453.49,-172.35"></polygon>
+</g>
+<!-- bFXm1&#45;&gt;m1 -->
+<g id="edge12" class="edge">
+<title>bFXm1-&gt;m1</title>
+<path fill="none" stroke="black" d="M426.62,-137.47C434.72,-139.95 444.07,-142.81 453.72,-145.77"></path>
+<polygon fill="black" stroke="black" points="452.84,-149.16 463.42,-148.74 454.89,-142.47 452.84,-149.16"></polygon>
+</g>
+<!-- eFXm2&#45;&gt;m2 -->
+<g id="edge18" class="edge">
+<title>eFXm2-&gt;m2</title>
+<path fill="none" stroke="black" d="M1055.86,-269.5C1065.34,-269.5 1076.6,-269.5 1088.26,-269.5"></path>
+<polygon fill="black" stroke="black" points="1088.58,-273 1098.58,-269.5 1088.58,-266 1088.58,-273"></polygon>
+<text text-anchor="middle" x="1077.11" y="-273.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- cATe&#45;&gt;e -->
+<g id="edge16" class="edge">
+<title>cATe-&gt;e</title>
+<path fill="none" stroke="black" d="M814.97,-207.16C825.19,-208.2 837.34,-209.43 849.4,-210.65"></path>
+<polygon fill="black" stroke="black" points="849.17,-214.15 859.47,-211.67 849.87,-207.18 849.17,-214.15"></polygon>
+<text text-anchor="middle" x="836.18" y="-212.7" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
