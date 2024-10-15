@@ -129,7 +129,8 @@ export default {
       */
     },
     initializeDiploTrans () {
-      this.$store.dispatch('initializeDiploTrans')
+      // this.$store.dispatch('initializeDiploTrans')
+      this.$store.dispatch('setModal', 'initializeDT')
     },
     autoTranscribe (newShapes, oldShapes, newAnnotated, oldAnnotated) {
       if (newShapes.length === 0 || !newAnnotated) {

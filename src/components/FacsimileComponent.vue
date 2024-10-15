@@ -59,10 +59,6 @@ export default {
     type: String // default: 'facsimile', 'diploTrans'
   },
 
-  data: () => ({
-    dtstore: useDiploTrans()
-  }),
-
   computed: {
     ...mapGetters(['diploTransVerovioOptions']),
 
@@ -158,7 +154,8 @@ export default {
         alt: e.originalEvent.altKey
       }
 
-      const dtstore = this.dtstore // useDiploTrans()
+      const dtstore = useDiploTrans()
+      console.log(dtstore.selections.facs)
 
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation
