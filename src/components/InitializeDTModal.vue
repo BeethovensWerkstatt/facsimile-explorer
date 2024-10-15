@@ -48,10 +48,10 @@ export default {
     active () {
       if (this.active) {
         // start with at least 1 system
-        if (this.systemcount === 0 || !this.$refs.systemcount.value) {
-          this.systemcount = this.guessSystems()
-          this.$refs.systemcount.value = this.guessSystems()
-        }
+        const systemcount = this.guessSystems()
+        this.systemcount = systemcount
+        this.$refs.systemcount.value = systemcount
+
         // if nothing is selected yet guess rastrums
         if (this.rastrumcount === 0) {
           this.rastrums = this.guessRastrums()
