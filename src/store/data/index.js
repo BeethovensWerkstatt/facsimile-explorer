@@ -3034,6 +3034,44 @@ const dataModule = {
         })
       })
       return arr
+    },
+
+    /**
+     * Return affected Staves/Rastrums for current writing zone.
+     * @param {*} state
+     * @param {*} getters
+     */
+    activeDiploTransAffectedStaves: (state, getters) => {
+      const currentWritingZoneObject = getters.currentWritingZoneObject
+      const rastrums = getters.rastrumsOnCurrentPage
+
+      // console.log('\n\ngot this:')
+      // console.log('currentWritingZoneObject', currentWritingZoneObject)
+      // console.log('rastrums', rastrums)
+      const wzBox = {
+        left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
+        top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
+        right: (parseInt(currentWritingZoneObject.xywh.split(',')[0]) + parseInt(currentWritingZoneObject.xywh.split(',')[2])),
+        bottom: (parseInt(currentWritingZoneObject.xywh.split(',')[1]) + parseInt(currentWritingZoneObject.xywh.split(',')[3]))
+      }
+
+      const affectedStaves = []
+      rastrums.forEach((rastrum, i) => {
+        const rastrumBox = {
+          left: parseInt(rastrum.px.x),
+          top: parseInt(rastrum.px.y),
+          right: (parseInt(rastrum.px.x) + parseInt(rastrum.px.w)),
+          bottom: (parseInt(rastrum.px.y) + parseInt(rastrum.px.h))
+        }
+        if (wzBox.top <= rastrumBox.top &&
+           wzBox.bottom >= rastrumBox.bottom &&
+           wzBox.left <= rastrumBox.right &&
+           wzBox.right >= rastrumBox.left) {
+          affectedStaves.push({ n: i + 1, rastrum })
+        }
+      })
+
+      return affectedStaves
     }
   }
 }
