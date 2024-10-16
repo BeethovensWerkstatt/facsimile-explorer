@@ -182,13 +182,22 @@ function getDiplomaticBarline (annotElem, barLine) {
  * @returns the initialized template
  */
 export async function initializeDiploTrans (filename, genDescWzId, surfaceId, appVersion, affectedStaves) {
+  /*
+  key words in the template
+  APP-VERSION
+  CURRENT-DATE
+  FILEPATH
+  GENDESCWZ-ID
+  NEW-ID
+  SURFACE-ID
+  */
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
 
   diploTemplate.querySelectorAll('*[*|id]').forEach(elem => {
-    const id = elem.localName.substring(0, 1) + uuid()
     if (elem.getAttribute('xml:id') === '%NEW-ID%') {
+      const id = elem.localName.substring(0, 1) + uuid()
       elem.setAttribute('xml:id', id)
     }
   })

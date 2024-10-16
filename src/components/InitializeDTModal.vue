@@ -82,7 +82,8 @@ export default {
       }
     },
     main () {
-      console.log(this.systemcount, this.rastrumlist)
+      console.log('InitializeDTModal:', this.systemcount, this.rastrumlist, this.rastrumids)
+      this.$store.dispatch('initializeDiploTrans', { systemcount: this.systemcount, rastrums: this.rastrumids })
       this.$store.dispatch('setModal', null)
     },
     guessRastrums () {
@@ -107,6 +108,9 @@ export default {
     ...mapGetters(['rastrumsOnCurrentPage', 'activeWritingZone']),
     active () {
       return this.$store.getters.modal === 'initializeDT'
+    },
+    rastrumids () {
+      return Object.values(this.rastrums).filter(r => !!r).map(r => r.id)
     },
     rastrumlist () {
       return Object.keys(this.rastrums).filter(k => this.rastrums[k]).map(k => +k)

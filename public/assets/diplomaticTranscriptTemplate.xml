@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
-<mei xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.music-encoding.org/ns/mei" meiversion="6.0+beethovensWerkstatt" xml:id="replace">
-    <meiHead meiversion="6.0+beethovensWerkstatt" xml:id="replace">
-        <fileDesc xml:id="replace">
-            <titleStmt xml:id="replace">
-                <title xml:id="replace">
+<mei xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.music-encoding.org/ns/mei" meiversion="6.0+beethovensWerkstatt" xml:id="%NEW-ID%">
+    <meiHead meiversion="6.0+beethovensWerkstatt" xml:id="%NEW-ID%">
+        <fileDesc xml:id="%NEW-ID%">
+            <titleStmt xml:id="%NEW-ID%">
+                <title xml:id="%NEW-ID%">
                     Ludwig van Beethoven, Skizzenbuch "Engelmann" zu den Diabelli-Variationen op. 120 und der 9. Sinfonie op. 125, Autograph
                 </title>
-                <composer xml:id="replace">
-                    <persName xml:id="replace">
+                <composer xml:id="%NEW-ID%">
+                    <persName xml:id="%NEW-ID%">
                         Beethoven, Ludwig van
                     </persName>
                 </composer>
-                <editor xml:id="replace">
-                    <corpName auth.uri="https://beethovens-werkstatt.de" xml:id="replace">
+                <editor xml:id="%NEW-ID%">
+                    <corpName auth.uri="https://beethovens-werkstatt.de" xml:id="%NEW-ID%">
                         Beethovens Werkstatt
                     </corpName>
                 </editor>
-                <funder xml:id="replace">
-                    <corpName auth.uri="http://www.adwmainz.de/" xml:id="replace">
+                <funder xml:id="%NEW-ID%">
+                    <corpName auth.uri="http://www.adwmainz.de/" xml:id="%NEW-ID%">
                         Akademie der Wissenschaften und der Literatur Mainz
                     </corpName>
                 </funder>
             </titleStmt>
-            <pubStmt xml:id="replace"/>
-            <seriesStmt xml:id="replace">
-                <title xml:lang="de" level="s" xml:id="replace">
+            <pubStmt xml:id="%NEW-ID%"/>
+            <seriesStmt xml:id="%NEW-ID%">
+                <title xml:lang="de" level="s" xml:id="%NEW-ID%">
                     Skizzenbuchedition
                 </title>
-                <identifier auth.uri="https://beethovens-werkstatt.de/modul-4/" xml:id="replace">
+                <identifier auth.uri="https://beethovens-werkstatt.de/modul-4/" xml:id="%NEW-ID%">
                     sk
                 </identifier>
             </seriesStmt>
-            <sourceDesc xml:id="replace">
+            <sourceDesc xml:id="%NEW-ID%">
                 <!-- @target: Pfad zur richtigen Dokument-Datei, und dann ID der //mei:genDesc[@class="#geneticOrder_writingZoneLevel"] -->
-                <source n="1" target="../D-BNba_MH_60_Engelmann.xml#g696d9716-a6d4-4126-9402-a17f8f0e0e32" xml:id="replace"/>
+                <source n="1" target="../D-BNba_MH_60_Engelmann.xml#g696d9716-a6d4-4126-9402-a17f8f0e0e32" xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
-        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="replace">
-            <appInfo xml:id="replace">
-                <application version="0.1.0" xml:id="facsimileExplorer">
+        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="%NEW-ID%">
+            <appInfo xml:id="%NEW-ID%">
+                <application version="%APP-VERSION%" xml:id="facsimileExplorer">
                     <name>
                         Facsimile Explorer
                     </name>
                 </application>
             </appInfo>
-            <classDecls xml:id="replace">
-                <taxonomy label="availableTaxonomies" xml:id="replace">
+            <classDecls xml:id="%NEW-ID%">
+                <taxonomy label="availableTaxonomies" xml:id="%NEW-ID%">
                     <category xml:id="document_type"/>
                     <category xml:id="bw_observation_type"/>
                     <category xml:id="bw_implementation_completeness"/>
@@ -145,11 +145,11 @@
                 </taxonomy>
             </classDecls>
         </encodingDesc>
-        <revisionDesc xml:id="replace">
+        <revisionDesc xml:id="%NEW-ID%">
             <!-- GitHub user als resp?!, Datum anpassen -->
-            <change n="1" resp="#bw_jk" isodate="2023-12-04" xml:id="replace">
-                <changeDesc xml:id="replace">
-                    <p xml:id="replace">
+            <change n="1" resp="#bw_jk" isodate="%CURRENT-DATE%" xml:id="%NEW-ID%">
+                <changeDesc xml:id="%NEW-ID%">
+                    <p xml:id="%NEW-ID%">
                         Generated file for diplomatic transcription with
                         <ptr target="#facsimileExplorer"/>
                         using template file.
@@ -160,39 +160,39 @@
     </meiHead>
     <music meiversion="6.0+beethovensWerkstatt">
         <body>
-            <mdiv xml:id="replace">
-                <drafts xml:id="replace">
-                    <draft xml:id="replace" class="#bw_diplomatic_transcript">
-                        <scoreDef xml:id="replace">
-                            <staffGrp symbol="none" xml:id="replace">
+            <mdiv xml:id="%NEW-ID%">
+                <drafts xml:id="%NEW-ID%">
+                    <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
+                        <scoreDef xml:id="%NEW-ID%">
+                            <staffGrp symbol="none" xml:id="%NEW-ID%">
                                 <!-- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -->
                                 
                                 <!--
-                                <staffDef xml:id="replace" n="1" label="10" decls="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca" lines="5"/>
-                                <staffDef xml:id="replace" n="2" label="11" decls="../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431" lines="5"/>
-                                <staffDef xml:id="replace" n="3" label="12" decls="../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085" lines="5"/>
+                                <staffDef xml:id="%NEW-ID%" n="1" label="10" decls="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca" lines="5"/>
+                                <staffDef xml:id="%NEW-ID%" n="2" label="11" decls="../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431" lines="5"/>
+                                <staffDef xml:id="%NEW-ID%" n="3" label="12" decls="../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085" lines="5"/>
                                 -->
                             </staffGrp>
                         </scoreDef>
-                        <section xml:id="replace">
+                        <section xml:id="%NEW-ID%">
                             
                             
                             <!-- pb/@target points to surface ID -->
-                            <pb xml:id="replace" target="../D-BNba_MH_60_Engelmann.xml#x2433e745-3d60-4043-9258-10ab1f1aeb47"/>
+                            <pb xml:id="%NEW-ID%" target="../D-BNba_MH_60_Engelmann.xml#x2433e745-3d60-4043-9258-10ab1f1aeb47"/>
                             
                             <!-- xsl:for-each nur für sb; pb einmalig, da unsere DT seitenbasiert angelegt werden -->
                                 
                                 <!-- sb/@corresp points to rastrum IDs used for this -->
                                 <sb corresp="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca ../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431 ../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085"/>
-                                <measure xml:id="replace">
-                                    <staff n="1" xml:id="replace">
-                                        <layer n="1" xml:id="replace"/>
+                                <measure xml:id="%NEW-ID%">
+                                    <staff n="1" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
                                     </staff>
-                                    <staff n="2" xml:id="replace">
-                                        <layer n="1" xml:id="replace"/>
+                                    <staff n="2" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
                                     </staff>
-                                    <staff n="3" xml:id="replace">
-                                        <layer n="1" xml:id="replace"/>
+                                    <staff n="3" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
                                     </staff>
                                 </measure>
                             

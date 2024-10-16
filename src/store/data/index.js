@@ -1287,12 +1287,14 @@ const dataModule = {
      * @param {*} param0
      * @returns
      */
-    async initializeDiploTrans ({ commit, getters, dispatch }) {
+    async initializeDiploTrans ({ commit, getters, dispatch }, { systemcount, rastrums: rastrumids }) {
       const existingDt = getters.diplomaticTranscriptForCurrentWz
       if (existingDt !== null) {
         console.log('…current writing zone already has a diplomatic transcription')
         return null
       }
+
+      console.log('initializeDiploTrans:', systemcount, rastrumids)
 
       const appversion = await getters.config?.app?.version
       const filename = getters.currentDocPath.split('/').splice(-1)[0]
@@ -1349,6 +1351,7 @@ const dataModule = {
       // -----------------
 
       const diploTrans = await initializeDiploTrans(filename, wzId, surfaceId, appversion, affectedStaves)
+      console.log(diploTrans)
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'add diplomatic transcript at '
