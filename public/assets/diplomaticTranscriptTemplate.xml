@@ -1,53 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
-<mei xmlns:svg="http://www.w3.org/2000/svg"
-    xmlns="http://www.music-encoding.org/ns/mei"
-    xmlns:bw="https://www.beethovens-werkstatt.de/ns/mei/proposal"
-    meiversion="6.0+beethovensWerkstatt"
-    xml:id="%NEW-ID%">
-    <meiHead xml:id="%NEW-ID%">
-        <fileDesc xml:id="%NEW-ID%">
-            <titleStmt xml:id="%NEW-ID%">
-                <title xml:id="%NEW-ID%">
+<mei xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.music-encoding.org/ns/mei" meiversion="6.0+beethovensWerkstatt" xml:id="replace">
+    <meiHead meiversion="6.0+beethovensWerkstatt" xml:id="replace">
+        <fileDesc xml:id="replace">
+            <titleStmt xml:id="replace">
+                <title xml:id="replace">
                     Ludwig van Beethoven, Skizzenbuch "Engelmann" zu den Diabelli-Variationen op. 120 und der 9. Sinfonie op. 125, Autograph
                 </title>
-                <composer xml:id="%NEW-ID%">
-                    <persName xml:id="%NEW-ID%">Beethoven, Ludwig van</persName>
+                <composer xml:id="replace">
+                    <persName xml:id="replace">
+                        Beethoven, Ludwig van
+                    </persName>
                 </composer>
-                <editor xml:id="%NEW-ID%">
-                    <corpName auth.uri="https://beethovens-werkstatt.de" xml:id="%NEW-ID%">Beethovens Werkstatt</corpName>
+                <editor xml:id="replace">
+                    <corpName auth.uri="https://beethovens-werkstatt.de" xml:id="replace">
+                        Beethovens Werkstatt
+                    </corpName>
                 </editor>
-                <funder xml:id="%NEW-ID%">
-                    <corpName auth.uri="http://www.adwmainz.de/" xml:id="%NEW-ID%">Akademie der Wissenschaften und der Literatur Mainz</corpName>
+                <funder xml:id="replace">
+                    <corpName auth.uri="http://www.adwmainz.de/" xml:id="replace">
+                        Akademie der Wissenschaften und der Literatur Mainz
+                    </corpName>
                 </funder>
             </titleStmt>
-            <pubStmt xml:id="%NEW-ID%"/>
-            <seriesStmt xml:id="%NEW-ID%">
-                <title xml:lang="de" level="s" xml:id="%NEW-ID%">
+            <pubStmt xml:id="replace"/>
+            <seriesStmt xml:id="replace">
+                <title xml:lang="de" level="s" xml:id="replace">
                     Skizzenbuchedition
                 </title>
-                <identifier auth.uri="https://beethovens-werkstatt.de/modul-4/" xml:id="%NEW-ID%">sk</identifier>
+                <identifier auth.uri="https://beethovens-werkstatt.de/modul-4/" xml:id="replace">
+                    sk
+                </identifier>
             </seriesStmt>
-            <sourceDesc xml:id="%NEW-ID%">
-                <source n="1"
-                    target="%FILEPATH%#%GENDESCWZ-ID%"
-                    xml:id="%NEW-ID%"/>
+            <sourceDesc xml:id="replace">
+                <!-- @target: Pfad zur richtigen Dokument-Datei, und dann ID der //mei:genDesc[@class="#geneticOrder_writingZoneLevel"] -->
+                <source n="1" target="../D-BNba_MH_60_Engelmann.xml#g696d9716-a6d4-4126-9402-a17f8f0e0e32" xml:id="replace"/>
             </sourceDesc>
         </fileDesc>
-        <encodingDesc class="#bw_diplomatic_transcript #bw_module4" xml:id="%NEW-ID%">
-            <appInfo xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="%NEW-ID%">
-                <application version="%APP-VERSION%" xml:id="facsimileExplorer">
-                    <name>Facsimile Explorer</name>
+        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="replace">
+            <appInfo xml:id="replace">
+                <application version="0.1.0" xml:id="facsimileExplorer">
+                    <name>
+                        Facsimile Explorer
+                    </name>
                 </application>
             </appInfo>
-            <classDecls xml:id="%NEW-ID%">
-                <taxonomy label="availableTaxonomies"
-                    xml:id="%NEW-ID%">
+            <classDecls xml:id="replace">
+                <taxonomy label="availableTaxonomies" xml:id="replace">
                     <category xml:id="document_type"/>
                     <category xml:id="bw_observation_type"/>
                     <category xml:id="bw_implementation_completeness"/>
-                    <!--<category xml:id="bw_monitum_category"/>-->
+                    <!--<category xml:id="bw_monitum_category"/>
+                    -->
                     <category xml:id="bw_file_type"/>
                     <category xml:id="bw_monitum_comment"/>
                     <category xml:id="bw_monitum_classification"/>
@@ -59,117 +64,70 @@
                     <category xml:id="xb8206fdc-e421-4ac0-b78d-3bee06b54f93"/>
                     <category xml:id="bw_geneticOrder"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t27152031-df5e-4270-8630-24f0aac2d413">
                     <category xml:id="geneticOrder_documentLevel" class="#bw_geneticOrder"/>
                     <category xml:id="geneticOrder_pageLevel" class="#bw_geneticOrder"/>
                     <category xml:id="geneticOrder_writingZoneLevel" class="#bw_geneticOrder"/>
                     <category xml:id="geneticOrder_writingLayerLevel" class="#bw_geneticOrder"/>
                     <category xml:id="geneticOrder_finalState" class="#bw_geneticOrder"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="ta95b4074-fd6f-4578-a6b3-cfbba093541d">
                     <category xml:id="music.print" class="#document_type"/>
                     <category xml:id="music.manuscript" class="#document_type"/>
                     <category xml:id="letter.manuscript" class="#document_type"/>
                     <category xml:id="music.sketchbook" class="#document_type"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="tf7005cc6-47e4-4478-8cb3-be3c81c88bb5">
                     <category xml:id="bw_monitum_context" class="#bw_observation_type"/>
                     <category xml:id="bw_monitum_effect" class="#bw_observation_type"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="tdb64fcf1-be23-4dd7-a46a-ea4969426632">
                     <category xml:id="bw_fully_implemented" class="#bw_implementation_completeness"/>
-                    <category xml:id="bw_partially_implemented"
-                        class="#bw_implementation_completeness"/>
+                    <category xml:id="bw_partially_implemented" class="#bw_implementation_completeness"/>
                     <category xml:id="bw_not_implemented" class="#bw_implementation_completeness"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t6f6e9c3b-5887-4d38-8bbe-0ca68aafc363">
                     <!-- Klassifizierung -->
-                    <category xml:id="bw_classification_korrektur"
-                        label="Korrektur"
-                        class="#bw_monitum_classification"/>
-                    <category xml:id="bw_classification_variante"
-                        label="Variante"
-                        class="#bw_monitum_classification"/>
-                    <category xml:id="bw_classification_textpraezisierung"
-                        label="Textpräzisierung"
-                        class="#bw_monitum_classification"/>
-                    <category xml:id="bw_classification_schriftbildliche_verbesserung"
-                        label="Schriftbildliche Verbesserung"
-                        class="#bw_monitum_classification"/>
-                    <category xml:id="bw_classification_paratextliche_eingriffe"
-                        label="Paratextliche Eingriffe"
-                        class="#bw_monitum_classification"/>
+                    <category xml:id="bw_classification_korrektur" label="Korrektur" class="#bw_monitum_classification"/>
+                    <category xml:id="bw_classification_variante" label="Variante" class="#bw_monitum_classification"/>
+                    <category xml:id="bw_classification_textpraezisierung" label="Textpräzisierung" class="#bw_monitum_classification"/>
+                    <category xml:id="bw_classification_schriftbildliche_verbesserung" label="Schriftbildliche Verbesserung" class="#bw_monitum_classification"/>
+                    <category xml:id="bw_classification_paratextliche_eingriffe" label="Paratextliche Eingriffe" class="#bw_monitum_classification"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t57eb9af2-22a6-438c-98bd-d508b13ef3d1">
                     <!-- Textoperation -->
-                    <category xml:id="bw_textoperation_einfuegung"
-                        label="Einfuegung"
-                        class="#bw_monitum_textoperation"/>
+                    <category xml:id="bw_textoperation_einfuegung" label="Einfuegung" class="#bw_monitum_textoperation"/>
                     <!--oder erweiterung-->
-                    <category xml:id="bw_textoperation_tilgung"
-                        label="Tilgung"
-                        class="#bw_monitum_textoperation"/>
-                    <category xml:id="bw_textoperation_ersetzung"
-                        label="Ersetzung"
-                        class="#bw_monitum_textoperation"/>
-                    <category xml:id="bw_textoperation_umstellung"
-                        label="Umstellung"
-                        class="#bw_monitum_textoperation"/>
+                    <category xml:id="bw_textoperation_tilgung" label="Tilgung" class="#bw_monitum_textoperation"/>
+                    <category xml:id="bw_textoperation_ersetzung" label="Ersetzung" class="#bw_monitum_textoperation"/>
+                    <category xml:id="bw_textoperation_umstellung" label="Umstellung" class="#bw_monitum_textoperation"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t8de23839-0d5c-4036-8502-5962c34a566c">
                     <!-- Revisionsobjekt -->
-                    <category xml:id="bw_object_dynamic"
-                        label="Dynamik"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_pitch"
-                        label="Tonbuchstabe"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_bogensetzung"
-                        label="Bogensetzung"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_rhythm"
-                        label="Rhythmus"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_ornament"
-                        label="Verzierung"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_octave"
-                        label="Oktavierung"
-                        class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_dynamic" label="Dynamik" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_pitch" label="Tonbuchstabe" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_bogensetzung" label="Bogensetzung" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_rhythm" label="Rhythmus" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_ornament" label="Verzierung" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_octave" label="Oktavierung" class="#bw_monitum_object"/>
                     <category xml:id="bw_object_pedal" label="Pedal" class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_articulation"
-                        label="Artikulation"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_clef"
-                        label="Notenschlüssel"
-                        class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_arpeggio"
-                        label="Arpeggiozeichen"
-                        class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_articulation" label="Artikulation" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_clef" label="Notenschlüssel" class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_arpeggio" label="Arpeggiozeichen" class="#bw_monitum_object"/>
                     <category xml:id="bw_object_rest" label="Pause" class="#bw_monitum_object"/>
-                    <category xml:id="bw_object_fingering"
-                        label="Fingersatz"
-                        class="#bw_monitum_object"/>
+                    <category xml:id="bw_object_fingering" label="Fingersatz" class="#bw_monitum_object"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t401a2f87-117b-476a-a26c-7eb76ffe8b35">
                     <!-- kontextzitat -->
-                    <category xml:id="bw_kontext_korrekt"
-                        label="korrekt"
-                        class="#bw_monitum_kontext"/>
-                    <category xml:id="bw_kontext_unvollstaendig"
-                        label="unvollständig"
-                        class="#bw_monitum_kontext"/>
-                    <category xml:id="bw_kontext_korrumpiert"
-                        label="korrumpiert"
-                        class="#bw_monitum_kontext"/>
+                    <category xml:id="bw_kontext_korrekt" label="korrekt" class="#bw_monitum_kontext"/>
+                    <category xml:id="bw_kontext_unvollstaendig" label="unvollständig" class="#bw_monitum_kontext"/>
+                    <category xml:id="bw_kontext_korrumpiert" label="korrumpiert" class="#bw_monitum_kontext"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t05c6a198-a189-4708-8034-a23065a73173">
                     <!-- konkordanz -->
-                    <category xml:id="bw_konkordanz"
-                        label="konkordanz"
-                        class="#bw_monitum_konkordanz"/>
+                    <category xml:id="bw_konkordanz" label="konkordanz" class="#bw_monitum_konkordanz"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t96dfc189-92ec-4fd5-8c86-130d94d24a22">
                     <category xml:id="bw_module3_corpusFile" class="#bw_file_type"/>
                     <category xml:id="bw_module3_textFile" class="#bw_file_type"/>
                     <category xml:id="bw_module3_linkingFile" class="#bw_file_type"/>
@@ -178,43 +136,70 @@
                     <category xml:id="bw_work_file" class="#bw_file_type"/>
                     <category xml:id="bw_document_reconstruction" class="#bw_file_type"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t9e1efd8d-e800-42aa-bb74-5c6be0dd5d59">
                     <category class="#bw_module" xml:id="bw_module4"/>
                 </taxonomy>
-                <taxonomy xml:id="%NEW-ID%">
+                <taxonomy xml:id="t54f5a158-8bbc-4d2d-b787-ac53fb78b26e">
                     <category xml:id="bw_diplomatic_transcript" class="#bw_transcription_type"/>
                     <category xml:id="bw_annotated_transcript" class="#bw_transcription_type"/>
                 </taxonomy>
             </classDecls>
         </encodingDesc>
-        <revisionDesc xml:id="%NEW-ID%">
-            <change
-                n="1"
-                resp="#bw_jk"
-                isodate="%CURRENT-DATE%"
-                xml:id="%NEW-ID%">
-                <changeDesc xml:id="%NEW-ID%">
-                    <p xml:id="%NEW-ID%">Generated file for diplomatic transcription with <ptr target="#facsimileExplorer"/> using template file.</p>
+        <revisionDesc xml:id="replace">
+            <!-- GitHub user als resp?!, Datum anpassen -->
+            <change n="1" resp="#bw_jk" isodate="2023-12-04" xml:id="replace">
+                <changeDesc xml:id="replace">
+                    <p xml:id="replace">
+                        Generated file for diplomatic transcription with
+                        <ptr target="#facsimileExplorer"/>
+                        using template file.
+                    </p>
                 </changeDesc>
             </change>
         </revisionDesc>
     </meiHead>
-    <music>
+    <music meiversion="6.0+beethovensWerkstatt">
         <body>
-            <mdiv xml:id="%NEW-ID%">
-                <bw:drafts xml:id="%NEW-ID%">
-                    <bw:draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
-                        <scoreDef xml:id="%NEW-ID%">
-                            <staffGrp symbol="none" xml:id="%NEW-ID%"></staffGrp>
-                        </scoreDef>
-                        <pb xml:id="%NEW-ID%" target="%FILEPATH%#%SURFACE-ID%"/>
-                        <section xml:id="%NEW-ID%">
-                            <measure xml:id="%NEW-ID%">
+            <mdiv xml:id="replace">
+                <drafts xml:id="replace">
+                    <draft xml:id="replace" class="#bw_diplomatic_transcript">
+                        <scoreDef xml:id="replace">
+                            <staffGrp symbol="none" xml:id="replace">
+                                <!-- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -->
                                 
-                            </measure>
+                                <!--
+                                <staffDef xml:id="replace" n="1" label="10" decls="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca" lines="5"/>
+                                <staffDef xml:id="replace" n="2" label="11" decls="../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431" lines="5"/>
+                                <staffDef xml:id="replace" n="3" label="12" decls="../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085" lines="5"/>
+                                -->
+                            </staffGrp>
+                        </scoreDef>
+                        <section xml:id="replace">
+                            
+                            
+                            <!-- pb/@target points to surface ID -->
+                            <pb xml:id="replace" target="../D-BNba_MH_60_Engelmann.xml#x2433e745-3d60-4043-9258-10ab1f1aeb47"/>
+                            
+                            <!-- xsl:for-each nur für sb; pb einmalig, da unsere DT seitenbasiert angelegt werden -->
+                                
+                                <!-- sb/@corresp points to rastrum IDs used for this -->
+                                <sb corresp="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca ../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431 ../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085"/>
+                                <measure xml:id="replace">
+                                    <staff n="1" xml:id="replace">
+                                        <layer n="1" xml:id="replace"/>
+                                    </staff>
+                                    <staff n="2" xml:id="replace">
+                                        <layer n="1" xml:id="replace"/>
+                                    </staff>
+                                    <staff n="3" xml:id="replace">
+                                        <layer n="1" xml:id="replace"/>
+                                    </staff>
+                                </measure>
+                            
+                            <!-- /xs:for-each -->
                         </section>
-                    </bw:draft>
-                </bw:drafts>
+                    </draft>
+                </drafts>
             </mdiv>
         </body>
     </music>
