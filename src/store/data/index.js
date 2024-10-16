@@ -1298,7 +1298,10 @@ const dataModule = {
 
       const appversion = await getters.config?.app?.version
       const filename = getters.currentDocPath.split('/').splice(-1)[0]
-      const wzId = getters.genDescForCurrentWritingZone.getAttribute('xml:id')
+      const wzObj = getters.currentWritingZoneObject
+      console.log('initializeDiploTrans - wzObj:', wzObj)
+      // const wzId = wzObj.id // getters.genDescForCurrentWritingZone.getAttribute('xml:id')
+      // console.log(wzId, getters.genDescForCurrentWritingZone.getAttribute('xml:id'))
       const surfaceId = getters.currentPageId
 
       const currentWritingZoneObject = getters.currentWritingZoneObject
@@ -1350,8 +1353,9 @@ const dataModule = {
 
       // -----------------
 
-      const diploTrans = await initializeDiploTrans(filename, wzId, surfaceId, appversion, affectedStaves)
-      console.log(diploTrans)
+      const diploTrans = await initializeDiploTrans(filename, wzObj, surfaceId, appversion, affectedStaves)
+      const serializer = new XMLSerializer()
+      console.log(serializer.serializeToString(diploTrans))
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'add diplomatic transcript at '

@@ -12,6 +12,7 @@
           <label for="dtsystemcount">Anzahl Systeme: </label>
           <input type="number" :model="systemcount" min="1" :max="Math.max(1, rastrumcount)" ref="systemcount" id="dtsystemcount" />
           <button class="btn" @click="$refs.systemcount.value = guessSystems()"><i class="icon icon-refresh"></i></button>
+          {{ systemcount }}
         </div>
         <div>
           Systems
@@ -20,9 +21,15 @@
         <div v-for="(rastrum, i) in rastrumsOnCurrentPage" :key="i">
           <span class="sysnum">{{ i+1 }}.:</span>
           <input type="checkbox" :checked="rastrums[i + 1]" @change="toggle(i + 1, rastrum)" :ref="'sel-' + rastrum.id" />
+          <template  v-if="rastrums[i + 1]">
+            <template v-for="r in systemcount" :key="'rwz-' + r">
+              <input type="radio" :id="'rs-' + rastrum.id + '-' - r" :name="'rs-' + rastrum.id" :checked="rastrum.r === r" @change="rastrum.r = r" />
+              <label :for="'rs-' + r">{{ r }}</label>
+            </template>
+          </template>
           {{ `${rastrum.x}, ${rastrum.y}` }}<!-- <code>{{ rastrum.id }}</code> -->
         </div>
-        <!-- <div>{{ rastrumlist }}</div> -->
+        <div>{{ rastrums }}</div>
       </div>
       <div class="modal-footer">
         <div class="btn-group">

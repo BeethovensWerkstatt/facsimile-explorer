@@ -35,7 +35,7 @@
             </seriesStmt>
             <sourceDesc xml:id="%NEW-ID%">
                 <!-- @target: Pfad zur richtigen Dokument-Datei, und dann ID der //mei:genDesc[@class="#geneticOrder_writingZoneLevel"] -->
-                <source n="1" target="../D-BNba_MH_60_Engelmann.xml#g696d9716-a6d4-4126-9402-a17f8f0e0e32" xml:id="%NEW-ID%"/>
+                <source n="1" target="../%FILENAME%#%GENDESC-WZID%" xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
         <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="%NEW-ID%">
@@ -178,13 +178,14 @@
                             
                             
                             <!-- pb/@target points to surface ID -->
-                            <pb xml:id="%NEW-ID%" target="../D-BNba_MH_60_Engelmann.xml#x2433e745-3d60-4043-9258-10ab1f1aeb47"/>
+                            <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
                             
-                            <!-- xsl:for-each nur für sb; pb einmalig, da unsere DT seitenbasiert angelegt werden -->
+                            <!-- xsl:for-each nur für sb; pb einmalig, da unsere DT seitenbasiert angelegt werden - ->
                                 
-                                <!-- sb/@corresp points to rastrum IDs used for this -->
+                                <!- - sb/@corresp points to rastrum IDs used for this - ->
                                 <sb corresp="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca ../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431 ../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085"/>
                                 <measure xml:id="%NEW-ID%">
+                                
                                     <staff n="1" xml:id="%NEW-ID%">
                                         <layer n="1" xml:id="%NEW-ID%"/>
                                     </staff>
@@ -194,9 +195,10 @@
                                     <staff n="3" xml:id="%NEW-ID%">
                                         <layer n="1" xml:id="%NEW-ID%"/>
                                     </staff>
+                                
                                 </measure>
                             
-                            <!-- /xs:for-each -->
+                            <!- - /xsl:for-each -->
                         </section>
                     </draft>
                 </drafts>

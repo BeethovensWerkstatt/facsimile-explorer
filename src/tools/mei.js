@@ -175,15 +175,15 @@ function getDiplomaticBarline (annotElem, barLine) {
  * takes a template for diplomatic transcriptions and initializes it by generating IDs
  * @param {*} diploTemplate the template to be initialized
  * @param {*} filename the filename of the document containing the page where the diplomatic transcription is located
- * @param {*} genDescWzId the xml:id of the <genDesc> of the writingZone to which this diplomatic transcription belongs
+ * @param {*} wzObj the object for the current writing zone
  * @param {*} surfaceId the xml:id of the <surface> on which this writing zone is transcribed
  * @param {*} appVersion the version of the application, as taken from package.json
  * @param {*} affectedStaves the staves that are covered by this diplomatic transcription
  * @returns the initialized template
  */
-export async function initializeDiploTrans (filename, genDescWzId, surfaceId, appVersion, affectedStaves) {
+export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersion, affectedStaves) {
   /*
-  key words in the template
+  key words in the (former) template
   APP-VERSION
   CURRENT-DATE
   FILEPATH
@@ -191,6 +191,7 @@ export async function initializeDiploTrans (filename, genDescWzId, surfaceId, ap
   NEW-ID
   SURFACE-ID
   */
+  const genDescWzId = wzObj.id
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
@@ -210,6 +211,8 @@ export async function initializeDiploTrans (filename, genDescWzId, surfaceId, ap
     }
   })
 
+  const staffGrp = diploTemplate.querySelector('staffGrp')
+
   affectedStaves.forEach((obj, i) => {
     const n = obj.n
     const rastrum = obj.rastrum
@@ -219,7 +222,7 @@ export async function initializeDiploTrans (filename, genDescWzId, surfaceId, ap
     staffDef.setAttribute('label', n)
     staffDef.setAttribute('sameas', '../' + filename + '#' + rastrum.id)
     staffDef.setAttribute('lines', 5)
-    diploTemplate.querySelector('staffGrp').append(staffDef)
+    staffGrp.append(staffDef)
 
     const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
     staff.setAttribute('n', (i + 1))
@@ -229,14 +232,14 @@ export async function initializeDiploTrans (filename, genDescWzId, surfaceId, ap
     layer.setAttribute('n', 1)
     layer.setAttribute('xml:id', 'l' + uuid())
     staff.append(layer)
-
-    diploTemplate.querySelector('measure').append(staff)
   })
 
   diploTemplate.querySelector('application').setAttribute('version', appVersion)
 
   diploTemplate.querySelector('source').setAttribute('target', '../' + filename + '#' + genDescWzId)
   diploTemplate.querySelector('pb').setAttribute('target', '../' + filename + '#' + surfaceId)
+  const section = diploTemplate.querySelector('pb').parentNode
+  console.log(section.localName)
 
   return diploTemplate
 }
