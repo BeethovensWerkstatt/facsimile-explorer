@@ -1305,7 +1305,7 @@ const dataModule = {
       const surfaceId = getters.currentPageId
 
       const currentWritingZoneObject = getters.currentWritingZoneObject
-      const rastrums = getters.rastrumsOnCurrentPage
+      const rastrums = getters.rastrumsOnCurrentPage.filter(rastrum => rastrumids.find(id => id === rastrum.id) >= 0)
 
       // console.log('\n\ngot this:')
       // console.log('currentWritingZoneObject', currentWritingZoneObject)

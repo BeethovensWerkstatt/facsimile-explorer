@@ -10,24 +10,33 @@
       <div class="modal-body">
         <div>
           <label for="dtsystemcount">Anzahl Systeme: </label>
-          <input type="number" :model="systemcount" min="1" :max="Math.max(1, rastrumcount)" ref="systemcount" id="dtsystemcount" />
-          <button class="btn" @click="$refs.systemcount.value = guessSystems()"><i class="icon icon-refresh"></i></button>
-          {{ systemcount }}
+          <input type="number" v-model="systemcount" min="1" :max="Math.max(1, rastrumcount)" ref="systemcount" id="dtsystemcount" />
+          <button class="btn" @click="$refs.systemcount.value = guessSystems()" title="set default systemcount">
+            <i class="icon icon-refresh"></i>
+          </button>
+          <span class="scwarn" v-if="rastrumcount % systemcount !== 0">{{ rastrumcount }} mod {{ systemcount }} = {{ rastrumcount % systemcount }}</span>
         </div>
         <div>
           Systems
-          <button class="btn btn-clear" @click="rastrums = guessRastrums()"></button>
+          <button class="btn" @click="rastrums = guessRastrums()" title="select default rastrum set">
+            <i class="icon icon-refresh"></i>
+          </button>
         </div>
-        <div v-for="(rastrum, i) in rastrumsOnCurrentPage" :key="i">
-          <span class="sysnum">{{ i+1 }}.:</span>
+        <div v-for="(rastrum, i) in rastrumsOnCurrentPage" :key="i" class="rastrum">
+          <span class="sysnum">{{ i + 1 }}.:</span>
           <input type="checkbox" :checked="rastrums[i + 1]" @change="toggle(i + 1, rastrum)" :ref="'sel-' + rastrum.id" />
-          <template  v-if="rastrums[i + 1]">
+          <!-- <template  v-if="rastrums[i + 1]">
             <template v-for="r in systemcount" :key="'rwz-' + r">
-              <input type="radio" :id="'rs-' + rastrum.id + '-' - r" :name="'rs-' + rastrum.id" :checked="rastrum.r === r" @change="rastrum.r = r" />
+              <input
+                type="radio"
+                :id="'rs-' + rastrum.id + '-' - r" :name="'rs-' + rastrum.id"
+                :value="2"
+                v-model="rlinks[i + 1]"
+              />
               <label :for="'rs-' + r">{{ r }}</label>
             </template>
-          </template>
-          {{ `${rastrum.x}, ${rastrum.y}` }}<!-- <code>{{ rastrum.id }}</code> -->
+          </template> -->
+          <!-- {{ `${rastrum.x}, ${rastrum.y}` }} <code>{{ rastrum.id }}</code> -->
         </div>
         <div>{{ rastrums }}</div>
       </div>
@@ -51,32 +60,35 @@ export default {
   },
   props: {
   },
+  data: () => ({
+    systemcount: 0,
+    rastrums: {},
+    rlinks: {}
+  }),
   watch: {
     active () {
       if (this.active) {
         // start with at least 1 system
         const systemcount = this.guessSystems()
         this.systemcount = systemcount
-        this.$refs.systemcount.value = systemcount
 
         // if nothing is selected yet guess rastrums
         if (this.rastrumcount === 0) {
           this.rastrums = this.guessRastrums()
         }
+        this.rastrumlist.forEach((r, i) => {
+          if (!this.rlinks[r]) {
+            this.rlinks[r] = (i % systemcount) + 1
+          }
+        })
       }
     },
     activeWritingZone () {
       // clear selections if WZ is changed
+      this.systemcount = this.guessSystems()
       this.rastrums = this.guessRastrums()
-      const systemcount = this.guessSystems()
-      this.systemcount = systemcount
-      this.$refs.systemcount.value = systemcount
     }
   },
-  data: () => ({
-    systemcount: 0,
-    rastrums: {}
-  }),
   methods: {
     closeModal () {
       this.$store.dispatch('setModal', null)
@@ -93,6 +105,13 @@ export default {
       this.$store.dispatch('initializeDiploTrans', { systemcount: this.systemcount, rastrums: this.rastrumids })
       this.$store.dispatch('setModal', null)
     },
+    guessSystems () {
+      const annotatedTranscript = this.$store.getters.annotatedTranscriptForCurrentWz
+      // console.log(annotatedTranscript)
+      const staffs = annotatedTranscript?.querySelectorAll('staffDef')
+      // console.log(staffs)
+      return staffs?.length || 1
+    },
     guessRastrums () {
       const rastrums = {}
       const affectedStaves = this.$store.getters.activeDiploTransAffectedStaves
@@ -102,13 +121,6 @@ export default {
         rastrums[n] = rastrum
       }
       return rastrums
-    },
-    guessSystems () {
-      const annotatedTranscript = this.$store.getters.annotatedTranscriptForCurrentWz
-      // console.log(annotatedTranscript)
-      const staffs = annotatedTranscript?.querySelectorAll('staffDef')
-      // console.log(staffs)
-      return staffs?.length || 1
     }
   },
   computed: {
@@ -136,6 +148,19 @@ export default {
   display: inline-block;
   width: 2em;
   text-align: right;
+  margin-right: 1ex;
+}
+
+.rastrum {
+  input[type="radio"] {
+    margin-left: 1ex;
+  }
+}
+
+.scwarn {
+  margin-left: 2ex;
+  color: red;
+  font-weight: bold;
 }
 
 </style>
