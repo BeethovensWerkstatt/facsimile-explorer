@@ -14,11 +14,11 @@ import { createPinia } from 'pinia'
 // console.log(config)
 
 // config is a promise...
-config.then(config => {
+config.then(async config => {
   // create app, when config is fully loaded
   // TODO use Vue-plugin?
   store.dispatch('set_config', config)
-  store.dispatch('initVerovio')
+  await store.dispatch('initVerovio')
   createApp(App).use(createPinia()).use(router).use(store).use(VueCookies).mount('#app')
   const token = VueCookies.get(GH_ACCESS_TOKEN)
   // console.log(token)

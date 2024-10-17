@@ -141,11 +141,10 @@ export default {
   mounted: function () {
     // eslint-disable-next-line
     // this.vrvToolkit = new verovio.toolkit()
-    this.$store.getters.verovioToolkit().then(tk => {
-      this.vrvToolkit = tk
-      this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
-      this.render()
-    })
+    console.log('mounting verovio component')
+    this.vrvToolkit = this.$store.getters.verovioToolkit
+    this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
+    this.render()
 
     this.unwatchData = this.$store.watch((state, getters) => getters[this.getter],
       (newCode, oldCode) => {

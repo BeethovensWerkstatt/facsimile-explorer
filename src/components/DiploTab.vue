@@ -97,6 +97,7 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
+      const dtPage = await this.diplomaticTranscriptsOnCurrentPage
       const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
 

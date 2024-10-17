@@ -2803,7 +2803,6 @@ const dataModule = {
      */
     emptyPageWithRastrums: async (state, getters) => {
       const ep = await getEmptyPage(getters.documentWithCurrentPage, getters.currentSurfaceId)
-
       if (!ep) {
         return null
       }
@@ -2811,29 +2810,27 @@ const dataModule = {
       const serializer = new XMLSerializer()
       const meiString = serializer.serializeToString(ep)
 
-      const tk = await getters.verovioToolkit()
+      const tk = getters.verovioToolkit
       const options = getters.diploPageBackgroundVerovioOptions
-      const width = ep.querySelector('page').getAttribute('page.width')
-      const height = ep.querySelector('page').getAttribute('page.height')
+      const width = ep.querySelector('surface').getAttribute('lrx')
+      const height = ep.querySelector('surface').getAttribute('lry')
       options.pageHeight = height
       options.pageWidth = width
-
       tk.setOptions(options)
-      tk.loadData(meiString)
-      const svgText = tk.renderToSVG(1, {})
-      const svgDom = parser.parseFromString(svgText, 'application/xml')
+      const svgText = tk.renderData(meiString, {})
 
+      const svgDom = parser.parseFromString(svgText, 'application/xml')
       svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
         barLine.remove()
       })
-      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+
+      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
         if (!staff.classList.contains('bounding-box')) {
           const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
           const x = topLineCoordinates[0].substring(1)
           const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
-          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
+          const rotation = staff.getAttribute('data-rotate')
+          staff.style.transform = 'rotate(' + rotation + 'deg)'
           staff.style.transformOrigin = x + 'px ' + y + 'px'
         }
       })
@@ -2855,6 +2852,7 @@ const dataModule = {
       const surface = getters.currentSurfaceId
       const osdRects = getters.osdRects
       const currentPageInfo = getters.currentPageInfo
+
       const emptyPage = await getEmptyPage(meiDoc, surface)
 
       // console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
