@@ -1304,21 +1304,25 @@ const dataModule = {
       // console.log(wzId, getters.genDescForCurrentWritingZone.getAttribute('xml:id'))
       const surfaceId = getters.currentPageId
 
-      const currentWritingZoneObject = getters.currentWritingZoneObject
-      const rastrums = getters.rastrumsOnCurrentPage.filter(rastrum => rastrumids.find(id => id === rastrum.id) >= 0)
+      // const currentWritingZoneObject = getters.currentWritingZoneObject
+      const rastrums = getters.rastrumsOnCurrentPage
 
       // console.log('\n\ngot this:')
       // console.log('currentWritingZoneObject', currentWritingZoneObject)
       // console.log('rastrums', rastrums)
+      /*
       const wzBox = {
         left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
         top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
         right: (parseInt(currentWritingZoneObject.xywh.split(',')[0]) + parseInt(currentWritingZoneObject.xywh.split(',')[2])),
         bottom: (parseInt(currentWritingZoneObject.xywh.split(',')[1]) + parseInt(currentWritingZoneObject.xywh.split(',')[3]))
       }
-
+      */
       const affectedStaves = []
+      console.log('rastrumids', rastrumids)
       rastrums.forEach((rastrum, i) => {
+        console.log('rastrum', rastrum, i + 1, rastrumids.find(id => id === rastrum.id))
+        /*
         const rastrumBox = {
           left: parseInt(rastrum.px.x),
           top: parseInt(rastrum.px.y),
@@ -1329,6 +1333,10 @@ const dataModule = {
            wzBox.bottom >= rastrumBox.bottom &&
            wzBox.left <= rastrumBox.right &&
            wzBox.right >= rastrumBox.left) {
+          affectedStaves.push({ n: i + 1, rastrum })
+        }
+        */
+        if (rastrumids.find(id => id === rastrum.id)) {
           affectedStaves.push({ n: i + 1, rastrum })
         }
       })
@@ -1353,7 +1361,7 @@ const dataModule = {
 
       // -----------------
 
-      const diploTrans = await initializeDiploTrans(filename, wzObj, surfaceId, appversion, affectedStaves)
+      const diploTrans = await initializeDiploTrans(filename, wzObj, surfaceId, appversion, affectedStaves, systemcount)
       const serializer = new XMLSerializer()
       console.log(serializer.serializeToString(diploTrans))
 

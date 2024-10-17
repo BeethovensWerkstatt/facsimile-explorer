@@ -9,6 +9,9 @@
       <div class="menuItem" v-if="showInitializeButton">
         <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
+      <div class="menuItem" v-else-if="$store.getters.diplomaticTranscriptForCurrentWz">
+        <button class="btn" @click="downloadDiploTrans">Download Diplomatic Transcription</button>
+      </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
@@ -60,6 +63,8 @@ import XmlEditor from '@/components/XmlEditor.vue'
 
 import DiploTabMenu from '@/components/DiploTabMenu.vue'
 
+import fileDownload from 'js-file-download'
+
 export default {
   name: 'DiploTab',
   components: {
@@ -97,7 +102,7 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
-      const dtPage = await this.diplomaticTranscriptsOnCurrentPage
+      // const dtPage = await this.diplomaticTranscriptsOnCurrentPage
       const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
 
@@ -154,6 +159,15 @@ export default {
       } else {
         this.$store.dispatch('diploTranscribe')
       }
+    },
+    downloadDiploTrans () {
+      const dt = this.$store.getters.diplomaticTranscriptForCurrentWz
+      const serializer = new XMLSerializer()
+      const dtstring = serializer.serializeToString(dt)
+      const data = new Blob([dtstring], {
+        type: 'application/xml'
+      })
+      fileDownload(data, this.$store.getters.currentWzDtPath.split('/').splice(-1)[0])
     }
   },
   computed: {

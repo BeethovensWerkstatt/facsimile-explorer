@@ -181,7 +181,7 @@ function getDiplomaticBarline (annotElem, barLine) {
  * @param {*} affectedStaves the staves that are covered by this diplomatic transcription
  * @returns the initialized template
  */
-export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersion, affectedStaves) {
+export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersion, affectedStaves, systemcount) {
   /*
   key words in the (former) template
   APP-VERSION
@@ -191,6 +191,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   NEW-ID
   SURFACE-ID
   */
+  console.log('---------------------> ', affectedStaves, systemcount)
   const genDescWzId = wzObj.id
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
@@ -211,35 +212,66 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
     }
   })
 
-  const staffGrp = diploTemplate.querySelector('staffGrp')
-
-  affectedStaves.forEach((obj, i) => {
-    const n = obj.n
-    const rastrum = obj.rastrum
-    const staffDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffDef')
-    staffDef.setAttribute('xml:id', 's' + uuid())
-    staffDef.setAttribute('n', (i + 1))
-    staffDef.setAttribute('label', n)
-    staffDef.setAttribute('sameas', '../' + filename + '#' + rastrum.id)
-    staffDef.setAttribute('lines', 5)
-    staffGrp.append(staffDef)
-
-    const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
-    staff.setAttribute('n', (i + 1))
-    staff.setAttribute('xml:id', 's' + uuid())
-
-    const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
-    layer.setAttribute('n', 1)
-    layer.setAttribute('xml:id', 'l' + uuid())
-    staff.append(layer)
-  })
-
   diploTemplate.querySelector('application').setAttribute('version', appVersion)
 
   diploTemplate.querySelector('source').setAttribute('target', '../' + filename + '#' + genDescWzId)
-  diploTemplate.querySelector('pb').setAttribute('target', '../' + filename + '#' + surfaceId)
-  const section = diploTemplate.querySelector('pb').parentNode
-  console.log(section.localName)
+  const pb = diploTemplate.querySelector('pb')
+  pb.setAttribute('target', '../' + filename + '#' + surfaceId)
+  const section = pb.parentNode
+
+  const staffGrp = diploTemplate.querySelector('staffGrp')
+  const staffDefs = []
+  const staffDecls = []
+
+  for (let i = 0; i < systemcount; i++) {
+    const staffDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffDef')
+    staffDef.setAttribute('xml:id', 's' + uuid())
+    staffDef.setAttribute('n', (i + 1))
+    staffDef.setAttribute('lines', 5)
+    staffGrp.append(staffDef)
+    staffDefs.push(staffDef)
+    staffDecls.push([])
+  }
+
+  let sb = null
+  let corresp = null
+  affectedStaves.forEach((obj, i) => {
+    if (i % systemcount === 0) {
+      if (sb && corresp) {
+        sb.setAttribute('corresp', ' '.join(corresp))
+      }
+      corresp = []
+      sb = document.createElementNS('http://www.music-encoding.org/ns/mei', 'sb')
+      section.append(sb)
+      sb.setAttribute('xml:id', 's' + uuid())
+      const measure = document.createElementNS('http://www.music-encoding.org/ns/mei', 'measure')
+      section.append(measure)
+      measure.setAttribute('xml:id', 'm' + uuid())
+
+      for (let i = 0; i < systemcount; i++) {
+        const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
+        staff.setAttribute('n', (i + 1))
+        staff.setAttribute('xml:id', 's' + uuid())
+        measure.append(staff)
+
+        const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
+        layer.setAttribute('n', 1)
+        layer.setAttribute('xml:id', 'l' + uuid())
+        staff.append(layer)
+      }
+    }
+    // const n = obj.n
+    const rastrum = obj.rastrum
+    const rastrumurl = `../${filename}#${rastrum.id}`
+    staffDecls[i % systemcount].push(rastrumurl)
+    corresp.push(rastrumurl)
+  })
+  if (sb && corresp) {
+    sb.setAttribute('corresp', corresp.join(' '))
+  }
+  staffDecls.forEach((sd, i) => {
+    staffDefs[i].setAttribute('decls', sd.join(' '))
+  })
 
   return diploTemplate
 }
