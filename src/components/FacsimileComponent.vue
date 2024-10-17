@@ -907,20 +907,24 @@ export default {
 
       // ----
       const ep = await getEmptyPage(this.$store.getters.documentWithCurrentPage, this.$store.getters.currentSurfaceId)
-
+      console.log('call me al', ep)
       if (!ep) {
         return null
       }
+      console.log(4, dtArr)
 
       // x const serializer = new XMLSerializer()
       // x const meiString = serializer.serializeToString(ep)
 
-      const tk = await this.$store.getters.verovioToolkit()
+      const tk = this.$store.getters.verovioToolkit
+      console.log(5)
       const options = this.$store.getters.diploPageBackgroundVerovioOptions
-      const width = ep.querySelector('page').getAttribute('page.width')
-      const height = ep.querySelector('page').getAttribute('page.height')
+      const width = ep.querySelector('surface').getAttribute('lrx')
+      const height = ep.querySelector('surface').getAttribute('lry')
       options.pageHeight = height
       options.pageWidth = width
+
+      console.log('643: height of empty page: ' + typeof height, height)
 
       tk.setOptions(options)
 
@@ -929,6 +933,9 @@ export default {
         if (dt.renderable) {
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === dt.wzDetails.diploTrans)
           const diplo = this.renderDiploTrans(tk, dt.wzDetails, dt.renderable)
+
+          console.log('913: diplo', diplo)
+
           const activeWritingZone = this.$store.getters.activeWritingZone
           const viewBox = dt.renderable.querySelector('page').getAttribute('viewBox')
           diplo.querySelector('svg.definition-scale').setAttribute('data-viewBox', viewBox)
@@ -989,6 +996,7 @@ export default {
     },
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
+      console.log('913a: renderDiploTrans()', meiDom)
       meiDom.querySelectorAll('measure').forEach(measure => {
         const xOff = parseFloat(measure.getAttribute('coord.x1'))
         measure.querySelectorAll('*[coord\\.x1], *[coord\\.x2]').forEach(event => {

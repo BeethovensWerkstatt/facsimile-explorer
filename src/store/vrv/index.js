@@ -1,4 +1,12 @@
 import verovio from 'verovio'
+// import createVerovioModule from 'verovio/wasm'
+// import { VerovioToolkit } from 'verovio/esm'
+let tk = null
+
+verovio.module.onRuntimeInitialized = () => {
+  // eslint-disable-next-line new-cap
+  tk = new verovio.toolkit()
+}
 
 /**
  * @namespace store.verovio
@@ -24,28 +32,14 @@ const verovioModule = {
      * @param {Object} context
      */
     async initVerovio ({ state }) {
-      verovio.module.onRuntimeInitialized = () => {
-        state.vrvInitFinished = true
-        while (state.tkqueue.length > 0) state.tkqueue.shift()()
-      }
+      state.verovio = tk
     }
   },
   /**
    * @namespace store.verovio.getters
    */
   getters: {
-    verovioToolkit: (state) => () => {
-      return new Promise((resolve) => {
-        if (state.vrvInitFinished) {
-          while (state.tkqueue.length > 0) state.tkqueue.shift()()
-          // eslint-disable-next-line new-cap
-          resolve(new verovio.toolkit())
-        } else {
-          // eslint-disable-next-line new-cap
-          state.tkqueue.push(() => resolve(new verovio.toolkit()))
-        }
-      })
-    },
+    verovioToolkit: (state) => state.verovio,
 
     /**
      * @memberof store.verovio.getters
@@ -66,7 +60,7 @@ const verovioModule = {
         pageMarginRight: 0,
         pageMarginBottom: 0,
         pageMarginLeft: 0,
-        svgAdditionalAttribute: 'staff@rotateheight'
+        svgAdditionalAttribute: ['staff@rotate']
       }
 
       return verovioOptions
@@ -131,7 +125,7 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: 'staff@rotateheight' //,
+        svgAdditionalAttribute: ['staff@rotate'] //,
         // unit: 18
       }
 
