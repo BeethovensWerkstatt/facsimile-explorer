@@ -166,13 +166,39 @@
                         <scoreDef xml:id="%NEW-ID%">
                             <staffGrp symbol="none" xml:id="%NEW-ID%">
                                 <!-- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -->
+                                
+                                <!--
+                                <staffDef xml:id="%NEW-ID%" n="1" label="10" decls="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca" lines="5"/>
+                                <staffDef xml:id="%NEW-ID%" n="2" label="11" decls="../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431" lines="5"/>
+                                <staffDef xml:id="%NEW-ID%" n="3" label="12" decls="../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085" lines="5"/>
+                                -->
                             </staffGrp>
                         </scoreDef>
-                        <section xml:id="%NEW-ID%">                            
+                        <section xml:id="%NEW-ID%">
+                            
+                            
                             <!-- pb/@target points to surface ID -->
                             <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
-                            <!-- loop-->
-                            <!-- <sb corresp="../%FILENAME%#%RASTRUMID% ... -->
+                            
+                            <!-- xsl:for-each nur für sb; pb einmalig, da unsere DT seitenbasiert angelegt werden - ->
+                                
+                                <!- - sb/@corresp points to rastrum IDs used for this - ->
+                                <sb corresp="../D-BNba_MH_60_Engelmann.xml#r2ff8762a-6374-449e-bd3f-ab9e461766ca ../D-BNba_MH_60_Engelmann.xml#r9242f07e-5046-4af6-b97e-680ef3be6431 ../D-BNba_MH_60_Engelmann.xml#r8ceeb41b-5530-4c9a-98b6-e80eb3197085"/>
+                                <measure xml:id="%NEW-ID%">
+                                
+                                    <staff n="1" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
+                                    </staff>
+                                    <staff n="2" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
+                                    </staff>
+                                    <staff n="3" xml:id="%NEW-ID%">
+                                        <layer n="1" xml:id="%NEW-ID%"/>
+                                    </staff>
+                                
+                                </measure>
+                            
+                            <!- - /xsl:for-each -->
                         </section>
                     </draft>
                 </drafts>

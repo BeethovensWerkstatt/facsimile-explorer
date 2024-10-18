@@ -38,7 +38,7 @@
           </template> -->
           <!-- {{ `${rastrum.x}, ${rastrum.y}` }} <code>{{ rastrum.id }}</code> -->
         </div>
-        <div>{{ rastrums }}</div>
+        <!-- <div>{{ rastrums }}</div> -->
       </div>
       <div class="modal-footer">
         <div class="btn-group">
