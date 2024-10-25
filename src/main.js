@@ -11,16 +11,23 @@ import 'spectre.css/dist/spectre.css'
 import { GH_ACCESS_TOKEN } from './store/octokit'
 import { createPinia } from 'pinia'
 
+import verovio from 'verovio'
+
 // console.log(config)
 
-// config is a promise...
-config.then(async config => {
-  // create app, when config is fully loaded
-  // TODO use Vue-plugin?
-  store.dispatch('set_config', config)
-  await store.dispatch('initVerovio')
-  createApp(App).use(createPinia()).use(router).use(store).use(VueCookies).mount('#app')
-  const token = VueCookies.get(GH_ACCESS_TOKEN)
-  // console.log(token)
-  store.dispatch('setAccessToken', { auth: token })
-})
+verovio.module.onRuntimeInitialized = () => {
+  // eslint-disable-next-line new-cap
+  const tk = new verovio.toolkit()
+
+  // config is a promise...
+  config.then(async config => {
+    // create app, when config is fully loaded
+    // TODO use Vue-plugin?
+    store.dispatch('set_config', config)
+    store.dispatch('initVerovio', tk)
+    createApp(App).use(createPinia()).use(router).use(store).use(VueCookies).mount('#app')
+    const token = VueCookies.get(GH_ACCESS_TOKEN)
+    // console.log(token)
+    store.dispatch('setAccessToken', { auth: token })
+  })
+}

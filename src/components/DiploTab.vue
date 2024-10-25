@@ -102,24 +102,48 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
+      console.log('142----- verifyDiploTransLoaded() -----')
       // const dtPage = await this.diplomaticTranscriptsOnCurrentPage
-      const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      // console.log('142 diplomaticTranscriptsOnCurrentPage', dtPage)
+
+      // const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
 
-      // console.warn('dtOnPage', dtOnPage)
-      // console.warn('this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
+      if (!this.$store.getters.currentSvgPath) {
+        return false
+      }
+
+      const refPath = this.$store.getters.currentSvgPath.slice(0, -4).replace('/svg/', '/diplomaticTranscripts/') + '_wz'
+      const arr = availableDiplomaticTranscripts.filter((path) => path.startsWith(refPath))
+
+      arr.forEach((path) => {
+        const callback = async () => {
+          // console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
+        }
+        const dt = this.$store.getters.documentByPath(path)
+        if (!dt) {
+          // console.log('142 … going for ' + path)
+          this.$store.dispatch('loadXmlFile', { path, callback })
+        }
+      })
+
+      /* console.log('142 docPath', docPath)
+
+      console.log('142 dtOnPage', dtOnPage)
+      console.log('142 this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
 
       for (const dt of dtOnPage) {
         const path = dt.wzDetails.diploTrans
         if (availableDiplomaticTranscripts.indexOf(path) !== -1) {
           // console.log(' … going for ' + path)
           const callback = async () => {
-            // const arr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
-            // console.warn('\n\n\nreceived callback from verifyDiploTransLoaded() for ' + path, arr)
+            const arr = await this.diplomaticTranscriptsOnCurrentPage // this.$store.getters.diplomaticTranscriptsOnCurrentPage
+            console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
           }
+          console.log('142 … going for ' + path)
           this.$store.dispatch('loadXmlFile', { path, callback })
         }
-      }
+      } */
       /*
         if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
           console.log(' … going for ' + dtPath)

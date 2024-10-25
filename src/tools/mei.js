@@ -703,19 +703,21 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
     return null
   }
 
-  console.warn('\n\n\n----HELLO POLLY----')
-  console.log(wzDetails)
-  console.log(dtDoc)
-  console.log(emptyPage)
-  console.log(osdRects)
-  console.log(currentPageInfo)
-  console.warn('-----done-----')
+  console.warn('\n\n\n515----HELLO POLLY----')
+  console.log(515, wzDetails)
+  console.log(515, dtDoc)
+  console.log(515, emptyPage)
+  console.log(515, osdRects)
+  console.log(515, currentPageInfo)
+  console.warn('515-----done-----')
 
   dtDoc.querySelectorAll('staffDef').forEach(staffDef => {
     requiredStaves.push(staffDef.getAttribute('label'))
   })
 
   const clonedPage = emptyPage.cloneNode(true)
+  clonedPage.querySelectorAll('section > *').forEach(node => node.remove())
+  clonedPage.querySelectorAll('surface > *').forEach(node => node.remove())
   // const clonedDt = dtDoc.cloneNode(true)
 
   const bbox = {}
@@ -730,8 +732,6 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
 
   const margin = 10
   const pixMargin = osdRects.ratio * margin // 10mm margin
-
-  console.log('clonedPage:', clonedPage, typeof appendNewElement)
 
   const pixBox = {}
   pixBox.x = bbox.x - pixMargin
@@ -756,6 +756,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
 
   // const defaultRastrumHeight = factor * 8 // 8vu = 72px
 
+  console.log('appendNewElement: ' + typeof appendNewElement)
   dtDoc.querySelectorAll('scoreDef staffDef').forEach(dtStaffDef => {
     /* const staffDef = */ outStaffGrp.appendChild(dtStaffDef.cloneNode(true))
 
@@ -782,6 +783,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
       node.setAttribute('facs', '#' + pageZone.getAttribute('xml:id')) */
       console.log('there should already be a pb in here: ', outSurface)
     } else if (name === 'sb') {
+      console.log('812', dtNode)
       /* const systemZone = appendNewElement(outSurface, 'zone')
       const rastrumIDs = node.getAttribute('corresp').split(' ').map(ref => ref.split('#')[1])
       const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
@@ -901,7 +903,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
     // outDom.querySelector('section').appendChild(node)
   })
 
-  console.log('diplomatic transcript for fragment', clonedPage)
+  console.log('846: diplomatic transcript for fragment', clonedPage)
 
   // temporaryVerovio3to4(clonedPage)
 
@@ -1064,17 +1066,23 @@ const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/m
  * @param {*} node
  * @returns
  */
-/* export const prepareDtForRendering = ({ dtDom, atDom, sourceDom }) => {
+export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
+  if (!dtDom || !sourceDom) {
+    console.warn('714: prepareDtForRendering: missing input')
+    return null
+  }
+
   // TODO: verify the inputs are proper XML documents
   const outDom = new DOMParser().parseFromString('<music xmlns="http://www.music-encoding.org/ns/mei"><facsimile type="transcription"><surface/></facsimile><body><mdiv><score><scoreDef><staffGrp/></scoreDef><section></section></score></mdiv></body></music>', 'text/xml')
 
   try {
     const writingZoneGenDescId = dtDom.querySelector('source').getAttribute('target').split('#')[1]
-    const writingZoneGenDesc = sourceDom.querySelector('genDesc[xml\\:id="' + writingZoneGenDescId + '"]')
-    const surface = sourceDom.querySelector('surface[xml\\:id="' + writingZoneGenDesc.closest('genDesc[class="#geneticOrder_pageLevel"]').getAttribute('corresp').substring(1) + '"]')
+    const writingZoneGenDesc = sourceDom.querySelector('genDesc[*|id="' + writingZoneGenDescId + '"]')
+    const surfaceGenDesc = writingZoneGenDesc.parentNode
+    const surface = sourceDom.querySelector('surface[*|id="' + surfaceGenDesc.getAttribute('corresp').substring(1) + '"]')
     // const writingZoneZone = surface.querySelectorAll('zone').values().find(z => writingZoneGenDesc.getAttribute('xml:id') === z.getAttribute('data').substring(1))
 
-    const layout = sourceDom.querySelector('layout[xml\\:id="' + surface.getAttribute('decls').substring(1) + '"]')
+    const layout = sourceDom.querySelector('layout[*|id="' + surface.getAttribute('decls').substring(1) + '"]')
     const foliumLike = sourceDom.querySelectorAll('foliaDesc > *').values().find(f => {
       const ref = '#' + surface.getAttribute('xml:id')
       return f.getAttribute('recto') === ref || f.getAttribute('verso') === ref || f.getAttribute('outer.recto') === ref || f.getAttribute('inner.verso') === ref || f.getAttribute('inner.recto') === ref || f.getAttribute('outer.verso') === ref
@@ -1170,23 +1178,27 @@ const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/m
             const childZone = appendNewElement(outSurface, 'zone')
             childZone.setAttribute('type', childName)
 
+            const getSbZone = (node) => {
+              let sibling = node
+              while (sibling) {
+                if (sibling.hasAttribute('type') && sibling.getAttribute('type') === 'sb') {
+                  return sibling // Found the matching sibling
+                }
+                sibling = sibling.previousElementSibling // Move to the next preceding sibling
+              }
+              return null
+            }
+            const sbZone = getSbZone(childZone)
+
             if (childName === 'note' || childName === 'accid') {
-              childZone.setAttribute('ulx', (parseFloat(child.getAttribute('x')) * factor).toFixed(1))
+              const ownX = parseFloat(child.getAttribute('x')) * factor
+              const systemX = parseFloat(sbZone.getAttribute('ulx'))
+              childZone.setAttribute('ulx', (ownX + systemX).toFixed(1))
             } else if (childName === 'staff') {
               const staffN = parseInt(child.getAttribute('n'))
-              const getSbZone = (node) => {
-                let sibling = node
-                while (sibling) {
-                  if (sibling.hasAttribute('type') && sibling.getAttribute('type') === 'sb') {
-                    return sibling // Found the matching sibling
-                  }
-                  sibling = sibling.previousElementSibling // Move to the next preceding sibling
-                }
-                return null
-              }
-              const sbZone = getSbZone(childZone)
+
               const rastrumID = sbZone.getAttribute('bw.rastrumIDs').split(' ')[staffN - 1]
-              const rastrum = layout.querySelector('rastrum[xml\\:id="' + rastrumID + '"]')
+              const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
               const staffY = parseFloat(rastrum.getAttribute('system.topmar')) * factor
               childZone.setAttribute('uly', staffY.toFixed(1))
             }
@@ -1197,8 +1209,9 @@ const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/m
             // todo: autogenerate an issue for unsupported elements?! If so, leave a stack trace of the file in which they occur?
           }
         })
-
-        / * TODO: make this work again
+        measureZone.setAttribute('ulx', measureX.toFixed(1))
+        measureZone.setAttribute('lrx', measureX2.toFixed(1))
+        /* TODO: make this work again
         const sbZone = measureZone.previousElementSibling
         const sbX = parseFloat(sbZone.getAttribute('ulx'))
         const sbX2 = parseFloat(sbZone.getAttribute('bw.lrx'))
@@ -1206,20 +1219,18 @@ const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/m
         measureX = Math.max(measureX - 10 * factor, sbX) // give 1cm margin, if possible
         measureX2 = Math.min(measureX2 + 10 * factor, sbX2) // give 1cm margin, if possible
 
-        measureZone.setAttribute('ulx', measureX.toFixed(1))
-        measureZone.setAttribute('lrx', measureX2.toFixed(1))
-        * /
+        */
         node.setAttribute('facs', '#' + measureZone.getAttribute('xml:id'))
       }
       // outDom.querySelector('section').appendChild(node)
     })
   } catch (err) {
-    console.error('Error in prepareDtForRendering: ' + err, err)
+    console.error('714: Error in prepareDtForRendering: ' + err, err)
   }
   return outDom
 }
 
-export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/mei') => {
+/* export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/mei') => {
   const elem = parent.appendChild(document.createElementNS(ns, name))
   if (ns === 'http://www.w3.org/2000/svg') {
     elem.setAttribute('id', 's' + uuid())
@@ -1228,6 +1239,7 @@ export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.o
   }
   return elem
 } */
+
 /*
 function convertDiploTransEvent (event) {
   const name = event.localName

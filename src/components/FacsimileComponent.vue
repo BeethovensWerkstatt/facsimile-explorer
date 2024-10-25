@@ -894,6 +894,12 @@ export default {
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
 
       const dtArr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+
+      if (dtArr.length === 0) {
+        console.log('no diploTrans to render yet')
+        return null
+      }
+
       const existingOverlays = this.$refs.container.querySelectorAll('.overlay.diploTrans')
 
       existingOverlays.forEach(overlay => {
@@ -907,63 +913,50 @@ export default {
 
       // ----
       const ep = await getEmptyPage(this.$store.getters.documentWithCurrentPage, this.$store.getters.currentSurfaceId)
-      console.log('call me al', ep)
       if (!ep) {
         return null
       }
-      console.log(4, dtArr)
 
       // x const serializer = new XMLSerializer()
       // x const meiString = serializer.serializeToString(ep)
 
       const tk = this.$store.getters.verovioToolkit
-      console.log(5)
       const options = this.$store.getters.diploPageBackgroundVerovioOptions
       const width = ep.querySelector('surface').getAttribute('lrx')
       const height = ep.querySelector('surface').getAttribute('lry')
       options.pageHeight = height
       options.pageWidth = width
 
-      console.log('643: height of empty page: ' + typeof height, height)
+      // console.log('643: height of empty page: ' + typeof height, height)
 
       tk.setOptions(options)
+      // console.log('643 again', dtArr)
+
+      const diplomaticTranscripts = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      // console.log('913 diplomaticTranscripts', diplomaticTranscripts)
 
       // ----
-      dtArr.forEach(dt => {
-        if (dt.renderable) {
-          const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === dt.wzDetails.diploTrans)
-          const diplo = this.renderDiploTrans(tk, dt.wzDetails, dt.renderable)
+      diplomaticTranscripts.forEach(async obj => {
+        console.log('913 entering ', obj)
 
-          console.log('913: diplo', diplo)
+        if (obj.dt) {
+          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt)
+          console.log('913: diplo', renderedDiplo)
 
+          const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
-          const viewBox = dt.renderable.querySelector('page').getAttribute('viewBox')
-          diplo.querySelector('svg.definition-scale').setAttribute('data-viewBox', viewBox)
-          /* diplo.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
-            if (!staff.classList.contains('bounding-box')) {
-              const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
-              const x = topLineCoordinates[0].substring(1)
-              const y = topLineCoordinates[1]
-              const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
-              const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-              const pivotOffsetX = staff.getAttribute('data-rotateheight').split(' ')[2]
-              const pivotX = parseFloat(x) - parseFloat(pivotOffsetX)
-              const origin = pivotX + 'px ' + y + 'px'
-              staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
-              staff.style.transformOrigin = origin
-            }
-          }) */
+
           if (!existingOverlay) {
             // console.log('adding overlay for ' + dt.wzDetails.diploTrans)
             const element = document.createElement('div')
             element.classList.add('overlay')
             element.classList.add('diploTrans')
-            if (dt.wzDetails.id === activeWritingZone) {
+            if (obj.wzDetails.id === activeWritingZone) {
               element.classList.add('activeDiploTrans')
             }
-            element.setAttribute('data-diploTrans', dt.wzDetails.id)
-            element.setAttribute('data-filePath', dt.wzDetails.diploTrans)
-            element.append(diplo)
+            element.setAttribute('data-diploTrans', obj.wzDetails.id)
+            element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
+            element.append(renderedDiplo)
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -978,26 +971,29 @@ export default {
             })
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
-            existingOverlay.replaceChild(diplo, existingOverlay.firstChild)
+            existingOverlay.replaceChild(renderedDiplo, existingOverlay.firstChild)
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
             const h = parseFloat(viewBox.split(' ')[3]) - parseFloat(y) */
             const location = pageLocation // new OpenSeadragon.Rect(x, y, w, h)
-            if (dt.wzDetails.id === activeWritingZone) {
+            if (obj.wzDetails.id === activeWritingZone) {
               existingOverlay.classList.add('activeDiploTrans')
             }
             this.viewer.updateOverlay(existingOverlay, location)
           }
-        } else {
-          // console.log('not rendering ', dt)
         }
       })
     },
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
       console.log('913a: renderDiploTrans()', meiDom)
+      console.log('913a: renderDiploTrans()', wzDetails)
       meiDom.querySelectorAll('measure').forEach(measure => {
+        const sb = measure.previousElementSibling
+        console.log('913a: sb', sb)
+        const staves = sb.getAttribute('corresp').split(' ')
+        console.log('913a: staves', staves)
         const xOff = parseFloat(measure.getAttribute('coord.x1'))
         measure.querySelectorAll('*[coord\\.x1], *[coord\\.x2]').forEach(event => {
           if (event.hasAttribute('coord.x1')) {
@@ -1390,6 +1386,17 @@ export default {
       filter: drop-shadow(0px 0px 5px $svgSelectedShapeColor);
       stroke: $svgSelectedShapeColor;
       stroke-width: 3px;
+    }
+  }
+
+  .overlay.diploTrans {
+    fill: #666666;
+    stroke: #666666;
+    fill-rule: evenodd;
+
+    &.activeDiploTrans {
+      fill: #000000;
+      stroke: #000000;
     }
   }
 }

@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, getRenderableDiplomaticTranscript } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -2863,36 +2863,77 @@ const dataModule = {
       const allWz = getters.writingZonesOnCurrentPage
       const arr = []
 
-      const meiDoc = getters.documentWithCurrentPage
-      const surface = getters.currentSurfaceId
-      const osdRects = getters.osdRects
-      const currentPageInfo = getters.currentPageInfo
+      const sourceDom = getters.documentWithCurrentPage
+      // const surface = getters.currentSurfaceId
+      // const osdRects = getters.osdRects
+      // const currentPageInfo = getters.currentPageInfo
 
-      const emptyPage = await getEmptyPage(meiDoc, surface)
+      allWz.forEach(async wzDetails => {
+        if (getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1) {
+          // console.log('816: should be able to retrieve dt for', wzDetails.diploTrans)
+          const dtDom = getters.documentByPath(wzDetails.diploTrans)
+          const dt = prepareDtForRendering({ sourceDom, dtDom })
+          if (dt !== null) {
+            arr.push({ dt, wzDetails })
+          }
+        }
+      })
 
-      // console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
+      // console.log('816: diplomaticTranscriptsOnCurrentPage', arr)
+
+      return arr
+
+      /* const emptyPage = await getEmptyPage(meiDoc, surface)
 
       allWz.forEach(async wzDetails => {
         const dtPath = wzDetails.diploTrans
         const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
-
         if (available) {
-          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
+          console.log('411 wzDetails', wzDetails)
 
-          arr.push({ wzDetails, dtDoc })
+          console.log('411 available', available)
+          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
+          console.log('411 pushing dtDoc "' + dtPath + '"', dtDoc)
+          const atDoc = getters.documentByPath(wzDetails.annotTrans) || null
+          console.log('411 pushing atDoc "' + wzDetails.annotTrans + '"', atDoc)
+          const docPath = getters.currentDocPath
+          console.log('411 docPath: ' + docPath)
+          const sourceDoc = getters.documentByPath(docPath)
+          console.log('411 sourceDoc', sourceDoc)
+          const dtAvail = getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1
+          const atAvail = getters.availableAnnotatedTranscripts.indexOf(wzDetails.annotTrans) !== -1
+          arr.push({ wzDetails, dtDoc, atDoc, sourceDoc, dtAvail, atAvail })
         }
       })
-
+      setTimeout(() => {
+        //
+      }, 1000)
       await Promise.all(arr.map(async wz => {
         try {
-          const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
-          wz.renderable = renderableDiplomaticTranscript
+          console.log('411 wzx', wz)
+
+          const func = async () => {
+            const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
+            console.log('411 renderableDiplomaticTranscript', renderableDiplomaticTranscript)
+            return renderableDiplomaticTranscript
+          }
+
+          if (wz.dtAvail && wz.atAvail) {
+            console.log('411x: alles da…', wz)
+          }
+
+          const renderable = await func()
+          wz.renderable = renderable
+          wz.renderableFunc = func
         } catch (error) {
-          console.error('Error getting renderableDiplomaticTranscript for wz', wz, error)
+          console.error('411: Error getting renderableDiplomaticTranscript for wz', wz, error)
         }
       }))
 
+      console.log('411 resulting arr', arr)
+
       return arr
+      */
     },
 
     /**

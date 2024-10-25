@@ -141,7 +141,7 @@ export default {
   mounted: function () {
     // eslint-disable-next-line
     // this.vrvToolkit = new verovio.toolkit()
-    console.log('mounting verovio component')
+    console.log('932: mounting verovio component')
     this.vrvToolkit = this.$store.getters.verovioToolkit
     this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
     this.render()

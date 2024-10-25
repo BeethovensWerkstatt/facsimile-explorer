@@ -1,12 +1,6 @@
-import verovio from 'verovio'
+// import verovio from 'verovio'
 // import createVerovioModule from 'verovio/wasm'
 // import { VerovioToolkit } from 'verovio/esm'
-let tk = null
-
-verovio.module.onRuntimeInitialized = () => {
-  // eslint-disable-next-line new-cap
-  tk = new verovio.toolkit()
-}
 
 /**
  * @namespace store.verovio
@@ -31,8 +25,8 @@ const verovioModule = {
      * @memberof store.verovio.actions
      * @param {Object} context
      */
-    async initVerovio ({ state }) {
-      state.verovio = tk
+    initVerovio ({ state }, toolkit) {
+      state.verovio = toolkit
     }
   },
   /**
@@ -99,7 +93,7 @@ const verovioModule = {
      */
     annotatedTranscriptForWz: (state, getters) => async (dom) => {
       const serializer = new XMLSerializer()
-      const vrvToolkit = await getters.verovioToolkit()
+      const vrvToolkit = getters.verovioToolkit
       console.log('annotatedTranscriptForWz', dom)
       const mei = serializer.serializeToString(dom)
       vrvToolkit.setOptions(getters.annotTransVerovioOptions)
