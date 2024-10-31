@@ -994,15 +994,15 @@ export default {
         console.log('913a: sb', sb)
         const staves = sb.getAttribute('corresp').split(' ')
         console.log('913a: staves', staves)
-        const xOff = parseFloat(measure.getAttribute('coord.x1'))
-        measure.querySelectorAll('*[coord\\.x1], *[coord\\.x2]').forEach(event => {
-          if (event.hasAttribute('coord.x1')) {
-            const x1 = parseFloat(event.getAttribute('coord.x1')) + xOff
-            event.setAttribute('coord.x1', x1)
+        const xOff = parseFloat(measure.getAttribute('x'))
+        measure.querySelectorAll('*[x], *[x2]').forEach(event => {
+          if (event.hasAttribute('x')) {
+            const x1 = parseFloat(event.getAttribute('x')) + xOff
+            event.setAttribute('x', x1)
           }
-          if (event.hasAttribute('coord.x2')) {
-            const x2 = parseFloat(event.getAttribute('coord.x2')) + xOff
-            event.setAttribute('coord.x2', x2)
+          if (event.hasAttribute('x2')) {
+            const x2 = parseFloat(event.getAttribute('x2')) + xOff
+            event.setAttribute('x2', x2)
           }
         })
       })
