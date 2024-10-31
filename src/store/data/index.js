@@ -3,7 +3,7 @@ import { uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, getRenderableDiplomaticTranscript } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
@@ -1287,33 +1287,42 @@ const dataModule = {
      * @param {*} param0
      * @returns
      */
-    async initializeDiploTrans ({ commit, getters, dispatch }) {
+    async initializeDiploTrans ({ commit, getters, dispatch }, { systemcount, rastrums: rastrumids }) {
       const existingDt = getters.diplomaticTranscriptForCurrentWz
       if (existingDt !== null) {
         console.log('…current writing zone already has a diplomatic transcription')
         return null
       }
 
+      console.log('initializeDiploTrans:', systemcount, rastrumids)
+
       const appversion = await getters.config?.app?.version
       const filename = getters.currentDocPath.split('/').splice(-1)[0]
-      const wzId = getters.genDescForCurrentWritingZone.getAttribute('xml:id')
+      const wzObj = getters.currentWritingZoneObject
+      console.log('initializeDiploTrans - wzObj:', wzObj)
+      // const wzId = wzObj.id // getters.genDescForCurrentWritingZone.getAttribute('xml:id')
+      // console.log(wzId, getters.genDescForCurrentWritingZone.getAttribute('xml:id'))
       const surfaceId = getters.currentPageId
 
-      const currentWritingZoneObject = getters.currentWritingZoneObject
+      // const currentWritingZoneObject = getters.currentWritingZoneObject
       const rastrums = getters.rastrumsOnCurrentPage
 
       // console.log('\n\ngot this:')
       // console.log('currentWritingZoneObject', currentWritingZoneObject)
       // console.log('rastrums', rastrums)
+      /*
       const wzBox = {
         left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
         top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
         right: (parseInt(currentWritingZoneObject.xywh.split(',')[0]) + parseInt(currentWritingZoneObject.xywh.split(',')[2])),
         bottom: (parseInt(currentWritingZoneObject.xywh.split(',')[1]) + parseInt(currentWritingZoneObject.xywh.split(',')[3]))
       }
-
+      */
       const affectedStaves = []
+      console.log('rastrumids', rastrumids)
       rastrums.forEach((rastrum, i) => {
+        console.log('rastrum', rastrum, i + 1, rastrumids.find(id => id === rastrum.id))
+        /*
         const rastrumBox = {
           left: parseInt(rastrum.px.x),
           top: parseInt(rastrum.px.y),
@@ -1324,6 +1333,10 @@ const dataModule = {
            wzBox.bottom >= rastrumBox.bottom &&
            wzBox.left <= rastrumBox.right &&
            wzBox.right >= rastrumBox.left) {
+          affectedStaves.push({ n: i + 1, rastrum })
+        }
+        */
+        if (rastrumids.find(id => id === rastrum.id)) {
           affectedStaves.push({ n: i + 1, rastrum })
         }
       })
@@ -1348,7 +1361,9 @@ const dataModule = {
 
       // -----------------
 
-      const diploTrans = await initializeDiploTrans(filename, wzId, surfaceId, appversion, affectedStaves)
+      const diploTrans = await initializeDiploTrans(filename, wzObj, surfaceId, appversion, affectedStaves, systemcount)
+      const serializer = new XMLSerializer()
+      console.log(serializer.serializeToString(diploTrans))
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'add diplomatic transcript at '
@@ -2803,7 +2818,6 @@ const dataModule = {
      */
     emptyPageWithRastrums: async (state, getters) => {
       const ep = await getEmptyPage(getters.documentWithCurrentPage, getters.currentSurfaceId)
-
       if (!ep) {
         return null
       }
@@ -2811,29 +2825,27 @@ const dataModule = {
       const serializer = new XMLSerializer()
       const meiString = serializer.serializeToString(ep)
 
-      const tk = await getters.verovioToolkit()
+      const tk = getters.verovioToolkit
       const options = getters.diploPageBackgroundVerovioOptions
-      const width = ep.querySelector('page').getAttribute('page.width')
-      const height = ep.querySelector('page').getAttribute('page.height')
+      const width = ep.querySelector('surface').getAttribute('lrx')
+      const height = ep.querySelector('surface').getAttribute('lry')
       options.pageHeight = height
       options.pageWidth = width
-
       tk.setOptions(options)
-      tk.loadData(meiString)
-      const svgText = tk.renderToSVG(1, {})
-      const svgDom = parser.parseFromString(svgText, 'application/xml')
+      const svgText = tk.renderData(meiString, {})
 
+      const svgDom = parser.parseFromString(svgText, 'application/xml')
       svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
         barLine.remove()
       })
-      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+
+      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
         if (!staff.classList.contains('bounding-box')) {
           const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
           const x = topLineCoordinates[0].substring(1)
           const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
-          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
+          const rotation = staff.getAttribute('data-rotate')
+          staff.style.transform = 'rotate(' + rotation + 'deg)'
           staff.style.transformOrigin = x + 'px ' + y + 'px'
         }
       })
@@ -2851,35 +2863,77 @@ const dataModule = {
       const allWz = getters.writingZonesOnCurrentPage
       const arr = []
 
-      const meiDoc = getters.documentWithCurrentPage
-      const surface = getters.currentSurfaceId
-      const osdRects = getters.osdRects
-      const currentPageInfo = getters.currentPageInfo
-      const emptyPage = await getEmptyPage(meiDoc, surface)
+      const sourceDom = getters.documentWithCurrentPage
+      // const surface = getters.currentSurfaceId
+      // const osdRects = getters.osdRects
+      // const currentPageInfo = getters.currentPageInfo
 
-      // console.log('getters.availableDiplomaticTranscripts', getters.availableDiplomaticTranscripts)
+      allWz.forEach(async wzDetails => {
+        if (getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1) {
+          // console.log('816: should be able to retrieve dt for', wzDetails.diploTrans)
+          const dtDom = getters.documentByPath(wzDetails.diploTrans)
+          const dt = prepareDtForRendering({ sourceDom, dtDom })
+          if (dt !== null) {
+            arr.push({ dt, wzDetails })
+          }
+        }
+      })
+
+      // console.log('816: diplomaticTranscriptsOnCurrentPage', arr)
+
+      return arr
+
+      /* const emptyPage = await getEmptyPage(meiDoc, surface)
 
       allWz.forEach(async wzDetails => {
         const dtPath = wzDetails.diploTrans
         const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
-
         if (available) {
-          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
+          console.log('411 wzDetails', wzDetails)
 
-          arr.push({ wzDetails, dtDoc })
+          console.log('411 available', available)
+          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
+          console.log('411 pushing dtDoc "' + dtPath + '"', dtDoc)
+          const atDoc = getters.documentByPath(wzDetails.annotTrans) || null
+          console.log('411 pushing atDoc "' + wzDetails.annotTrans + '"', atDoc)
+          const docPath = getters.currentDocPath
+          console.log('411 docPath: ' + docPath)
+          const sourceDoc = getters.documentByPath(docPath)
+          console.log('411 sourceDoc', sourceDoc)
+          const dtAvail = getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1
+          const atAvail = getters.availableAnnotatedTranscripts.indexOf(wzDetails.annotTrans) !== -1
+          arr.push({ wzDetails, dtDoc, atDoc, sourceDoc, dtAvail, atAvail })
         }
       })
-
+      setTimeout(() => {
+        //
+      }, 1000)
       await Promise.all(arr.map(async wz => {
         try {
-          const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
-          wz.renderable = renderableDiplomaticTranscript
+          console.log('411 wzx', wz)
+
+          const func = async () => {
+            const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
+            console.log('411 renderableDiplomaticTranscript', renderableDiplomaticTranscript)
+            return renderableDiplomaticTranscript
+          }
+
+          if (wz.dtAvail && wz.atAvail) {
+            console.log('411x: alles da…', wz)
+          }
+
+          const renderable = await func()
+          wz.renderable = renderable
+          wz.renderableFunc = func
         } catch (error) {
-          console.error('Error getting renderableDiplomaticTranscript for wz', wz, error)
+          console.error('411: Error getting renderableDiplomaticTranscript for wz', wz, error)
         }
       }))
 
+      console.log('411 resulting arr', arr)
+
       return arr
+      */
     },
 
     /**
