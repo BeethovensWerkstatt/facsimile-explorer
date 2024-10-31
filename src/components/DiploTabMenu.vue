@@ -12,7 +12,7 @@
     <div class="entry">
         <label>@coord.x1</label>
         <div class="value">
-            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="coord.x1" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
     <div class="entry" v-if="isNote">

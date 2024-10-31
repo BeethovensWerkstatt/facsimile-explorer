@@ -9,7 +9,9 @@
       <div class="menuItem" v-if="showInitializeButton">
         <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
-      <div class="menuItem">ADT: {{ $store.getters.activeDiploTransElementId }}</div>
+      <div class="menuItem" v-else-if="$store.getters.diplomaticTranscriptForCurrentWz">
+        <button class="btn" @click="downloadDiploTrans">Download Diplomatic Transcription</button>
+      </div>
       <div class="osdButtons">
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
@@ -61,6 +63,8 @@ import XmlEditor from '@/components/XmlEditor.vue'
 
 import DiploTabMenu from '@/components/DiploTabMenu.vue'
 
+import fileDownload from 'js-file-download'
+
 import { useDiploTrans } from '@/store/gui/diplotrans'
 
 export default {
@@ -103,23 +107,48 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
-      const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      console.log('142----- verifyDiploTransLoaded() -----')
+      // const dtPage = await this.diplomaticTranscriptsOnCurrentPage
+      // console.log('142 diplomaticTranscriptsOnCurrentPage', dtPage)
+
+      // const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
 
-      // console.warn('dtOnPage', dtOnPage)
-      // console.warn('this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
+      if (!this.$store.getters.currentSvgPath) {
+        return false
+      }
+
+      const refPath = this.$store.getters.currentSvgPath.slice(0, -4).replace('/svg/', '/diplomaticTranscripts/') + '_wz'
+      const arr = availableDiplomaticTranscripts.filter((path) => path.startsWith(refPath))
+
+      arr.forEach((path) => {
+        const callback = async () => {
+          // console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
+        }
+        const dt = this.$store.getters.documentByPath(path)
+        if (!dt) {
+          // console.log('142 … going for ' + path)
+          this.$store.dispatch('loadXmlFile', { path, callback })
+        }
+      })
+
+      /* console.log('142 docPath', docPath)
+
+      console.log('142 dtOnPage', dtOnPage)
+      console.log('142 this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
 
       for (const dt of dtOnPage) {
         const path = dt.wzDetails.diploTrans
         if (availableDiplomaticTranscripts.indexOf(path) !== -1) {
           // console.log(' … going for ' + path)
           const callback = async () => {
-            // const arr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
-            // console.warn('\n\n\nreceived callback from verifyDiploTransLoaded() for ' + path, arr)
+            const arr = await this.diplomaticTranscriptsOnCurrentPage // this.$store.getters.diplomaticTranscriptsOnCurrentPage
+            console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
           }
+          console.log('142 … going for ' + path)
           this.$store.dispatch('loadXmlFile', { path, callback })
         }
-      }
+      } */
       /*
         if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
           console.log(' … going for ' + dtPath)
@@ -159,6 +188,15 @@ export default {
       } else {
         this.$store.dispatch('diploTranscribe')
       }
+    },
+    downloadDiploTrans () {
+      const dt = this.$store.getters.diplomaticTranscriptForCurrentWz
+      const serializer = new XMLSerializer()
+      const dtstring = serializer.serializeToString(dt)
+      const data = new Blob([dtstring], {
+        type: 'application/xml'
+      })
+      fileDownload(data, this.$store.getters.currentWzDtPath.split('/').splice(-1)[0])
     }
   },
   computed: {

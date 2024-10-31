@@ -331,12 +331,8 @@ export default {
     }
   },
   created () {
-    this.$store.getters.verovioToolkit().then(tk => {
-      this.vrvToolkit = tk
-      this.vrvToolkit.setOptions(verovioOptions)
-      // console.log('verovio is there now')
-      // console.log(this.vrvToolkit)
-    })
+    this.vrvToolkit = this.$store.getters.verovioToolkit
+    this.vrvToolkit.setOptions(verovioOptions)
   },
   mounted () {
     try {
