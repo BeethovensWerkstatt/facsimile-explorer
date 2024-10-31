@@ -238,7 +238,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   affectedStaves.forEach((obj, i) => {
     if (i % systemcount === 0) {
       if (sb && corresp) {
-        sb.setAttribute('corresp', ' '.join(corresp))
+        sb.setAttribute('corresp', corresp.join(' '))
       }
       corresp = []
       sb = document.createElementNS('http://www.music-encoding.org/ns/mei', 'sb')
@@ -1199,7 +1199,8 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
               const rastrumID = sbZone.getAttribute('bw.rastrumIDs').split(' ')[staffN - 1]
               const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
-              const staffY = parseFloat(rastrum.getAttribute('system.topmar')) * factor
+              // TODO: if rastrum is null/undefined set to 0 ???
+              const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0
               childZone.setAttribute('uly', staffY.toFixed(1))
             }
 
