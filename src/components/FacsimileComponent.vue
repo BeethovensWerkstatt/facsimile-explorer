@@ -201,7 +201,7 @@ export default {
             action: () => {
               console.log('TODO: add shape to current DiploTrans element')
             },
-            disabled: this.$store.getters.diploTransSelectedId === null
+            disabled: this.$store.getters.activeDiploTransElementId === null
           }
 
           const activateDTEntry = {
