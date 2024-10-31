@@ -1430,7 +1430,7 @@ const dataModule = {
       // console.log('annotStaffN', annotStaffN)
 
       const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
-      // console.log('diploStaffN', diploStaffN)
+      console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
       const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
