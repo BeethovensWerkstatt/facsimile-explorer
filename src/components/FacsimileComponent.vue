@@ -200,6 +200,15 @@ export default {
             label: 'Add shape to current DiploTrans element',
             action: () => {
               console.log('TODO: add shape to current DiploTrans element')
+              const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
+              const id = this.$store.getters.activeDiploTransElementId
+              const snippet = this.$store.getters.xmlSnippet({ filePath, id })
+              if (snippet) {
+                const corresp = snippet.getAttribute('corresp')?.split(' ') || []
+                corresp.push(click.target.id)
+                snippet.setAttribute('corresp', corresp.join(' '))
+                // TODO: log change!
+              }
             },
             disabled: this.$store.getters.activeDiploTransElementId === null
           }

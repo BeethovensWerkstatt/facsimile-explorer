@@ -1429,7 +1429,7 @@ const dataModule = {
       }
       console.log('691 annotStaffN', annotStaffN)
 
-      const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
+      const diploStaffN = annotStaffN // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
       console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
