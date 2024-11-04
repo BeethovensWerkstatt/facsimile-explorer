@@ -1427,7 +1427,7 @@ const dataModule = {
       } else {
         annotStaffN = annotElem.closest('staff').getAttribute('n')
       }
-      // console.log('annotStaffN', annotStaffN)
+      console.log('691 annotStaffN', annotStaffN)
 
       const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
       console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
@@ -1458,9 +1458,30 @@ const dataModule = {
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, annotElemRef)
 
       const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
-      console.log('diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
-      const diploLayer = dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
-      const diploMeasure = diploLayer.closest('measure')
+      // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
+
+      const getDiplomaticMeasure = (annotElem) => {
+        const atMeasure = annotElem.closest('measure')
+
+        const countPrecedingSb = (elem) => {
+          let count = 0
+          let current = elem.previousElementSibling
+          while (current) {
+            if (current.localName === 'sb') {
+              count++
+            }
+            current = current.previousElementSibling
+          }
+          return count
+        }
+
+        const sbCount = countPrecedingSb(atMeasure)
+        const dtMeasure = dtDoc.querySelectorAll('measure')[sbCount - 1]
+        return dtMeasure
+      }
+
+      const diploMeasure = getDiplomaticMeasure(annotElem) // diploLayer.closest('measure')
+      const diploLayer = diploMeasure.querySelector('layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
 
       if (isControlEvent) {
         diploMeasure.appendChild(diplomaticElement)
@@ -1468,8 +1489,8 @@ const dataModule = {
         // Convert child nodes of diploLayer into an array
         const children = Array.from(diploLayer.children)
 
-        // Find the index of the first child node with a greater coord.x1 value
-        const index = children.findIndex(child => child.hasAttribute('coord.x1') && (parseFloat(child.getAttribute('coord.x1')) > parseFloat(mm)))
+        // Find the index of the first child node with a greater x value
+        const index = children.findIndex(child => child.hasAttribute('x') && (parseFloat(child.getAttribute('x')) > parseFloat(mm)))
         if (index !== -1) {
           // If such a node is found, insert diplomaticElement before this node
           diploLayer.insertBefore(diplomaticElement, children[index])
