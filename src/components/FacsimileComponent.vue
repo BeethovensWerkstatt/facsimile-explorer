@@ -1408,6 +1408,7 @@ export default {
     fill-rule: evenodd;
 
     &.activeDiploTrans {
+      z-index: 10;
       fill: #000000;
       stroke: #000000;
     }
