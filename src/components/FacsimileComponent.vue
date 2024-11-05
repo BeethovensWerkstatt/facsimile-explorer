@@ -206,8 +206,12 @@ export default {
               if (snippet) {
                 const corresp = snippet.getAttribute('corresp')?.split(' ') || []
                 corresp.push(click.target.id)
-                snippet.setAttribute('corresp', corresp.join(' '))
-                // TODO: log change!
+                const acorresp = corresp.join(' ')
+                console.log('corresp:', acorresp)
+                snippet.setAttribute('corresp', acorresp)
+
+                // TODO: loadDocumentIntoStore!
+                // TODO: logChange!
               }
             },
             disabled: this.$store.getters.activeDiploTransElementId === null
