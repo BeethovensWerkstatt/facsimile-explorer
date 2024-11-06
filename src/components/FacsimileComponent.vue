@@ -199,19 +199,30 @@ export default {
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
             action: () => {
-              console.log('TODO: add shape to current DiploTrans element')
+              console.log('add shape to current DiploTrans element ...')
+              const baseMessage = 'add shape to DT at '
               const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
               const id = this.$store.getters.activeDiploTransElementId
-              const snippet = this.$store.getters.xmlSnippet({ filePath, id })
+              const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
+              const origdoc = this.$store.getters.documentByPath(filePath)
+              const doc = origdoc?.cloneNode(true)
+              const snippet = doc?.querySelector(`*[*|id="${id}"]`)
               if (snippet) {
-                const corresp = snippet.getAttribute('corresp')?.split(' ') || []
-                corresp.push(click.target.id)
-                const acorresp = corresp.join(' ')
-                console.log('corresp:', acorresp)
-                snippet.setAttribute('corresp', acorresp)
-
-                // TODO: loadDocumentIntoStore!
-                // TODO: logChange!
+                const facs = snippet.getAttribute('facs')?.split(' ') || []
+                facs.push(svgPath + '#' + click.target.id)
+                const afacs = facs.join(' ')
+                snippet.setAttribute('facs', afacs)
+                console.log('facs:', afacs, snippet)
+                this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
+                this.$store.dispatch('logChange', {
+                  path: filePath,
+                  baseMessage,
+                  param: 0,
+                  xmlIDs: [id],
+                  isNewDoument: false
+                })
+              } else {
+                console.warn('addShapeEntry: no snippet found!')
               }
             },
             disabled: this.$store.getters.activeDiploTransElementId === null
