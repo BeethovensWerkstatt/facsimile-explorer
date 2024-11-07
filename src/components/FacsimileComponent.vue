@@ -200,6 +200,7 @@ export default {
             label: 'Add shape to current DiploTrans element',
             action: () => {
               console.log('add shape to current DiploTrans element ...')
+              // TODO: ask for function (stem/head/etc)
               const baseMessage = 'add shape to DT at '
               const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
               const id = this.$store.getters.activeDiploTransElementId
