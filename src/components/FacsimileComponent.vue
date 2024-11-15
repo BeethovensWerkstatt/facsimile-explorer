@@ -256,8 +256,12 @@ export default {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(selectables)
         if (target) {
-          const id = target.getAttribute('data-id')
+          let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
+          // select chords to show up in XML editor instead of single notes
+          if (target.matches('.note') && target.closest('.chord')) {
+            id = target.closest('.chord').getAttribute('data-id')
+          }
           this.$store.dispatch('setActiveDiploTransElementId', id)
           console.log('selecting activeDiploTransElementId: ', id)
         }
@@ -988,13 +992,13 @@ export default {
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
       console.log('913a: renderDiploTrans()', meiDom)
-      console.log('913a: renderDiploTrans()', wzDetails)
+      // console.log('913a: renderDiploTrans()', wzDetails)
       meiDom.querySelectorAll('measure').forEach(measure => {
-        const sb = measure.previousElementSibling
-        console.log('913a: sb', sb)
-        const staves = sb.getAttribute('corresp').split(' ')
-        console.log('913a: staves', staves)
-        const xOff = parseFloat(measure.getAttribute('x'))
+        // const sb = measure.previousElementSibling
+        // console.log('913a: sb', sb)
+        // const staves = sb.getAttribute('corresp').split(' ')
+        // console.log('913a: staves', staves)
+        const xOff = 0 // parseFloat(measure.getAttribute('x'))
         measure.querySelectorAll('*[x], *[x2]').forEach(event => {
           if (event.hasAttribute('x')) {
             const x1 = parseFloat(event.getAttribute('x')) + xOff
@@ -1018,15 +1022,30 @@ export default {
           barLine.remove()
         }
       })
-      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+
+      svgDom.querySelectorAll('.chord:not(.bounding-box)').forEach(chord => {
+        const stem = chord.querySelector('.stem > path')
+
+        if (stem) {
+          const stemDir = meiDom.querySelector('chord[*|id = "' + chord.getAttribute('data-id') + '"]').getAttribute('stem.dir')
+
+          const x = stemDir === 'up'
+            ? parseFloat(parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('x')) + parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('width')))
+            : chord.querySelector('.note.bounding-box > rect').getAttribute('x')
+          const arr = stem.getAttribute('d').split(' ')
+          stem.setAttribute('d', 'M' + x + ' ' + arr[1] + ' L' + x + ' ' + arr[3])
+          chord.querySelector('.stem.bounding-box rect').setAttribute('x', x)
+        }
+      })
+
+      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
         if (!staff.classList.contains('bounding-box')) {
-          const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
-          const x = topLineCoordinates[0].substring(1)
-          const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
-          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
-          staff.style.transformOrigin = x + 'px ' + y + 'px'
+          // const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
+          // const x = parseFloat(topLineCoordinates[0].substring(1)) - parseFloat(staff.getAttribute('data-pivot'))
+          // const y = topLineCoordinates[1]
+          const rotation = staff.getAttribute('data-rotate')
+          staff.style.transform = 'rotate(' + rotation + 'deg)'
+          // staff.style.transformOrigin = x + 'px ' + y + 'px'
         }
       })
 

@@ -9,13 +9,15 @@ const parser = new DOMParser()
  * @param {*} x the x coordinate of the new element, relative to the staff and given in mm
  * @returns the generated diplomatic transcription
  */
-export function generateDiplomaticElement (annotElem, shapes, x, svgPath, annotElemRef) {
+export function generateDiplomaticElement (annotElem, shapes, x, svgPath, correspPath, annotElemRef) {
   let name = annotElem.localName
 
   if (name === 'beam') {
     name = 'beamSpan'
   } else if (name === 'measure') {
     name = 'barLine'
+  } else if (name === 'note' && annotElem.parentNode.localName === 'chord') {
+    name = 'chord'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -33,6 +35,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, annotE
   elem.setAttribute('facs', facs.join(' '))
   elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
+  annotElem.setAttribute('corresp', correspPath + elem.getAttribute('xml:id'))
+
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
   } else if (name === 'beamSpan' || name === 'beam') {
@@ -41,6 +45,10 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, annotE
     getDiplomaticAccid(annotElem, elem)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem)
+  } else if (name === 'dot') {
+    getDiplomaticDot(annotElem, elem)
+  } else if (name === 'chord') {
+    getDiplomaticChord(annotElem.parentNode, elem)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -54,6 +62,125 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, annotE
  * @param {*} note the diplomatic note to be translated
  */
 function getDiplomaticNote (annotElem, note) {
+  try {
+    const loc = getLocAttribute(annotElem)
+
+    note.setAttribute('loc', loc)
+
+    // head shape
+    let headshape
+    const dur = annotElem.getAttribute('dur')
+    if (dur === '1') {
+      headshape = 'whole'
+    } else if (dur === '2') {
+      headshape = 'half'
+    } else if (parseInt(dur) >= 4) {
+      headshape = 'quarter'
+    }
+    if (annotElem.hasAttribute('head.shape')) {
+      headshape = annotElem.getAttribute('head.shape')
+    }
+    note.setAttribute('head.shape', headshape)
+    note.setAttribute('dur', dur)
+
+    // stem direction
+    if (annotElem.hasAttribute('stem.dir')) {
+      note.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
+    } else if (dur !== '1') {
+      note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
+    }
+
+    // log('diplomatic note:', note)
+  } catch (err) {
+    console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
+  }
+}
+
+/**
+ * translates an annotated note to a diplomatic note
+ * @param {*} annotElem the annotated note to be translated
+ * @param {*} beam the diplomatic beam to be translated
+ */
+function getDiplomaticBeam (annotElem, beam) {
+  const targets = []
+  annotElem.querySelectorAll('*').forEach(elem => {
+    console.log('718: investigating ', elem)
+    if (elem.localName === 'note' && !elem.closest('chord') && elem.hasAttribute('corresp')) {
+      targets.push('#' + elem.getAttribute('corresp').split('#')[1])
+    }
+  })
+  beam.setAttribute('plist', targets.join(' '))
+  beam.setAttribute('startid', targets[0])
+  beam.setAttribute('endid', targets.splice(-1)[0])
+  beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
+  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+}
+
+/**
+ * translates an annotated accidental to a diplomatic accidental
+ * @param {*} annotElem the annotated accidental to be translated
+ * @param {*} accid the diplomatic accid to be translated
+ */
+function getDiplomaticAccid (annotElem, accid) {
+  accid.setAttribute('accid', annotElem.getAttribute('accid'))
+  const note = annotElem.closest('note')
+  accid.setAttribute('loc', getLocAttribute(note))
+}
+
+/**
+ * translates an annotated barLine to a diplomatic barLine
+ * @param {*} annotElem the annotated barLine to be translated
+ * @param {*} barLine the diplomatic barLine to be translated
+ */
+function getDiplomaticBarline (annotElem, barLine) {
+  barLine.setAttribute('form', 'single')
+  // console.log(364, '\n', barLine, '\n', annotElem)
+}
+
+/**
+ * translates a dot from an annotated note to a diplomatic dot
+ * @param {*} annotElem the annotated dot to be translated
+ * @param {*} barLine the diplomatic dot to be translated
+ */
+function getDiplomaticDot (annotElem, barLine) {
+  barLine.setAttribute('loc', 6)
+  // console.log(364, '\n', barLine, '\n', annotElem)
+}
+
+/**
+ * translates a chord to a diplomatic chord
+ * @param {*} annotElem the annotated dot to be translated
+ * @param {*} barLine the diplomatic dot to be translated
+ */
+function getDiplomaticChord (annotElem, chord) {
+  // console.log(472, ' entering ', annotElem, chord)
+
+  // chords will incorrectly point from a note to the diplomatic chord
+  const correspPath = annotElem.querySelector('*[corresp]').getAttribute('corresp').split('#')[0] + '#'
+  annotElem.setAttribute('corresp', correspPath + chord.getAttribute('xml:id'))
+
+  const notes = annotElem.querySelectorAll('note')
+  notes.forEach((note, i) => {
+    const diploNote = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
+    diploNote.setAttribute('xml:id', 'd' + uuid())
+    getDiplomaticNote(note, diploNote)
+    note.setAttribute('corresp', correspPath + diploNote.getAttribute('xml:id'))
+    chord.append(diploNote)
+    if (i === 0 && !annotElem.hasAttribute('stem.dir')) {
+      chord.setAttribute('stem.dir', note.getAttribute('stem.dir'))
+    } else if (annotElem.hasAttribute('stem.dir')) {
+      chord.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
+    }
+    diploNote.removeAttribute('stem.dir')
+  })
+  // console.log(472, annotElem, chord)
+}
+
+function getLocAttribute (annotElem) {
+  if (!annotElem) {
+    console.warn('WARNING: no proper annotElem provided to calculate @loc', annotElem)
+    return 5
+  }
   try {
     const staffN = annotElem.closest('staff').getAttribute('n')
     if (!staffN) {
@@ -101,74 +228,11 @@ function getDiplomaticNote (annotElem, note) {
     // C3 in bass clef should be 3: (3-3) * 7 + 0 + 3
     // G2 in bass clef should be 0: (2-3) * 7 + 4 + 3
 
-    note.setAttribute('loc', loc)
-
-    // head shape
-    let headshape
-    const dur = annotElem.getAttribute('dur')
-    if (dur === '1') {
-      headshape = 'whole'
-    } else if (dur === '2') {
-      headshape = 'half'
-    } else if (parseInt(dur) > 4) {
-      headshape = 'quarter'
-    }
-    if (annotElem.hasAttribute('head.shape')) {
-      headshape = annotElem.getAttribute('head.shape')
-    }
-    note.setAttribute('head.shape', headshape)
-    note.setAttribute('dur', dur)
-
-    // stem direction
-    if (annotElem.hasAttribute('stem.dir')) {
-      note.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
-    } else if (dur !== '1') {
-      note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
-    }
-
-    // log('diplomatic note:', note)
+    return loc
   } catch (err) {
-    console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
+    console.warn('WARNING: Could not properly retrieve the @loc attribute for ' + annotElem + ' ' + annotElem.getAttribute('xml:id'), err)
+    return 5
   }
-}
-
-/**
- * translates an annotated note to a diplomatic note
- * @param {*} annotElem the annotated note to be translated
- * @param {*} beam the diplomatic beam to be translated
- */
-function getDiplomaticBeam (annotElem, beam) {
-  const targets = []
-  annotElem.querySelectorAll('*').forEach(elem => {
-    if (elem.localName === 'note' && !elem.closest('chord') && elem.hasAttribute('corresp')) {
-      targets.push('#' + elem.getAttribute('corresp').split('#')[1])
-    }
-  })
-  beam.setAttribute('plist', targets.join(' '))
-  beam.setAttribute('startid', targets[0])
-  beam.setAttribute('endid', targets.splice(-1)[0])
-  beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
-  // console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
-}
-
-/**
- * translates an annotated accidental to a diplomatic accidental
- * @param {*} annotElem the annotated accidental to be translated
- * @param {*} accid the diplomatic accid to be translated
- */
-function getDiplomaticAccid (annotElem, accid) {
-  accid.setAttribute('accid', annotElem.getAttribute('accid'))
-  // console.log(411, '\n', accid, '\n', annotElem)
-}
-
-/**
- * translates an annotated barLine to a diplomatic barLine
- * @param {*} annotElem the annotated barLine to be translated
- * @param {*} barLine the diplomatic barLine to be translated
- */
-function getDiplomaticBarline (annotElem, barLine) {
-  barLine.setAttribute('form', 'single')
-  // console.log(364, '\n', barLine, '\n', annotElem)
 }
 
 /**
@@ -436,7 +500,7 @@ export function generateSystemFromRect (uly, left, right) {
   const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
 
   /* <system system.leftmar="0" system.rightmar="0" uly="2711">
-                        <measure coord.x1="290" coord.x2="3323" n="1">
+                        <measure x="290" x2="3323" n="1">
                                   <staff n="1" coord.y1="2416">
   */
   system.setAttribute('system.leftmar', 0)
@@ -1115,6 +1179,9 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
       })
       staffDef.setAttribute('scale', (100 / defaultRastrumHeight * parseFloat(rastrums[0].getAttribute('system.height')) * factor).toFixed(1) + '%')
+      dtDom.querySelectorAll('staff[n="' + staffDef.getAttribute('n') + '"]').forEach(staff => {
+        staff.setAttribute('rotate', rastrums[0].getAttribute('rotate'))
+      })
     })
 
     dtDom.querySelectorAll('section > *').forEach(dtNode => {
@@ -1161,17 +1228,17 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         let measureX2 = 0
         node.querySelectorAll('*').forEach(child => {
           if (child.hasAttribute('x')) {
-            const x = parseFloat(child.getAttribute('x')) * factor
-            measureX = Math.min(measureX, x)
-            measureX2 = Math.max(measureX2, x)
+            const testX = parseFloat(child.getAttribute('x')) * factor
+            measureX = Math.min(measureX, testX)
+            measureX2 = Math.max(measureX2, testX)
           }
           if (child.hasAttribute('x2')) {
-            const x = parseFloat(child.getAttribute('x2')) * factor
-            measureX2 = Math.max(measureX2, x)
+            const testX = parseFloat(child.getAttribute('x2')) * factor
+            measureX2 = Math.max(measureX2, testX)
           }
 
           const childName = child.localName
-          const supportedElements = ['note', 'staff', 'accid']
+          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord']
           const ignoreElements = ['layer']
 
           if (supportedElements.indexOf(childName) !== -1) {
@@ -1190,10 +1257,16 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             }
             const sbZone = getSbZone(childZone)
 
-            if (childName === 'note' || childName === 'accid') {
-              const ownX = parseFloat(child.getAttribute('x')) * factor
+            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord') {
+              const ownX = child.hasAttribute('x') ? parseFloat(child.getAttribute('x')) * factor : parseFloat(child.parentNode.getAttribute('x')) * factor
+              const fixOwnX = childName === 'barLine' ? ownX * 2 : ownX
               const systemX = parseFloat(sbZone.getAttribute('ulx'))
-              childZone.setAttribute('ulx', (ownX + systemX).toFixed(1))
+              childZone.setAttribute('ulx', (fixOwnX + systemX).toFixed(1))
+
+              // TODO accids should use @loc
+              if (childName === 'accid') {
+                childZone.setAttribute('uly', 1415)
+              }
             } else if (childName === 'staff') {
               const staffN = parseInt(child.getAttribute('n'))
 
@@ -1202,6 +1275,10 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               // TODO: if rastrum is null/undefined set to 0 ???
               const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0
               childZone.setAttribute('uly', staffY.toFixed(1))
+
+              // enter data that will allow rotation around the correct pivot in SVG
+              const pivot = (measureX - parseFloat(rastrum.getAttribute('system.leftmar'))) * factor * 10
+              child.setAttribute('pivot', pivot)
             }
 
             child.setAttribute('facs', '#' + childZone.getAttribute('xml:id'))
@@ -1210,8 +1287,17 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             // todo: autogenerate an issue for unsupported elements?! If so, leave a stack trace of the file in which they occur?
           }
         })
-        measureZone.setAttribute('ulx', measureX.toFixed(1))
-        measureZone.setAttribute('lrx', measureX2.toFixed(1))
+
+        // TODO: this is not correct, as it takes the leftmost rastrum, not the current one
+        let x = pageMM.w * factor
+        layout.querySelectorAll('rastrum').forEach(rastrum => {
+          const rx = parseFloat(rastrum.getAttribute('system.leftmar')) * factor
+          x = Math.min(rx, x)
+        })
+        const ulx = measureX + x
+        const lrx = measureX2 + x
+        measureZone.setAttribute('ulx', ulx.toFixed(1))
+        measureZone.setAttribute('lrx', lrx.toFixed(1))
         /* TODO: make this work again
         const sbZone = measureZone.previousElementSibling
         const sbX = parseFloat(sbZone.getAttribute('ulx'))
@@ -1228,6 +1314,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
   } catch (err) {
     console.error('714: Error in prepareDtForRendering: ' + err, err)
   }
+  console.log('714 outDom: ', outDom)
   return outDom
 }
 

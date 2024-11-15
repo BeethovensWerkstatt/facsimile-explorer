@@ -134,8 +134,8 @@ export default createStore({
       const staff = measure.querySelector('staff')
 
       staff.setAttribute('coord.y1', uly)
-      measure.setAttribute('coord.x1', left)
-      measure.setAttribute('coord.x2', right)
+      measure.setAttribute('x', left)
+      measure.setAttribute('x2', right)
 
       state.parsedXml = null
       state.parsedXml = xmlDoc
@@ -194,9 +194,9 @@ export default createStore({
 
       console.log(system)
 
-      const x = parseInt(measure.getAttribute('coord.x1'))
+      const x = parseInt(measure.getAttribute('x'))
       const y = parseInt(pageHeight - parseInt(system.getAttribute('uly')))
-      const w = parseInt(measure.getAttribute('coord.x2') - x)
+      const w = parseInt(measure.getAttribute('x2') - x)
       const h = parseInt(Math.round(pageHeight / 30))
 
       console.log('xywh:', x, y, w, h)
@@ -496,8 +496,8 @@ export default createStore({
         const staff = measure.querySelector('staff')
         const top = parseInt(pageHeight - staff.getAttributeNS('', 'coord.y1'))
 
-        const left = parseInt(measure.getAttributeNS('', 'coord.x1'))
-        const right = parseInt(measure.getAttributeNS('', 'coord.x2'))
+        const left = parseInt(measure.getAttributeNS('', 'x'))
+        const right = parseInt(measure.getAttributeNS('', 'x2'))
 
         const obj = { top, left, right }
         systems.push(obj)

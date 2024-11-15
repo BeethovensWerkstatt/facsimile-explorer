@@ -10,7 +10,7 @@
         <div class="value string">{{elementId}}</div>
     </div>
     <div class="entry">
-        <label>@coord.x1</label>
+        <label>@x</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
@@ -21,7 +21,7 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="loc" setterName="setActiveDiploTransElementAttValue" :min="-10" :max="25" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isNote">
+    <div class="entry" v-if="isNote || isChord">
         <label>@stem.len</label>
         <div class="value" v-if="hasStemLen">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="stem.len" setterName="setActiveDiploTransElementAttValue" :min="0" :max="25" :step="1" :readOnly="false"/>
@@ -49,8 +49,8 @@ export default {
       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'stem.len', value: 8 })
     },
     test () {
-      const doc = this.$store.getters.documentByPath(this.filePath)
-      console.log('got doc: \n', doc)
+      // const doc = this.$store.getters.documentByPath(this.filePath)
+      // console.log('got doc: \n', doc)
     }
   },
   computed: {
@@ -59,7 +59,7 @@ export default {
     },
     stateLabel () {
       const state = this.diploTransState
-      console.log('773: ' + state + ' – ' + this.$store.getters.diploTransState)
+      // console.log('773: ' + state + ' – ' + this.$store.getters.diploTransState)
       if (state === 'awaitStart') {
         return 'Select Shape in Facsimile'
       } else if (state === 'awaitAT') {
@@ -90,6 +90,9 @@ export default {
     },
     isNote () {
       return this.$store.getters.activeDiploTransElementName === 'note'
+    },
+    isChord () {
+      return this.$store.getters.activeDiploTransElementName === 'chord'
     },
     isRest () {
       return this.$store.getters.activeDiploTransElementName === 'rest'
