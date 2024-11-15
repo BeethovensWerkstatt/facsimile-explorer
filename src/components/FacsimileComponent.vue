@@ -586,6 +586,8 @@ export default {
         console.log(this.$store.getters.diploTransActivationsInShapes)
         this.indicateSelectedShapes()
       }
+
+      this.indicateSelectedDTElement()
     },
 
     /**
@@ -644,6 +646,26 @@ export default {
           } else {
             console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
           }
+        })
+      }
+    },
+
+    /**
+     * indicate currently selected DT element
+     */
+    indicateSelectedDTElement () {
+      const dtid = this.$store.getters.activeDiploTransElementId
+      console.log('DT ELEMENT:', dtid)
+      const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
+
+      if (existingOverlay !== null) {
+        console.log('found an overlay')
+        existingOverlay.querySelectorAll('.selectedDiploTrans').forEach(element => {
+          element.classList.remove('selectedDiploTrans')
+        })
+        existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach(element => {
+          element.classList.add('selectedDiploTrans')
+          console.log(element)
         })
       }
     },
@@ -1225,6 +1247,12 @@ export default {
         this.indicateSelectedShapes()
       })
 
+    this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
+      (newValue, oldValue) => {
+        console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        this.indicateSelectedDTElement()
+      })
+
     this.openFacsimile()
   },
   updated () {
@@ -1446,6 +1474,10 @@ export default {
       z-index: 10;
       fill: #000000;
       stroke: #000000;
+      .selectedDiploTrans {
+        fill: #880000;
+        stroke: #880000;
+      }
     }
   }
 }
