@@ -203,9 +203,34 @@ export default {
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
             action: () => {
-              console.log('TODO: add shape to current DiploTrans element')
+              console.log('add shape to current DiploTrans element ...')
+              // TODO: ask for function (stem/head/etc)
+              const baseMessage = 'add shape to DT at '
+              const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
+              const id = this.$store.getters.activeDiploTransElementId
+              const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
+              const origdoc = this.$store.getters.documentByPath(filePath)
+              const doc = origdoc?.cloneNode(true)
+              const snippet = doc?.querySelector(`*[*|id="${id}"]`)
+              if (snippet) {
+                const facs = snippet.getAttribute('facs')?.split(' ') || []
+                facs.push(svgPath + '#' + click.target.id)
+                const afacs = facs.join(' ')
+                snippet.setAttribute('facs', afacs)
+                console.log('facs:', afacs, snippet)
+                this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
+                this.$store.dispatch('logChange', {
+                  path: filePath,
+                  baseMessage,
+                  param: 0,
+                  xmlIDs: [id],
+                  isNewDoument: false
+                })
+              } else {
+                console.warn('addShapeEntry: no snippet found!')
+              }
             },
-            disabled: this.$store.getters.activeDiploTransSelectedId === null
+            disabled: this.$store.getters.activeDiploTransElementId === null
           }
 
           const activateDTEntry = {
@@ -260,8 +285,12 @@ export default {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(selectables)
         if (target) {
-          const id = target.getAttribute('data-id')
+          let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
+          // select chords to show up in XML editor instead of single notes
+          if (target.matches('.note') && target.closest('.chord')) {
+            id = target.closest('.chord').getAttribute('data-id')
+          }
           this.$store.dispatch('setActiveDiploTransElementId', id)
           console.log('selecting activeDiploTransElementId: ', id)
         }
@@ -992,21 +1021,21 @@ export default {
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
       console.log('913a: renderDiploTrans()', meiDom)
-      console.log('913a: renderDiploTrans()', wzDetails)
+      // console.log('913a: renderDiploTrans()', wzDetails)
       meiDom.querySelectorAll('measure').forEach(measure => {
-        const sb = measure.previousElementSibling
-        console.log('913a: sb', sb)
-        const staves = sb.getAttribute('corresp').split(' ')
-        console.log('913a: staves', staves)
-        const xOff = parseFloat(measure.getAttribute('coord.x1'))
-        measure.querySelectorAll('*[coord\\.x1], *[coord\\.x2]').forEach(event => {
-          if (event.hasAttribute('coord.x1')) {
-            const x1 = parseFloat(event.getAttribute('coord.x1')) + xOff
-            event.setAttribute('coord.x1', x1)
+        // const sb = measure.previousElementSibling
+        // console.log('913a: sb', sb)
+        // const staves = sb.getAttribute('corresp').split(' ')
+        // console.log('913a: staves', staves)
+        const xOff = 0 // parseFloat(measure.getAttribute('x'))
+        measure.querySelectorAll('*[x], *[x2]').forEach(event => {
+          if (event.hasAttribute('x')) {
+            const x1 = parseFloat(event.getAttribute('x')) + xOff
+            event.setAttribute('x', x1)
           }
-          if (event.hasAttribute('coord.x2')) {
-            const x2 = parseFloat(event.getAttribute('coord.x2')) + xOff
-            event.setAttribute('coord.x2', x2)
+          if (event.hasAttribute('x2')) {
+            const x2 = parseFloat(event.getAttribute('x2')) + xOff
+            event.setAttribute('x2', x2)
           }
         })
       })
@@ -1022,15 +1051,30 @@ export default {
           barLine.remove()
         }
       })
-      svgDom.querySelectorAll('g.staff[data-rotateheight]').forEach(staff => {
+
+      svgDom.querySelectorAll('.chord:not(.bounding-box)').forEach(chord => {
+        const stem = chord.querySelector('.stem > path')
+
+        if (stem) {
+          const stemDir = meiDom.querySelector('chord[*|id = "' + chord.getAttribute('data-id') + '"]').getAttribute('stem.dir')
+
+          const x = stemDir === 'up'
+            ? parseFloat(parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('x')) + parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('width')))
+            : chord.querySelector('.note.bounding-box > rect').getAttribute('x')
+          const arr = stem.getAttribute('d').split(' ')
+          stem.setAttribute('d', 'M' + x + ' ' + arr[1] + ' L' + x + ' ' + arr[3])
+          chord.querySelector('.stem.bounding-box rect').setAttribute('x', x)
+        }
+      })
+
+      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
         if (!staff.classList.contains('bounding-box')) {
-          const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
-          const x = topLineCoordinates[0].substring(1)
-          const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotateheight').split(' ')[0]
-          const height = staff.getAttribute('data-rotateheight').split(' ')[1]
-          staff.style.transform = 'rotate(' + rotation + 'deg) scaleY(' + height + ')'
-          staff.style.transformOrigin = x + 'px ' + y + 'px'
+          // const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
+          // const x = parseFloat(topLineCoordinates[0].substring(1)) - parseFloat(staff.getAttribute('data-pivot'))
+          // const y = topLineCoordinates[1]
+          const rotation = staff.getAttribute('data-rotate')
+          staff.style.transform = 'rotate(' + rotation + 'deg)'
+          // staff.style.transformOrigin = x + 'px ' + y + 'px'
         }
       })
 
@@ -1399,6 +1443,7 @@ export default {
     fill-rule: evenodd;
 
     &.activeDiploTrans {
+      z-index: 10;
       fill: #000000;
       stroke: #000000;
     }

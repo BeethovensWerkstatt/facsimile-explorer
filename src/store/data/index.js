@@ -1427,17 +1427,18 @@ const dataModule = {
       } else {
         annotStaffN = annotElem.closest('staff').getAttribute('n')
       }
-      // console.log('annotStaffN', annotStaffN)
+      console.log('691 annotStaffN', annotStaffN)
 
-      const diploStaffN = dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
-      // console.log('diploStaffN', diploStaffN)
+      const diploStaffN = annotStaffN // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
+      console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
       const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
-      // console.log('rastrum', rastrum)
+
+      console.log('691 rastrum', rastrum)
 
       const rects = getters.osdRects
-      // console.log('rects', rects)
+      // console.log('691 rects', rects)
 
       let x = 1000000
       shapes.forEach(shape => {
@@ -1449,18 +1450,40 @@ const dataModule = {
         }
       })
 
-      // console.log('x', x)
+      // console.log('691 x', x)
       const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
-      // console.log('mm', mm)
+      // console.log('691 mm', mm)
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
+      const correspPath = '../diplomaticTranscripts/' + getters.currentWzDtPath.split('/').splice(-1)[0] + '#'
 
-      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, annotElemRef)
+      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, correspPath, annotElemRef)
 
       const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
-      console.log('diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
-      const diploLayer = dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
-      const diploMeasure = diploLayer.closest('measure')
+      // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
+
+      const getDiplomaticMeasure = (annotElem) => {
+        const atMeasure = annotElem.closest('measure')
+
+        const countPrecedingSb = (elem) => {
+          let count = 0
+          let current = elem.previousElementSibling
+          while (current) {
+            if (current.localName === 'sb') {
+              count++
+            }
+            current = current.previousElementSibling
+          }
+          return count
+        }
+
+        const sbCount = countPrecedingSb(atMeasure)
+        const dtMeasure = dtDoc.querySelectorAll('measure')[sbCount - 1]
+        return dtMeasure
+      }
+
+      const diploMeasure = getDiplomaticMeasure(annotElem) // diploLayer.closest('measure')
+      const diploLayer = diploMeasure.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
 
       if (isControlEvent) {
         diploMeasure.appendChild(diplomaticElement)
@@ -1468,8 +1491,8 @@ const dataModule = {
         // Convert child nodes of diploLayer into an array
         const children = Array.from(diploLayer.children)
 
-        // Find the index of the first child node with a greater coord.x1 value
-        const index = children.findIndex(child => child.hasAttribute('coord.x1') && (parseFloat(child.getAttribute('coord.x1')) > parseFloat(mm)))
+        // Find the index of the first child node with a greater x value
+        const index = children.findIndex(child => child.hasAttribute('x') && (parseFloat(child.getAttribute('x')) > parseFloat(mm)))
         if (index !== -1) {
           // If such a node is found, insert diplomaticElement before this node
           diploLayer.insertBefore(diplomaticElement, children[index])
@@ -1479,19 +1502,19 @@ const dataModule = {
         }
       }
 
-      const deid = diplomaticElement.getAttribute('xml:id')
+      // const deid = diplomaticElement.getAttribute('xml:id')
       const dtstr = new XMLSerializer().serializeToString(dtDoc)
-      console.log(dtstr.indexOf(deid))
+      // console.log(dtstr.indexOf(deid))
       const dtDoc2 = new DOMParser().parseFromString(dtstr, 'application/xml')
-      console.log(deid, dtDoc2.querySelector('*[*|id="' + deid + '"]'))
+      /* console.log(deid, dtDoc2.querySelector('*[*|id="' + deid + '"]'))
       const deids = Array.from(dtDoc2.querySelectorAll('*[*|id]')).map(e => e.getAttribute('xml:id')).filter(s => s.substring(0, 1) === 'd')
-      console.log(deids, deid)
+      console.log(deids, deid) */
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'generate diplomatic transcription at '
       const param = dtPath.split('/').splice(-1)[0]
 
-      annotElem.setAttribute('corresp', '../diplomaticTranscripts/' + param + '#' + diplomaticElement.getAttribute('xml:id'))
+      // annotElem.setAttribute('corresp', '../diplomaticTranscripts/' + param + '#' + diplomaticElement.getAttribute('xml:id'))
 
       const atPath = getters.currentWzAtPath
 
@@ -1507,7 +1530,9 @@ const dataModule = {
       dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
       dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
 
-      dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
+      await dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
+      // TODO: clear activations?
+      dispatch('diploTransClear')
     },
 
     /**
@@ -3039,7 +3064,7 @@ const dataModule = {
      * @returns
      */
     activeDiploTransElementAttValue: (state, getters) => (attName) => {
-      // const attName = 'coord.x1'
+      // const attName = 'x'
       const filePath = getters.currentWritingZoneObject?.diploTrans
       const elemId = getters.activeDiploTransElementId
       if (!filePath || !elemId) {
