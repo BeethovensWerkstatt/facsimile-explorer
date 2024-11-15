@@ -406,6 +406,11 @@ const guiModule = {
       }
     },
 
+    CLEAR_DIPLO_TRANS_ITEMS (state) {
+      state.diploTransActivations.shapes = new Map()
+      state.diploTransActivations.annotTrans = new Map()
+    },
+
     /**
      * sets the ID of the selected item from the diplomatic transcription
      * @param {[type]} state  [description]
@@ -717,6 +722,10 @@ const guiModule = {
       if (getters.activeWritingZone !== null) {
         commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
       }
+    },
+
+    diploTransClear ({ commit }) {
+      commit('CLEAR_DIPLO_TRANS_ITEMS')
     },
 
     /**

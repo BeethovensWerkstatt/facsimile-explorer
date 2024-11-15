@@ -54,7 +54,7 @@ const verovioModule = {
         pageMarginRight: 0,
         pageMarginBottom: 0,
         pageMarginLeft: 0,
-        svgAdditionalAttribute: ['staff@rotate']
+        svgAdditionalAttribute: ['staff@rotate', 'staff@n', 'staff@pivot']
       }
 
       return verovioOptions
@@ -76,7 +76,7 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp'] //,
+        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate'] //,
         // unit: 18
       }
 
@@ -119,7 +119,7 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: ['staff@rotate'] //,
+        svgAdditionalAttribute: ['staff@rotate', 'staff@pivot'] //,
         // unit: 18
       }
 
