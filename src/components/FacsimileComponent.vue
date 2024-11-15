@@ -1035,6 +1035,7 @@ export default {
           }
         }
       })
+      this.indicateSelectedDTElement()
     },
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
@@ -1235,12 +1236,14 @@ export default {
     this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
       (newArr, oldArr) => {
         this.indicateUsedShapes()
+        this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
       (newValue, oldValue) => {
         console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedShapes()
+        this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,

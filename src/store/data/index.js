@@ -1524,11 +1524,11 @@ const dataModule = {
         }
       }
 
-      dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc2 })
-      dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
+      await dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc2 })
+      await dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
 
-      dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
-      dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
+      await dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+      await dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
 
       await dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
       // TODO: clear activations?
