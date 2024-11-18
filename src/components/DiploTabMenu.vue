@@ -1,10 +1,12 @@
 <template>
   <div class="diploTabMenu">
+    <!--
     <div class="entry right">
       <div class="cancel button" title="Cancel [Esc]">⛌</div>
       <label>Next</label>
       <div class="value" :title="stateTitle">{{ stateLabel }}</div>
     </div>
+    -->
     <div class="entry">
         <label>@xml:id</label>
         <div class="value string">{{elementId}}</div>
@@ -28,7 +30,7 @@
         </div>
         <div class="value string button" :onClick="initStemLen" v-else>add attribute</div>
     </div>
-    <div class="entry" :onClick="test">Push</div>
+    <!-- <div class="entry" :onClick="test">Push</div> -->
   </div>
 </template>
 
