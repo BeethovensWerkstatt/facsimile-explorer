@@ -33,7 +33,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     }
   })
   elem.setAttribute('facs', facs.join(' '))
-  elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
+  // elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
   annotElem.setAttribute('corresp', correspPath + elem.getAttribute('xml:id'))
 

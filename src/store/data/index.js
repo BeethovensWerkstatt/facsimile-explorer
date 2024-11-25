@@ -1531,7 +1531,6 @@ const dataModule = {
       await dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
 
       await dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
-      // TODO: clear activations?
       dispatch('diploTransClear')
     },
 

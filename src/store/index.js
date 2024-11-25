@@ -270,12 +270,13 @@ export default createStore({
                parseInt(Number(value)) === value &&
                !isNaN(parseInt(value, 10))
       }
-      if (isInt(i)) { // if i is integer select page
+      if (isInt(i) && +i !== getters.currentPageZeroBased) { // if i is integer and unequal to current page select page
         console.log('setting current page to ' + i + ' (zero-based)')
         commit('SET_WELLFORMED', true)
         commit('SET_CURRENT_PAGE', i)
         commit('SET_ACTIVE_WRITINGZONE', null)
         router.replace({ query: { page: i + 1 } })
+        commit('CLEAR_DIPLO_TRANS_ITEMS')
       } else { // else look for object with attributes (page, zone, wzid, layer) -- all int or undefined
         const { page, zone, wzid, layer } = i
         console.log(page, zone, layer)
