@@ -225,6 +225,11 @@ export default {
     max-width: 150%;
     max-height: 150%;
   }
+
+  svg g.note:not(.bounding-box) g.accid:not(.highlighted) {
+    stroke: black;
+    fill: black;
+  }
 }
 
 </style>
