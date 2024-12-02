@@ -304,25 +304,22 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   }
 
   let system = null
-  let corresp = null
+  let section = null
   affectedStaves.forEach((obj, i) => {
+    // TODO: explicit mapping!
     if (i % systemcount === 0) {
-      if (system && corresp) {
-        system.setAttribute('corresp', corresp.join(' '))
-      }
-      corresp = []
       system = document.createElementNS('http://www.music-encoding.org/ns/mei', 'system')
       draft.append(system)
       system.setAttribute('xml:id', 's' + uuid())
-      const measure = document.createElementNS('http://www.music-encoding.org/ns/mei', 'measure')
-      draft.append(measure)
-      measure.setAttribute('xml:id', 'm' + uuid())
+      section = document.createElementNS('http://www.music-encoding.org/ns/mei', 'section')
+      system.append(section)
+      section.setAttribute('xml:id', 's' + uuid())
 
       for (let i = 0; i < systemcount; i++) {
         const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
         staff.setAttribute('n', (i + 1))
         staff.setAttribute('xml:id', 's' + uuid())
-        measure.append(staff)
+        section.append(staff)
 
         const layer = document.createElementNS('http://www.music-encoding.org/ns/mei', 'layer')
         layer.setAttribute('n', 1)
@@ -334,13 +331,6 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
     const rastrum = obj.rastrum
     const rastrumurl = `../${filename}#${rastrum.id}`
     staffDecls[i % systemcount].push(rastrumurl)
-    corresp.push(rastrumurl)
-  })
-  if (system && corresp) {
-    system.setAttribute('corresp', corresp.join(' '))
-  }
-  staffDecls.forEach((sd, i) => {
-    staffDefs[i].setAttribute('decls', sd.join(' '))
   })
 
   return diploTemplate
