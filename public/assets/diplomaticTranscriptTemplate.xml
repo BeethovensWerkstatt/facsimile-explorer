@@ -34,7 +34,6 @@
                 </identifier>
             </seriesStmt>
             <sourceDesc xml:id="%NEW-ID%">
-                <!-- @target: Pfad zur richtigen Dokument-Datei, und dann ID der //mei:genDesc[@class="#geneticOrder_writingZoneLevel"] -->
                 <source n="1" target="../%FILENAME%#%GENDESC-WZID%" xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
@@ -163,17 +162,37 @@
             <mdiv xml:id="%NEW-ID%">
                 <drafts xml:id="%NEW-ID%">
                     <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
-                        <scoreDef xml:id="%NEW-ID%">
+                        <!--<scoreDef xml:id="%NEW-ID%">
                             <staffGrp symbol="none" xml:id="%NEW-ID%">
-                                <!-- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -->
+                                <!-/- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -/->
                             </staffGrp>
-                        </scoreDef>
-                        <section xml:id="%NEW-ID%">                            
-                            <!-- pb/@target points to surface ID -->
-                            <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
-                            <!-- loop-->
-                            <!-- <sb corresp="../%FILENAME%#%RASTRUMID% ... -->
-                        </section>
+                        </scoreDef>-->
+                        <!-- pb/@target points to surface ID -->
+                        <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
+                        <!-- 
+                        <system xml:id="%NEW-ID%">
+                            <scoreDef xml:id="%NEW-ID%">
+                                <staffGrp xml:id="%NEW-ID%">
+                                    Bsp: <staffDef xml:id="%NEW-ID%" n="1" decls="../%FILENAME%#%RASTRUMID%"/>
+                                    Bsp: <staffDef xml:id="%NEW-ID%" n="2" decls="../%FILENAME%#%RASTRUMID%"/>
+                                </staffGrp>    
+                            </scoreDef>
+                            <section xml:id="%NEW-ID%" join="#idOfSectionInNextSystem">
+                                Bsp: <staff n="1">
+                                    <layer n="1">
+                                        Bsp: <note x="123"/>
+                                    </layer>
+                                </staff>
+                                Besp: <staff n="2">
+                                    <layer n="1">
+                                        Bsp: <note x="234"/>
+                                    </layer>
+                                </staff>
+                                Bsp: <beamSpan/>
+                                Bsp: <barLine x="345" staff="1 2"/>    
+                            </section>
+                        </system>
+                        -->
                     </draft>
                 </drafts>
             </mdiv>

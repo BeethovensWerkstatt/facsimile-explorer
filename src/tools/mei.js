@@ -255,11 +255,17 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   NEW-ID
   SURFACE-ID
   */
-  console.log('---------------------> ', affectedStaves, systemcount)
+  console.log('881---------------------> ', affectedStaves, systemcount)
   const genDescWzId = wzObj.id
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
+
+  diploTemplate.querySelector('draft').childNodes.forEach(node => {
+    if (node.nodeType === Node.COMMENT_NODE) {
+      node.remove()
+    }
+  })
 
   diploTemplate.querySelectorAll('*[*|id]').forEach(elem => {
     if (elem.getAttribute('xml:id') === '%NEW-ID%') {
@@ -281,7 +287,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   diploTemplate.querySelector('source').setAttribute('target', '../' + filename + '#' + genDescWzId)
   const pb = diploTemplate.querySelector('pb')
   pb.setAttribute('target', '../' + filename + '#' + surfaceId)
-  const section = pb.parentNode
+  const draft = diploTemplate.querySelector('draft')
 
   const staffGrp = diploTemplate.querySelector('staffGrp')
   const staffDefs = []
@@ -297,19 +303,19 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
     staffDecls.push([])
   }
 
-  let sb = null
+  let system = null
   let corresp = null
   affectedStaves.forEach((obj, i) => {
     if (i % systemcount === 0) {
-      if (sb && corresp) {
-        sb.setAttribute('corresp', corresp.join(' '))
+      if (system && corresp) {
+        system.setAttribute('corresp', corresp.join(' '))
       }
       corresp = []
-      sb = document.createElementNS('http://www.music-encoding.org/ns/mei', 'sb')
-      section.append(sb)
-      sb.setAttribute('xml:id', 's' + uuid())
+      system = document.createElementNS('http://www.music-encoding.org/ns/mei', 'system')
+      draft.append(system)
+      system.setAttribute('xml:id', 's' + uuid())
       const measure = document.createElementNS('http://www.music-encoding.org/ns/mei', 'measure')
-      section.append(measure)
+      draft.append(measure)
       measure.setAttribute('xml:id', 'm' + uuid())
 
       for (let i = 0; i < systemcount; i++) {
@@ -330,8 +336,8 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
     staffDecls[i % systemcount].push(rastrumurl)
     corresp.push(rastrumurl)
   })
-  if (sb && corresp) {
-    sb.setAttribute('corresp', corresp.join(' '))
+  if (system && corresp) {
+    system.setAttribute('corresp', corresp.join(' '))
   }
   staffDecls.forEach((sd, i) => {
     staffDefs[i].setAttribute('decls', sd.join(' '))
