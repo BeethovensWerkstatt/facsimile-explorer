@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <?xml-model href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
-<mei xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.music-encoding.org/ns/mei" meiversion="6.0+beethovensWerkstatt" xml:id="%NEW-ID%">
+<mei xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.music-encoding.org/ns/mei" xmlns:bw="https://beethovens-werkstatt.de/ns/meiAdditions" meiversion="6.0+beethovensWerkstatt" xml:id="%NEW-ID%">
     <meiHead meiversion="6.0+beethovensWerkstatt" xml:id="%NEW-ID%">
         <fileDesc xml:id="%NEW-ID%">
             <titleStmt xml:id="%NEW-ID%">
@@ -37,7 +37,7 @@
                 <source n="1" target="../%FILENAME%#%GENDESC-WZID%" xml:id="%NEW-ID%"/>
             </sourceDesc>
         </fileDesc>
-        <encodingDesc class="#bw_diplomatic_transcript #bw_document_file #bw_module4" xml:id="%NEW-ID%">
+        <encodingDesc class="#bw_diplomatic_transcript #bw_module4" xml:id="%NEW-ID%">
             <appInfo xml:id="%NEW-ID%">
                 <application version="%APP-VERSION%" xml:id="facsimileExplorer">
                     <name>
@@ -162,11 +162,6 @@
             <mdiv xml:id="%NEW-ID%">
                 <drafts xml:id="%NEW-ID%">
                     <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
-                        <scoreDef xml:id="%NEW-ID%">
-                            <staffGrp symbol="none" xml:id="%NEW-ID%">
-                                <!-- @decls: Quellendokument, dann ID von rastrum-Element, space-separated list; vorerst glatte Zuordnung, d.h. Systeme einfach der Reihe nach belegen -->
-                            </staffGrp>
-                        </scoreDef>
                         <!-- pb/@target points to surface ID -->
                         <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
                         <!-- 

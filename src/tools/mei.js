@@ -289,35 +289,39 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   pb.setAttribute('target', '../' + filename + '#' + surfaceId)
   const draft = diploTemplate.querySelector('draft')
 
-  const staffGrp = diploTemplate.querySelector('staffGrp')
-  const staffDefs = []
-  const staffDecls = []
-
-  for (let i = 0; i < systemcount; i++) {
-    const staffDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffDef')
-    staffDef.setAttribute('xml:id', 's' + uuid())
-    staffDef.setAttribute('n', (i + 1))
-    staffDef.setAttribute('lines', 5)
-    staffGrp.append(staffDef)
-    staffDefs.push(staffDef)
-    staffDecls.push([])
-  }
-
   let system = null
   let section = null
   affectedStaves.forEach((obj, i) => {
     // TODO: explicit mapping!
     if (i % systemcount === 0) {
-      system = document.createElementNS('http://www.music-encoding.org/ns/mei', 'system')
+      system = document.createElementNS('https://beethovens-werkstatt.de/ns/meiAdditions', 'system')
       draft.append(system)
       system.setAttribute('xml:id', 's' + uuid())
+
+      const scoreDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'scoreDef')
+      scoreDef.setAttribute('xml:id', 's' + uuid())
+      system.append(scoreDef)
+
+      const staffGrp = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffGrp')
+      staffGrp.setAttribute('xml:id', 's' + uuid())
+      staffGrp.setAttribute('symbol', 'none')
+      staffGrp.setAttribute('bar.thru', 'false')
+      scoreDef.append(staffGrp)
+
       section = document.createElementNS('http://www.music-encoding.org/ns/mei', 'section')
       system.append(section)
       section.setAttribute('xml:id', 's' + uuid())
 
-      for (let i = 0; i < systemcount; i++) {
+      for (let j = 0; j < systemcount; j++) {
+        const staffDef = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staffDef')
+        staffDef.setAttribute('xml:id', 's' + uuid())
+        staffDef.setAttribute('n', (j + 1))
+        staffDef.setAttribute('lines', 5)
+        staffDef.setAttribute('decls', '../' + filename + '#' + affectedStaves[i + j].rastrum.id)
+        staffGrp.append(staffDef)
+
         const staff = document.createElementNS('http://www.music-encoding.org/ns/mei', 'staff')
-        staff.setAttribute('n', (i + 1))
+        staff.setAttribute('n', (j + 1))
         staff.setAttribute('xml:id', 's' + uuid())
         section.append(staff)
 
@@ -327,11 +331,19 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
         staff.append(layer)
       }
     }
-    // const n = obj.n
-    const rastrum = obj.rastrum
-    const rastrumurl = `../${filename}#${rastrum.id}`
-    staffDecls[i % systemcount].push(rastrumurl)
   })
+
+  // add join attributes to connect multiple accolades
+  const sections = diploTemplate.querySelectorAll('section')
+  if (sections.length > 1) {
+    sections.forEach((section, i) => {
+      const otherSectionIds = Array.from(sections)
+        .filter((s, j) => j !== i)
+        .map(s => '#' + s.getAttribute('xml:id'))
+
+      section.setAttribute('join', otherSectionIds.join(' '))
+    })
+  }
 
   return diploTemplate
 }
