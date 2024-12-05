@@ -39,6 +39,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
+  } else if (name === 'rest') {
+    getDiplomaticRest(annotElem, elem)
   } else if (name === 'beamSpan' || name === 'beam') {
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
@@ -81,7 +83,7 @@ function getDiplomaticNote (annotElem, note) {
       headshape = annotElem.getAttribute('head.shape')
     }
     note.setAttribute('head.shape', headshape)
-    note.setAttribute('dur', dur)
+    // note.setAttribute('dur', dur)
 
     // stem direction
     if (annotElem.hasAttribute('stem.dir')) {
@@ -93,6 +95,43 @@ function getDiplomaticNote (annotElem, note) {
     // log('diplomatic note:', note)
   } catch (err) {
     console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
+  }
+}
+
+/**
+ * translates an annotated rest to a diplomatic rest
+ * @param {*} annotElem the annotated rest to be translated
+ * @param {*} rest the diplomatic rest to be translated
+ */
+function getDiplomaticRest (annotElem, rest) {
+  try {
+    rest.setAttribute('loc', 5)
+
+    let glyphName
+    const dur = annotElem.getAttribute('dur')
+    if (dur === '1') {
+      glyphName = 'restWhole'
+    } else if (dur === '2') {
+      glyphName = 'restHalf'
+    } else if (dur === '4') {
+      glyphName = 'restQuarter'
+    } else if (dur === '8') {
+      glyphName = 'rest8th'
+    } else if (dur === '16') {
+      glyphName = 'rest16th'
+    } else if (dur === '32') {
+      glyphName = 'rest32nd'
+    } else if (dur === '64') {
+      glyphName = 'rest64th'
+    }
+
+    if (annotElem.hasAttribute('glyph.name')) {
+      glyphName = annotElem.getAttribute('glyph.name')
+    }
+    rest.setAttribute('glyph.name', glyphName)
+    rest.setAttribute('glyph.auth', 'smufl')
+  } catch (err) {
+    console.warn('WARNING: Could not properly generate diplomatic rest for ' + annotElem, err)
   }
 }
 
