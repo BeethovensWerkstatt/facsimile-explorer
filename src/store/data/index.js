@@ -1462,7 +1462,7 @@ const dataModule = {
       const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
-      const getDiplomaticMeasure = (annotElem) => {
+      const getDiplomaticSection = (annotElem) => {
         const atMeasure = annotElem.closest('measure')
 
         const countPrecedingSb = (elem) => {
@@ -1478,15 +1478,15 @@ const dataModule = {
         }
 
         const sbCount = countPrecedingSb(atMeasure)
-        const dtMeasure = dtDoc.querySelectorAll('measure')[sbCount - 1]
-        return dtMeasure
+        const dtSection = dtDoc.querySelectorAll('system')[sbCount - 1].querySelector('section')
+        return dtSection
       }
 
-      const diploMeasure = getDiplomaticMeasure(annotElem) // diploLayer.closest('measure')
-      const diploLayer = diploMeasure.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
+      const diploSection = getDiplomaticSection(annotElem) // diploLayer.closest('measure') */
+      const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
 
       if (isControlEvent) {
-        diploMeasure.appendChild(diplomaticElement)
+        diploSection.appendChild(diplomaticElement)
       } else {
         // Convert child nodes of diploLayer into an array
         const children = Array.from(diploLayer.children)
@@ -1525,7 +1525,7 @@ const dataModule = {
       }
 
       await dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc2 })
-      await dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploMeasure.getAttribute('xml:id')], isNewDocument: false })
+      await dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [diploSection.getAttribute('xml:id')], isNewDocument: false })
 
       await dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
       await dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
