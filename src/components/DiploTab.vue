@@ -64,6 +64,7 @@ import XmlEditor from '@/components/XmlEditor.vue'
 import DiploTabMenu from '@/components/DiploTabMenu.vue'
 
 import fileDownload from 'js-file-download'
+import { base64dom, dom2base64 } from '@/tools/github'
 
 export default {
   name: 'DiploTab',
@@ -185,7 +186,7 @@ export default {
       }
     },
     downloadDiploTrans () {
-      const dt = this.$store.getters.diplomaticTranscriptForCurrentWz
+      const dt = base64dom(dom2base64(this.$store.getters.diplomaticTranscriptForCurrentWz))
       const serializer = new XMLSerializer()
       const dtstring = serializer.serializeToString(dt)
       const data = new Blob([dtstring], {
