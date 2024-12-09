@@ -83,7 +83,7 @@ function getDiplomaticNote (annotElem, note) {
       headshape = annotElem.getAttribute('head.shape')
     }
     note.setAttribute('head.shape', headshape)
-    // note.setAttribute('dur', dur)
+    note.setAttribute('dur', dur)
 
     // stem direction
     if (annotElem.hasAttribute('stem.dir')) {
@@ -1231,11 +1231,12 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
       })
     })
 
-    dtDom.querySelectorAll('section > *').forEach(dtNode => {
-      const node = outSection.appendChild(dtNode.cloneNode(true))
+    dtDom.querySelectorAll('draft > *').forEach(dtNode => {
+      const node = dtNode.cloneNode(true)
       const name = node.localName
 
       if (name === 'pb') {
+        outSection.appendChild(node)
         const pageZone = appendNewElement(outSurface, 'zone')
         pageZone.setAttribute('type', 'pb')
         pageZone.setAttribute('lrx', (pageMM.w * factor).toFixed(1))
@@ -1243,37 +1244,65 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         pageZone.setAttribute('ulx', 0)
         pageZone.setAttribute('uly', 0)
         node.setAttribute('facs', '#' + pageZone.getAttribute('xml:id'))
-      } else if (name === 'sb') {
+      } else if (name === 'system') {
+        const sb = appendNewElement(outSection, 'sb')
+
         const systemZone = appendNewElement(outSurface, 'zone')
-        const rastrumIDs = node.getAttribute('corresp').split(' ').map(ref => ref.split('#')[1])
+        const rastrumIDs = [...node.querySelectorAll('staffDef')].map(staffDef => staffDef.getAttribute('decls').split('#')[1])
+        console.log(714, 'rastrumIDs:', rastrumIDs)
         const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
           return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
         })
-        let x = pageMM.w
+        let x1 = pageMM.w
         let y = pageMM.h
         let x2 = 0
         rastrums.forEach(rastrum => {
           const rx = parseFloat(rastrum.getAttribute('system.leftmar'))
           const ry = parseFloat(rastrum.getAttribute('system.topmar'))
           const rw = parseFloat(rastrum.getAttribute('width')) + rx
-          x = Math.min(rx, x)
+          x1 = Math.min(rx, x1)
           y = Math.min(ry, y)
           x2 = Math.max(rw, x2)
         })
 
         systemZone.setAttribute('type', 'sb')
-        systemZone.setAttribute('ulx', (x * factor).toFixed(1))
+        systemZone.setAttribute('ulx', (x1 * factor).toFixed(1))
         systemZone.setAttribute('bw.lrx', (x2 * factor).toFixed(1))
         systemZone.setAttribute('bw.rastrumIDs', rastrumIDs.join(' '))
         systemZone.setAttribute('uly', (y * factor).toFixed(1)) // todo: how to determine sb/@uly properly? This is not the same as staff/@uly!!!!
-        node.setAttribute('facs', '#' + systemZone.getAttribute('xml:id'))
-      } else if (name === 'measure') {
+        sb.setAttribute('facs', '#' + systemZone.getAttribute('xml:id'))
+
+        const measure = appendNewElement(outSection, 'measure')
+
         const measureZone = appendNewElement(outSurface, 'zone')
         measureZone.setAttribute('type', 'measure')
+        measure.setAttribute('facs', '#' + measureZone.getAttribute('xml:id'))
 
         let measureX = pageMM.w * factor
         let measureX2 = 0
-        node.querySelectorAll('*').forEach(child => {
+
+        node.querySelectorAll('staff').forEach(staff => {
+          const outStaff = measure.appendChild(staff.cloneNode(true))
+
+          const staffN = parseInt(staff.getAttribute('n'))
+
+          const rastrumID = dtDom.querySelector('scoreDef staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
+          const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
+          // TODO: if rastrum is null/undefined set to 0 ???
+          const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0
+
+          const staffZone = appendNewElement(outSurface, 'zone')
+          staffZone.setAttribute('type', 'staff')
+          staffZone.setAttribute('uly', staffY.toFixed(1))
+
+          outStaff.setAttribute('facs', '#' + staffZone.getAttribute('xml:id'))
+
+          // enter data that will allow rotation around the correct pivot in SVG
+          const pivot = (measureX - parseFloat(rastrum.getAttribute('system.leftmar'))) * factor * 10
+          staff.setAttribute('pivot', pivot)
+        })
+
+        measure.querySelectorAll('staff *').forEach(child => {
           if (child.hasAttribute('x')) {
             const testX = parseFloat(child.getAttribute('x')) * factor
             measureX = Math.min(measureX, testX)
@@ -1314,20 +1343,9 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               if (childName === 'accid') {
                 childZone.setAttribute('uly', 1415)
               }
-            } else if (childName === 'staff') {
-              const staffN = parseInt(child.getAttribute('n'))
-
-              const rastrumID = sbZone.getAttribute('bw.rastrumIDs').split(' ')[staffN - 1]
-              const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
-              // TODO: if rastrum is null/undefined set to 0 ???
-              const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0
-              childZone.setAttribute('uly', staffY.toFixed(1))
-
-              // enter data that will allow rotation around the correct pivot in SVG
-              const pivot = (measureX - parseFloat(rastrum.getAttribute('system.leftmar'))) * factor * 10
-              child.setAttribute('pivot', pivot)
             }
 
+            console.log(714, ' setting facs of ' + childName + '#' + child.getAttribute('xml:id') + ' to #' + childZone.getAttribute('xml:id'))
             child.setAttribute('facs', '#' + childZone.getAttribute('xml:id'))
           } else if (ignoreElements.indexOf(childName) === -1) {
             console.warn('Unsupported element in diplomatic transcription: ' + childName)
