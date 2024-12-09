@@ -1041,13 +1041,13 @@ export default {
     renderDiploTrans (toolkit, wzDetails, meiDom) {
       console.log('913a: renderDiploTrans()', meiDom)
       // console.log('913a: renderDiploTrans()', wzDetails)
-      meiDom.querySelectorAll('measure').forEach(measure => {
+      meiDom.querySelectorAll('system').forEach(system => {
         // const sb = measure.previousElementSibling
         // console.log('913a: sb', sb)
         // const staves = sb.getAttribute('corresp').split(' ')
         // console.log('913a: staves', staves)
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        measure.querySelectorAll('*[x], *[x2]').forEach(event => {
+        system.querySelectorAll('*[x], *[x2]').forEach(event => {
           if (event.hasAttribute('x')) {
             const x1 = parseFloat(event.getAttribute('x')) + xOff
             event.setAttribute('x', x1)
@@ -1058,6 +1058,8 @@ export default {
           }
         })
       })
+
+      console.log('913: meiDom', meiDom)
 
       const meiString = new XMLSerializer().serializeToString(meiDom)
       toolkit.loadData(meiString)
