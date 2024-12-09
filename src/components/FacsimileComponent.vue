@@ -186,6 +186,10 @@ export default {
             this.$store.dispatch('setActiveWritingZone', genDescWzId)
           }
 
+          const initializeDT = () => {
+            this.$store.dispatch('setModal', 'initializeDT')
+          }
+
           const selectFunc = () => {
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
@@ -246,24 +250,34 @@ export default {
             disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
           }
 
+          const items = []
+          if (!wzActive) {
+            items.push({ label: 'select writing zone', action: selectWzFunc, disabled: wzActive })
+          } else {
+            if (this.$store.getters.needInitializeDT) {
+              items.push({ label: 'initialize diplomatic transcript', action: initializeDT, disabled: this.$store.needInitializeDT })
+            } else {
+              [
+                { label: 'Select for automatic transcription', action: selectFunc, disabled: !wzActive },
+                {
+                  label: 'Transcribe shape without AnnotTrans',
+                  disabled: !wzActive,
+                  items: [
+                    { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
+                    { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
+                    { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
+                  ]
+                },
+                addShapeEntry,
+                activateDTEntry,
+                adjustFunctionEntry
+              ].forEach(it => items.push(it))
+            }
+          }
+
           const contextMenu = {
             pos: { x: e.originalEvent.clientX, y: e.originalEvent.clientY },
-            items: [
-              { label: 'select writing zone', action: selectWzFunc, disabled: wzActive },
-              { label: 'Select for automatic transcription', action: selectFunc, disabled: !wzActive },
-              {
-                label: 'Transcribe shape without AnnotTrans',
-                disabled: !wzActive,
-                items: [
-                  { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
-                  { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
-                  { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
-                ]
-              },
-              addShapeEntry,
-              activateDTEntry,
-              adjustFunctionEntry
-            ]
+            items
           }
           this.$store.dispatch('setContextMenu', contextMenu)
         } else {

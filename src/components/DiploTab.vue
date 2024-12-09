@@ -198,17 +198,7 @@ export default {
   computed: {
     ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage', 'activeDiploTransElementId']),
     showInitializeButton () {
-      const currentWz = this.$store.getters.currentWritingZoneObject
-      if (!currentWz) {
-        return false
-      }
-
-      const annotTransLink = currentWz.annotTrans
-      const diploTransLink = currentWz.diploTrans
-
-      const annotTransAvailable = this.$store.getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
-      const diploTransAvailable = this.$store.getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
-      return annotTransAvailable && !diploTransAvailable
+      return this.$store.getters.needInitializeDT
     },
     editorSettings () {
       return {

@@ -1206,6 +1206,27 @@ const guiModule = {
      */
     contextMenuVisible: (state) => {
       return state.contextMenu !== null
+    },
+
+    /**
+     * boolean wether DT needs to be initialized
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    needInitializeDT: (state, getters) => {
+      const currentWz = getters.currentWritingZoneObject
+      console.log(currentWz)
+      if (!currentWz) {
+        return false
+      }
+
+      const annotTransLink = currentWz.annotTrans
+      const diploTransLink = currentWz.diploTrans
+
+      const annotTransAvailable = getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
+      const diploTransAvailable = getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
+      return annotTransAvailable && !diploTransAvailable
     }
   }
 }

@@ -1373,6 +1373,7 @@ const dataModule = {
       commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
       dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
+      dispatch('setModal', 'commitmei')
 
       return diploTrans
     },
