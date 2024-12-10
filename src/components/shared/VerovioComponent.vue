@@ -73,8 +73,16 @@ export default {
           const localCopy = svg.repeat(1)
           this.$refs.mei.innerHTML = localCopy
           if (this.scale > 0) {
+            const nre = /^([0-9.]*)([a-z]*)$/
+            const whnum = (att) => +att.match(nre)[1]
             const svgDom = this.$refs.mei.querySelector('svg')
-            svgDom.setAttribute('style', `transform: scale(${+this.scale});`)
+            const svgWidth = svgDom.getAttribute('width')
+            const svgHeight = svgDom.getAttribute('height')
+            console.log(`VerovioComponent width="${svgWidth}" height="${svgHeight}"`)
+            svgDom.setAttribute('viewBox', `0 0 ${whnum(svgWidth)} ${whnum(svgHeight)}`)
+            svgDom.removeAttribute('width')
+            svgDom.removeAttribute('height')
+            svgDom.setAttribute('style', `height: ${100 * +this.scale}%; max-width: none; max-height: none;`)
           }
         }
 
