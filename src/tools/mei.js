@@ -1302,6 +1302,8 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           staff.setAttribute('pivot', pivot)
         })
 
+        // handle events
+        // TODO: fix multiple sections (=accolades)
         measure.querySelectorAll('staff *').forEach(child => {
           if (child.hasAttribute('x')) {
             const testX = parseFloat(child.getAttribute('x')) * factor
@@ -1351,6 +1353,12 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             console.warn('Unsupported element in diplomatic transcription: ' + childName)
             // todo: autogenerate an issue for unsupported elements?! If so, leave a stack trace of the file in which they occur?
           }
+        })
+
+        // handle controlevents
+        const controlEvents = node.querySelectorAll('section > *:not(staff)')
+        controlEvents.forEach(controlEvent => {
+          measure.appendChild(controlEvent.cloneNode(true))
         })
 
         // TODO: this is not correct, as it takes the leftmost rastrum, not the current one
