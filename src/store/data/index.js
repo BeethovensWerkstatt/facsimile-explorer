@@ -3014,7 +3014,7 @@ const dataModule = {
       // console.log('------\nid: ' + id)
       // console.log([...doc.querySelectorAll('layer')])
 
-      const allElems = doc.querySelectorAll('layer *[*|id]')
+      const allElems = doc.querySelectorAll('section *[*|id]')
       // console.log([...allElems])
       const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
 
