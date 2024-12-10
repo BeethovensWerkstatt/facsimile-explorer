@@ -41,10 +41,16 @@ export default {
     purpose: String,
     type: String,
     getter: String,
-    pathGetter: String
+    pathGetter: String,
+    scale: Number
   },
   computed: {
     ...mapGetters(['diploPageBackgroundVerovioOptions', 'annotTransVerovioOptions'])
+  },
+  watch: {
+    scale () {
+      this.render()
+    }
   },
   methods: {
     async render () {
@@ -66,6 +72,10 @@ export default {
           const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
           const localCopy = svg.repeat(1)
           this.$refs.mei.innerHTML = localCopy
+          if (this.scale > 0) {
+            const svgDom = this.$refs.mei.querySelector('svg')
+            svgDom.setAttribute('style', `transform: scale(${+this.scale});`)
+          }
         }
 
         if (this.type === 'diploTrans') {
@@ -186,7 +196,7 @@ export default {
   border-radius: .3rem;
   background-color: #ffffff;
   box-shadow: 0 0 .3rem #00000066 inset;
-  max-height: 100%;
+  height: 100%;
   overflow: auto;
 
   svg *[data-corresp] {

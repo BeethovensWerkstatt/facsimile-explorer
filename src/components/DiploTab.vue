@@ -40,7 +40,10 @@
           <XmlEditor :filePath="editorSettings.filePath" :id="editorSettings.id"/>
         </div>
         <div class="mainBox">
-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
+          <div class="vscale">
+            <input type="range" v-model="annotScale" min="0.5" max="5" step=".5" />
+          </div>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath" :scale="annotScale"/>
         </div>
       </MainStage>
     </div>
@@ -80,6 +83,7 @@ export default {
     XmlEditor,
     DiploTabMenu
   },
+  data: () => ({ annotScale: 3 }),
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleDiploTabSidebar')
@@ -269,10 +273,27 @@ export default {
     }
 
     .mainStage {
+      position: relative;
       background: linear-gradient( to bottom, $darkBackgroundColor, darken($darkBackgroundColor, 10%));
       flex: 1 1 auto;
       order: 2;
       height: calc(100vh - $totalHeaderHeight - $topMenuHeight - 10px);
+
+      .vscale {
+        position: relative;
+        display: inline-block;
+        max-height: 100%;
+        input[type="range"] {
+          writing-mode: vertical-lr;
+          direction: rtl;
+          appearance: slider-vertical;
+          width: 16px;
+        }
+      }
+      .verovioComponent {
+        width: calc(100% - 16px);
+        display: inline-block;
+      }
     }
   }
 }
