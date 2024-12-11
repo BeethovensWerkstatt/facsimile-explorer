@@ -247,7 +247,7 @@ export default {
     max-height: 150%;
   }
 
-  svg g.note:not(.bounding-box) g.accid:not(.highlighted) {
+  svg g.note:not(.bounding-box) g.accid:not(.highlighted):not(*[data-corresp]) {
     stroke: black;
     fill: black;
   }

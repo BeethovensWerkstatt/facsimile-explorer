@@ -36,6 +36,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
   // elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
   annotElem.setAttribute('corresp', correspPath + elem.getAttribute('xml:id'))
+  console.log('generateDiplomaticElement', annotElem)
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)

@@ -1385,6 +1385,7 @@ const dataModule = {
     async diploTranscribe ({ commit, getters, dispatch }) {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
+      console.log('\n\n\ndiploTranscribe:\n annotElementRef=', annotElemRef)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         return false
