@@ -399,9 +399,15 @@ const guiModule = {
       }
     },
 
-    CLEAR_DIPLO_TRANS_ITEMS (state) {
+    CLEAR_DIPLO_TRANS_ITEMS (state, full = false) {
       state.diploTransActivations.shapes = new Map()
       state.diploTransActivations.annotTrans = new Map()
+      if (full) {
+        state.activeWritingZone = null
+        state.activeWritingLayer = null
+        state.activeSystem = null
+        state.activeDiploTransElementId = null
+      }
     },
 
     /**
@@ -572,7 +578,10 @@ const guiModule = {
      * @param {[type]} commit  [description]
      * @param {[type]} id      [description]
      */
-    setActiveWritingZone ({ commit, getters }, id) {
+    setActiveWritingZone ({ dispatch, commit, getters }, id) {
+      if (id !== getters.activeWritingZone) {
+        dispatch('diploTransClear', true)
+      }
       commit('SET_ACTIVE_WRITINGZONE', id)
 
       if (id !== null) {
@@ -717,8 +726,8 @@ const guiModule = {
       }
     },
 
-    diploTransClear ({ commit }) {
-      commit('CLEAR_DIPLO_TRANS_ITEMS')
+    diploTransClear ({ commit }, full = false) {
+      commit('CLEAR_DIPLO_TRANS_ITEMS', full)
     },
 
     /**

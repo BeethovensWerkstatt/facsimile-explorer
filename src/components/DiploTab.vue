@@ -83,7 +83,7 @@ export default {
     XmlEditor,
     DiploTabMenu
   },
-  data: () => ({ annotScale: 3 }),
+  data: () => ({ annotScale: 1 }),
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleDiploTabSidebar')

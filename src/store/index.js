@@ -276,7 +276,7 @@ export default createStore({
         commit('SET_CURRENT_PAGE', i)
         commit('SET_ACTIVE_WRITINGZONE', null)
         router.replace({ query: { page: i + 1 } })
-        commit('CLEAR_DIPLO_TRANS_ITEMS')
+        commit('CLEAR_DIPLO_TRANS_ITEMS', true)
       } else { // else look for object with attributes (page, zone, wzid, layer) -- all int or undefined
         const { page, zone, wzid, layer } = i
         console.log(page, zone, layer)

@@ -1532,7 +1532,7 @@ const dataModule = {
       await dispatch('logChange', { path: atPath, baseMessage, param, xmlIDs: [annotElemRef.id], isNewDocument: false })
 
       await dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
-      dispatch('diploTransClear')
+      dispatch('diploTransClear', false)
     },
 
     /**
