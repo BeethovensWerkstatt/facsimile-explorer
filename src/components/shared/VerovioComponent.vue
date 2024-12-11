@@ -1,7 +1,7 @@
 <template>
-  <div class="verovioComponent" :class="purpose" ref="mei">
+  <div class="verovioComponent"><div :class="purpose" ref="mei">
     <div class="placeholder">no transcript available ...</div>
-  </div>
+  </div></div>
 </template>
 
 <script>
@@ -76,13 +76,15 @@ export default {
             const nre = /^([0-9.]*)([a-z]*)$/
             const whnum = (att) => +att.match(nre)[1]
             const svgDom = this.$refs.mei.querySelector('svg')
-            const svgWidth = svgDom.getAttribute('width')
-            const svgHeight = svgDom.getAttribute('height')
+            const svgWidth = whnum(svgDom.getAttribute('width'))
+            const svgHeight = whnum(svgDom.getAttribute('height'))
+            const percHeight = 10 * +this.scale
+            const percWidth = percHeight * svgWidth / svgHeight
             console.log(`VerovioComponent width="${svgWidth}" height="${svgHeight}"`)
-            svgDom.setAttribute('viewBox', `0 0 ${whnum(svgWidth)} ${whnum(svgHeight)}`)
+            svgDom.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
             svgDom.removeAttribute('width')
             svgDom.removeAttribute('height')
-            svgDom.setAttribute('style', `height: ${100 * +this.scale}%; max-width: none; max-height: none;`)
+            svgDom.setAttribute('style', `width: ${percWidth}%; height: ${percHeight}%; max-width: none; max-height: none;`)
           }
         }
 
@@ -205,7 +207,8 @@ export default {
   background-color: #ffffff;
   box-shadow: 0 0 .3rem #00000066 inset;
   height: 100%;
-  overflow: auto;
+  width: 100%;
+  overflow: scroll;
 
   svg *[data-corresp] {
     fill: $svgUsedShapeColor;
