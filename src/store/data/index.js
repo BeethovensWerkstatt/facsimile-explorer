@@ -1619,6 +1619,49 @@ const dataModule = {
 
       dispatch('loadDocumentIntoStore', { path: filePath, dom: newDoc })
       dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [elemId], isNewDocument: false })
+    },
+    /**
+     * removes current DT element
+     */
+    removeDTElement ({ getters, dispatch }) {
+      const baseMessage = 'remove DT element'
+      const dtElemId = getters.activeDiploTransElementId
+      console.log('remove DT element', dtElemId)
+      const oldAT = getters.annotatedTranscriptForCurrentWz
+      const oldDT = getters.diplomaticTranscriptForCurrentWz
+      if (oldAT && oldDT) {
+        const atIds = new Set()
+        const dtIds = new Set()
+        const AT = oldAT.cloneNode(true)
+        const atPath = getters.currentWzAtPath
+        const DT = oldDT.cloneNode(true)
+        const dtPath = getters.currentWzDtPath
+        const correspList = AT.querySelectorAll('*[corresp]')
+        for (const el of correspList) {
+          atIds.add(el.getAttribute('id'))
+          const correspl = el.getAttribute('corresp').split(' ').filter(corresp => {
+            return corresp.split('#')[1] !== dtElemId
+          })
+          if (correspl.length > 0) {
+            el.setAttribute('corresp', correspl.join(' '))
+          } else {
+            el.removeAttribute('corresp')
+          }
+        }
+        const dtElem = DT.querySelectorAll(`*[*|id="${dtElemId}"]`)
+        for (const el of dtElem) {
+          console.log(el)
+          dtIds.add(el.parentElement.getAttribute('id'))
+          el.remove()
+        }
+        dispatch('loadDocumentIntoStore', { path: atPath, dom: AT })
+        dispatch('logChange', { path: atPath, baseMessage, param: ` ${dtElemId}`, xmlIDs: [...atIds], isNewDocument: false })
+        dispatch('loadDocumentIntoStore', { path: dtPath, dom: DT })
+        dispatch('logChange', { path: dtPath, baseMessage, param: ` ${dtElemId}`, xmlIDs: [...dtIds], isNewDocument: false })
+        dispatch('setActiveDiploTransElementId', null)
+      } else {
+        console.warn('removeDTElement: no DT or AT!')
+      }
     }
   },
 

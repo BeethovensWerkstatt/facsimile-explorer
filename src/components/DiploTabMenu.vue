@@ -7,11 +7,15 @@
       <div class="value" :title="stateTitle">{{ stateLabel }}</div>
     </div>
     -->
-    <div class="entry">
+    <div class="entry" v-if="elementId">
+      <label>close</label>
+      <div class="value string button" @click="$store.dispatch('setActiveDiploTransElementId', null)">X</div>
+    </div>
+    <div class="entry" v-if="elementId">
         <label>@xml:id</label>
         <div class="value string">{{elementId}}</div>
     </div>
-    <div class="entry">
+    <div class="entry" v-if="elementId">
         <label>@x</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -29,6 +33,10 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="stem.len" setterName="setActiveDiploTransElementAttValue" :min="0" :max="25" :step="1" :readOnly="false"/>
         </div>
         <div class="value string button" :onClick="initStemLen" v-else>add attribute</div>
+    </div>
+    <div class="entry" v-if="elementId">
+      <label>unlink</label>
+      <div class="value string button" :onClick="removeDTElement" title="remove DT element">&#x2702;</div>
     </div>
     <!-- <div class="entry" :onClick="test">Push</div> -->
   </div>
@@ -49,6 +57,11 @@ export default {
   methods: {
     initStemLen () {
       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'stem.len', value: 8 })
+    },
+    removeDTElement () {
+      if (confirm('Do you relly want to delete the selected DT element?\nThis cannot be undone!')) {
+        this.$store.dispatch('removeDTElement')
+      }
     },
     test () {
       // const doc = this.$store.getters.documentByPath(this.filePath)
