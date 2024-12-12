@@ -54,7 +54,7 @@ export default {
         try {
           // look for locked attributes
           // eslint-disable-next-line no-empty-character-class
-          const re = /((xmlns|(xml:)?id|facs)="([^"]+)")/gd
+          const re = /(\b(xmlns|(xml:)?id|facs)="([^"]+)")/gd
           const s = state.doc.toString()
           let m
           while ((m = re.exec(s)) !== null) {
