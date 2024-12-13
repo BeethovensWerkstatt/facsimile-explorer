@@ -606,30 +606,30 @@ export default {
      */
     indicateUsedShapes () {
       const arr = [...this.$store.getters.activeDiploTransUsedShapes]
-      console.log('FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
+      // console.log('FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
-        console.log('found an overlay')
+        // console.log('found an overlay')
         existingOverlay.querySelectorAll('.activeWritingZone .usedShape').forEach(shape => {
           const id = shape.getAttribute('data-id')
           const index = arr.indexOf(id)
           if (index === -1) {
-            console.log('removing usedShape from ' + id)
+            // console.log('removing usedShape from ' + id)
             shape.classList.remove('usedShape')
           } else {
             arr.splice(index, 1)
           }
         })
 
-        console.log('\n\nNEED TO ADD in following array\n', arr)
+        // console.log('\n\nNEED TO ADD in following array\n', arr)
         arr.forEach(id => {
           const elem = existingOverlay.querySelector('.activeWritingZone path[id="' + id + '"]')
           if (elem) {
-            console.log('adding usedShape to ' + id)
+            // console.log('adding usedShape to ' + id)
             elem.classList.add('usedShape')
           } else {
-            console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
+            // console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
           }
         })
       }
@@ -640,21 +640,21 @@ export default {
      */
     indicateSelectedShapes () {
       const arr2 = [...this.$store.getters.diploTransActivationsInShapes.map(dt => dt.id)]
-      console.log('FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
+      // console.log('FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
-        console.log('found an overlay')
+        // console.log('found an overlay')
         existingOverlay.querySelectorAll('.activeWritingZone .selectedShape').forEach(shape => {
           shape.classList.remove('selectedShape')
         })
         arr2.forEach(id => {
           const elem = existingOverlay.querySelector('.activeWritingZone path[id="' + id + '"]')
           if (elem) {
-            console.log('selected shape ' + id)
+            // console.log('selected shape ' + id)
             elem.classList.add('selectedShape')
           } else {
-            console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
+            // console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
           }
         })
       }
@@ -665,17 +665,17 @@ export default {
      */
     indicateSelectedDTElement () {
       const dtid = this.$store.getters.activeDiploTransElementId
-      console.log('DT ELEMENT:', dtid)
+      // console.log('DT ELEMENT:', dtid)
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
 
       if (existingOverlay !== null) {
-        console.log('found an overlay')
+        // console.log('found an overlay')
         existingOverlay.querySelectorAll('.selectedDiploTrans').forEach(element => {
           element.classList.remove('selectedDiploTrans')
         })
         existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach(element => {
           element.classList.add('selectedDiploTrans')
-          console.log(element)
+          // console.log(element)
         })
       }
     },
@@ -961,7 +961,7 @@ export default {
       const dtArr = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
 
       if (dtArr.length === 0) {
-        console.log('no diploTrans to render yet')
+        // console.log('no diploTrans to render yet')
         return null
       }
 
@@ -1002,11 +1002,11 @@ export default {
 
       // ----
       diplomaticTranscripts.forEach(async obj => {
-        console.log('913 entering ', obj)
+        // console.log('913 entering ', obj)
 
         if (obj.dt) {
           const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt)
-          console.log('913: diplo', renderedDiplo)
+          // console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
@@ -1053,7 +1053,7 @@ export default {
     },
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
-      console.log('913a: renderDiploTrans()', meiDom)
+      // console.log('913a: renderDiploTrans()', meiDom)
       // console.log('913a: renderDiploTrans()', wzDetails)
       meiDom.querySelectorAll('system').forEach(system => {
         // const sb = measure.previousElementSibling
@@ -1073,7 +1073,7 @@ export default {
         })
       })
 
-      console.log('913: meiDom', meiDom)
+      // console.log('913: meiDom', meiDom)
 
       const meiString = new XMLSerializer().serializeToString(meiDom)
       toolkit.loadData(meiString)
@@ -1257,14 +1257,14 @@ export default {
 
     this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
       (newValue, oldValue) => {
-        console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        // console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
-        console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        // console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedDTElement()
       })
 
