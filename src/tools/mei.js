@@ -35,8 +35,11 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
   elem.setAttribute('facs', facs.join(' '))
   // elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
-  annotElem.setAttribute('corresp', correspPath + elem.getAttribute('xml:id'))
-  console.log('generateDiplomaticElement', annotElem)
+  const existingCorresp = annotElem.getAttribute('corresp')
+  const newCorresp = correspPath + elem.getAttribute('xml:id')
+  const corresp = existingCorresp ? existingCorresp + ' ' + newCorresp : newCorresp
+  annotElem.setAttribute('corresp', corresp)
+  // console.log('generateDiplomaticElement', annotElem)
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
@@ -1286,7 +1289,6 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           const outStaff = measure.appendChild(staff.cloneNode(true))
 
           const staffN = parseInt(staff.getAttribute('n'))
-
           const scoreDef = staff.closest('system').querySelector('scoreDef')
           const rastrumID = scoreDef.querySelector('staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
           const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')

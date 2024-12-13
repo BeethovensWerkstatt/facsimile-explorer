@@ -1442,8 +1442,8 @@ const dataModule = {
 
       // check if element is already transcribed
       if (annotElem.hasAttribute('corresp')) {
-        console.warn('element already transcribed', annotElem)
-        return null
+        alert('element already transcribed', annotElem)
+        // return null
       }
 
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
