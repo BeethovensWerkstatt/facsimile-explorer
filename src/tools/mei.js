@@ -1287,7 +1287,8 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
           const staffN = parseInt(staff.getAttribute('n'))
 
-          const rastrumID = dtDom.querySelector('scoreDef staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
+          const scoreDef = staff.closest('system').querySelector('scoreDef')
+          const rastrumID = scoreDef.querySelector('staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
           const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
           // TODO: if rastrum is null/undefined set to 0 ???
           const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0

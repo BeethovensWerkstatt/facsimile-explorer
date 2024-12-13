@@ -1290,16 +1290,16 @@ const dataModule = {
     async initializeDiploTrans ({ commit, getters, dispatch }, { systemcount, rastrums: rastrumids }) {
       const existingDt = getters.diplomaticTranscriptForCurrentWz
       if (existingDt !== null) {
-        console.log('…current writing zone already has a diplomatic transcription')
+        // console.log('…current writing zone already has a diplomatic transcription')
         return null
       }
 
-      console.log('initializeDiploTrans:', systemcount, rastrumids)
+      // console.log('446 initializeDiploTrans:', systemcount, rastrumids)
 
       const appversion = await getters.config?.app?.version
       const filename = getters.currentDocPath.split('/').splice(-1)[0]
       const wzObj = getters.currentWritingZoneObject
-      console.log('initializeDiploTrans - wzObj:', wzObj)
+      // console.log('446 initializeDiploTrans - wzObj:', wzObj)
       // const wzId = wzObj.id // getters.genDescForCurrentWritingZone.getAttribute('xml:id')
       // console.log(wzId, getters.genDescForCurrentWritingZone.getAttribute('xml:id'))
       const surfaceId = getters.currentPageId
@@ -1319,9 +1319,9 @@ const dataModule = {
       }
       */
       const affectedStaves = []
-      console.log('rastrumids', rastrumids)
+      // console.log('rastrumids', rastrumids)
       rastrums.forEach((rastrum, i) => {
-        console.log('rastrum', rastrum, i + 1, rastrumids.find(id => id === rastrum.id))
+        // console.log('rastrum', rastrum, i + 1, rastrumids.find(id => id === rastrum.id))
         /*
         const rastrumBox = {
           left: parseInt(rastrum.px.x),
@@ -1362,17 +1362,45 @@ const dataModule = {
       // -----------------
 
       const diploTrans = await initializeDiploTrans(filename, wzObj, surfaceId, appversion, affectedStaves, systemcount)
-      const serializer = new XMLSerializer()
-      console.log(serializer.serializeToString(diploTrans))
+      // const serializer = new XMLSerializer()
+      // console.log(serializer.serializeToString(diploTrans))
 
       const dtPath = getters.currentWzDtPath
       const baseMessage = 'add diplomatic transcript at '
       const param = dtPath.split('/').splice(-1)[0]
 
-      // console.log(diploTrans, dtPath)
       commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
       dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
+
+      const at = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
+      const systemIDs = [...diploTrans.querySelectorAll('draft system')].map(system => system.getAttribute('xml:id'))
+
+      at.querySelectorAll('sb').forEach((sb, i) => {
+        const path = '../diplomaticTranscripts/' + param + '#' + systemIDs[i]
+        if (!sb.hasAttribute('xml:id')) {
+          const id = 's' + uuid()
+          sb.setAttribute('xml:id', id)
+        }
+        sb.setAttribute('corresp', path)
+      })
+      const pb = at.querySelector('pb') // intentionally picking the first pb only
+      if (!pb.hasAttribute('xml:id')) {
+        const id = 'p' + uuid()
+        pb.setAttribute('xml:id', id)
+      }
+      const pbCorresp = '../' + filename + '#' + surfaceId
+      pb.setAttribute('corresp', pbCorresp)
+
+      const changedID = [at.querySelector('mdiv').getAttribute('xml:id')]
+
+      const atPath = getters.currentWzAtPath
+      const baseMessageAt = 'add references to diplomatic systems from sb elements at '
+      const paramAt = atPath.split('/').splice(-1)[0]
+
+      dispatch('loadDocumentIntoStore', { path: atPath, dom: at })
+      dispatch('logChange', { path: atPath, baseMessage: baseMessageAt, param: paramAt, xmlIDs: changedID, isNewDocument: false })
+
       dispatch('setModal', 'commitmei')
 
       return diploTrans
@@ -1467,20 +1495,20 @@ const dataModule = {
       const getDiplomaticSection = (annotElem) => {
         const atMeasure = annotElem.closest('measure')
 
-        const countPrecedingSb = (elem) => {
-          let count = 0
+        const getSystemId = (elem) => {
+          let id = null
           let current = elem.previousElementSibling
-          while (current) {
-            if (current.localName === 'sb') {
-              count++
+          while (current && !id) {
+            if (current.localName === 'sb' && current.hasAttribute('corresp')) {
+              id = current.getAttribute('corresp').split('#')[1]
             }
             current = current.previousElementSibling
           }
-          return count
+          return id
         }
 
-        const sbCount = countPrecedingSb(atMeasure)
-        const dtSection = dtDoc.querySelectorAll('system')[sbCount - 1].querySelector('section')
+        const systemId = getSystemId(atMeasure)
+        const dtSection = dtDoc.querySelector('system[*|id="' + systemId + '"] section')
         return dtSection
       }
 
