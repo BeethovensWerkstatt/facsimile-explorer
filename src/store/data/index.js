@@ -1413,7 +1413,7 @@ const dataModule = {
     async diploTranscribe ({ commit, getters, dispatch }) {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
-      console.log('\n\n\ndiploTranscribe:\n annotElementRef=', annotElemRef)
+      console.log('317 diploTranscribe: annotElementRef=', annotElemRef)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         return false
@@ -1442,7 +1442,7 @@ const dataModule = {
 
       // check if element is already transcribed
       if (annotElem.hasAttribute('corresp')) {
-        alert('element already transcribed', annotElem)
+        alert('Element has already been transcribed. Continuing. ', annotElem)
         // return null
       }
 
@@ -1450,12 +1450,21 @@ const dataModule = {
       // console.log('annotElem', annotElem)
       // console.log('shapes', shapes)
 
+      const isAtControlEvent = ['slur', 'tie'].indexOf(annotElemRef.name) !== -1
+
       let annotStaffN
       if (annotElemRef.name === 'barLine') {
         // todo: find better value for staff of the barline
         annotStaffN = 1
-      } else {
+      } else if (!isAtControlEvent) {
         annotStaffN = annotElem.closest('staff').getAttribute('n')
+      } else if (isAtControlEvent) {
+        if (annotElem.hasAttribute('staff')) {
+          annotStaffN = annotElem.getAttribute('staff')
+        } else if (annotElem.hasAttribute('startid')) {
+          const startElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElem.getAttribute('startid') + '"]')
+          annotStaffN = startElem.closest('staff').getAttribute('n')
+        }
       }
       console.log('691 annotStaffN', annotStaffN)
 
@@ -1489,7 +1498,7 @@ const dataModule = {
 
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, correspPath, annotElemRef)
 
-      const isControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
+      const isDtControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
       const getDiplomaticSection = (annotElem) => {
@@ -1515,7 +1524,7 @@ const dataModule = {
       const diploSection = getDiplomaticSection(annotElem) // diploLayer.closest('measure') */
       const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
 
-      if (isControlEvent) {
+      if (isDtControlEvent || isAtControlEvent) {
         diploSection.appendChild(diplomaticElement)
       } else {
         // Convert child nodes of diploLayer into an array
