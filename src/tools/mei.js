@@ -35,8 +35,11 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
   elem.setAttribute('facs', facs.join(' '))
   // elem.setAttribute('corresp', annotElem.getAttribute('xml:id'))
 
-  annotElem.setAttribute('corresp', correspPath + elem.getAttribute('xml:id'))
-  console.log('generateDiplomaticElement', annotElem)
+  const existingCorresp = annotElem.getAttribute('corresp')
+  const newCorresp = correspPath + elem.getAttribute('xml:id')
+  const corresp = existingCorresp ? existingCorresp + ' ' + newCorresp : newCorresp
+  annotElem.setAttribute('corresp', corresp)
+  // console.log('generateDiplomaticElement', annotElem)
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
@@ -144,7 +147,7 @@ function getDiplomaticRest (annotElem, rest) {
 function getDiplomaticBeam (annotElem, beam) {
   const targets = []
   annotElem.querySelectorAll('*').forEach(elem => {
-    console.log('718: investigating ', elem)
+    // console.log('718: investigating ', elem)
     if (elem.localName === 'note' && !elem.closest('chord') && elem.hasAttribute('corresp')) {
       targets.push('#' + elem.getAttribute('corresp').split('#')[1])
     }
@@ -153,7 +156,7 @@ function getDiplomaticBeam (annotElem, beam) {
   beam.setAttribute('startid', targets[0])
   beam.setAttribute('endid', targets.splice(-1)[0])
   beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
-  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+  // console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
 }
 
 /**
@@ -295,7 +298,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   NEW-ID
   SURFACE-ID
   */
-  console.log('881---------------------> ', affectedStaves, systemcount)
+  // console.log('881---------------------> ', affectedStaves, systemcount)
   const genDescWzId = wzObj.id
   const diploTemplate = await fetch('../assets/diplomaticTranscriptTemplate.xml')
     .then(response => response.text())
@@ -815,13 +818,13 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
     return null
   }
 
-  console.warn('\n\n\n515----HELLO POLLY----')
+  /* console.warn('\n\n\n515----HELLO POLLY----')
   console.log(515, wzDetails)
   console.log(515, dtDoc)
   console.log(515, emptyPage)
   console.log(515, osdRects)
   console.log(515, currentPageInfo)
-  console.warn('515-----done-----')
+  console.warn('515-----done-----') */
 
   dtDoc.querySelectorAll('staffDef').forEach(staffDef => {
     requiredStaves.push(staffDef.getAttribute('label'))
@@ -868,7 +871,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
 
   // const defaultRastrumHeight = factor * 8 // 8vu = 72px
 
-  console.log('appendNewElement: ' + typeof appendNewElement)
+  // console.log('appendNewElement: ' + typeof appendNewElement)
   dtDoc.querySelectorAll('scoreDef staffDef').forEach(dtStaffDef => {
     /* const staffDef = */ outStaffGrp.appendChild(dtStaffDef.cloneNode(true))
 
@@ -895,7 +898,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
       node.setAttribute('facs', '#' + pageZone.getAttribute('xml:id')) */
       console.log('there should already be a pb in here: ', outSurface)
     } else if (name === 'sb') {
-      console.log('812', dtNode)
+      // console.log('812', dtNode)
       /* const systemZone = appendNewElement(outSurface, 'zone')
       const rastrumIDs = node.getAttribute('corresp').split(' ').map(ref => ref.split('#')[1])
       const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
@@ -1015,7 +1018,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
     // outDom.querySelector('section').appendChild(node)
   })
 
-  console.log('846: diplomatic transcript for fragment', clonedPage)
+  // console.log('846: diplomatic transcript for fragment', clonedPage)
 
   // temporaryVerovio3to4(clonedPage)
 
@@ -1250,7 +1253,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         const systemZone = appendNewElement(outSurface, 'zone')
         const rastrumIDs = [...node.querySelectorAll('staffDef')].map(staffDef => staffDef.getAttribute('decls').split('#')[1])
-        console.log(714, 'rastrumIDs:', rastrumIDs)
+        // console.log(714, 'rastrumIDs:', rastrumIDs)
         const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
           return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
         })
@@ -1286,8 +1289,8 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           const outStaff = measure.appendChild(staff.cloneNode(true))
 
           const staffN = parseInt(staff.getAttribute('n'))
-
-          const rastrumID = dtDom.querySelector('scoreDef staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
+          const scoreDef = staff.closest('system').querySelector('scoreDef')
+          const rastrumID = scoreDef.querySelector('staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
           const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
           // TODO: if rastrum is null/undefined set to 0 ???
           const staffY = rastrum ? parseFloat(rastrum.getAttribute('system.topmar')) * factor : 0
@@ -1348,7 +1351,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               }
             }
 
-            console.log(714, ' setting facs of ' + childName + '#' + child.getAttribute('xml:id') + ' to #' + childZone.getAttribute('xml:id'))
+            // console.log(714, ' setting facs of ' + childName + '#' + child.getAttribute('xml:id') + ' to #' + childZone.getAttribute('xml:id'))
             child.setAttribute('facs', '#' + childZone.getAttribute('xml:id'))
           } else if (ignoreElements.indexOf(childName) === -1) {
             console.warn('Unsupported element in diplomatic transcription: ' + childName)

@@ -57,7 +57,7 @@ export default {
       const meiDom = this.$store.getters[this.getter]
 
       if (!meiDom) {
-        console.log('VerovioComponent:render(): No data available.')
+        // console.log('VerovioComponent:render(): No data available.')
         this.$refs.mei.innerHTML = '<div class="placeholder"><!-- loading data… -->select writing zone ...</div>'
         return false
       }
@@ -80,7 +80,7 @@ export default {
             const svgHeight = whnum(svgDom.getAttribute('height'))
             const percHeight = 10 * +this.scale
             const percWidth = percHeight * svgWidth / svgHeight
-            console.log(`VerovioComponent width="${svgWidth}" height="${svgHeight}"`)
+            // console.log(`VerovioComponent width="${svgWidth}" height="${svgHeight}"`)
             svgDom.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
             svgDom.removeAttribute('width')
             svgDom.removeAttribute('height')
@@ -161,7 +161,7 @@ export default {
   mounted: function () {
     // eslint-disable-next-line
     // this.vrvToolkit = new verovio.toolkit()
-    console.log('932: mounting verovio component')
+    // console.log('932: mounting verovio component')
     this.vrvToolkit = this.$store.getters.verovioToolkit
     this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
     this.render()
