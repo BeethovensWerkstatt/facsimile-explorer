@@ -1320,7 +1320,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           }
 
           const childName = child.localName
-          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord']
+          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord', 'rest']
           const ignoreElements = ['layer']
 
           if (supportedElements.indexOf(childName) !== -1) {
@@ -1339,7 +1339,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             }
             const sbZone = getSbZone(childZone)
 
-            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord') {
+            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord' || childName === 'rest') {
               const ownX = child.hasAttribute('x') ? parseFloat(child.getAttribute('x')) * factor : parseFloat(child.parentNode.getAttribute('x')) * factor
               const fixOwnX = childName === 'barLine' ? ownX * 2 : ownX
               const systemX = parseFloat(sbZone.getAttribute('ulx'))
@@ -1349,6 +1349,27 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               if (childName === 'accid') {
                 childZone.setAttribute('uly', 1415)
               }
+            }
+
+            if (childName === 'rest') {
+              const glyphName = child.getAttribute('glyph.name')
+              let dur = null
+              if (glyphName === 'restWhole') {
+                dur = '1'
+              } else if (glyphName === 'restHalf') {
+                dur = '2'
+              } else if (glyphName === 'restQuarter') {
+                dur = '4'
+              } else if (glyphName === 'rest8th') {
+                dur = '8'
+              } else if (glyphName === 'rest16th') {
+                dur = '16'
+              } else if (glyphName === 'rest32nd') {
+                dur = '32'
+              } else if (glyphName === 'rest64th') {
+                dur = '64'
+              }
+              child.setAttribute('dur', dur)
             }
 
             // console.log(714, ' setting facs of ' + childName + '#' + child.getAttribute('xml:id') + ' to #' + childZone.getAttribute('xml:id'))
