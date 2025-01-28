@@ -19,6 +19,11 @@
           <div class="tile-content"><button @click="login()" class="customBtn btn btn-link">Login</button></div>
         </div>
       </li>
+      <li class="menu-item">
+        <button class="customBtn btn btn-link" @click="showVersion()">
+          Version ...
+        </button>
+      </li>
 
       <!--<li class="divider" data-content="Data"></li>
 
@@ -47,8 +52,8 @@
       <li class="menu-item">
         <button class="customBtn btn btn-link" :disabled=!isReady @click="assignSVGs()">
           <i class="icon icon-copy"></i> Assign SVGs
-       </button>
-     </li> -->
+        </button>
+      </li> -->
     </ul>
   </div>
 </template>
@@ -81,6 +86,7 @@ export default {
 
     const importGH = () => store.dispatch('loadContent', {})
     const commitGH = () => store.dispatch('setModal', 'commitmei')
+    const showVersion = () => store.dispatch('setModal', 'version')
     // const importIIIF = () => store.dispatch('setModal', 'iiif')
     // const loadXML = () => store.dispatch('setModal', 'loadxml')
     // const openFile = () => store.dispatch('setModal', 'openfile')
@@ -134,6 +140,7 @@ export default {
       ghUserAvatar,
       importGH,
       commitGH,
+      showVersion,
       // importIIIF,
       // loadXML,
       // openFile,

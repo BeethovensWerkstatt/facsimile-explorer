@@ -160,6 +160,7 @@ export default {
     },
     initializeDiploTrans () {
       // this.$store.dispatch('initializeDiploTrans')
+      console.log('clicked initialize DT')
       this.$store.dispatch('setModal', 'initializeDT')
     },
     autoTranscribe (newShapes, oldShapes, newAnnotated, oldAnnotated) {

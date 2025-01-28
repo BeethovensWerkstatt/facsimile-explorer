@@ -171,7 +171,7 @@ export default {
       click.page = clickedPagePos
       // }
 
-      console.log(click)
+      console.log(click, click.target.localName)
 
       // check for click to svg shape
       if (click.target.localName === 'path') {
@@ -1331,6 +1331,10 @@ export default {
     &.active .rotatedSystem {
       background-color: #85b6ffcc;
     }
+  }
+
+  .bounding-box rect {
+    display: none;
   }
 
   g.sketchArea {
