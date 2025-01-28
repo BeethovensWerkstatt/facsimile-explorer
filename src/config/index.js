@@ -12,4 +12,13 @@ export const config = new Promise((resolve, reject) => {
     resolve(config)
   }).catch(err => reject(err))
 })
+export const version = new Promise((resolve, reject) => {
+  console.log('load version.json ...')
+  const versionURL = process.env.BASE_URL + 'version.json'
+  fetch(versionURL).then(resp => resp.json()).then(version => {
+    console.log(version)
+    resolve(version)
+  }).catch(err => reject(err))
+})
+
 export default config

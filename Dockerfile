@@ -3,17 +3,15 @@
 # 1. set up the build environment and compile the app
 # 2. run it with nginx
 #########################
-FROM node:16 as build-stage
-# ARG CLIENT_ID
+FROM node:22 as build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY ./ .
-# RUN echo "VUE_APP_CLIENT_ID=$CLIENT_ID" >.env.production
-# RUN apk add git
-# RUN npm install -g gulp-cli gulp-git
+RUN apt-get install -y git
+RUN npm install -g gulp-cli gulp-git
 RUN npm run build
-# RUN gulp gitlog
+RUN gulp gitlog
 
 #########################
 # now move on to deploying it

@@ -51,6 +51,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-vue": "^8.0.3",
+    "gulp": "^5.0.0",
+    "gulp-git": "^2.11.0",
     "js-base64": "^3.7.2",
     "jsdoc": "^3.6.11",
     "jsdoc-to-markdown": "^7.1.1",
