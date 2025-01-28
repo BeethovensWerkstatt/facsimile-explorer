@@ -5,6 +5,7 @@
   <CommitModal/>
   <OpenFileModal/>
   <AssignSVGsModal/>
+  <InitializeDTModal/>
   <VersionModal/>
 </template>
 
@@ -16,6 +17,7 @@ import CommitModal from '@/components/CommitModal.vue'
 import OpenFileModal from '@/components/OpenFileModal.vue'
 import AssignSVGsModal from '@/components/AssignSVGsModal.vue'
 import VersionModal from '@/components/modals/VersionModal.vue'
+import InitializeDTModal from '../InitializeDTModal.vue'
 
 export default {
   name: 'allModals',
@@ -26,6 +28,7 @@ export default {
     CommitModal,
     OpenFileModal,
     AssignSVGsModal,
+    InitializeDTModal,
     VersionModal
   }
 }

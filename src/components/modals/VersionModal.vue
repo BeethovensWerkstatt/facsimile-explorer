@@ -1,5 +1,5 @@
 <template>
-  <div class="modal modal-lg" :class="{ active }" id="version-modal">
+  <div class="modal" :class="{ active }" id="version-modal">
     <a href="#close" @click="closeModal()" class="modal-overlay" aria-label="Close"></a>
     <div class="modal-container">
       <div class="modal-header">
@@ -27,7 +27,7 @@
             </tr>
             <tr>
               <th>Commit</th>
-              <td>{{ version.commit }}</td>
+              <td><a :href="commiturl" target="_blank" v-if="version.commit">{{ version.commit }}</a><template v-else>N/A</template></td>
             </tr>
           </table>
         </div>
@@ -49,6 +49,9 @@ export default {
   computed: {
     active () {
       return this.$store.getters.modal === 'version'
+    },
+    commiturl () {
+      return 'https://github.com/BeethovensWerkstatt/facsimile-explorer/commits/' + this.version.commit
     }
   },
   data: () => ({
@@ -70,36 +73,5 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
-.pagesRow {
-   border-bottom: $lightBorder;
-}
 
-.modal-body {
-  img {
-    width: 100%;
-    max-width: 600px;
-  }
-}
-
-.modal-footer {
-  .preview-info {
-    display: flex;
-    width: 100%;
-    div {
-      width: 50%;
-      text-align: left;
-
-      font-size: .7rem;
-      font-weight: 300;
-
-      &.transcription {
-         font-size: .9rem;
-      }
-
-      &.unavailable {
-         color: #aaaaaa;
-      }
-    }
-  }
-}
 </style>
