@@ -1198,10 +1198,14 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
     // const writingZoneZone = surface.querySelectorAll('zone').values().find(z => writingZoneGenDesc.getAttribute('xml:id') === z.getAttribute('data').substring(1))
 
     const layout = sourceDom.querySelector('layout[*|id="' + surface.getAttribute('decls').substring(1) + '"]')
-    const foliumLike = sourceDom.querySelectorAll('foliaDesc > *').values().find(f => {
+    const foliumLike = sourceDom.querySelectorAll('foliaDesc *').values().find(f => {
       const ref = '#' + surface.getAttribute('xml:id')
       return f.getAttribute('recto') === ref || f.getAttribute('verso') === ref || f.getAttribute('outer.recto') === ref || f.getAttribute('inner.verso') === ref || f.getAttribute('inner.recto') === ref || f.getAttribute('outer.verso') === ref
     })
+    if (!foliumLike) {
+      console.error(`969: no folium found for surface ${surface.getAttribute('xml:id')}`)
+      return null
+    }
 
     const pageMM = {
       x: 0,

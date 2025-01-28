@@ -9,23 +9,23 @@
       <div class="modal-body">
         <div class="content">
           <table>
-            <tr>
+            <tr class="subject">
               <th>Subject</th>
               <td>{{ version.subject }}</td>
             </tr>
-            <tr>
+            <tr class="date">
               <th>Date</th>
-              <td>{{ version.date }}</td>
+              <td>{{ date }}</td>
             </tr>
             <tr>
-              <th>Author</th>
+              <th class="author">Author</th>
               <td>{{ version.author }}</td>
             </tr>
-            <tr>
+            <tr class="branch">
               <th>Branch</th>
               <td>{{ version.branch }}</td>
             </tr>
-            <tr>
+            <tr clas="commit">
               <th>Commit</th>
               <td><a :href="commiturl" target="_blank" v-if="version.commit">{{ version.commit }}</a><template v-else>N/A</template></td>
             </tr>
@@ -49,6 +49,13 @@ export default {
   computed: {
     active () {
       return this.$store.getters.modal === 'version'
+    },
+    date () {
+      if (this.version.date) {
+        const d = new Date(this.version.date)
+        return d.toLocaleString()
+      }
+      return 'N/A'
     },
     commiturl () {
       return 'https://github.com/BeethovensWerkstatt/facsimile-explorer/commits/' + this.version.commit
@@ -74,4 +81,9 @@ export default {
 <style scoped lang="scss">
 @import '@/css/_variables.scss';
 
+tr.subject {
+  td {
+    font-weight: bold;
+  }
+}
 </style>
