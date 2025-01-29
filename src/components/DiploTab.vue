@@ -31,19 +31,17 @@
           <FacsimileComponent type="facsimile"/>
         </div>
         <div class="mainBox">
+          <div class="vscale">
+            <input type="range" v-model="annotScale" min="0.5" max="5" step=".01" />
+          </div>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath" :scale="annotScale"/>
+        </div>
+        <div class="mainBox">
           <FacsimileComponent type="diploTrans"/>
-          <!--<VerovioComponent purpose="transcribing" type="diploTrans" getter="diplomaticTranscriptForCurrentWz" pathGetter="currentWzDtPath"/>-->
-          <!--<OpenSeadragonComponent/>-->
         </div>
         <div class="mainBox">
           <DiploTabMenu :filePath="editorSettings.filePath" :id="editorSettings.id"/>
           <XmlEditor :filePath="editorSettings.filePath" :id="editorSettings.id"/>
-        </div>
-        <div class="mainBox">
-          <div class="vscale">
-            <input type="range" v-model="annotScale" min="0.5" max="5" step=".5" />
-          </div>
-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath" :scale="annotScale"/>
         </div>
       </MainStage>
     </div>
@@ -372,8 +370,19 @@ i.showSidebar {
 }
 
 .mainBox {
-  height: 25%;
   padding: .5rem;
+}
+.mainBox:nth-child(1) {
+  height: 33%;
+}
+.mainBox:nth-child(2) {
+  height: 20%;
+}
+.mainBox:nth-child(3) {
+  height: 33%;
+}
+.mainBox:nth-child(4) {
+  height: 14%;
 }
 
 </style>
