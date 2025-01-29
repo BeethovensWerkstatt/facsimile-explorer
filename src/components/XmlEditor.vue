@@ -12,6 +12,7 @@
       v-if="filePath && id"
       @change="lock=true"
       @focus="lock=true"
+      ref="xmlEditor"
     />
   </div>
 </template>
@@ -34,6 +35,21 @@ export default {
   },
   components: {
     Codemirror
+  },
+  watch: {
+    code: {
+      handler (newxml, oldxml) {
+        console.log(oldxml, ' => ', newxml)
+        if (this.$refs.xmlEditor) {
+          this.lock = false
+          this.$refs.xmlEditor.val = newxml
+          setTimeout(() => {
+            this.$refs.xmlEditor.$forceUpdate()
+            this.lock = true
+          }, 100)
+        }
+      }
+    }
   },
   data () {
     const extensions = [xml(), oneDark, EditorView.lineWrapping, readOnlyRangesExtension(this.readOnly)]
