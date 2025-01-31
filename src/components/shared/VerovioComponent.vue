@@ -251,6 +251,19 @@ export default {
     stroke: black;
     fill: black;
   }
+
+  svg text tspan .bounding-box rect {
+    display: none;
+  }
+  svg .tie.bounding-box rect {
+    display: none;
+  }
+  svg .slur.bounding-box rect {
+    display: none;
+  }
+  svg .hairpin.bounding-box rect {
+    display: none;
+  }
 }
 
 </style>

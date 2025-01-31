@@ -3208,11 +3208,11 @@ const dataModule = {
       // console.log('\n\ngot this:')
       // console.log('currentWritingZoneObject', currentWritingZoneObject)
       // console.log('rastrums', rastrums)
-      const wzBox = {
-        left: parseInt(currentWritingZoneObject.xywh.split(',')[0]),
-        top: parseInt(currentWritingZoneObject.xywh.split(',')[1]),
-        right: (parseInt(currentWritingZoneObject.xywh.split(',')[0]) + parseInt(currentWritingZoneObject.xywh.split(',')[2])),
-        bottom: (parseInt(currentWritingZoneObject.xywh.split(',')[1]) + parseInt(currentWritingZoneObject.xywh.split(',')[3]))
+      const [x, y, w, h] = currentWritingZoneObject?.xywh?.split(',').map(c => +c) || [0, 0, 0, 0]
+      const wzBox = { left: x, top: y, right: (x + w), bottom: (y + h) }
+
+      if (w === 0 || h === 0) {
+        console.warn('width/height = 0 !!!', currentWritingZoneObject)
       }
 
       const affectedStaves = []
