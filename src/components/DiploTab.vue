@@ -13,6 +13,7 @@
         <button class="btn" @click="downloadDiploTrans">Download Diplomatic Transcription</button>
       </div>
       <div class="osdButtons">
+        <div class="osdButton" v-if="currentWritingZoneObject"><button class="zoomWZ" @click="zoomWZ">[<i>wz</i>]</button></div>
         <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
         <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
       </div>
@@ -32,12 +33,12 @@
         </div>
         <div class="mainBox">
           <div class="vscale">
-            <input type="range" v-model="annotScale" min="0.5" max="5" step=".01" />
+            <input type="range" v-model="annotScale" min="0.2" max="5" step=".01" />
           </div>
           <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath" :scale="annotScale"/>
         </div>
         <div class="mainBox">
-          <FacsimileComponent type="diploTrans"/>
+          <FacsimileComponent type="diploTrans" ref="facsShapes"/>
         </div>
         <div class="mainBox">
           <DiploTabMenu :filePath="editorSettings.filePath" :id="editorSettings.id"/>
@@ -196,10 +197,19 @@ export default {
         type: 'application/xml'
       })
       fileDownload(data, this.$store.getters.currentWzDtPath.split('/').splice(-1)[0])
+    },
+    zoomWZ () {
+      const currentWz = this.$store.getters.currentWritingZoneObject
+      if (currentWz) {
+        const [x, y, w, h] = currentWz.xywh.split(',')
+        const bounds = this.$refs.facsShapes.viewer.viewport.imageToViewportRectangle(+x, +y, +w, +h)
+        console.log('zoom to:', bounds, this.$refs.facsShapes.viewer.viewport.getBounds(true))
+        this.$refs.facsShapes.viewer.viewport.fitBounds(bounds)
+      }
     }
   },
   computed: {
-    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage', 'activeDiploTransElementId']),
+    ...mapGetters(['diploTabSidebarVisible', 'diploTransActivationsInShapes', 'diploTransActivationsInAnnotTrans', 'diplomaticTranscriptsOnCurrentPage', 'activeDiploTransElementId', 'currentWritingZoneObject']),
     showInitializeButton () {
       return this.$store.getters.needInitializeDT
     },
@@ -281,12 +291,13 @@ export default {
       .vscale {
         position: relative;
         display: inline-block;
-        max-height: 100%;
+        height: 100%;
         input[type="range"] {
           writing-mode: vertical-lr;
           direction: rtl;
           appearance: slider-vertical;
           width: 16px;
+          height: 100%;
         }
       }
       .verovioComponent {
@@ -367,6 +378,9 @@ i.showSidebar {
     display: inline-block;
     margin: 0 .2rem;
   }
+  .zoomWZ {
+    font-size: 80%;
+  }
 }
 
 .mainBox {
@@ -382,7 +396,7 @@ i.showSidebar {
   height: 33%;
 }
 .mainBox:nth-child(4) {
-  height: 14%;
+  height: 10%;
 }
 
 </style>
