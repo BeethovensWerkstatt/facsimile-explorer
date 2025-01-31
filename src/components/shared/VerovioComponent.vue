@@ -251,6 +251,10 @@ export default {
     stroke: black;
     fill: black;
   }
+  svg g.beam:not(.bounding-box) > g:not(.highlighted):not(*[data-corresp]) {
+    stroke: black;
+    fill: black;
+  }
 
   svg text tspan .bounding-box rect {
     display: none;

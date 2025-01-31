@@ -1,6 +1,5 @@
 <template>
   <div class="writingZoneDirectory">
-
     <div class="page" :class="{ active: p === activePage }" v-for="(page, p) in pages" :key="p" :data-page-id="page.id">
       <!-- <h2 title="Page Number">{{pageLabel(page, p)}} <small v-if="page.reconstructionLabel" class="float-right">{{pageAltLabel(page, p)}}</small></h2> -->
       <h2 @click="setPage(p)">{{ page.label ? page.label : (p + 1).toFixed(0) }} <small class="modernLabel" v-if="page.modernLabel !== null">{{page.document?.replaceAll('_', ' ')}}: {{page.modernLabel}}</small></h2>
@@ -167,6 +166,17 @@ export default {
           this.$store.dispatch('loadXmlFile', { path, callback })
         }
       }
+    },
+    scrollToCurrentPage () {
+      const activePageItem = this.$el?.querySelector(`.writingZoneDirectory .page[data-page-id=${this.activePageId}]`)
+      if (activePageItem) {
+        activePageItem.scrollIntoView()
+      }
+    }
+  },
+  watch: {
+    activePageId () {
+      this.scrollToCurrentPage()
     }
   },
   computed: {
@@ -175,7 +185,7 @@ export default {
       return this.$store.getters.currentPageZeroBased
     },
     activePageId () {
-      return this.pages[this.$store.getters.currentPageZeroBased].id
+      return this.pages[this.$store.getters.currentPageZeroBased]?.id
     },
     activeWritingZoneId () {
       return this.activeWritingZone

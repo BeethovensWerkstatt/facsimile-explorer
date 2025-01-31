@@ -6,6 +6,11 @@
           <i class="icon" :class="{'icon-arrow-left': diploTabSidebarVisible, 'icon-arrow-right': !diploTabSidebarVisible}"></i>
         </button>
       </div>
+      <div class="menuItem" v-if="diploTabSidebarVisible">
+        <button class="btn" @click="$refs.writingZoneDirectory?.scrollToCurrentPage()">
+          <i class="icon icon-arrow-down"></i>
+        </button>
+      </div>
       <div class="menuItem" v-if="showInitializeButton">
         <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
@@ -23,7 +28,7 @@
       <Transition name="slide-fade">
         <SideBar class="stageItem sidebarLeft" position="left" tab="diploTab" v-if="diploTabSidebarVisible">
           <SourceSelector/>
-          <WritingZoneDirectory purpose="diploTrans"/>
+          <WritingZoneDirectory purpose="diploTrans" ref="writingZoneDirectory"/>
           {{ diplomaticTranscriptsOnCurrentPage }}
         </SideBar>
       </Transition>

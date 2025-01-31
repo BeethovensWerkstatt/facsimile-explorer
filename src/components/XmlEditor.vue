@@ -44,7 +44,7 @@ export default {
           this.lock = false
           this.$refs.xmlEditor.val = newxml
           setTimeout(() => {
-            this.$refs.xmlEditor.$forceUpdate()
+            this.$refs.xmlEditor?.$forceUpdate()
             this.lock = true
           }, 100)
         }
