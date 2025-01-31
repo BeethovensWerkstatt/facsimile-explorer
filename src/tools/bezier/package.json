@@ -1,0 +1,16 @@
+{
+  "name": "bezier-tools",
+  "version": "0.5.0",
+  "files": [
+    "bezier_tools_bg.wasm",
+    "bezier_tools.js",
+    "bezier_tools_bg.js",
+    "bezier_tools.d.ts"
+  ],
+  "module": "bezier_tools.js",
+  "types": "bezier_tools.d.ts",
+  "sideEffects": [
+    "./bezier_tools.js",
+    "./snippets/*"
+  ]
+}
