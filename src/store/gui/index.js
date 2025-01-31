@@ -394,6 +394,8 @@ const guiModule = {
           state.diploTransActivations.shapes.delete(id)
         } else {
           state.diploTransActivations.shapes.clear()
+          // clear AT selections before Shape selection to prevent unwanted linking!
+          state.diploTransActivations.annotTrans.clear()
           state.diploTransActivations.shapes.set(id, { id, path })
         }
       }
