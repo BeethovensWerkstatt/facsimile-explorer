@@ -175,8 +175,8 @@ export default {
     }
   },
   watch: {
-    activePageId () {
-      this.scrollToCurrentPage()
+    pages () {
+      setTimeout(this.scrollToCurrentPage, 1000)
     }
   },
   computed: {

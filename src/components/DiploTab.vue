@@ -29,7 +29,6 @@
         <SideBar class="stageItem sidebarLeft" position="left" tab="diploTab" v-if="diploTabSidebarVisible">
           <SourceSelector/>
           <WritingZoneDirectory purpose="diploTrans" ref="writingZoneDirectory"/>
-          {{ diplomaticTranscriptsOnCurrentPage }}
         </SideBar>
       </Transition>
       <MainStage class="mainStage stageItem">
