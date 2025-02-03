@@ -1663,7 +1663,7 @@ const dataModule = {
     removeDTElement ({ getters, dispatch }) {
       const baseMessage = 'remove DT element'
       const dtElemId = getters.activeDiploTransElementId
-      console.log('remove DT element', dtElemId)
+      // console.log('remove DT element', dtElemId)
       const oldAT = getters.annotatedTranscriptForCurrentWz
       const oldDT = getters.diplomaticTranscriptForCurrentWz
       if (oldAT && oldDT) {
@@ -1675,21 +1675,39 @@ const dataModule = {
         const dtPath = getters.currentWzDtPath
         const correspList = AT.querySelectorAll('*[corresp]')
         for (const el of correspList) {
-          atIds.add(el.getAttribute('id'))
-          const correspl = el.getAttribute('corresp').split(' ').filter(corresp => {
-            return corresp.split('#')[1] !== dtElemId
-          })
-          if (correspl.length > 0) {
-            el.setAttribute('corresp', correspl.join(' '))
-          } else {
-            el.removeAttribute('corresp')
+          const corresp = el.getAttribute('corresp')
+          if (corresp.includes(dtElemId)) {
+            // console.log('468', corresp)
+            atIds.add(el.getAttribute('xml:id'))
+            const correspl = corresp.split(' ').filter(corresp => {
+              return corresp.split('#')[1] !== dtElemId
+            })
+            // console.log('469', correspl)
+            if (correspl.length > 0) {
+              el.setAttribute('corresp', correspl.join(' '))
+            } else {
+              el.removeAttribute('corresp')
+            }
+          }
+          if (atIds.length === 0) {
+            console.error('no AT element found!')
           }
         }
         const dtElem = DT.querySelectorAll(`*[*|id="${dtElemId}"]`)
         for (const el of dtElem) {
-          console.log(el)
-          dtIds.add(el.parentElement.getAttribute('id'))
-          el.remove()
+          // console.log(el)
+          let parnode = el.parentElement
+          let parid = null
+          while (parnode && !parid) {
+            parid = parnode.getAttribute('xml:id')
+            parnode = parnode.parentElement
+          }
+          if (parid) {
+            dtIds.add(parid)
+            el.remove()
+          } else {
+            console.error('could not remove DT ' + dtElemId)
+          }
         }
         dispatch('loadDocumentIntoStore', { path: atPath, dom: AT })
         dispatch('logChange', { path: atPath, baseMessage, param: ` ${dtElemId}`, xmlIDs: [...atIds], isNewDocument: false })

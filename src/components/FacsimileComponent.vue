@@ -237,6 +237,7 @@ export default {
             label: 'Activate element in DiploTrans',
             action: () => {
               console.log('TODO: activate element in DiploTrans')
+              console.log(this.$store.getters.currentWritingZoneObject)
             },
             disabled: !usedShape
           }
