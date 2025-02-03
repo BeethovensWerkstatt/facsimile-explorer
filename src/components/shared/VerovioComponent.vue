@@ -127,6 +127,7 @@ export default {
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
+        // console.log('clicked verovio', name, id)
         this.$store.dispatch('clickedVerovio', {
           meiDom,
           path,
