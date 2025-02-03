@@ -236,16 +236,12 @@ export default {
           const activateDTEntry = {
             label: 'Activate element in DiploTrans',
             action: () => {
-              console.log('TODO: activate element in DiploTrans')
-              const wzobject = this.$store.getters.currentWritingZoneObject
-              console.log(wzobject, svgGroupWzId)
-              // const AT = this.$store.getters.annotatedTranscriptForCurrentWz
               const DT = this.$store.getters.diplomaticTranscriptForCurrentWz
               const elems = DT.querySelectorAll('*[facs]')
               for (const elem of elems) {
                 const facs = elem.getAttribute('facs')
                 if (facs.includes(click.target.id)) {
-                  console.log('activate?', elem.getAttribute('xml:id'))
+                  // console.log('activate?', elem.getAttribute('xml:id'))
                   this.$store.dispatch('setActiveDiploTransElementId', elem.getAttribute('xml:id'))
                 }
               }

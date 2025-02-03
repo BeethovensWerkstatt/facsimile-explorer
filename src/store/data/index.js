@@ -1444,6 +1444,7 @@ const dataModule = {
       if (annotElem.hasAttribute('corresp')) {
         alert('Element has already been transcribed. Continuing. ', annotElem)
         // return null
+        // ... or ask for unlink?
       }
 
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
@@ -1457,13 +1458,21 @@ const dataModule = {
         // todo: find better value for staff of the barline
         annotStaffN = 1
       } else if (!isAtControlEvent) {
-        annotStaffN = annotElem.closest('staff').getAttribute('n')
+        if (annotElem.hasAttribute('staff')) {
+          annotStaffN = annotElem.getAttribute('staff')
+          console.log('691 found staff (a)', annotStaffN)
+        } else {
+          annotStaffN = annotElem.closest('staff').getAttribute('n')
+          console.log('691 found staff (b)', annotStaffN)
+        }
       } else if (isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')
+          console.log('691 found staff (c)', annotStaffN)
         } else if (annotElem.hasAttribute('startid')) {
           const startElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElem.getAttribute('startid') + '"]')
           annotStaffN = startElem.closest('staff').getAttribute('n')
+          console.log('691 found staff (d)', annotStaffN)
         }
       }
       console.log('691 annotStaffN', annotStaffN)
