@@ -226,6 +226,7 @@ function getLocAttribute (annotElem) {
   }
   try {
     let staffN = annotElem.closest('staff').getAttribute('n')
+    // TODO do we need other?
     if (annotElem.hasAttribute('staff')) {
       staffN = annotElem.getAttribute('staff')
     }
