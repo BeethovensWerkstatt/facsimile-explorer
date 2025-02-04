@@ -225,7 +225,10 @@ function getLocAttribute (annotElem) {
     return 5
   }
   try {
-    const staffN = annotElem.closest('staff').getAttribute('n')
+    let staffN = annotElem.closest('staff').getAttribute('n')
+    if (annotElem.hasAttribute('staff')) {
+      staffN = annotElem.getAttribute('staff')
+    }
     if (!staffN) {
       console.warn('WARNING: Could not determine staff number for ' + annotElem)
     }
