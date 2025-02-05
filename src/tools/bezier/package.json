@@ -5,9 +5,10 @@
     "bezier_tools_bg.wasm",
     "bezier_tools.js",
     "bezier_tools_bg.js",
-    "bezier_tools.d.ts"
+    "bezier_tools.d.ts",
+    "index.js"
   ],
-  "module": "bezier_tools.js",
+  "module": "index.js",
   "types": "bezier_tools.d.ts",
   "sideEffects": [
     "./bezier_tools.js",
