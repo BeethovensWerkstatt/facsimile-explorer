@@ -1416,10 +1416,12 @@ const dataModule = {
       console.log('317 diploTranscribe: annotElementRef=', annotElemRef)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
+        console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
         return false
       }
       const currentWz = getters.currentWritingZoneObject
       if (!currentWz) {
+        console.log('??? currentWz', currentWz)
         return false
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
@@ -1428,7 +1430,7 @@ const dataModule = {
       // const meiDoc = getters.documentWithCurrentPage
 
       if (!atDoc || !dtDoc || !svgDoc) {
-        // console.log(atDoc, dtDoc, svgDoc)
+        console.log('??? at, dt, svg', atDoc, dtDoc, svgDoc)
         return false
       }
 
@@ -1445,6 +1447,10 @@ const dataModule = {
         alert('Element has already been transcribed. Continuing. ', annotElem)
         // return null
         // ... or ask for unlink?
+      }
+      console.log('-------------------------> "' + annotElem.localName + '"')
+      if (annotElem.localName === 'beam' || annotElem.localName === 'beamSpan') {
+        console.log('found beam:', annotElemRef)
       }
 
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
@@ -1504,7 +1510,6 @@ const dataModule = {
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + getters.currentWzDtPath.split('/').splice(-1)[0] + '#'
-
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, correspPath, annotElemRef)
 
       const isDtControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1

@@ -39,7 +39,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
   const newCorresp = correspPath + elem.getAttribute('xml:id')
   const corresp = existingCorresp ? existingCorresp + ' ' + newCorresp : newCorresp
   annotElem.setAttribute('corresp', corresp)
-  // console.log('generateDiplomaticElement', annotElem)
+  console.log('generateDiplomaticElement', name, annotElem)
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)
@@ -146,9 +146,9 @@ function getDiplomaticRest (annotElem, rest) {
  */
 function getDiplomaticBeam (annotElem, beam) {
   const targets = []
-  annotElem.querySelectorAll('*').forEach(elem => {
-    // console.log('718: investigating ', elem)
-    if (elem.localName === 'note' && !elem.closest('chord') && elem.hasAttribute('corresp')) {
+  annotElem.querySelectorAll('[corresp]').forEach(elem => {
+    console.log('718: investigating ', elem)
+    if (elem.localName === 'chord' || (elem.localName === 'note' && !elem.closest('chord'))) {
       targets.push('#' + elem.getAttribute('corresp').split('#')[1])
     }
   })
@@ -156,7 +156,7 @@ function getDiplomaticBeam (annotElem, beam) {
   beam.setAttribute('startid', targets[0])
   beam.setAttribute('endid', targets.splice(-1)[0])
   beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
-  // console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
 }
 
 /**
