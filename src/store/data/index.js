@@ -1477,7 +1477,10 @@ const dataModule = {
           annotStaffN = annotElem.getAttribute('staff')
           console.log('691 found staff (c)', annotStaffN)
         } else if (annotElem.hasAttribute('startid')) {
-          const startElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElem.getAttribute('startid') + '"]')
+          const startid = annotElem.getAttribute('startid').split('#')[1]
+          console.log('startid', startid)
+          const startElem = atDoc.querySelector('[*|id="' + startid + '"]') // TODO?? annotElemRef.name +
+          console.log('startelem', startElem)
           annotStaffN = startElem.closest('staff').getAttribute('n')
           console.log('691 found staff (d)', annotStaffN)
         }

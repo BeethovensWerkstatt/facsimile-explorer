@@ -18,6 +18,7 @@ const rawSelectables = [
   'accid',
   'clef',
   'slur',
+  'tie',
   'dynam',
   'dir',
   'keySig',
