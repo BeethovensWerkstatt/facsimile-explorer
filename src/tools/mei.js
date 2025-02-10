@@ -149,7 +149,10 @@ function getDiplomaticBeam (annotElem, beam) {
   annotElem.querySelectorAll('[corresp]').forEach(elem => {
     console.log('718: investigating ', elem)
     if (elem.localName === 'chord' || (elem.localName === 'note' && !elem.closest('chord'))) {
-      targets.push('#' + elem.getAttribute('corresp').split('#')[1])
+      const corresp = elem.getAttribute('corresp').split('#')[1]
+      if (corresp.trim().length > 0) {
+        targets.push('#' + corresp)
+      }
     }
   })
   beam.setAttribute('plist', targets.join(' '))
@@ -204,6 +207,12 @@ function getDiplomaticChord (annotElem, chord) {
 
   const notes = annotElem.querySelectorAll('note')
   notes.forEach((note, i) => {
+    const dur = note.getAttribute('dur')
+    if (!chord.hasAttribute('dur')) {
+      chord.setAttribute('dur', dur)
+    } else if (dur !== chord.getAttribute('dur')) {
+      console.warn('getDiplomaticChord(): inconsistent duration in chord!', annotElem)
+    }
     const diploNote = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
     diploNote.setAttribute('xml:id', 'd' + uuid())
     getDiplomaticNote(note, diploNote)
@@ -1378,6 +1387,16 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
                 dur = '64'
               }
               child.setAttribute('dur', dur)
+            }
+
+            if (childName === 'chord') {
+              if (!child.hasAttribute('dur')) {
+                // TODO takes first duration it finds!
+                const dur = child.querySelector('[dur]')?.getAttribute('dur')
+                if (dur) {
+                  child.setAttribute('dur', dur)
+                }
+              }
             }
 
             // console.log(714, ' setting facs of ' + childName + '#' + child.getAttribute('xml:id') + ' to #' + childZone.getAttribute('xml:id'))

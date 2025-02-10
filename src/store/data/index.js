@@ -1425,6 +1425,7 @@ const dataModule = {
         return false
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
+      atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
       const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
