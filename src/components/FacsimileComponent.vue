@@ -35,10 +35,12 @@ const rawSelectables = [
   'syl',
   'rest',
   'beam',
+  'beamSpan',
   'artic',
   'accid',
   'clef',
   'slur',
+  'tie',
   'dynam',
   'dir',
   'keySig',
@@ -174,7 +176,7 @@ export default {
       console.log(click, click.target.localName)
 
       // check for click to svg shape
-      if (click.target.localName === 'path') {
+      if (click.target.localName === 'path' || click.target.localName === 'polygon') {
         // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
         if (this.type === 'facsimile' && this.explorerTab === 'diplo') {
           const svgGroupWzId = click.target.closest('.writingZone')?.id
