@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { MEIversion } from '@/tools/mei'
 import OpenSeadragon from 'openseadragon'
 
 const verovioOptions = {
@@ -293,7 +294,7 @@ export default {
         return false
       }
 
-      const prefix = '<music meiversion="5.0.0-dev"><body><pages type="transcription">'
+      const prefix = `<music meiversion="${MEIversion}"><body><pages type="transcription">`
       const pageCode = this.$store.getters.xmlCode
       const postfix = '</pages></body></music>'
 

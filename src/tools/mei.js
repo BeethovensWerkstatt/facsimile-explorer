@@ -3,6 +3,11 @@ import { getOsdRects } from '@/tools/facsimileHelpers.js'
 const parser = new DOMParser()
 
 /**
+ * MEI version tag
+ */
+export const MEIversion = '5.0'
+
+/**
  * generates a diplomatic transcription from a given annotated transcription and a list of shapes
  * @param {*} annotElem the annotated transcription to be converted
  * @param {*} shapes the shapes to be converted
@@ -770,7 +775,7 @@ export function draft2score (meiDom) {
   meiDom.querySelectorAll('draft').forEach(draft => {
     console.warn('draft:', draft)
     const music = document.createElementNS('http://www.music-encoding.org/ns/mei', 'music')
-    music.setAttribute('meiversion', '5.0.0-dev')
+    music.setAttribute('meiversion', MEIversion)
     const body = document.createElementNS('http://www.music-encoding.org/ns/mei', 'body')
     const mdiv = document.createElementNS('http://www.music-encoding.org/ns/mei', 'mdiv')
     const score = document.createElementNS('http://www.music-encoding.org/ns/mei', 'score')
@@ -790,7 +795,7 @@ export function draft2score (meiDom) {
     console.warn('draft2score: try to add score elements ...')
     meiDom.querySelectorAll('score').forEach(score => {
       const music = document.createElementNS('http://www.music-encoding.org/ns/mei', 'music')
-      music.setAttribute('meiversion', '5.0.0-dev')
+      music.setAttribute('meiversion', MEIversion)
       const body = document.createElementNS('http://www.music-encoding.org/ns/mei', 'body')
       const mdiv = document.createElementNS('http://www.music-encoding.org/ns/mei', 'mdiv')
 
@@ -1438,13 +1443,14 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             if (bbox) {
               const ctrlZone = appendNewElement(outSurface, 'zone')
               ctrlZone.setAttribute('type', 'beamSpan')
-              ctrlZone.setAttribute('ulx', bbox.x / factor)
-              ctrlZone.setAttribute('uly', bbox.y / factor)
-              ctrlZone.setAttribute('lrx', (bbox.x + bbox.width) / factor)
-              ctrlZone.setAttribute('lry', (bbox.y + bbox.height) / factor)
+              ctrlZone.setAttribute('ulx', (bbox.x / factor).toFixed(1))
+              ctrlZone.setAttribute('uly', (bbox.y / factor).toFixed(1))
+              ctrlZone.setAttribute('lrx', ((bbox.x + bbox.width) / factor).toFixed(1))
+              ctrlZone.setAttribute('lry', ((bbox.y + bbox.height) / factor).toFixed(1))
               ctrlevt.setAttribute('facs', '#' + ctrlZone.getAttribute('xml:id'))
             } else {
               ctrlevt.removeAttribute('facs')
+              console.warn('element has no bbox ...')
             }
             console.log(ctrlevt)
           }
