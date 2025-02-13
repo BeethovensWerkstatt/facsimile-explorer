@@ -1410,7 +1410,46 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         // handle controlevents
         const controlEvents = node.querySelectorAll('section > *:not(staff)')
         controlEvents.forEach(controlEvent => {
-          measure.appendChild(controlEvent.cloneNode(true))
+          const ctrlevt = controlEvent.cloneNode(true)
+          console.log('Control Event', ctrlevt.localName)
+          if (ctrlevt.localName === 'beamSpan') {
+            const facs = ctrlevt.getAttribute('facs').split([' '])
+            let bbox = null
+            const setBBox = (_bbox) => {
+              if (bbox) {
+                bbox.x = Math.min(bbox.x, _bbox.x)
+                bbox.y = Math.min(bbox.y, _bbox.y)
+                bbox.width = Math.max(bbox.width, _bbox.width)
+                bbox.height = Math.max(bbox.height, _bbox.height)
+              } else {
+                bbox = _bbox
+              }
+            }
+            facs.forEach(f => {
+              const shapeid = f.split('#')[1]
+              // console.log(shapeid)
+              const shape = document.querySelector(`[*|id="${shapeid}"]`)
+              // console.log(shape)
+              if (shape) {
+                setBBox(shape.getBBox())
+              }
+            })
+            // console.log(bbox)
+            if (bbox) {
+              const ctrlZone = appendNewElement(outSurface, 'zone')
+              ctrlZone.setAttribute('type', 'beamSpan')
+              ctrlZone.setAttribute('ulx', bbox.x / factor)
+              ctrlZone.setAttribute('uly', bbox.y / factor)
+              ctrlZone.setAttribute('lrx', (bbox.x + bbox.width) / factor)
+              ctrlZone.setAttribute('lry', (bbox.y + bbox.height) / factor)
+              ctrlevt.setAttribute('facs', '#' + ctrlZone.getAttribute('xml:id'))
+            } else {
+              ctrlevt.removeAttribute('facs')
+            }
+            console.log(ctrlevt)
+          }
+          // TODO slur, tie, ...
+          measure.appendChild(ctrlevt)
         })
 
         // TODO: this is not correct, as it takes the leftmost rastrum, not the current one

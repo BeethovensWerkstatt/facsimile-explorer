@@ -1012,7 +1012,7 @@ const guiModule = {
      */
     activeWritingZoneIndex: (state, getters) => {
       const wzid = getters.activeWritingZone
-      const wzidx = getters.writingZonesOnCurrentPage?.find(wzid)
+      const wzidx = getters.writingZonesOnCurrentPage?.find(wz => wz.id === wzid)
       return wzid && wzidx >= 0 ? wzidx + 1 : null
     },
 
