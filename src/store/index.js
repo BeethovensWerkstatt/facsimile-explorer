@@ -264,7 +264,7 @@ export default createStore({
         console.error(path, 'not found!')
       }
     },
-    setCurrentPage ({ commit, getters }, i) {
+    setCurrentPage ({ dispatch, commit, getters }, i) {
       function isInt (value) {
         return !isNaN(value) &&
                parseInt(Number(value)) === value &&
@@ -275,19 +275,28 @@ export default createStore({
         commit('SET_WELLFORMED', true)
         commit('SET_CURRENT_PAGE', i)
         commit('SET_ACTIVE_WRITINGZONE', null)
-        router.replace({ query: { page: i + 1 } })
+        const query = { page: i + 1 }
+        if (getters.activeWritingZoneIndex >= 0) {
+          query.zone = getters.activeWritingZoneIndex + 1
+        }
+        router.replace({ query })
         commit('CLEAR_DIPLO_TRANS_ITEMS', true)
+        dispatch('diploTransClear', true)
       } else { // else look for object with attributes (page, zone, wzid, layer) -- all int or undefined
         const { page, zone, wzid, layer } = i
         console.log(page, zone, layer)
         if (isInt(page)) {
           const query = { page: page + 1 }
+          console.log('TODO', getters.currentPageZeroBased)
+          if (+page !== getters.currentPageZeroBased || (isInt(zone) && +zone !== getters.activeWritingZone)) {
+            dispatch('diploTransClear', true)
+          }
           commit('SET_WELLFORMED', true)
           commit('SET_CURRENT_PAGE', page)
           const wzArr = getters.writingZonesOnCurrentPage
           console.log('   the array:', wzArr)
           if (wzArr instanceof Array) {
-            if (isInt(zone) && zone >= 0 && zone < wzArr.length) {
+            if (isInt(zone) && +zone >= 0 && +zone < wzArr.length) {
               commit('SET_ACTIVE_WRITINGZONE', wzArr[zone])
               query.zone = zone + 1
             } else {

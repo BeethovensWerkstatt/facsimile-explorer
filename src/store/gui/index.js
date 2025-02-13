@@ -1,3 +1,5 @@
+// import router from '@/router'
+
 const angleFunc = (p1, p2, direction) => {
   const dy = p2.y - p1.y
   const dx = p2.x - p1.x
@@ -595,6 +597,19 @@ const guiModule = {
       } else {
         commit('SET_ACTIVE_WRITINGLAYER', null)
       }
+      /*
+      const zoneidx = getters.writingZonesOnCurrentPage.map(wzo => wzo.id).indexOf(id)
+      if (zoneidx >= 0) {
+        const query = { ...router.currentRoute.value.query, zone: zoneidx + 1 }
+        router.replace({ query })
+      } else {
+        const query = { ...router.currentRoute.value.query, zone: zoneidx + 1 }
+        if (query.zone) {
+          delete query.zone
+        }
+        router.replace({ query })
+      }
+      */
     },
 
     /**
@@ -988,6 +1003,17 @@ const guiModule = {
      */
     activeWritingZone: (state) => {
       return state.activeWritingZone
+    },
+
+    /**
+     * returns onebased index of writing zone on page
+     * @param  {[type]} state               [description]
+     * @return {[type]}       [description]
+     */
+    activeWritingZoneIndex: (state, getters) => {
+      const wzid = getters.activeWritingZone
+      const wzidx = getters.writingZonesOnCurrentPage?.find(wzid)
+      return wzid && wzidx >= 0 ? wzidx + 1 : null
     },
 
     /**

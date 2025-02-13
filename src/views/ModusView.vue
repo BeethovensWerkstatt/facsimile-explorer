@@ -77,6 +77,15 @@ export default {
         const currentPage = { page: +page - 1 }
         if (zone) {
           currentPage.zone = +zone - 1
+          /*
+          const zones = this.$store.getters.writingZonesOnCurrentPage
+          if (+zone >= 0 && +zone < zones.length) {
+            const zoneid = zones[zone]
+            if (zoneid !== this.$store.getters.activeWritingZone) {
+              this.$store.dispatch('setActiveWritingZone', zoneid)
+            }
+          }
+          */
         }
         console.log('setCurrentPage', currentPage)
         this.$store.dispatch('setCurrentPage', currentPage)
