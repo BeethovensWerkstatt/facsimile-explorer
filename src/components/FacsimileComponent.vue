@@ -262,7 +262,9 @@ export default {
 
           const items = []
           if (!wzActive) {
-            items.push({ label: 'select writing zone', action: selectWzFunc, disabled: wzActive })
+            const wzidx = this.$store.getters.writingZoneIndexOnCurrentPage(genDescWzId)
+            const label = 'select writing zone' + (wzidx >= 0 ? ` (${wzidx + 1})` : '')
+            items.push({ label, action: selectWzFunc, disabled: !genDescWzId || wzActive })
           } else {
             if (this.$store.getters.needInitializeDT) {
               items.push({ label: 'initialize diplomatic transcript', action: initializeDT, disabled: this.$store.needInitializeDT })

@@ -2813,6 +2813,21 @@ const dataModule = {
     },
 
     /**
+     * helper to retrieve index of writing zon on current page by id
+     * @param {*} state
+     * @param {*} getters
+     * @returns index of wz on current page
+     */
+    writingZoneIndexOnCurrentPage: (state, getters) => (wzid) => {
+      const wzArr = getters.writingZonesOnCurrentPage
+      if (!wzid || !wzArr) {
+        return null
+      }
+      const wz = wzArr.find(wz => wz.id === wzid)
+      return wz?.index
+    },
+
+    /**
      * retrieves all shapes of the current page not currently assigned to a writing zone
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]

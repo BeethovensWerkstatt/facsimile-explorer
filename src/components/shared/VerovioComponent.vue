@@ -104,11 +104,15 @@ export default {
     },
     removeListeners () {
       this.$refs.mei.removeEventListener('click', this.clickListener)
+      this.$refs.mei.removeEventListener('mouseover', this.hoverListener)
+      this.$refs.mei.removeEventListener('mouseout', this.hoverListener)
       /* const els = this.$refs.mei.querySelectorAll(selectables)
       els.forEach((elm) => elm.removeEventListener('click', this.clickListener)) */
     },
     addListeners () {
       this.$refs.mei.addEventListener('click', this.clickListener)
+      this.$refs.mei.addEventListener('mouseover', this.hoverListener)
+      this.$refs.mei.addEventListener('mouseout', this.hoverListener)
       /* const els = this.$refs.mei.querySelector('selectables')
       els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
@@ -138,6 +142,28 @@ export default {
           purpose: this.purpose,
           callback: () => { this.render() }
         })
+      }
+    },
+    hoverListener (e) {
+      const activate = e.type === 'mouseover'
+      const target = e.target.closest(selectables)
+      if (target !== null) {
+        // console.log('hover:', target)
+        const corresp = target.getAttribute('data-corresp')
+        if (corresp) {
+          const dtid = corresp.split('#')[1]
+          console.log(activate, this.$store.getters.activeWritingZone, dtid)
+          const dtdoc = this.$store.getters.diplomaticTranscriptForCurrentWz
+          const dtelm = dtdoc?.querySelector(`[*|id="${dtid}"]`)
+          const dtsvg = document.querySelector(`[*|data-id="${dtid}"]`)
+          console.log(dtelm, dtsvg)
+          const facs = dtelm.getAttribute('facs')
+          const shapes = facs.split(' ').map(furl => {
+            const shapeid = furl.split('#')[1]
+            return document.querySelector(`[*|id="${shapeid}"]`)
+          })
+          console.log(shapes)
+        }
       }
     },
     /**
