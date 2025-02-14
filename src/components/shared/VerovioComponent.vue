@@ -144,25 +144,30 @@ export default {
         })
       }
     },
+    // TODO: make global getter in score to retrieve related objects
     hoverListener (e) {
+      const hilite = (target) => target.classList[(activate ? 'add' : 'remove')]('highlightShadow')
       const activate = e.type === 'mouseover'
       const target = e.target.closest(selectables)
       if (target !== null) {
         // console.log('hover:', target)
+        hilite(target)
         const corresp = target.getAttribute('data-corresp')
         if (corresp) {
           const dtid = corresp.split('#')[1]
-          console.log(activate, this.$store.getters.activeWritingZone, dtid)
+          // console.log(activate, this.$store.getters.activeWritingZone, dtid)
           const dtdoc = this.$store.getters.diplomaticTranscriptForCurrentWz
           const dtelm = dtdoc?.querySelector(`[*|id="${dtid}"]`)
           const dtsvg = document.querySelector(`[*|data-id="${dtid}"]`)
-          console.log(dtelm, dtsvg)
+          hilite(dtsvg)
+          // console.log(dtelm, dtsvg)
           const facs = dtelm.getAttribute('facs')
           const shapes = facs.split(' ').map(furl => {
             const shapeid = furl.split('#')[1]
             return document.querySelector(`[*|id="${shapeid}"]`)
           })
-          console.log(shapes)
+          shapes.forEach(hilite)
+          // console.log(shapes)
         }
       }
     },
