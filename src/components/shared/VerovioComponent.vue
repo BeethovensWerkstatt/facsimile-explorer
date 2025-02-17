@@ -224,7 +224,7 @@ export default {
     this.unwatchDTElementId = this.$store.watch((state, getters) => getters.activeDiploTransElementdIds,
       (newID, oldID) => {
         if (this.purpose === 'transcribing') {
-          console.log(oldID.at, '=>', newID.at, this.$refs.mei.querySelectorAll(`[data-id="${newID.at}"]`))
+          // console.log(oldID.at, '=>', newID.at, this.$refs.mei.querySelectorAll(`[data-id="${newID.at}"]`))
           this.$refs.mei.querySelectorAll(`[data-id="${oldID.at[0]}"]`).forEach(e => e.classList.remove('highlightDTChain'))
           this.$refs.mei.querySelectorAll(`[data-id="${newID.at[0]}"]`).forEach(e => e.classList.add('highlightDTChain'))
         }

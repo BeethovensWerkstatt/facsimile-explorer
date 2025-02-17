@@ -211,7 +211,7 @@ export default {
       if (currentWz) {
         const [x, y, w, h] = currentWz.xywh.split(',')
         const bounds = this.$refs.facsShapes.viewer.viewport.imageToViewportRectangle(+x, +y, +w, +h)
-        console.log('zoom to:', bounds, this.$refs.facsShapes.viewer.viewport.getBounds(true))
+        // console.log('zoom to:', bounds, this.$refs.facsShapes.viewer.viewport.getBounds(true))
         this.$refs.facsShapes.viewer.viewport.fitBounds(bounds)
       }
     }
@@ -246,7 +246,7 @@ export default {
 
     this.unwatchDiploActivations = this.$store.watch((state, getters) => [getters.diploTransActivationsInShapes, getters.diploTransActivationsInAnnotTrans],
       ([newShapes, newAnnotated], [oldShapes, oldAnnotated]) => {
-        console.log('selected shapes:', newShapes.target)
+        // console.log('selected shapes:', newShapes.target)
         this.autoTranscribe(newShapes, oldShapes, newAnnotated, oldAnnotated)
       })
 

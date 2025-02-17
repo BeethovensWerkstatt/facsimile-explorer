@@ -173,7 +173,7 @@ export default {
       click.page = clickedPagePos
       // }
 
-      console.log(click, click.target.localName)
+      // console.log(click, click.target.localName)
 
       // check for click to svg shape
       if (click.target.localName === 'path' || click.target.localName === 'polygon') {
@@ -605,7 +605,7 @@ export default {
       }
 
       if (this.$store.getters.diploTransActivationsInShapes.length > 0) {
-        console.log(this.$store.getters.diploTransActivationsInShapes)
+        // console.log(this.$store.getters.diploTransActivationsInShapes)
         this.indicateSelectedShapes()
       }
 
@@ -671,7 +671,7 @@ export default {
         })
         existingOverlay.querySelectorAll('.highlightDTChain').forEach(s => s.classList.remove('highlightDTChain'))
         this.$store.getters.activeDiploTransElementdIds.shapes.forEach(shape => {
-          console.log(shape)
+          // console.log(shape)
           existingOverlay.querySelectorAll(`[*|id="${shape}"]`).forEach(s => s.classList.add('highlightDTChain'))
         })
       }
