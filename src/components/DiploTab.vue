@@ -18,9 +18,10 @@
         <button class="btn" @click="downloadDiploTrans">Download Diplomatic Transcription</button>
       </div>
       <div class="osdButtons">
-        <div class="osdButton" v-if="currentWritingZoneObject"><button class="zoomWZ" @click="zoomWZ">[<i>wz</i>]</button></div>
-        <div class="osdButton" id="zoomOut"><i class="icon icon-minus"></i></div>
-        <div class="osdButton" id="zoomIn"><i class="icon icon-plus"></i></div>
+        <div class="osdButton" v-if="$store.getters.diploTransActivationsInShapes.length" title="clear selection"><button class="zoomWZ" @click="$store.dispatch('diploTransClear', false)">[<i>clr</i>]</button></div>
+        <div class="osdButton" v-if="currentWritingZoneObject" title="zoom to wrting zone"><button class="zoomWZ" @click="zoomWZ">[<i>wz</i>]</button></div>
+        <div class="osdButton" id="zoomOut" title="zoom out"><i class="icon icon-minus"></i></div>
+        <div class="osdButton" id="zoomIn" title="zoom in"><i class="icon icon-plus"></i></div>
       </div>
     </TopMenu>
     <div class="flexBox">
