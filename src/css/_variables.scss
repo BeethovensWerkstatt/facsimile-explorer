@@ -35,11 +35,21 @@ $svgSelectedShapeColor: rgb(255, 248, 46);
 
 $scoreHighlightedColor: $highlightColor01;
 
-.highlightHover {
-    filter: drop-shadow(5px 5px 5px red);
-    outline: 3px solid red;
+.svgContainer .highlightHover {
+    filter: drop-shadow(5px 5px 3px red) !important;
 }
-.highlightDTChain {
-    filter: drop-shadow(5px 5px 5px blue);
-    outline: 3px solid blue;
+.svgContainer .highlightDTChain {
+    filter: drop-shadow(5px 5px 3px blue);
+}
+.verovioComponent .highlightHover {
+    filter: drop-shadow(3ex 3ex 1ex red) !important;
+}
+.verovioComponent .highlightDTChain {
+    filter: drop-shadow(3ex 3ex 1ex blue);
+}
+.diploTrans .highlightHover {
+    filter: drop-shadow(2ex 2ex 1ex red) !important;
+}
+.diploTrans .highlightDTChain {
+    filter: drop-shadow(2ex 2ex 1ex blue);
 }
