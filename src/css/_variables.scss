@@ -35,7 +35,11 @@ $svgSelectedShapeColor: rgb(255, 248, 46);
 
 $scoreHighlightedColor: $highlightColor01;
 
-.highlightShadow {
+.highlightHover {
     filter: drop-shadow(5px 5px 5px red);
     outline: 3px solid red;
+}
+.highlightDTChain {
+    filter: drop-shadow(5px 5px 5px blue);
+    outline: 3px solid blue;
 }

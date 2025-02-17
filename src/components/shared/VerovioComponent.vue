@@ -43,7 +43,7 @@ export default {
     type: String,
     getter: String,
     pathGetter: String,
-    scale: Number
+    scale: String
   },
   computed: {
     ...mapGetters(['diploPageBackgroundVerovioOptions', 'annotTransVerovioOptions'])
@@ -73,7 +73,7 @@ export default {
           const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
           const localCopy = svg.repeat(1)
           this.$refs.mei.innerHTML = localCopy
-          if (this.scale > 0) {
+          if (+this.scale > 0) {
             const nre = /^([0-9.]*)([a-z]*)$/
             const whnum = (att) => +att.match(nre)[1]
             const svgDom = this.$refs.mei.querySelector('svg')
@@ -146,7 +146,7 @@ export default {
     },
     // TODO: make global getter in score to retrieve related objects
     hoverListener (e) {
-      const hilite = (target) => target.classList[(activate ? 'add' : 'remove')]('highlightShadow')
+      const hilite = (target) => target.classList[(activate ? 'add' : 'remove')]('highlightHover')
       const activate = e.type === 'mouseover'
       const target = e.target.closest(selectables)
       if (target !== null) {
@@ -160,8 +160,17 @@ export default {
           const dtelm = dtdoc?.querySelector(`[*|id="${dtid}"]`)
           const dtsvg = document.querySelector(`[*|data-id="${dtid}"]`)
           hilite(dtsvg)
-          // console.log(dtelm, dtsvg)
-          const facs = dtelm.getAttribute('facs')
+          // console.log(dtelm.parentElement, dtelm, dtsvg)
+          const getFacs = elm => {
+            if (elm.hasAttribute('facs')) {
+              return elm.getAttribute('facs')
+            }
+            if (elm.parentElement) {
+              return getFacs(elm.parentElement)
+            }
+            return ''
+          }
+          const facs = getFacs(dtelm)
           const shapes = facs.split(' ').map(furl => {
             const shapeid = furl.split('#')[1]
             return document.querySelector(`[*|id="${shapeid}"]`)
@@ -197,7 +206,6 @@ export default {
     // console.log('932: mounting verovio component')
     this.vrvToolkit = this.$store.getters.verovioToolkit
     this.vrvToolkit.setOptions(this.annotTransVerovioOptions)
-    this.render()
 
     this.unwatchData = this.$store.watch((state, getters) => getters[this.getter],
       (newCode, oldCode) => {
@@ -212,6 +220,15 @@ export default {
           this.activateElement(newActivation, oldActivation)
         }
       })
+
+    this.unwatchDTElementId = this.$store.watch((state, getters) => getters.activeDiploTransElementdIds,
+      (newID, oldID) => {
+        if (this.purpose === 'transcribing') {
+          console.log(oldID.at, '=>', newID.at, this.$refs.mei.querySelectorAll(`[data-id="${newID.at}"]`))
+          this.$refs.mei.querySelectorAll(`[data-id="${oldID.at[0]}"]`).forEach(e => e.classList.remove('highlightDTChain'))
+          this.$refs.mei.querySelectorAll(`[data-id="${newID.at[0]}"]`).forEach(e => e.classList.add('highlightDTChain'))
+        }
+      })
     /*
     this.unwatchPageXML = this.$store.watch((state, getters) => getters.xmlCode,
       (newCode, oldCode) => {
@@ -224,6 +241,7 @@ export default {
     this.unwatchData()
     this.removeListeners()
     this.unwatchActivations()
+    this.unwatchDTElementId()
   }
 }
 </script>

@@ -1220,6 +1220,39 @@ const guiModule = {
     },
 
     /**
+     * returns all IDs linked to the active DT element
+     * @param {} state
+     * @returns
+     */
+    activeDiploTransElementdIds: (state, getters) => {
+      const chain = {
+        shapes: [],
+        at: [],
+        dt: state.activeDiploTransElementId
+      }
+      if (chain.dt) {
+        const atdoc = getters.annotatedTranscriptForCurrentWz
+        const dtdoc = getters.diplomaticTranscriptForCurrentWz
+        atdoc.querySelectorAll('[corresp]').forEach(elm => {
+          const corresp = elm.getAttribute('corresp').split('#')[1]
+          if (corresp === chain.dt) {
+            chain.at.push(elm.getAttribute('xml:id'))
+          }
+        })
+        const dtelm = dtdoc.querySelector(`[*|id="${chain.dt}"]`)
+        if (dtelm && dtelm.hasAttribute('facs')) {
+          dtelm.getAttribute('facs').split(' ').forEach(f => {
+            const id = f.split('#')[1]
+            if (id) {
+              chain.shapes.push(id)
+            }
+          })
+        }
+      }
+      return chain
+    },
+
+    /**
      * returns true, if read only is activated
      * @param {*} state
      * @returns

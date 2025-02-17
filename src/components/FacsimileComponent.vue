@@ -669,6 +669,11 @@ export default {
             // console.log('unable to find element with id ' + id + '\n', this.$refs.container.querySelectorAll('path'))
           }
         })
+        existingOverlay.querySelectorAll('.highlightDTChain').forEach(s => s.classList.remove('highlightDTChain'))
+        this.$store.getters.activeDiploTransElementdIds.shapes.forEach(shape => {
+          console.log(shape)
+          existingOverlay.querySelectorAll(`[*|id="${shape}"]`).forEach(s => s.classList.add('highlightDTChain'))
+        })
       }
     },
 
@@ -676,6 +681,7 @@ export default {
      * indicate currently selected DT element
      */
     indicateSelectedDTElement () {
+      // console.log('indicateSelectedDTElement', this.$store.getters.activeDiploTransElementdIds)
       const dtid = this.$store.getters.activeDiploTransElementId
       // console.log('DT ELEMENT:', dtid)
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
@@ -1277,6 +1283,7 @@ export default {
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
         // console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
       })
 
