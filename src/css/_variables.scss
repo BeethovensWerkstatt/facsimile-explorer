@@ -45,35 +45,35 @@ $highlightDTChainColorFill: orange;
 .svgContainer .highlightHover {
     filter: drop-shadow(5px 5px 3px $highlightHoverColorShadow) !important;
     stroke: $highlightHoverColorStroke !important;
-    fill: $highlightHoverColorFill !important;
+    // fill: $highlightHoverColorFill !important;
 }
 
 .svgContainer .highlightDTChain {
     filter: drop-shadow(5px 5px 3px $highlightDTChainColorShadow);
     stroke: $highlightDTChainColorStroke !important;
-    fill: $highlightDTChainColorFill !important;
+    // fill: $highlightDTChainColorFill !important;
 }
 
 .verovioComponent .highlightHover {
     filter: drop-shadow(3ex 3ex 1ex $highlightHoverColorShadow) !important;
     stroke: $highlightHoverColorStroke !important;
-    fill: $highlightHoverColorFill !important;
+    // fill: $highlightHoverColorFill !important;
 }
 
 .verovioComponent .highlightDTChain {
     filter: drop-shadow(3ex 3ex 1ex $highlightDTChainColorShadow);
     stroke: $highlightDTChainColorStroke !important;
-    fill: $highlightDTChainColorFill !important;
+    // fill: $highlightDTChainColorFill !important;
 }
 
 .diploTrans .highlightHover {
     filter: drop-shadow(2ex 2ex 1ex $highlightHoverColorShadow) !important;
     stroke: $highlightHoverColorStroke !important;
-    fill: $highlightHoverColorFill !important;
+    // fill: $highlightHoverColorFill !important;
 }
 
 .diploTrans .highlightDTChain {
     filter: drop-shadow(2ex 2ex 1ex $highlightDTChainColorShadow);
     stroke: $highlightDTChainColorStroke !important;
-    fill: $highlightDTChainColorFill !important;
+    // fill: $highlightDTChainColorFill !important;
 }
