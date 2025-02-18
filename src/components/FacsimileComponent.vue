@@ -1513,8 +1513,8 @@ export default {
       fill: #000000;
       stroke: #000000;
       .selectedDiploTrans {
-        fill: #880000;
-        stroke: #880000;
+        fill: #961010;
+        stroke: #961010;
       }
     }
   }
