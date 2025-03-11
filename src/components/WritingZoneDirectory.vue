@@ -41,6 +41,7 @@
           v-for="(wz, w) in writingZonesOnActivePage"
           :key="w"
           @click="selectWritingZone(wz)"
+          :title="'AT: ' + wz.annotTrans + '\nDT: ' + wz.diploTrans"
         >
           <span class="zoneNumber">WZ {{w + 1}}</span>
           <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
