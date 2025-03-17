@@ -1493,6 +1493,42 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
   return outDom
 }
 
+/**
+ * adds indicators for system begins to the MEI, using dir elements
+ * @param {*} meiDom
+ */
+export const addSbIndicators = (meiDom) => {
+  const sbs = meiDom.querySelectorAll('sb')
+
+  const getMeasure = (node) => {
+    let sibling = node.nextElementSibling
+    while (sibling) {
+      if (sibling.localName === 'measure') {
+        return sibling
+      }
+      sibling = sibling.nextElementSibling
+    }
+    return null
+  }
+
+  sbs.forEach((sb, i) => {
+    if (i > 0) {
+      const measure = getMeasure(sb)
+      if (measure) {
+        const dir = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dir')
+        dir.innerHTML = '⊤'
+        dir.setAttribute('staff', 1)
+        dir.setAttribute('tstamp', 0)
+        dir.setAttribute('place', 'above')
+        dir.setAttribute('type', 'sb unselectable')
+        measure.append(dir)
+      }
+    }
+  })
+
+  return meiDom
+}
+
 /* export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/mei') => {
   const elem = parent.appendChild(document.createElementNS(ns, name))
   if (ns === 'http://www.w3.org/2000/svg') {

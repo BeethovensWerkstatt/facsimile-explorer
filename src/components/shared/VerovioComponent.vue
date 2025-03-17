@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { draft2score, draft2page } from '@/tools/mei.js'
+import { draft2score, draft2page, addSbIndicators } from '@/tools/mei.js'
 import { mapGetters } from 'vuex'
 
 const rawSelectables = [
@@ -68,9 +68,10 @@ export default {
 
         if (this.type === 'annotTrans') {
           const resolvedDraft = draft2score(meiDom)[0]
-          console.log('VerovioComponent', meiDom, resolvedDraft)
+          const addedSbIndicators = addSbIndicators(resolvedDraft)
+          console.log('VerovioComponent', meiDom, addedSbIndicators)
 
-          const svg = await this.$store.getters.annotatedTranscriptForWz(resolvedDraft)
+          const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
           this.$refs.mei.innerHTML = localCopy
           if (+this.scale > 0) {
@@ -313,6 +314,10 @@ export default {
 
   svg .bounding-box rect {
     display: none;
+  }
+
+  svg g.dir.sb {
+    font-style: normal;
   }
 }
 
