@@ -145,8 +145,8 @@ function getDiplomaticRest (annotElem, rest) {
 }
 
 /**
- * translates an annotated note to a diplomatic note
- * @param {*} annotElem the annotated note to be translated
+ * translates an annotated beam to a diplomatic beam
+ * @param {*} annotElem the annotated beam to be translated
  * @param {*} beam the diplomatic beam to be translated
  */
 function getDiplomaticBeam (annotElem, beam) {
@@ -154,9 +154,14 @@ function getDiplomaticBeam (annotElem, beam) {
   annotElem.querySelectorAll('[corresp]').forEach(elem => {
     console.log('718: investigating ', elem)
     if (elem.localName === 'chord' || (elem.localName === 'note' && !elem.closest('chord'))) {
-      const corresp = elem.getAttribute('corresp').split('#')[1]
-      if (corresp.trim().length > 0) {
-        targets.push('#' + corresp)
+      // multiple associations are possible!
+      for (const correspelem of elem.getAttribute('corresp').split(' ')) {
+        // get uid for corresponding element
+        const corresp = correspelem.split('#')[1]
+        // TODO check target element
+        if (corresp.trim().length > 0) {
+          targets.push('#' + corresp)
+        }
       }
     }
   })

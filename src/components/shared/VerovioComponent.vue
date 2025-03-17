@@ -146,7 +146,7 @@ export default {
     },
     // TODO: make global getter in score to retrieve related objects
     hoverListener (e) {
-      const hilite = (target) => target.classList[(activate ? 'add' : 'remove')]('highlightHover')
+      const hilite = (target) => target?.classList[(activate ? 'add' : 'remove')]('highlightHover')
       const activate = e.type === 'mouseover'
       const target = e.target.closest(selectables)
       if (target !== null) {
