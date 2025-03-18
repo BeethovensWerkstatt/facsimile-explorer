@@ -60,6 +60,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
     getDiplomaticChord(annotElem.parentNode, elem)
+  } else if (name === 'keysig') {
+    getDiplomaticKeysig(annotElem, elem)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -236,6 +238,10 @@ function getDiplomaticChord (annotElem, chord) {
     diploNote.removeAttribute('stem.dir')
   })
   // console.log(472, annotElem, chord)
+}
+
+function getDiplomaticKeysig (annotElem, keysig) {
+  console.log('getDiplomaticKeysig', annotElem, keysig)
 }
 
 function getLocAttribute (annotElem) {
@@ -1421,7 +1427,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         const controlEvents = node.querySelectorAll('section > *:not(staff)')
         controlEvents.forEach(controlEvent => {
           const ctrlevt = controlEvent.cloneNode(true)
-          console.log('Control Event', ctrlevt.localName)
+          // console.log('Control Event', ctrlevt.localName)
           if (ctrlevt.localName === 'beamSpan') {
             const facs = ctrlevt.getAttribute('facs').split([' '])
             let bbox = null
@@ -1457,7 +1463,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               ctrlevt.removeAttribute('facs')
               console.warn('element has no bbox ...')
             }
-            console.log(ctrlevt)
+            // console.log(ctrlevt)
           }
           // TODO slur, tie, ...
           measure.appendChild(ctrlevt)
