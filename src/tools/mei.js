@@ -1,5 +1,6 @@
 import { uuid } from '@/tools/uuid.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
+import store from '@/store'
 const parser = new DOMParser()
 
 /**
@@ -152,6 +153,7 @@ function getDiplomaticRest (annotElem, rest) {
  * @param {*} beam the diplomatic beam to be translated
  */
 function getDiplomaticBeam (annotElem, beam) {
+  const dtdoc = store.getters.diplomaticTranscriptForCurrentWz
   const targets = []
   annotElem.querySelectorAll('[corresp]').forEach(elem => {
     console.log('718: investigating ', elem)
@@ -160,8 +162,10 @@ function getDiplomaticBeam (annotElem, beam) {
       for (const correspelem of elem.getAttribute('corresp').split(' ')) {
         // get uid for corresponding element
         const corresp = correspelem.split('#')[1]
-        // TODO check target element
-        if (corresp.trim().length > 0) {
+        const dtelem = dtdoc.querySelector('*[*|id="' + corresp + '"]')
+        console.log('718: found ', corresp, dtelem)
+        // check target element
+        if (corresp.trim().length > 0 && dtelem) {
           targets.push('#' + corresp)
         }
       }
