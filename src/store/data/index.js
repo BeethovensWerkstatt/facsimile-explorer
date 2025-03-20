@@ -1413,7 +1413,8 @@ const dataModule = {
     async diploTranscribe ({ commit, getters, dispatch }) {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
-      console.log('317 diploTranscribe: annotElementRef=', annotElemRef)
+      const atPath = getters.currentWzAtPath
+      console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
@@ -1426,6 +1427,15 @@ const dataModule = {
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
+      /* {
+        if (noid.localName === 'meterSig' || noid.localName === 'keySig' || noid.localName === 'clef') {
+          const nid = uuid()
+          console.log(`add missing uuid to ${noid.localName}: ${nid}`)
+          noid.setAttribute('xml:id', nid)
+          const scoreDef = noid.closest('scoreDef')
+          dispatch('logChange', { path: atPath, baseMessage: `add missing uuid to ${noid.localName}`, param: '', xmlIDs: [scoreDef.getAttribute('xml:id')], isNewDocument: false })
+        }
+      }) */
       const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
@@ -1572,8 +1582,6 @@ const dataModule = {
       const param = dtPath.split('/').splice(-1)[0]
 
       // annotElem.setAttribute('corresp', '../diplomaticTranscripts/' + param + '#' + diplomaticElement.getAttribute('xml:id'))
-
-      const atPath = getters.currentWzAtPath
 
       for (const elem of [...dtDoc.querySelectorAll('*[*|id]')]) {
         if (elem.getAttribute('xml:id') === diplomaticElement.getAttribute('xml:id')) {
