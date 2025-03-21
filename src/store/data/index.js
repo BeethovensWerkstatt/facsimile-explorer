@@ -1427,15 +1427,6 @@ const dataModule = {
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
-      /* {
-        if (noid.localName === 'meterSig' || noid.localName === 'keySig' || noid.localName === 'clef') {
-          const nid = uuid()
-          console.log(`add missing uuid to ${noid.localName}: ${nid}`)
-          noid.setAttribute('xml:id', nid)
-          const scoreDef = noid.closest('scoreDef')
-          dispatch('logChange', { path: atPath, baseMessage: `add missing uuid to ${noid.localName}`, param: '', xmlIDs: [scoreDef.getAttribute('xml:id')], isNewDocument: false })
-        }
-      }) */
       const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
@@ -1446,6 +1437,8 @@ const dataModule = {
       }
 
       let annotElem
+
+      console.log('annotElem', annotElemRef.id)
 
       if (annotElemRef.name === 'barLine') {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
