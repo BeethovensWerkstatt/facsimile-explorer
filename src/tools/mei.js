@@ -63,6 +63,10 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     getDiplomaticChord(annotElem.parentNode, elem)
   } else if (name === 'keysig') {
     getDiplomaticKeysig(annotElem, elem)
+  } else if (name === 'metersig') {
+    getDiplomaticMetersig(annotElem, elem)
+  } else if (name === 'clef') {
+    getDiplomaticClef(annotElem, elem)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -246,6 +250,14 @@ function getDiplomaticChord (annotElem, chord) {
 
 function getDiplomaticKeysig (annotElem, keysig) {
   console.log('getDiplomaticKeysig', annotElem, keysig)
+}
+
+function getDiplomaticMetersig (annotElem, keysig) {
+  console.log('getDiplomaticMetersig', annotElem, keysig)
+}
+
+function getDiplomaticClef (annotElem, keysig) {
+  console.log('getDiplomaticClef', annotElem, keysig)
 }
 
 function getLocAttribute (annotElem) {

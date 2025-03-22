@@ -1462,7 +1462,7 @@ const dataModule = {
 
       let annotStaffN
       if (annotElemRef.name === 'barLine') {
-        // todo: find better value for staff of the barline
+        // TODO: find better value for staff of the barline
         annotStaffN = 1
       } else if (!isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
