@@ -76,7 +76,7 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp'] //,
+        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp', 'keySig@template'] //,
         // unit: 18
       }
 
@@ -95,6 +95,10 @@ const verovioModule = {
       const serializer = new XMLSerializer()
       const vrvToolkit = getters.verovioToolkit
       console.log('annotatedTranscriptForWz', dom)
+      dom.querySelectorAll('keysig').forEach(element => {
+        element.setAttribute('template', element.getAttribute('xml:id'))
+        console.log('keysig:', element)
+      })
       const mei = serializer.serializeToString(dom)
       vrvToolkit.setOptions(getters.annotTransVerovioOptions)
       vrvToolkit.loadData(mei)
@@ -138,10 +142,18 @@ const verovioModule = {
       const serializer = new XMLSerializer()
       const vrvToolkit = await getters.verovioToolkit()
 
+      dom.querySelectorAll('keysig').forEach(element => {
+        console.log('keysig:', element.getAttribute('xml:id'))
+      })
+
       const mei = serializer.serializeToString(dom)
       vrvToolkit.setOptions(getters.diploTransVerovioOptions)
       vrvToolkit.loadData(mei)
       const svg = vrvToolkit.renderToSVG(1, {})
+      const svgdom = new DOMParser().parseFromString(svg)
+      svgdom.querySelectorAll('[data-class="keySig"]').forEach(element => {
+        console.log('keySig:', element.getAttribute('data-id'))
+      })
 
       return svg
     }

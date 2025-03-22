@@ -1413,7 +1413,8 @@ const dataModule = {
     async diploTranscribe ({ commit, getters, dispatch }) {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
-      console.log('317 diploTranscribe: annotElementRef=', annotElemRef)
+      const atPath = getters.currentWzAtPath
+      console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
@@ -1436,6 +1437,8 @@ const dataModule = {
       }
 
       let annotElem
+
+      console.log('annotElem', annotElemRef.id)
 
       if (annotElemRef.name === 'barLine') {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
@@ -1572,8 +1575,6 @@ const dataModule = {
       const param = dtPath.split('/').splice(-1)[0]
 
       // annotElem.setAttribute('corresp', '../diplomaticTranscripts/' + param + '#' + diplomaticElement.getAttribute('xml:id'))
-
-      const atPath = getters.currentWzAtPath
 
       for (const elem of [...dtDoc.querySelectorAll('*[*|id]')]) {
         if (elem.getAttribute('xml:id') === diplomaticElement.getAttribute('xml:id')) {
