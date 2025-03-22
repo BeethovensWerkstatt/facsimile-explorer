@@ -31,12 +31,12 @@
         </template>
       </MainStage>
       <SideBar class="stageItem sidebarRight" position="right" tab="annotTab" v-if="annotTabRightSidebarVisible">
-        <div class="desc">
+        <!--<div class="desc">
           <h1>Supplied elements</h1>
           <p>In order to change whether an element is supplied or not, just click on it.
             All supplied elements cannot be linked to SVG shapes in a diplomatic transcript,
             and will be displayed in grey.</p>
-        </div>
+        </div>-->
         <div class="filePicker" v-if="showFilePicker">
           <h1>Add Annotated Transcript</h1>
           <p>
