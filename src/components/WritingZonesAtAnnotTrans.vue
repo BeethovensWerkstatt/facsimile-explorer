@@ -1,25 +1,16 @@
 <template>
   <div class="WritingZonesAtAnnotTrans">
     <h1>Writing Zones</h1>
-    <div class="firstWritingZone">
+    <div class="firstWritingZone" v-if="activeWritingZone">
       <label>Main Writing Zone</label>
-      <div>{{ firstWritingZone }}</div>
+      <div>{{ firstWritingZone.label }}</div>
     </div>
-    <div class="additionalWritingZones">
-      <label>Additional Writing Zones</label>
+    <div class="additionalWritingZones" v-if="activeWritingZone">
+      <label>Additional Writing Zones {{ additionalWritingZones.length > 0 ? '(' + additionalWritingZones.length + ')': '' }}</label>
       <div v-for="(zone, z) in additionalWritingZones" :key="z">
-        <span class="wzLabel">{{docLabel(zone.page)}}, p.{{pageLabel(zone.page)}}, WZ {{z + 1}}</span>
-        <span class="float-right">
-          <template v-if="z !== 0">
-            <i class="icon icon-upward" title="Reorder Writing Zones" @click="moveZoneUp(zone, z)"></i>
-          </template>
-          <template v-if="z !== additionalWritingZones.length - 1">
-            <i class="icon icon-downward" title="Reorder Writing Zones" @click="moveZoneDown(zone, z)"></i>
-          </template>
-          <i class="icon icon-delete" title="Delete Additional Writing Zone" @click="deleteAdditionalWritingZone(zone)"></i>
-        </span>
+        <span class="wzLabel">{{ zone.label }}</span>
       </div>
-      <button class="btn btn-link btn-sm" @click="addAdditionalWritingZone"><i class="icon icon-plus"></i> Add Additional Writing Zone</button>
+      <div style="margin-top: 1em;"><small><strong>Warning:</strong> For now, additional writing zones must be entered and committed manually. The order of links in //source/@target of the Annotated Transcript specify the logical order of writing zones within the transcription.</small></div>
     </div>
   </div>
 </template>
@@ -85,26 +76,57 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['writingZonesOnCurrentPage', 'activeWritingZone', 'availableAnnotatedTranscripts', 'currentWritingZoneObject']),
+    ...mapGetters(['writingZonesOnCurrentPage', 'activeWritingZone', 'availableAnnotatedTranscripts', 'currentWritingZoneObject', 'currentAtWzIds', 'sources']),
     firstWritingZone () {
-      const wz = this.currentWritingZoneObject
-      if (!wz) {
-        return ''
-      }
-      const annotTransPath = wz.annotTrans.split('/').slice(-1)[0]
-      const sourceName = annotTransPath.substring(0, annotTransPath.length - 17)
-      // D-BNba_MH_60_Engelmann_p007_wz01_at.xml
-      const pageNum = parseInt(annotTransPath.substring(sourceName.length + 2, sourceName.length + 5))
-      const wzNum = parseInt(annotTransPath.substring(sourceName.length + 8, sourceName.length + 10))
+      const id = this.currentAtWzIds[0]
 
-      // TODO important!: pageNum durch label ersetzen!!!
+      console.log('713 WritingZonesAtAnnotTrans.vue', id, this.currentAtWzIds, this.additionalWritingZones)
+      console.log('713a', this.activeWritingZone)
+      if (!id) return { id: 'null', label: 'no Annotated Transcription selected' }
+      const relativePath = id.split('#')[0]
+      const wzId = id.split('#')[1]
+      const fileName = relativePath.split('/').slice(-1)[0]
+      const sourceInfo = this.sources.find(s => s.path.split('/').indexOf(fileName) !== -1)
+      const fullPath = sourceInfo.path
+      const sourceLabel = sourceInfo.name
 
-      return sourceName + ', p.' + pageNum + ', WZ ' + wzNum
-      // TODO: Hier am Objekt einfach noch die jeweilige Seite angehängt
-      // return { id: 'sdf', label: '02', xywh: '37,6,43,15', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: true }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }
+      const source = this.$store.getters.documentByPath(fullPath)
+      const gendescWZ = source.querySelector('genDesc[*|id="' + wzId + '"]')
+      const wzLabel = gendescWZ.getAttribute('label')
+
+      const surfaceId = gendescWZ.parentElement.getAttribute('corresp').substring(1)
+      const surface = source.querySelector('surface[*|id="' + surfaceId + '"]')
+      const surfaceLabel = surface.getAttribute('label')
+
+      return { id: fullPath + '#' + wzId, label: sourceLabel + ', p.' + surfaceLabel + ', WZ ' + wzLabel }
     },
     additionalWritingZones () {
-      return [] // [{ id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }]
+      const zoneIds = this.currentAtWzIds.slice(1)
+
+      const arr = []
+      zoneIds.forEach(id => {
+        // example: ../D-BNba_MH_60_Engelmann.xml#g0fb67eed-9707-4d78-b650-f8cc84ce1718
+        // path to source file, then xml:id of genDesc of WZ
+
+        const relativePath = id.split('#')[0]
+        const wzId = id.split('#')[1]
+        const fileName = relativePath.split('/').slice(-1)[0]
+        const sourceInfo = this.sources.find(s => s.path.split('/').indexOf(fileName) !== -1)
+        const fullPath = sourceInfo.path
+        const sourceLabel = sourceInfo.name
+
+        const source = this.$store.getters.documentByPath(fullPath)
+        const gendescWZ = source.querySelector('genDesc[*|id="' + wzId + '"]')
+        const wzLabel = gendescWZ.getAttribute('label')
+
+        const surfaceId = gendescWZ.parentElement.getAttribute('corresp').substring(1)
+        const surface = source.querySelector('surface[*|id="' + surfaceId + '"]')
+        const surfaceLabel = surface.getAttribute('label')
+
+        arr.push({ id: fullPath + '#' + wzId, label: sourceLabel + ', p.' + surfaceLabel + ', WZ ' + wzLabel })
+      })
+
+      return arr // [{ id: 'dfg', label: '03', xywh: '11,18,37,13', annotTrans: { file: 'NK_p005_wz02_at.xml', firstZone: false }, page: { id: 'e5', modernLabel: '4r', reconstructionLabel: '5', zonesCount: 19, modernDocumentId: 'E', reconstructionId: 'NotK', width: 100, height: 80 } }]
     },
     displayPerspective () {
       // TODO: das sollte natürlich über einen getter funktionieren
