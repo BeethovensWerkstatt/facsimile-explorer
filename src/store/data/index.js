@@ -584,7 +584,7 @@ const dataModule = {
      * @param  {[XMLDocument]} meiDom          [description] TODO: we can fetch it with the path!
      * @param  {[string]} path                 [description]
      * @param  {[string]} id                   [description]
-     * @param  {[string]} id                   [description]
+     * @param  {[string]} name                 [description]
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
@@ -1426,11 +1426,12 @@ const dataModule = {
         return false
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
-      atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
+      // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
       const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
 
+      // check that all necessary documents are available
       if (!atDoc || !dtDoc || !svgDoc) {
         console.log('??? at, dt, svg', atDoc, dtDoc, svgDoc)
         return false
@@ -1457,6 +1458,10 @@ const dataModule = {
 
       if (annotElemRef.name === 'barLine') {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
+      } if (annotElemRef.name === 'dots') {
+        // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
+        // console.warn('\n\nLOOKING FOR A DOT!!!')
+        annotElem = atDoc.querySelector('note[*|id="' + annotElemRef.id + '"]')
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
         if (!annotElemRef) {
@@ -1466,22 +1471,25 @@ const dataModule = {
       }
 
       // check if element is already transcribed
-      if (annotElem.hasAttribute('corresp')) {
+      if (annotElem.hasAttribute('corresp') && !annotElemRef.name === 'dots') {
         alert('Element has already been transcribed. Continuing. ', annotElem)
         // return null
         // ... or ask for unlink?
       }
-      console.log('-------------------------> "' + annotElem.localName + '"')
+
+      // debug messages
+      console.log('-------------------------> "' + annotElemRef.name === 'dots' ? 'dot' : annotElem.localName + '"')
       if (annotElem.localName === 'beam' || annotElem.localName === 'beamSpan') {
         console.log('found beam:', annotElemRef)
       }
 
+      // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
-      // console.log('annotElem', annotElem)
-      // console.log('shapes', shapes)
 
+      // decides if new element is a control event
       const isAtControlEvent = ['slur', 'tie'].indexOf(annotElemRef.name) !== -1
 
+      // determine the staff in the AT
       let annotStaffN
       if (annotElemRef.name === 'barLine') {
         // TODO: find better value for staff of the barline
@@ -1501,7 +1509,7 @@ const dataModule = {
         } else if (annotElem.hasAttribute('startid')) {
           const startid = annotElem.getAttribute('startid').split('#')[1]
           console.log('startid', startid)
-          const startElem = atDoc.querySelector('[*|id="' + startid + '"]') // TODO?? annotElemRef.name +
+          const startElem = atDoc.querySelector('*[*|id="' + startid + '"]') // TODO?? annotElemRef.name +
           console.log('startelem', startElem)
           annotStaffN = startElem.closest('staff').getAttribute('n')
           console.log('691 found staff (d)', annotStaffN)
@@ -1509,10 +1517,12 @@ const dataModule = {
       }
       console.log('691 annotStaffN', annotStaffN)
 
+      // the staff in the DT will be the same as in the AT
       const diploStaffN = annotStaffN // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
-      console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
+      // console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
+      // get the rastrum for the staff
       const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
 
       console.log('691 rastrum', rastrum)
@@ -1520,6 +1530,7 @@ const dataModule = {
       const rects = getters.osdRects
       // console.log('691 rects', rects)
 
+      // determine the minimal x position of the DT element
       let x = 1000000
       shapes.forEach(shape => {
         const rendered = document.querySelector('path#' + shape.id)
@@ -1531,6 +1542,8 @@ const dataModule = {
       })
 
       // console.log('691 x', x)
+
+      // convert x to mm, substracting the x position of the rastrum
       const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
       // console.log('691 mm', mm)
 
@@ -2252,6 +2265,26 @@ const dataModule = {
     },
 
     /**
+     * retrieves the writing zones covered by the currently active Annotated Transcript
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    currentAtWzIds: (state, getters) => {
+      const at = getters.annotatedTranscriptForCurrentWz
+      if (!at) return []
+
+      const source = at.querySelector('source')
+      if (!source || !source.hasAttribute('target')) return []
+
+      const target = source.getAttribute('target')
+      const arr = target.trim().split(/\s+/)
+      console.log(482, arr)
+
+      return arr
+    },
+
+    /**
      * retrieves the svg file of the current page
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
@@ -2740,7 +2773,7 @@ const dataModule = {
     }, */
 
     /**
-     * retrieves the writing zons on the current page
+     * retrieves the writing zones on the current page
      * @param  {[type]} state                 [description]
      * @param  {[type]} getters               [description]
      * @return {[type]}         [description]

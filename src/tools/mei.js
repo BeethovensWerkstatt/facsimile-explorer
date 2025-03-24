@@ -24,6 +24,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     name = 'barLine'
   } else if (name === 'note' && annotElem.parentNode.localName === 'chord') {
     name = 'chord'
+  } else if (name === 'note' && annotElemRef.name === 'dots') {
+    name = 'dot'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -206,11 +208,12 @@ function getDiplomaticBarline (annotElem, barLine) {
 /**
  * translates a dot from an annotated note to a diplomatic dot
  * @param {*} annotElem the annotated dot to be translated
- * @param {*} barLine the diplomatic dot to be translated
+ * @param {*} dot the diplomatic dot to be translated
  */
-function getDiplomaticDot (annotElem, barLine) {
-  barLine.setAttribute('loc', 6)
-  // console.log(364, '\n', barLine, '\n', annotElem)
+function getDiplomaticDot (annotElem, dot) {
+  const loc = getLocAttribute(annotElem)
+
+  dot.setAttribute('loc', loc)
 }
 
 /**
@@ -1369,7 +1372,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           }
 
           const childName = child.localName
-          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord', 'rest']
+          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord', 'rest', 'dot']
           const ignoreElements = ['layer']
 
           if (supportedElements.indexOf(childName) !== -1) {
@@ -1388,7 +1391,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             }
             const sbZone = getSbZone(childZone)
 
-            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord' || childName === 'rest') {
+            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord' || childName === 'rest' || childName === 'dot') {
               const ownX = child.hasAttribute('x') ? parseFloat(child.getAttribute('x')) * factor : parseFloat(child.parentNode.getAttribute('x')) * factor
               const fixOwnX = childName === 'barLine' ? ownX * 2 : ownX
               const systemX = parseFloat(sbZone.getAttribute('ulx'))
@@ -1477,7 +1480,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
               ctrlevt.setAttribute('facs', '#' + ctrlZone.getAttribute('xml:id'))
             } else {
               ctrlevt.removeAttribute('facs')
-              console.warn('element has no bbox ...')
+              // console.warn('element has no bbox ...')
             }
             // console.log(ctrlevt)
           }
@@ -1538,11 +1541,14 @@ export const addSbIndicators = (meiDom) => {
       const measure = getMeasure(sb)
       if (measure) {
         const dir = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dir')
-        dir.innerHTML = '⊤'
+        const pb = sb.previousElementSibling.localName === 'pb'
+        dir.innerHTML = pb ? '⫪' : '⊤'
         dir.setAttribute('staff', 1)
         dir.setAttribute('tstamp', 0)
         dir.setAttribute('place', 'above')
-        dir.setAttribute('type', 'sb unselectable')
+        const classes = pb ? 'pb sb unselectable' : 'sb unselectable'
+        dir.setAttribute('type', classes)
+        dir.setAttribute('xml:id', 'dir_' + sb.getAttribute('xml:id'))
         measure.append(dir)
       }
     }
