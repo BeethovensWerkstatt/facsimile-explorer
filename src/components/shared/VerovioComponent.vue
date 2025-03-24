@@ -130,6 +130,9 @@ export default {
         const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
         const measure = target.closest('.measure').getAttribute('data-id')
+        const staff = target.closest('.staff').getAttribute('data-n')
+
+        console.log('clicked verovio', staff, measure, name, id)
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
@@ -140,6 +143,7 @@ export default {
           id,
           name,
           measure,
+          staff,
           purpose: this.purpose,
           callback: () => { this.render() }
         })

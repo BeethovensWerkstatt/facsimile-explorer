@@ -61,9 +61,9 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
     getDiplomaticChord(annotElem.parentNode, elem)
-  } else if (name === 'keysig') {
+  } else if (name === 'keySig') {
     getDiplomaticKeysig(annotElem, elem)
-  } else if (name === 'metersig') {
+  } else if (name === 'meterSig') {
     getDiplomaticMetersig(annotElem, elem)
   } else if (name === 'clef') {
     getDiplomaticClef(annotElem, elem)

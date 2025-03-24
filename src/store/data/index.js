@@ -588,7 +588,7 @@ const dataModule = {
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, purpose, callback }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, staff, purpose, callback }) {
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
@@ -596,7 +596,7 @@ const dataModule = {
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, path })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path })
           }
           break
         default:
@@ -1437,13 +1437,32 @@ const dataModule = {
       }
 
       let annotElem
-
-      console.log('annotElem', annotElemRef.id)
+      // x918f5394-e20d-432b-b4e9-2ef0f4326dd4
+      const uuidRegex = /[a-z]([0-9,a-f]{8})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{12})/i
+      if (!uuidRegex.test(annotElemRef.id)) {
+        console.warn('not a uuid!', annotElemRef.id)
+        console.log('diploTranscribe search for', annotElemRef.name, '...')
+        if (annotElemRef.name === 'keySig' || annotElemRef.name === 'clef') {
+          const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
+          annotElemRef.id = elem.getAttribute('xml:id')
+          console.log('diploTranscribe use', elem)
+        } else if (annotElemRef.name === 'meterSig') {
+          const elem = atDoc.querySelector('scoreDef ' + annotElemRef.name)
+          annotElemRef.id = elem.getAttribute('xml:id')
+          console.log('diploTranscribe use', elem)
+        }
+      } else {
+        console.log('annotElem', annotElemRef.id)
+      }
 
       if (annotElemRef.name === 'barLine') {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
+        if (!annotElemRef) {
+          console.log('??? annotElemRef', annotElemRef)
+          return false
+        }
       }
 
       // check if element is already transcribed
@@ -1472,7 +1491,7 @@ const dataModule = {
           annotStaffN = annotElem.getAttribute('staff')
           console.log('691 found staff (a)', annotStaffN)
         } else {
-          annotStaffN = annotElem.closest('staff').getAttribute('n')
+          annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
           console.log('691 found staff (b)', annotStaffN)
         }
       } else if (isAtControlEvent) {

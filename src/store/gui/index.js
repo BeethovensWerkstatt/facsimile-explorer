@@ -379,7 +379,7 @@ const guiModule = {
       state.allDocsLoaded = true
     },
 
-    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, staff, path }) {
       console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
@@ -388,7 +388,7 @@ const guiModule = {
         } else {
           // TODO we don't need a dict/object if it only contains one item
           state.diploTransActivations.annotTrans.clear()
-          state.diploTransActivations.annotTrans.set(id, { id, name, measure, path })
+          state.diploTransActivations.annotTrans.set(id, { id, name, measure, staff, path })
         }
       } else if (type === 'shape') {
         // state.diploTransActivations.annotTrans.clear()
@@ -729,7 +729,7 @@ const guiModule = {
 
     /**
      * toggles an item (either SVG shape or from the annotated transcription in the selection for the diplomatic transcription
-     * TODO: remove this???
+     * TODO: remove this??? no!!!
      * @param  {[type]} commit               [description]
      * @param  {[type]} type                 [description]
      * @param  {[type]} id                   [description]
@@ -737,9 +737,9 @@ const guiModule = {
      * @param  {[type]} path                 [description]
      * @return {[type]}        [description]
      */
-    diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
+    diploTransToggle ({ commit, getters }, { type, id, name, measure, staff, path }) {
       if (getters.activeWritingZone !== null) {
-        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, staff, path })
       }
     },
 
