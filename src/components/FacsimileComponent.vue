@@ -9,7 +9,7 @@ import OpenSeadragon from 'openseadragon'
 import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
-import { getEmptyPage } from '@/tools/mei.js'
+import { getEmptyPage, selectables } from '@/tools/mei.js'
 import { useDiploTrans } from '@/store/gui/diplotrans'
 
 const osdOptions = {
@@ -29,6 +29,7 @@ const osdOptions = {
   silenceMultiImageWarnings: true
 }
 
+/*
 const rawSelectables = [
   'note',
   'chord',
@@ -43,7 +44,7 @@ const rawSelectables = [
   'tie',
   'dynam',
   'dir',
-  'keySig',
+  'keyAccid',
   'meterSig',
   'barLine'
   // 'staff',
@@ -54,6 +55,7 @@ rawSelectables.forEach(elem => {
   selectables.push('.' + elem + ':not(.bounding-box)')
 })
 selectables = selectables.join(', ')
+*/
 
 export default {
   name: 'FacsimileComponent',

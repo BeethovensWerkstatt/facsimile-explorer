@@ -5,9 +5,10 @@
 </template>
 
 <script>
-import { draft2score, draft2page, addSbIndicators } from '@/tools/mei.js'
+import { draft2score, draft2page, addSbIndicators, selectables } from '@/tools/mei.js'
 import { mapGetters } from 'vuex'
 
+/*
 const rawSelectables = [
   'note',
   'chord',
@@ -21,7 +22,7 @@ const rawSelectables = [
   'tie',
   'dynam',
   'dir',
-  'keySig',
+  'keyAccid',
   'meterSig',
   'barLine'
   // 'staff',
@@ -32,6 +33,7 @@ rawSelectables.forEach(elem => {
   selectables.push('.' + elem + ':not(.bounding-box)')
 })
 selectables = selectables.join(', ')
+*/
 
 export default {
   name: 'VerovioComponent',
@@ -132,12 +134,10 @@ export default {
         const measure = target.closest('.measure').getAttribute('data-id')
         const staff = target.closest('.staff').getAttribute('data-n')
 
-        console.log('clicked verovio', staff, measure, name, id)
-
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
         // console.log('clicked verovio', name, id)
-        this.$store.dispatch('clickedVerovio', {
+        const cvpayload = {
           meiDom,
           path,
           id,
@@ -146,7 +146,24 @@ export default {
           staff,
           purpose: this.purpose,
           callback: () => { this.render() }
-        })
+        }
+
+        if (name === 'keyAccid') {
+          const keySig = target.closest('.keySig')
+          const keyAccids = keySig.querySelectorAll('.keyAccid')
+
+          let keyAccidN = 0
+          for (const ka of keyAccids) {
+            if (ka.getAttribute('data-id') === id) {
+              cvpayload.keyAccid = keyAccidN
+              break
+            }
+            keyAccidN += 1
+          }
+        }
+
+        console.log('clicked verovio', cvpayload)
+        this.$store.dispatch('clickedVerovio', cvpayload)
       }
     },
     // TODO: make global getter in score to retrieve related objects

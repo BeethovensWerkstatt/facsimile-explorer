@@ -76,7 +76,20 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp', 'keySig@template', 'staff@n'] //,
+        svgAdditionalAttribute: [
+          'beam@corresp',
+          'note@corresp',
+          'chord@corresp',
+          'measure@corresp',
+          'rest@corresp',
+          'slur@corresp',
+          'staff@rotate',
+          'accid@corresp',
+          'keySig@template',
+          'staff@n',
+          'clef@shape',
+          'clef@line'
+        ] //,
         // unit: 18
       }
 

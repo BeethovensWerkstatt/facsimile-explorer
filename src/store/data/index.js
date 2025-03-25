@@ -588,7 +588,8 @@ const dataModule = {
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, staff, purpose, callback }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, staff, purpose, callback, ...opts }) {
+      console.log(opts)
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
@@ -596,7 +597,7 @@ const dataModule = {
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, opts })
           }
           break
         default:
@@ -1443,7 +1444,12 @@ const dataModule = {
       if (!uuidRegex.test(annotElemRef.id)) {
         console.warn('not a uuid!', annotElemRef.id)
         console.log('diploTranscribe search for', annotElemRef.name, '...')
-        if (annotElemRef.name === 'keySig' || annotElemRef.name === 'clef') {
+        if (annotElemRef.name === 'keyAccid') {
+          const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
+          const sig = elem.getAttribute('sig')
+          const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
+          console.log('sig:', sign)
+        } else if (annotElemRef.name === 'clef') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
           console.log('diploTranscribe use', elem)

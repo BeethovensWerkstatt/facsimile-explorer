@@ -8,6 +8,32 @@ const parser = new DOMParser()
  */
 export const MEIversion = '5.0'
 
+const rawSelectables = [
+  'note',
+  'chord',
+  'syl',
+  'rest',
+  'beam',
+  'beamSpan',
+  'artic',
+  'accid',
+  'clef',
+  'slur',
+  'tie',
+  'dynam',
+  'dir',
+  'keyAccid',
+  'meterSig',
+  'barLine'
+  // 'staff',
+  // 'measure'
+]
+const clsSelectables = []
+rawSelectables.forEach(elem => {
+  clsSelectables.push('.' + elem + ':not(.bounding-box)')
+})
+export const selectables = clsSelectables.join(', ')
+
 /**
  * generates a diplomatic transcription from a given annotated transcription and a list of shapes
  * @param {*} annotElem the annotated transcription to be converted
