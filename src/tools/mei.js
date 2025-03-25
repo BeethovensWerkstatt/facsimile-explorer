@@ -252,6 +252,9 @@ function getDiplomaticChord (annotElem, chord) {
 }
 
 function getDiplomaticKeysig (annotElem, keysig) {
+  const sig = annotElem.getAttribute('sig')
+  console.log(sig)
+  keysig.setAttribute('sig', sig)
   console.log('getDiplomaticKeysig', annotElem, keysig)
 }
 
