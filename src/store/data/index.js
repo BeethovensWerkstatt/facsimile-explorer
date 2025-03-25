@@ -1464,7 +1464,7 @@ const dataModule = {
         annotElem = atDoc.querySelector('note[*|id="' + annotElemRef.id + '"]')
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
-        if (!annotElemRef) {
+        if (!annotElem) {
           console.log('??? annotElemRef', annotElemRef)
           return false
         }
@@ -1478,7 +1478,7 @@ const dataModule = {
       }
 
       // debug messages
-      console.log('-------------------------> "' + annotElemRef.name === 'dots' ? 'dot' : annotElem.localName + '"')
+      console.log('-------------------------> "' + (annotElemRef.name === 'dots' ? 'dot' : annotElem.localName) + '"')
       if (annotElem.localName === 'beam' || annotElem.localName === 'beamSpan') {
         console.log('found beam:', annotElemRef)
       }
@@ -1555,7 +1555,8 @@ const dataModule = {
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
       const getDiplomaticSection = (annotElem) => {
-        const atMeasure = annotElem.closest('measure')
+        // TODO scoreDef/staffDef elements?
+        const atMeasure = annotElem.closest('measure') || atDoc.querySelector(`measure[*|id=${annotElemRef.measure}]`)
 
         const getSystemId = (elem) => {
           let id = null

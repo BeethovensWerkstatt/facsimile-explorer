@@ -255,12 +255,12 @@ function getDiplomaticKeysig (annotElem, keysig) {
   console.log('getDiplomaticKeysig', annotElem, keysig)
 }
 
-function getDiplomaticMetersig (annotElem, keysig) {
-  console.log('getDiplomaticMetersig', annotElem, keysig)
+function getDiplomaticMetersig (annotElem, metersig) {
+  console.log('getDiplomaticMetersig', annotElem, metersig)
 }
 
-function getDiplomaticClef (annotElem, keysig) {
-  console.log('getDiplomaticClef', annotElem, keysig)
+function getDiplomaticClef (annotElem, clef) {
+  console.log('getDiplomaticClef', annotElem, clef)
 }
 
 function getLocAttribute (annotElem) {
