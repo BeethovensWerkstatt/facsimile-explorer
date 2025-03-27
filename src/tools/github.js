@@ -109,6 +109,23 @@ export class OctokitFile extends OctokitNode {
   get isFile () { return true }
   get isFolder () { return false }
 
+  get isLink () { return this._mode === '120000' }
+  get target () {
+    return new Promise((resolve, reject) => {
+      if (this.isLink) {
+        this._repo.octokit.request('GET /repos/{owner}/{repo}/git/blobs/{file_sha}', {
+          owner: this.repo.owner,
+          repo: this.repo.repo,
+          file_sha: this._sha
+        }).then(({ data }) => {
+          const dec = new TextDecoder('utf-8')
+          const content = dec.decode(Base64.toUint8Array(data.content))
+          resolve(content)
+        }).catch(error => reject(error))
+      } else reject(new Error('not a link'))
+    })
+  }
+
   getContent (refresh = false) {
     if (refresh || !this._content) {
       this._content = new Promise((resolve, reject) => {

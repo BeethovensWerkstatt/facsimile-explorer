@@ -89,8 +89,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
     getDiplomaticChord(annotElem.parentNode, elem)
-  } else if (name === 'keySig') {
-    getDiplomaticKeysig(annotElem, elem)
+  } else if (name === 'keyAccid') {
+    getDiplomaticKeyAccid(annotElem, elem)
   } else if (name === 'meterSig') {
     getDiplomaticMetersig(annotElem, elem)
   } else if (name === 'clef') {
@@ -277,11 +277,11 @@ function getDiplomaticChord (annotElem, chord) {
   // console.log(472, annotElem, chord)
 }
 
-function getDiplomaticKeysig (annotElem, keysig) {
-  const sig = annotElem.getAttribute('sig')
-  console.log(sig)
-  keysig.setAttribute('sig', sig)
-  console.log('getDiplomaticKeysig', annotElem, keysig)
+function getDiplomaticKeyAccid (annotElem, keyAccid) {
+  const loc = annotElem.getAttribute('log')
+  console.log(loc)
+  keyAccid.setAttribute('loc', loc)
+  console.log('getDiplomaticKeysig', annotElem, keyAccid)
 }
 
 function getDiplomaticMetersig (annotElem, metersig) {

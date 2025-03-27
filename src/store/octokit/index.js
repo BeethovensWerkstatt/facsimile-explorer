@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
-import { OctokitRepo, base64dom, dom2base64 } from '@/tools/github'
+import { OctokitRepo, base64dom, dom2base64, base64text } from '@/tools/github'
 // import { Base64 } from 'js-base64'
 
 // import config from '@/config.json'
@@ -281,6 +281,7 @@ const actions = {
       // console.log(contentData.path, 'loaded from cache')
     } else {
       getters.octokit.repos.getContent({ owner, repo, path, ref }).then(({ data }) => {
+        // console.log('octokit.repos.getContent:', data.type, data.name, data.target)
         // console.log(data.download_url) // , data.content)
         try {
           const mei = base64dom(data.content)
@@ -391,6 +392,7 @@ const actions = {
           Accept: 'application/vnd.github.v3.raw'
         }
       }).then(({ data }) => {
+        console.log('load AT:', data.type, data.name, data.target)
         console.warn('received this as svg raw text, which is wrong media type!!!')
         // console.log(data) // , data.content)
         const svgText = data
@@ -441,18 +443,35 @@ const actions = {
         }
       }
     } else {
-      getters.octokit.repos.getContent({
+      const getContent = async (data) => {
+        if (data.type === 'symlink') {
+          const data2 = await getters.octokit.repos.getContent({
+            owner,
+            repo,
+            path: data.target,
+            ref,
+            headers: {
+              Accept: 'application/vnd.github.v3+json'
+            }
+          })
+          return await getContent(data2)
+        } else {
+          return base64text(data.content)
+        }
+      }
+      getters.octokit.request('GET https://api.github.com/repos/{owner}/{repo}/contents/{path}', {
         owner,
         repo,
         path,
         ref,
         headers: {
-          Accept: 'application/vnd.github.v3.raw'
+          // Accept: 'application/vnd.github.v3.raw'
+          Accept: 'application/vnd.github.v3+json'
         }
       }).then(({ data }) => {
         // console.log('received this as svg raw text')
         // console.log(data) // , data.content)
-        const xml = data
+        const xml = getContent(data)
         // console.log(xmlText)
         const parser = new DOMParser()
         const dom = parser.parseFromString(xml, 'application/xml')

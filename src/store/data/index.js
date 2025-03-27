@@ -1446,7 +1446,7 @@ const dataModule = {
         console.log('diploTranscribe search for', annotElemRef.name, '...')
         if (annotElemRef.name === 'keyAccid') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
-          const sig = elem.getAttribute('sig')
+          const sig = elem.closest('keySig').getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
           console.log('sig:', sign)
         } else if (annotElemRef.name === 'clef') {
