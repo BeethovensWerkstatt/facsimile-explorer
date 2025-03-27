@@ -834,6 +834,30 @@ const actions = {
       repo: getters.config.repository.repo,
       branch: getters.config.repository.branch
     }
+    getters.octokit.git.getTree({
+      owner: repometa.owner,
+      repo: repometa.repo,
+      branch: repometa.branch,
+      tree_sha: 'HEAD',
+      recursive: 'true'
+    }).then(({ data }) => {
+      console.log('tree', data)
+      for (const item of data.tree) {
+        if (item.type === 'blob' && (item.path.endsWith('.xml') || item.path.endsWith('.mei')) && item.mode === '120000') {
+          getters.octokit.rest.git.getBlob({
+            owner: repometa.owner,
+            repo: repometa.repo,
+            file_sha: item.sha,
+            headers: {
+              Accept: 'application/vnd.github.v3.raw'
+            }
+          }).then(({ data }) => {
+            console.log('link:', item.path, '->', data)
+          })
+        }
+      }
+    })
+
     // console.log(repometa)
     dispatch('setLoading', true)
     const sourcefiles = []
@@ -844,7 +868,7 @@ const actions = {
     const root = await repo.folder
     // console.log(repo.commitUrl)
     fetch(repo.commitUrl).then(resp => resp.json()).then(commitObj => commit('SET_COMMIT', commitObj))
-    // console.log('commit', getters.commit)
+    console.log('commit', getters.commit)
     const folder = await root.getFile(getters.config.root)
     const sources = await folder.folder
     for (const source of sources) {
@@ -859,6 +883,9 @@ const actions = {
             const transcripts = await srcfile.folder
             for (const transcript of transcripts) {
               if (transcript.name.endsWith('.xml') || transcript.name.endsWith('.mei')) {
+                if (transcript.isLink) {
+                  console.warn('annotated transcript is a link:', transcript.target)
+                }
                 annotatedTranscripts.push(transcript.path)
               }
             }
