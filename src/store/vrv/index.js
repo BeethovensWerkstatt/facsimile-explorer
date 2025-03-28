@@ -76,7 +76,11 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
-        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp'] //,
+        pageMarginTop: 200,
+        pageMarginRight: 50,
+        pageMarginLeft: 50,
+        pageMarginBottom: 50,
+        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp', 'annot@class', 'annot@corresp'] //,
         // unit: 18
       }
 
@@ -94,7 +98,7 @@ const verovioModule = {
     annotatedTranscriptForWz: (state, getters) => async (dom) => {
       const serializer = new XMLSerializer()
       const vrvToolkit = getters.verovioToolkit
-      console.log('annotatedTranscriptForWz', dom)
+      // console.log('annotatedTranscriptForWz', dom)
       const mei = serializer.serializeToString(dom)
       vrvToolkit.setOptions(getters.annotTransVerovioOptions)
       vrvToolkit.loadData(mei)

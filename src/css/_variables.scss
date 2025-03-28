@@ -42,6 +42,8 @@ $highlightDTChainColorShadow: #961010;
 $highlightDTChainColorStroke: #961010;
 $highlightDTChainColorFill: orange;
 
+$verovioAtPageLabelBox: #33333333;
+
 .svgContainer .highlightHover {
     filter: drop-shadow(5px 5px 3px $highlightHoverColorShadow) !important;
     stroke: $highlightHoverColorStroke !important;

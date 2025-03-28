@@ -588,15 +588,15 @@ const dataModule = {
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, id, name, measure, purpose, callback }) {
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, dtPath, id, name, measure, purpose, callback }) {
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
-          dispatch('suppliedToggle', { meiDom, path, id, name, measure, callback })
+          // dispatch('suppliedToggle', { meiDom, path, id, name, measure, callback })
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, path })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, path, dtPath })
           }
           break
         default:
@@ -1287,7 +1287,7 @@ const dataModule = {
      * @param {*} param0
      * @returns
      */
-    async initializeDiploTrans ({ commit, getters, dispatch }, { systemcount, rastrums: rastrumids }) {
+    async initializeDiploTrans ({ commit, getters, dispatch }, { systemcount, rastrums: rastrumids, symlinkUrl }) {
       const existingDt = getters.diplomaticTranscriptForCurrentWz
       if (existingDt !== null) {
         // console.log('…current writing zone already has a diplomatic transcription')
@@ -1373,33 +1373,63 @@ const dataModule = {
       dispatch('loadDocumentIntoStore', { path: dtPath, dom: diploTrans })
       dispatch('logChange', { path: dtPath, baseMessage, param, xmlIDs: [], isNewDocument: true })
 
-      const at = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
-      const systemIDs = [...diploTrans.querySelectorAll('draft system')].map(system => system.getAttribute('xml:id'))
+      if (!symlinkUrl) {
+        const at = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
+        const systemIDs = [...diploTrans.querySelectorAll('draft system')].map(system => system.getAttribute('xml:id'))
 
-      at.querySelectorAll('sb').forEach((sb, i) => {
-        const path = '../diplomaticTranscripts/' + param + '#' + systemIDs[i]
-        if (!sb.hasAttribute('xml:id')) {
-          const id = 's' + uuid()
-          sb.setAttribute('xml:id', id)
+        at.querySelectorAll('sb').forEach((sb, i) => {
+          const path = '../diplomaticTranscripts/' + param + '#' + systemIDs[i]
+          if (!sb.hasAttribute('xml:id')) {
+            const id = 's' + uuid()
+            sb.setAttribute('xml:id', id)
+          }
+          sb.setAttribute('corresp', path)
+        })
+        const pb = at.querySelector('pb') // intentionally picking the first pb only
+        if (!pb.hasAttribute('xml:id')) {
+          const id = 'p' + uuid()
+          pb.setAttribute('xml:id', id)
         }
-        sb.setAttribute('corresp', path)
-      })
-      const pb = at.querySelector('pb') // intentionally picking the first pb only
-      if (!pb.hasAttribute('xml:id')) {
-        const id = 'p' + uuid()
-        pb.setAttribute('xml:id', id)
+        const pbCorresp = '../' + filename + '#' + surfaceId
+        pb.setAttribute('corresp', pbCorresp)
+
+        const changedID = [at.querySelector('mdiv').getAttribute('xml:id')]
+
+        const atPath = getters.currentWzAtPath
+        const baseMessageAt = 'add references to diplomatic systems from sb elements at '
+        const paramAt = atPath.split('/').splice(-1)[0]
+
+        dispatch('loadDocumentIntoStore', { path: atPath, dom: at })
+        dispatch('logChange', { path: atPath, baseMessage: baseMessageAt, param: paramAt, xmlIDs: changedID, isNewDocument: false })
+      } else {
+        // create a symlink file pointing to another AT
+        const regularAtPath = getters.currentWzAtPath
+        const symlinkPath = regularAtPath.replace('_at.xml', '_symlink.xml')
+        const plistPath = symlinkPath.replace('data/sources/', '../../')
+
+        const symlinkDom = document.implementation.createDocument('http://www.music-encoding.org/ns/mei', 'relation', null)
+        const relation = symlinkDom.documentElement
+        relation.setAttribute('xml:id', 'r' + uuid())
+        relation.setAttribute('rel', 'symlink')
+        relation.setAttribute('target', symlinkUrl)
+        relation.setAttribute('plist', plistPath)
+
+        const xmlPI = symlinkDom.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"')
+        const relaxngPI = symlinkDom.createProcessingInstruction('xml-model', 'href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"')
+        const schematronPI = symlinkDom.createProcessingInstruction('xml-model', 'href="../../../../rng/bw_module4_complete.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"')
+
+        symlinkDom.insertBefore(xmlPI, relation)
+        symlinkDom.insertBefore(relaxngPI, relation)
+        symlinkDom.insertBefore(schematronPI, relation)
+
+        const baseMessageSym = 'add symlink to annotated transcript at '
+        const paramSym = symlinkPath.split('/').splice(-1)[0]
+        console.log(361, symlinkDom, baseMessageSym + paramSym)
+
+        // commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
+        dispatch('loadDocumentIntoStore', { path: symlinkPath, dom: symlinkDom })
+        dispatch('logChange', { path: symlinkPath, baseMessage: baseMessageSym, param: paramSym, xmlIDs: [], isNewDocument: true })
       }
-      const pbCorresp = '../' + filename + '#' + surfaceId
-      pb.setAttribute('corresp', pbCorresp)
-
-      const changedID = [at.querySelector('mdiv').getAttribute('xml:id')]
-
-      const atPath = getters.currentWzAtPath
-      const baseMessageAt = 'add references to diplomatic systems from sb elements at '
-      const paramAt = atPath.split('/').splice(-1)[0]
-
-      dispatch('loadDocumentIntoStore', { path: atPath, dom: at })
-      dispatch('logChange', { path: atPath, baseMessage: baseMessageAt, param: paramAt, xmlIDs: changedID, isNewDocument: false })
 
       dispatch('setModal', 'commitmei')
 
@@ -1426,7 +1456,9 @@ const dataModule = {
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
-      const dtDoc = getters.diplomaticTranscriptForCurrentWz.cloneNode(true)
+      console.log(785, annotElemRef.dtPath)
+      const dtDoc = getters.documentByPath(annotElemRef.dtPath).cloneNode(true)
+      const dtDocName = annotElemRef.dtPath.split('/').splice(-1)[0].replace('.xml', '')
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
 
@@ -1526,7 +1558,7 @@ const dataModule = {
       // console.log('691 mm', mm)
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
-      const correspPath = '../diplomaticTranscripts/' + getters.currentWzDtPath.split('/').splice(-1)[0] + '#'
+      const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, correspPath, annotElemRef)
 
       const isDtControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
@@ -1969,6 +2001,7 @@ const dataModule = {
           // const page = mei.querySelector('page:nth-child(' + i + ')')
 
           const surfaceId = surface.getAttribute('xml:id').trim()
+          const surfaceIndex = surface.getAttribute('n').trim()
 
           const mei = surface.closest('mei')
           const allFolia = mei.querySelectorAll('foliaDesc *')
@@ -1997,6 +2030,7 @@ const dataModule = {
           obj.uri = target
           obj.id = surfaceId
           obj.label = label
+          obj.surfaceModernIndex = surfaceIndex
           obj.modernLabel = isReconstruction ? surfaceLabel : null
 
           obj.document = name
@@ -2010,7 +2044,16 @@ const dataModule = {
           obj.position = position
 
           obj.hasSvg = surface.querySelector('graphic[type="shapes"]') !== null // exists(graphic[@type='svg']) inside relevant /surface
-          obj.zonesCount = surface.querySelectorAll('zone[type="writingZone"]').length // exists(mei:zone) inside relevant /surface
+          obj.zones = [...surface.querySelectorAll('zone')].map(zone => {
+            const genDesc = {}
+            genDesc.id = zone.getAttribute('data').substring(1)
+            genDesc.zone = zone.getAttribute('xml:id')
+            const gd = mei.querySelector('genDesc[*|id="' + genDesc.id + '"]')
+            genDesc.label = gd.getAttribute('label')
+            genDesc.svg = gd.getAttribute('corresp')
+            return genDesc
+          })
+          obj.zonesCount = obj.zones.length // exists(mei:zone) inside relevant /surface
           obj.hasFragment = target.indexOf('#xywh=') !== -1
 
           if (!surface.hasAttribute('decls')) {

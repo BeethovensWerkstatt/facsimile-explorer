@@ -165,7 +165,7 @@
                         <!-- pb/@target points to surface ID -->
                         <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
                         <!-- 
-                        <system xml:id="%NEW-ID%">
+                        <bw:system xml:id="%NEW-ID%">
                             <scoreDef xml:id="%NEW-ID%">
                                 <staffGrp xml:id="%NEW-ID%">
                                     Bsp: <staffDef xml:id="%NEW-ID%" n="1" decls="../%FILENAME%#%RASTRUMID%"/>
@@ -186,7 +186,7 @@
                                 Bsp: <beamSpan/>
                                 Bsp: <barLine x="345" staff="1 2"/>    
                             </section>
-                        </system>
+                        </bw:system>
                         -->
                     </draft>
                 </drafts>

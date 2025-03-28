@@ -283,18 +283,18 @@ export default createStore({
         commit('CLEAR_DIPLO_TRANS_ITEMS', true)
         dispatch('diploTransClear', true)
       } else { // else look for object with attributes (page, zone, wzid, layer) -- all int or undefined
-        const { page, zone, wzid, layer } = i
-        console.log(page, zone, layer)
+        const { page, zone, wzid } = i // const { page, zone, wzid, layer } = i
+        // console.log(page, zone, layer)
         if (isInt(page)) {
           const query = { page: page + 1 }
-          console.log('TODO', getters.currentPageZeroBased)
+          // console.log('TODO', getters.currentPageZeroBased)
           if (+page !== getters.currentPageZeroBased || (isInt(zone) && +zone !== getters.activeWritingZone)) {
             dispatch('diploTransClear', true)
           }
           commit('SET_WELLFORMED', true)
           commit('SET_CURRENT_PAGE', page)
           const wzArr = getters.writingZonesOnCurrentPage
-          console.log('   the array:', wzArr)
+          // console.log('   the array:', wzArr)
           if (wzArr instanceof Array) {
             if (isInt(zone) && +zone >= 0 && +zone < wzArr.length) {
               commit('SET_ACTIVE_WRITINGZONE', wzArr[zone])

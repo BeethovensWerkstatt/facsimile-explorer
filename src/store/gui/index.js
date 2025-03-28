@@ -379,7 +379,7 @@ const guiModule = {
       state.allDocsLoaded = true
     },
 
-    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path }) {
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, path, dtPath }) {
       console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
@@ -388,7 +388,7 @@ const guiModule = {
         } else {
           // TODO we don't need a dict/object if it only contains one item
           state.diploTransActivations.annotTrans.clear()
-          state.diploTransActivations.annotTrans.set(id, { id, name, measure, path })
+          state.diploTransActivations.annotTrans.set(id, { id, name, measure, path, dtPath })
         }
       } else if (type === 'shape') {
         // state.diploTransActivations.annotTrans.clear()
@@ -737,9 +737,9 @@ const guiModule = {
      * @param  {[type]} path                 [description]
      * @return {[type]}        [description]
      */
-    diploTransToggle ({ commit, getters }, { type, id, name, measure, path }) {
+    diploTransToggle ({ commit, getters }, { type, id, name, measure, path, dtPath }) {
       if (getters.activeWritingZone !== null) {
-        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path })
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, path, dtPath })
       }
     },
 
@@ -1291,12 +1291,12 @@ const guiModule = {
         return false
       }
 
-      const annotTransLink = currentWz.annotTrans
+      // const annotTransLink = currentWz.annotTrans
       const diploTransLink = currentWz.diploTrans
 
-      const annotTransAvailable = getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
+      // const annotTransAvailable = getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
       const diploTransAvailable = getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
-      return annotTransAvailable && !diploTransAvailable
+      return /* annotTransAvailable && */ !diploTransAvailable
     }
   }
 }

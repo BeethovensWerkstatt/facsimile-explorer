@@ -39,11 +39,26 @@
           <!-- {{ `${rastrum.x}, ${rastrum.y}` }} <code>{{ rastrum.id }}</code> -->
         </div>
         <!-- <div>{{ rastrums }}</div> -->
+         <div v-if="!annotTransAvailable">
+          <h1>Symbolic Link to Annotated Transcription</h1>
+          <p>
+            No Annotated Transcription is available for this Writing Zone. Probably, this Writing Zone is a continuation of another Writing Zone. You can still initialize a Diplomatic Transcription, but you will not to pick the Annotated Transcription that contains the music from this Writing Zone.
+            A symbolic link referencing this Annotated Transcription will be added to the repository.
+          </p>
+          <p>
+            <select ref="symlink" v-model="selectedSymlink">
+              <optgroup v-for="(page, pi) in pages" :label="page.label" :key="pi">
+                <option v-for="(zone, zi) in page.zones" :value="zone.url" :key="zi">{{ zone.label }}</option>
+              </optgroup>
+            </select>
+            <span class="symlink">{{symlinkUrl}}</span>
+          </p>
+         </div>
       </div>
       <div class="modal-footer">
         <div class="btn-group">
           <button class="btn" @click="closeModal()">Cancel</button>
-          <button class="btn btn-primary" @click="main()">Select</button>
+          <button class="btn btn-primary" @click="main()" :disabled="!annotTransAvailable && !this.selectedSymlink">Initialize</button>
         </div>
       </div>
     </div>
@@ -63,7 +78,8 @@ export default {
   data: () => ({
     systemcount: 0,
     rastrums: {},
-    rlinks: {}
+    rlinks: {},
+    selectedSymlink: null
   }),
   watch: {
     active () {
@@ -101,8 +117,20 @@ export default {
       }
     },
     main () {
-      console.log('InitializeDTModal:', this.systemcount, this.rastrumlist, this.rastrumids)
-      this.$store.dispatch('initializeDiploTrans', { systemcount: this.systemcount, rastrums: this.rastrumids })
+      // console.log('InitializeDTModal:', this.systemcount, this.rastrumlist, this.rastrumids)
+
+      const currentWz = this.$store.getters.currentWritingZoneObject
+      const annotTransLink = currentWz.annotTrans
+      const annotTransAvailable = this.$store.getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
+
+      if (!annotTransAvailable) {
+        // TODO: consider following comment?!
+        console.log('Initializing Diplomatic Transcription without directly corresponding annotated transcription. Generating symlink at ' + this.selectedSymlink)
+        this.$store.dispatch('initializeDiploTrans', { systemcount: this.systemcount, rastrums: this.rastrumids, symlinkUrl: this.selectedSymlink })
+      } else {
+        this.$store.dispatch('initializeDiploTrans', { systemcount: this.systemcount, rastrums: this.rastrumids })
+      }
+
       this.$store.dispatch('setModal', null)
     },
     guessSystems () {
@@ -136,6 +164,37 @@ export default {
     },
     rastrumcount () {
       return this.rastrumlist.length
+    },
+    annotTransAvailable () {
+      const currentWz = this.$store.getters.currentWritingZoneObject
+      if (!currentWz) return false
+      const annotTransLink = currentWz.annotTrans
+      return this.$store.getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
+    },
+    pages () {
+      const path = this.$store.getters.filepath
+      const pages = this.$store.getters.documentPagesForSidebars(path)
+
+      const arr = []
+
+      pages.forEach((page, i) => {
+        const zones = (!page.zones)
+          ? []
+          : page.zones.map(z => {
+            const url = '../../' + page.document + '/annotatedTranscripts/' + page.document + '_p' + page.surfaceModernIndex.padStart(3, '0') + '_wz' + z.label.padStart(2, '0') + '_at.xml'
+            return { label: 'WZ ' + z.label, url }
+          })
+        const label = page.label ? page.label : +i + 1
+        arr.push({
+          label: 'NK ' + label,
+          zones
+        })
+      })
+
+      return arr
+    },
+    symlinkUrl () {
+      return this.selectedSymlink || 'no annotated transcription selected'
     }
   }
 }
@@ -161,6 +220,17 @@ export default {
   margin-left: 2ex;
   color: red;
   font-weight: bold;
+}
+
+h1 {
+  font-size: 1.1rem;
+  margin: .7rem 0 0;
+}
+
+.symlink {
+  margin: 0 .5rem;
+  font-family: monospace;
+  font-size: 0.6rem;
 }
 
 </style>
