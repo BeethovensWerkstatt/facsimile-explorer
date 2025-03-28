@@ -1424,9 +1424,8 @@ const dataModule = {
 
         const baseMessageSym = 'add symlink to annotated transcript at '
         const paramSym = symlinkPath.split('/').splice(-1)[0]
-        console.log(361, symlinkDom, baseMessageSym + paramSym)
 
-        // commit('ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT', dtPath)
+        commit('ADD_AVAILABLE_AT_SYMLINK', symlinkPath)
         dispatch('loadDocumentIntoStore', { path: symlinkPath, dom: symlinkDom })
         dispatch('logChange', { path: symlinkPath, baseMessage: baseMessageSym, param: paramSym, xmlIDs: [], isNewDocument: true })
       }
