@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest'
 // import { createPullRequest } from 'octokit-plugin-create-pull-request'
-import { OctokitRepo, base64dom, dom2base64, base64text } from '@/tools/github'
+import { OctokitRepo, base64dom, dom2base64, base64text, OctokitTree } from '@/tools/github'
 // import { Base64 } from 'js-base64'
 
 // import config from '@/config.json'
@@ -842,6 +842,8 @@ const actions = {
       recursive: 'true'
     }).then(({ data }) => {
       console.log('tree', data)
+      const tree = new OctokitTree(data)
+      console.log(tree)
       for (const item of data.tree) {
         if (item.type === 'blob' && (item.path.endsWith('.xml') || item.path.endsWith('.mei')) && item.mode === '120000') {
           getters.octokit.rest.git.getBlob({

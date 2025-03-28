@@ -2,6 +2,7 @@ import { Base64 } from 'js-base64'
 // import XMLFormat from 'xml-formatter'
 import beautify from 'xml-beautifier'
 import store from '@/store'
+// import { Path } from './net'
 
 /**
  * An XML Serializer for converting back to string
@@ -53,6 +54,63 @@ export const dom2base64 = (dom, type = 'application/xml') => {
   // const xml = XMLFormat(str)
   const xml = beautify(str)
   return str2base64(xml)
+}
+
+export class OctokitTree {
+  _sha
+  _name
+  _mode
+  _children
+
+  constructor (data) {
+    // console.log(data)
+    self._children = {}
+    self._name = data.name || ''
+    self._mode = data.mode
+    self._sha = data.sha
+  }
+  /*
+  addPath (path, ) {
+    if (data.tree) {
+      const insertItem = (parent, path, item) => {
+        console.log(parent, path, item)
+        const name = path[0]
+        path._list.shift()
+        if (path.length === 1) {
+          parent._children[name] = item
+        } else {
+          if (!parent._children[name]) {
+            parent._children[name] = new OctokitTree({ ...item, name })
+          }
+          insertItem(parent._children[name], path, item)
+        }
+      }
+      for (const item of data.tree) {
+        console.log(item)
+        const path = new Path(item.path)
+        if (item.type === 'tree') {
+          insertItem(self, path, new OctokitTree({ name: path[-1] }))
+        } else if (item.type === 'blob') {
+          insertItem(self, path, { sha: data.sha, type: 'blob', name: path[0] })
+        }
+      }
+    }
+  }
+
+  buildTree (tree) {
+    for (const item of tree) {
+
+    }
+  }
+  */
+
+  get sha () {
+    return self._sha
+  }
+
+  get name () {
+    return self._name
+  }
 }
 
 export class OctokitNode {
