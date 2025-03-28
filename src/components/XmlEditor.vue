@@ -39,7 +39,7 @@ export default {
   watch: {
     code: {
       handler (newxml, oldxml) {
-        console.log(oldxml, ' => ', newxml)
+        // console.log(oldxml, ' => ', newxml)
         if (this.$refs.xmlEditor) {
           this.lock = false
           this.$refs.xmlEditor.val = newxml

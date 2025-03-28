@@ -80,9 +80,8 @@ export default {
     firstWritingZone () {
       const id = this.currentAtWzIds[0]
 
-      console.log('713 WritingZonesAtAnnotTrans.vue', id, this.currentAtWzIds, this.additionalWritingZones)
-      console.log('713a', this.activeWritingZone)
       if (!id) return { id: 'null', label: 'no Annotated Transcription selected' }
+
       const relativePath = id.split('#')[0]
       const wzId = id.split('#')[1]
       const fileName = relativePath.split('/').slice(-1)[0]

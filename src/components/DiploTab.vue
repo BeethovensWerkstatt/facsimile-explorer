@@ -112,7 +112,7 @@ export default {
       }
     },
     async verifyDiploTransLoaded () {
-      console.log('142----- verifyDiploTransLoaded() -----')
+      // console.log('142----- verifyDiploTransLoaded() -----')
       // const dtPage = await this.diplomaticTranscriptsOnCurrentPage
       // console.log('142 diplomaticTranscriptsOnCurrentPage', dtPage)
 
@@ -165,7 +165,7 @@ export default {
     },
     initializeDiploTrans () {
       // this.$store.dispatch('initializeDiploTrans')
-      console.log('clicked initialize DT')
+      // console.log('clicked initialize DT')
       this.$store.dispatch('setModal', 'initializeDT')
     },
     autoTranscribe (newShapes, oldShapes, newAnnotated, oldAnnotated) {
@@ -189,16 +189,19 @@ export default {
 
       if (newAnnotated === oldAnnotated && newShapes.length > oldShapes.length && oldShapes.length > 0) {
         // add shape to existing diploTrans
-        console.log('TODO: add shape to existing diploTrans')
+        console.log('add shape to existing diploTrans')
         this.$store.dispatch('diploTranscribe_setShapes', { annotElem: newAnnotated, shapes: newShapes })
       } else {
+        console.log('diploTranscribe')
+        // console.log('newAnnotated', newAnnotated)
+        // console.log('oldAnnotated', oldAnnotated)
         this.$store.dispatch('diploTranscribe')
       }
     },
     downloadDiploTrans () {
       const sourceDom = this.$store.getters.documentWithCurrentPage
       const dt = prepareDtForRendering({ sourceDom, dtDom: this.$store.getters.diplomaticTranscriptForCurrentWz }) // base64dom(dom2base64(this.$store.getters.diplomaticTranscriptForCurrentWz))
-      console.log(this.$store.getters.diplomaticTranscriptForCurrentWz)
+      // console.log(this.$store.getters.diplomaticTranscriptForCurrentWz)
       const serializer = new XMLSerializer()
       const dtstring = serializer.serializeToString(dt)
       const data = new Blob([dtstring], {

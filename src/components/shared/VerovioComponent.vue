@@ -6,6 +6,7 @@
 
 <script>
 import { draft2score, draft2page, addSbIndicators, selectables } from '@/tools/mei.js'
+import { resolveSbIndicators } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
 
 /*
@@ -24,7 +25,8 @@ const rawSelectables = [
   'dir',
   'keyAccid',
   'meterSig',
-  'barLine'
+  'barLine',
+  'dots'
   // 'staff',
   // 'measure'
 ]
@@ -45,7 +47,10 @@ export default {
     type: String,
     getter: String,
     pathGetter: String,
-    scale: String
+    scale: {
+      type: String,
+      default: '2'
+    }
   },
   computed: {
     ...mapGetters(['diploPageBackgroundVerovioOptions', 'annotTransVerovioOptions'])
@@ -67,7 +72,6 @@ export default {
 
       try {
         this.removeListeners()
-
         if (this.type === 'annotTrans') {
           const resolvedDraft = draft2score(meiDom)[0]
           const addedSbIndicators = addSbIndicators(resolvedDraft)
@@ -76,10 +80,12 @@ export default {
           const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
           this.$refs.mei.innerHTML = localCopy
-          if (+this.scale > 0) {
+
+          if (+this.scale > 0 || !this.scale) {
             const nre = /^([0-9.]*)([a-z]*)$/
             const whnum = (att) => +att.match(nre)[1]
-            const svgDom = this.$refs.mei.querySelector('svg')
+
+            const svgDom = resolveSbIndicators(this.$refs.mei.querySelector('svg'), meiDom, this.$store.getters)
             const svgWidth = whnum(svgDom.getAttribute('width'))
             const svgHeight = whnum(svgDom.getAttribute('height'))
             const percHeight = 10 * +this.scale
@@ -121,6 +127,9 @@ export default {
     },
     clickListener (e) {
       const target = e.target.closest(selectables)
+
+      // console.log('\n\n841 clickListener', target)
+
       if (target !== null) {
         // TODO: Hier müssen wir auf this.purpose reagieren und unterschiedliche
         // Aktionen ausführen. Hier erstmal nur zur Anschauung – das müsste
@@ -129,17 +138,19 @@ export default {
 
         // const isBarline = target.classList.contains('barLine')
 
-        const id = target.getAttribute('data-id')
         const name = target.getAttribute('data-class')
+        const id = (name === 'dots') ? target.closest('.note').getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
         const staff = target.closest('.staff').getAttribute('data-n')
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
-        // console.log('clicked verovio', name, id)
+        const dtPath = target.closest('g[data-dt-path]').getAttribute('data-dt-path')
+        console.log('\n841 clicked verovio\nname: ' + name + '\nid: ' + id + '\nmeasure: ' + measure + '\npath: ' + path + '\npurpose: ' + this.purpose + '\ndtPath: ' + dtPath)
         const cvpayload = {
           meiDom,
           path,
+          dtPath,
           id,
           name,
           measure,
@@ -192,12 +203,14 @@ export default {
             }
             return ''
           }
-          const facs = getFacs(dtelm)
-          const shapes = facs.split(' ').map(furl => {
-            const shapeid = furl.split('#')[1]
-            return document.querySelector(`[*|id="${shapeid}"]`)
-          })
-          shapes.forEach(hilite)
+          if (dtelm) {
+            const facs = getFacs(dtelm)
+            const shapes = facs.split(' ').map(furl => {
+              const shapeid = furl.split('#')[1]
+              return document.querySelector(`[*|id="${shapeid}"]`)
+            })
+            shapes.forEach(hilite)
+          }
           // console.log(shapes)
         }
       }
@@ -339,6 +352,15 @@ export default {
 
   svg g.dir.sb {
     font-style: normal;
+  }
+
+  svg .dots:not([data-corresp]) {
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  svg rect.pageLabelBox {
+    fill: $verovioAtPageLabelBox;
   }
 }
 

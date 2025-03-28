@@ -1073,8 +1073,10 @@ export default {
     },
 
     renderDiploTrans (toolkit, wzDetails, meiDom) {
-      // console.log('913a: renderDiploTrans()', meiDom)
-      // console.log('913a: renderDiploTrans()', wzDetails)
+      /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
+        console.log('913a: renderDiploTrans()', meiDom)
+        console.log('913a: renderDiploTrans()', wzDetails)
+      } */
       meiDom.querySelectorAll('system').forEach(system => {
         // const sb = measure.previousElementSibling
         // console.log('913a: sb', sb)
@@ -1093,7 +1095,9 @@ export default {
         })
       })
 
-      // console.log('913: meiDom', meiDom)
+      /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
+        console.log('913: meiDom', meiDom)
+      } */
 
       const meiString = new XMLSerializer().serializeToString(meiDom)
       toolkit.loadData(meiString)
@@ -1133,6 +1137,9 @@ export default {
         }
       })
 
+      if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
+        console.log('913a svg', svgDom.querySelector('svg'))
+      }
       return svgDom.querySelector('svg')
     },
 

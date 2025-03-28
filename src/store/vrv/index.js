@@ -76,6 +76,10 @@ const verovioModule = {
         svgHtml5: true,
         header: 'none',
         footer: 'none',
+        pageMarginTop: 200,
+        pageMarginRight: 50,
+        pageMarginLeft: 50,
+        pageMarginBottom: 50,
         svgAdditionalAttribute: [
           'beam@corresp',
           'note@corresp',
@@ -88,8 +92,8 @@ const verovioModule = {
           'keySig@template',
           'staff@n',
           'clef@shape',
-          'clef@line'
-        ] //,
+          'clef@line',
+          'annot@class', 'annot@corresp'] //,
         // unit: 18
       }
 
