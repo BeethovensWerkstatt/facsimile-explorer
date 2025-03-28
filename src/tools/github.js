@@ -182,6 +182,7 @@ export class OctokitFile extends OctokitNode {
           ref: this.repo.branch,
           path: this.path
         }).then(({ data }) => {
+          console.log(data)
           this._dirty = false
           this._sha = data.sha
           const dec = new TextDecoder('utf-8')
