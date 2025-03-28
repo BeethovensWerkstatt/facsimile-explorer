@@ -2,7 +2,6 @@ import { Base64 } from 'js-base64'
 // import XMLFormat from 'xml-formatter'
 import beautify from 'xml-beautifier'
 import store from '@/store'
-// import { Path } from './net'
 
 /**
  * An XML Serializer for converting back to string
@@ -60,49 +59,39 @@ export class OctokitTree {
   _sha
   _name
   _mode
-  _children
+  _tree
 
   constructor (data) {
     // console.log(data)
-    self._children = {}
+    self._tree = {}
     self._name = data.name || ''
     self._mode = data.mode
     self._sha = data.sha
   }
-  /*
-  addPath (path, ) {
-    if (data.tree) {
-      const insertItem = (parent, path, item) => {
-        console.log(parent, path, item)
-        const name = path[0]
-        path._list.shift()
-        if (path.length === 1) {
-          parent._children[name] = item
-        } else {
-          if (!parent._children[name]) {
-            parent._children[name] = new OctokitTree({ ...item, name })
-          }
-          insertItem(parent._children[name], path, item)
-        }
+
+  addPath ({ path, sha, ...item }) {
+    const apath = path.split('/').filter(p => p)
+    let node = self._tree
+    for (const name of apath) {
+      if (!node[name]) {
+        node[name] = { name }
       }
-      for (const item of data.tree) {
-        console.log(item)
-        const path = new Path(item.path)
-        if (item.type === 'tree') {
-          insertItem(self, path, new OctokitTree({ name: path[-1] }))
-        } else if (item.type === 'blob') {
-          insertItem(self, path, { sha: data.sha, type: 'blob', name: path[0] })
-        }
-      }
+      node = node[name]
     }
+    node.sha = sha
+    node.path = path
+    node.mode = item.mode
+    node.type = item.type
+    return node
   }
 
   buildTree (tree) {
     for (const item of tree) {
-
+      if (item.type === 'tree' || item.type === 'blob') {
+        self.addPath(item)
+      }
     }
   }
-  */
 
   get sha () {
     return self._sha
