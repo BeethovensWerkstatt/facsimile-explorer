@@ -2332,8 +2332,24 @@ const dataModule = {
      */
     annotatedTranscriptForCurrentWz: (state, getters) => {
       const path = getters.currentWzAtPath
-      if (getters.availableAnnotatedTranscripts.indexOf(path) === -1) {
+      if (!path) {
         return null
+      }
+      if (getters.availableAnnotatedTranscripts.indexOf(path) === -1) {
+        const atSymlinkTarget = getters.atSymlinkForCurrentWz
+        const symlinkDom = getters.documentByPath(atSymlinkTarget)
+        if (!symlinkDom) {
+          return null
+        }
+        const target = symlinkDom.documentElement.getAttribute('target').replace('../../', 'data/sources/')
+        if (!target) {
+          return null
+        }
+        const linkedAtDom = getters.documentByPath(target)
+        if (!linkedAtDom) {
+          return null
+        }
+        return linkedAtDom.cloneNode(true)
       }
 
       const atDom = getters.documentByPath(path)
@@ -2343,6 +2359,53 @@ const dataModule = {
       }
 
       return atDom.cloneNode(true)
+    },
+
+    /**
+     * retrieves the path of the symlink target for the currently active Annotated Transcript
+     */
+    atSymlinkForCurrentWz: (state, getters) => {
+      const path = getters.currentWzAtPath
+      if (!path) {
+        return null
+      }
+
+      const symlinkPath = path.replace('_at.xml', '_symlink.xml')
+      if (!symlinkPath) {
+        return null
+      }
+
+      return symlinkPath
+    },
+
+    resolvedAtSymlinkForCurrentWz: (state, getters) => {
+      const originalPath = getters.currentWzAtPath
+
+      if (!originalPath) {
+        return null
+      }
+
+      if (getters.availableAnnotatedTranscripts.indexOf(originalPath) !== -1) {
+        return originalPath
+      }
+
+      const symlinkPath = originalPath.replace('_at.xml', '_symlink.xml')
+
+      if (getters.availableAtSymlinks.indexOf(symlinkPath) === -1) {
+        return null
+      }
+
+      const symlinkDom = getters.documentByPath(symlinkPath)
+      if (!symlinkDom) {
+        return symlinkPath
+      }
+
+      const target = symlinkDom.documentElement.getAttribute('target').replace('../../', 'data/sources/')
+      if (!target) {
+        return symlinkPath
+      }
+
+      return target
     },
 
     /**
