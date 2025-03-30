@@ -110,6 +110,18 @@ export default {
           path: atPath
         })
       }
+
+      if (atPath && !at) {
+        const atSymlinkForCurrentWz = this.$store.getters.resolvedAtSymlinkForCurrentWz
+        if (atSymlinkForCurrentWz !== null) {
+          const symlinkedDom = this.$store.getters.documentByPath(atSymlinkForCurrentWz)
+          if (!symlinkedDom) {
+            this.$store.dispatch('loadXmlFile', {
+              path: atSymlinkForCurrentWz
+            })
+          }
+        }
+      }
     },
     async verifyDiploTransLoaded () {
       // console.log('142----- verifyDiploTransLoaded() -----')
@@ -238,6 +250,11 @@ export default {
       })
 
     this.unwatchAnnotTransVerification = this.$store.watch((state, getters) => getters.currentWzAtPath,
+      (newPath, oldPath) => {
+        this.verifyAnnotTransLoaded()
+      })
+
+    this.unwatchAtSymlinkVerification = this.$store.watch((state, getters) => getters.resolvedAtSymlinkForCurrentWz,
       (newPath, oldPath) => {
         this.verifyAnnotTransLoaded()
       })

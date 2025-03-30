@@ -27,6 +27,10 @@
                 <i class="icon icon-link" :title="wz.annotTrans.file"></i>
               </template>-->
             </template>
+            <template v-else-if="this.availableAtSymlinks.indexOf(wz.annotTrans.replace('_at.xml', '_symlink.xml')) !== -1">
+              <span class="desc">Linked<br/>AT</span>
+              <i class="icon icon-link" :title="wz.annotTrans.file"></i>
+            </template>
             <template v-else>
               <span class="desc">not<br/>transc.</span>
               <i class="icon icon-stop" title="Writing Zone without Annotated Transcription"></i>
@@ -59,6 +63,10 @@
                 <i class="icon icon-link" :title="wz.annotTrans.file"></i>
               </template>-->
             </template>
+            <template v-else-if="this.availableAtSymlinks.indexOf(wz.annotTrans.replace('_at.xml', '_symlink.xml')) !== -1">
+              <span class="desc">Linked<br/>AT</span>
+              <i class="icon icon-link" :title="wz.annotTrans.file"></i>
+            </template>
             <template v-else>
               <span class="desc">not<br/>transc.</span>
               <i class="icon icon-stop" title="Writing Zone without Diplomatic Transcription"></i>
@@ -75,6 +83,10 @@
                 <span class="desc">cont'd</span>
                 <i class="icon icon-link" :title="wz.annotTrans.file"></i>
               </template>-->
+            </template>
+            <template v-else-if="this.availableAtSymlinks.indexOf(wz.annotTrans.replace('_at.xml', '_symlink.xml')) !== -1">
+              <span class="desc">Linked<br/>AT</span>
+              <i class="icon icon-link" :title="wz.annotTrans.file"></i>
             </template>
             <template v-else>
               <span class="desc">not<br/>transc.</span>
@@ -181,7 +193,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts', 'availableDiplomaticTranscripts']),
+    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts', 'availableDiplomaticTranscripts', 'availableAtSymlinks']),
     activePage () {
       return this.$store.getters.currentPageZeroBased
     },

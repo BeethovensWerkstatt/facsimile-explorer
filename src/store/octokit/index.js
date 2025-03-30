@@ -27,6 +27,7 @@ const state = {
   sources: [],
   availableAnnotatedTranscripts: [],
   availableDiplomaticTranscripts: [],
+  availableAtSymlinks: [],
   documents: {},
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
@@ -67,6 +68,7 @@ const getters = {
 
   availableAnnotatedTranscripts: state => state.availableAnnotatedTranscripts,
   availableDiplomaticTranscripts: state => state.availableDiplomaticTranscripts,
+  availableAtSymlinks: state => state.availableAtSymlinks,
   // getCommit: (state, getters) => (sha) => getters.octokit.
 
   proposedCommitMessage: state => {
@@ -163,6 +165,15 @@ const mutations = {
   },
   SET_AVAILABLE_ANNOTATED_TRANSCRIPTS (state, annotatedTranscripts) {
     state.availableAnnotatedTranscripts = annotatedTranscripts
+  },
+  SET_AVAILABLE_AT_SYMLINKS (state, atSymlinks) {
+    state.availableAtSymlinks = atSymlinks
+  },
+  ADD_AVAILABLE_AT_SYMLINK (state, atSymlink) {
+    console.log(913, atSymlink)
+    if (state.availableAtSymlinks.indexOf(atSymlink) === -1) {
+      state.availableAtSymlinks.push(atSymlink)
+    }
   },
   SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS (state, diplomaticTranscripts) {
     state.availableDiplomaticTranscripts = diplomaticTranscripts
@@ -848,6 +859,7 @@ const actions = {
     dispatch('setLoading', true)
     const sourcefiles = []
     const annotatedTranscripts = []
+    const atSymlinks = []
     const diplomaticTranscripts = []
     const repo = new OctokitRepo(repometa)
     // repo.getLastCommit().then(c => console.log('latest commit', c))
@@ -868,8 +880,10 @@ const actions = {
           if (srcfile.name === 'annotatedTranscripts') {
             const transcripts = await srcfile.folder
             for (const transcript of transcripts) {
-              if (transcript.name.endsWith('.xml') || transcript.name.endsWith('.mei')) {
+              if (transcript.name.endsWith('_at.xml') || transcript.name.endsWith('_at.mei')) {
                 annotatedTranscripts.push(transcript.path)
+              } else if (transcript.name.endsWith('_symlink.xml') || transcript.name.endsWith('_symlink.xml')) {
+                atSymlinks.push(transcript.path)
               }
             }
           }
@@ -886,6 +900,7 @@ const actions = {
     }
     commit('SET_SOURCES', sourcefiles)
     commit('SET_AVAILABLE_ANNOTATED_TRANSCRIPTS', annotatedTranscripts)
+    commit('SET_AVAILABLE_AT_SYMLINKS', atSymlinks)
     commit('SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS', diplomaticTranscripts)
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
