@@ -52,6 +52,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     name = 'chord'
   } else if (name === 'note' && annotElemRef.name === 'dots') {
     name = 'dot'
+  } else if (name === 'keyAccid') {
+    name = 'accid'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -82,6 +84,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
   } else if (name === 'beamSpan' || name === 'beam') {
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
+    console.log('getDiplomaticAccid', annotElem, elem)
     getDiplomaticAccid(annotElem, elem)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem)
@@ -278,8 +281,8 @@ function getDiplomaticChord (annotElem, chord) {
 }
 
 function getDiplomaticKeyAccid (annotElem, keyAccid) {
-  const loc = annotElem.getAttribute('log')
-  console.log(loc)
+  const loc = annotElem.getAttribute('loc')
+  console.log('keyAccid:', loc)
   keyAccid.setAttribute('loc', loc)
   console.log('getDiplomaticKeysig', annotElem, keyAccid)
 }

@@ -1477,9 +1477,16 @@ const dataModule = {
         console.log('diploTranscribe search for', annotElemRef.name, '...')
         if (annotElemRef.name === 'keyAccid') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
-          const sig = elem.closest('keySig').getAttribute('sig')
+          const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
           console.log('sig:', sign)
+          let c = 0
+          elem.querySelectorAll('keyAccid').forEach(accid => {
+            if (accid.getAttribute('xml:id') === annotElemRef.id) {
+              console.log('found keyAccid:', accid, c)
+            }
+            c++
+          })
         } else if (annotElemRef.name === 'clef') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
