@@ -25,9 +25,29 @@
               <th>Branch</th>
               <td>{{ version.branch }}</td>
             </tr>
-            <tr clas="commit">
+            <tr class="commit">
               <th>Commit</th>
               <td><a :href="commiturl" target="_blank" v-if="version.commit">{{ version.commit }}</a><template v-else>N/A</template></td>
+            </tr>
+          </table>
+          <hr />
+          <h5>Data Version</h5>
+          <table>
+            <tr class="subject">
+              <td>Message</td>
+              <td><a :href="commit?.html_url" target="_blank">{{ commit?.message || 'N/A' }} {{ commit?.sha }}</a></td>
+            </tr>
+            <tr>
+              <th class="author">Author</th>
+              <td>{{ commit?.author?.name || 'N/A' }}</td>
+            </tr>
+            <tr class="date">
+              <th>Date</th>
+              <td>{{ datadate }}</td>
+            </tr>
+            <tr class="branch">
+              <th>Branch</th>
+              <td>{{ config?.repository?.owner || '?' }} / {{ config?.repository?.repo || '?' }} / {{ config?.repository?.branch || '?' }}</td>
             </tr>
           </table>
         </div>
@@ -43,10 +63,12 @@
 
 <script>
 import { version } from '@/config'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'VersionModal',
   computed: {
+    ...mapGetters(['commit', 'config']),
     active () {
       return this.$store.getters.modal === 'version'
     },
@@ -59,6 +81,12 @@ export default {
     },
     commiturl () {
       return 'https://github.com/BeethovensWerkstatt/facsimile-explorer/commits/' + this.version.commit
+    },
+    datadate () {
+      if (this.commit?.author?.date) {
+        return new Date(this.commit.author.date).toLocaleString()
+      }
+      return 'N/A'
     }
   },
   data: () => ({
