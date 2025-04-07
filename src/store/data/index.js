@@ -2929,8 +2929,19 @@ const dataModule = {
         })
 
         const wzIndexPadded = String(zi + 1).padStart(2, '0')
-        const annotTransFilePath = 'data/sources/' + docName + '/annotatedTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_at.xml'
+        let annotTransFilePath = 'data/sources/' + docName + '/annotatedTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_at.xml'
         const diploTransFilePath = 'data/sources/' + docName + '/diplomaticTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_dt.xml'
+
+        if (getters.availableAnnotatedTranscripts.indexOf(annotTransFilePath) === -1) {
+          const atSymlinkTarget = 'data/sources/' + docName + '/annotatedTranscripts/' + docName + '_p' + surface.getAttribute('n').padStart(3, '0') + '_wz' + wzIndexPadded + '_symlink.xml'
+          const symlinkDom = getters.documentByPath(atSymlinkTarget)
+          if (symlinkDom) {
+            const target = symlinkDom.documentElement.getAttribute('target').replace('../../', 'data/sources/')
+            if (target) {
+              annotTransFilePath = target
+            }
+          }
+        }
 
         const wz = {}
         wz.id = genDescWzId

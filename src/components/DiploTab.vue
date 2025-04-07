@@ -40,7 +40,7 @@
           <div class="vscale">
             <input type="range" v-model="annotScale" min="0.2" max="5" step=".01" />
           </div>
-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath" :scale="annotScale"/>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="resolvedAtSymlinkForCurrentWz" :scale="annotScale"/>
         </div>
         <div class="mainBox">
           <FacsimileComponent type="diploTrans" ref="facsShapes"/>
