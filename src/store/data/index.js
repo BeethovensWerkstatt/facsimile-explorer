@@ -2082,6 +2082,7 @@ const dataModule = {
             genDesc.id = zone.getAttribute('data').substring(1)
             genDesc.zone = zone.getAttribute('xml:id')
             const gd = mei.querySelector('genDesc[*|id="' + genDesc.id + '"]')
+            console.log('gd', genDesc.id, gd)
             genDesc.label = gd.getAttribute('label')
             genDesc.svg = gd.getAttribute('corresp')
             return genDesc
