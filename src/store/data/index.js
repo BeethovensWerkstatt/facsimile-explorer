@@ -1458,7 +1458,22 @@ const dataModule = {
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
       console.log(785, annotElemRef.dtPath)
-      const dtDoc = getters.documentByPath(annotElemRef.dtPath).cloneNode(true)
+      let dtDoc = getters.documentByPath(annotElemRef.dtPath)?.cloneNode(true)
+      if (!dtDoc) {
+        const docload = new Promise((resolve, reject) => {
+          const callback = ({ xml, dom }) => {
+            console.log('loaded document:', xml, dom)
+            dtDoc = dom
+            resolve(dtDoc)
+          }
+          const errorCallback = (err) => {
+            console.error('Error loading document:', err)
+            reject(err)
+          }
+          dispatch('loadXmlFile', { path: annotElemRef.dtPath, callback, errorCallback })
+        })
+        await docload
+      }
       const dtDocName = annotElemRef.dtPath.split('/').splice(-1)[0].replace('.xml', '')
       const svgDoc = getters.svgForCurrentPage
       // const meiDoc = getters.documentWithCurrentPage
@@ -2082,7 +2097,7 @@ const dataModule = {
             genDesc.id = zone.getAttribute('data').substring(1)
             genDesc.zone = zone.getAttribute('xml:id')
             const gd = mei.querySelector('genDesc[*|id="' + genDesc.id + '"]')
-            console.log('gd', genDesc.id, gd)
+            // console.log('gd', genDesc.id, gd)
             genDesc.label = gd.getAttribute('label')
             genDesc.svg = gd.getAttribute('corresp')
             return genDesc
