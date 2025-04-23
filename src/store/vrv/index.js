@@ -80,7 +80,7 @@ const verovioModule = {
         pageMarginRight: 50,
         pageMarginLeft: 50,
         pageMarginBottom: 50,
-        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp', 'annot@class', 'annot@corresp'] //,
+        svgAdditionalAttribute: ['beam@corresp', 'note@corresp', 'chord@corresp', 'measure@corresp', 'rest@corresp', 'slur@corresp', 'staff@rotate', 'accid@corresp', 'annot@class', 'annot@corresp', 'sb@corresp'] //,
         // unit: 18
       }
 

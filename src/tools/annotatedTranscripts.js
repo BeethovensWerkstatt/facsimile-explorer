@@ -33,6 +33,29 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
     let next = wzb.nextElementSibling
     while (next && !next.classList.contains('annot')) {
+      if (next.classList.contains('sb')) {
+        console.log(912, 'found sb', next)
+
+        const sysBox = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+        sysBox.setAttribute('class', 'systemBegin')
+        sysBox.setAttribute('data-class', 'systemBegin')
+        sysBox.setAttribute('data-id', next.getAttribute('data-id'))
+        sysBox.setAttribute('data-system-id', next.hasAttribute('data-corresp') ? next.getAttribute('data-corresp').split('#')[1] : '')
+
+        content.push(sysBox)
+        const sysBoxContent = []
+
+        let sysNext = next.nextElementSibling
+        while (sysNext && !sysNext.classList.contains('sb') && !sysNext.classList.contains('pb')) {
+          sysBoxContent.push(sysNext)
+          sysNext = sysNext.nextElementSibling
+        }
+        sysBoxContent.forEach((node) => {
+          sysBox.append(node)
+        })
+        box.append(sysBox)
+      }
+
       if (!next.classList.contains('pb')) {
         content.push(next)
       }
@@ -64,7 +87,7 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
         box.setAttribute('data-source', fullPath)
 
-        const sourceLabel = getters.title // sourceInfo.name
+        const sourceLabel = getters.title === 'Notirungsbuch K' || getters.title === '' ? 'NK' : getters.title// sourceInfo.name
 
         console.log(911, 'wzId', wzId, 'fullPath', fullPath, 'sourceLabel', sourceLabel, 'sourceInfo', sourceInfo)
 
@@ -74,7 +97,12 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
         const surfaceId = gendescWZ.parentElement.getAttribute('corresp').substring(1)
         const surface = source.querySelector('surface[*|id="' + surfaceId + '"]')
-        const surfaceLabel = surface.getAttribute('label')
+
+        const pageInfo = getters.documentPagesForSidebars(getters.filepath).find(p => p.id === surfaceId)
+
+        const surfaceLabel = pageInfo.label // surface.getAttribute('label')
+
+        // console.log(774, 'pages2', getters.documentPagesForSidebars(getters.filepath))
 
         const wzIndexPadded = wzLabel.padStart(2, '0')
         const docName = sourceInfo.name
@@ -82,7 +110,7 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
         box.setAttribute('data-dt-path', diploTransFilePath)
 
-        label = sourceLabel + ', p.' + surfaceLabel + ', WZ ' + wzLabel
+        label = sourceLabel + ' ' + surfaceLabel + ' / ' + wzLabel
         console.log(911, 'wzLabel', wzLabel)
       } catch (err) {
         console.warn('Unable to retrieve wz label for writingZone', atWzBegin)
@@ -105,6 +133,74 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
     text.textContent = label
     box.prepend(text)
     box.prepend(rect)
+
+    const sysBoxes = box.querySelectorAll('g.systemBegin')
+    const sourceDocPath = box.getAttribute('data-source')
+    const dtDocPath = box.getAttribute('data-dt-path')
+
+    sysBoxes.forEach((sysBox) => {
+      const sysId = sysBox.getAttribute('data-system-id')
+      const sysBbox = sysBox.getBBox()
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      rect.setAttribute('x', sysBbox.x + staffHeight / 8)
+      rect.setAttribute('y', staffHeight * -0.8)
+      rect.setAttribute('width', sysBbox.width - staffHeight / 4)
+      rect.setAttribute('height', staffHeight * 0.6)
+      rect.classList.add('pageLabelBox')
+
+      const systemLabels = getters.systemNumbersByDtSystem(sysId, sourceDocPath, dtDocPath)
+      const pageHeight = staffHeight * 0.6 * 0.8
+      const pageWidth = systemLabels.length > 0 ? parseFloat((pageHeight * systemLabels[0].ratio).toFixed(2)) : 1
+
+      const previewPageBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      previewPageBox.classList.add('pageBg')
+      previewPageBox.setAttribute('x', sysBbox.x + staffHeight / 8 + pageHeight * 0.1)
+      previewPageBox.setAttribute('y', staffHeight * -0.8 + pageHeight * 0.1)
+
+      previewPageBox.setAttribute('height', pageHeight)
+      previewPageBox.setAttribute('width', pageWidth)
+
+      let x1 = 1
+      let y1 = 1
+      let x2 = 0
+      let y2 = 0
+      systemLabels.forEach((systemLabel) => {
+        x1 = Math.min(x1, systemLabel.x)
+        y1 = Math.min(y1, systemLabel.y)
+        x2 = Math.max(x2, systemLabel.x + systemLabel.w)
+        y2 = Math.max(y2, systemLabel.y + systemLabel.h)
+      })
+
+      const previewSystemBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      previewSystemBox.classList.add('sysPreview')
+      previewSystemBox.setAttribute('x', sysBbox.x + staffHeight / 8 + pageHeight * 0.1 + pageWidth * x1)
+      previewSystemBox.setAttribute('y', staffHeight * -0.8 + pageHeight * 0.1 + pageHeight * y1)
+
+      previewSystemBox.setAttribute('height', pageHeight * (y2 - y1))
+      previewSystemBox.setAttribute('width', pageWidth * (x2 - x1))
+
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+      text.setAttribute('x', sysBbox.x + staffHeight / 8 + parseFloat(pageHeight * 0.5) + parseFloat(pageWidth))
+      text.setAttribute('y', staffHeight * -0.8 + fontSize * 0.65)
+      text.setAttribute('font-size', fontSize * 0.75)
+      text.classList.add('sysLabel')
+
+      let systemLabel
+
+      if (systemLabels.length > 1) {
+        systemLabel = 'Staves ' + systemLabels.map(label => label.pos).join(', ')
+      } else if (systemLabels.length === 1) {
+        systemLabel = 'Staff ' + systemLabels[0].pos
+      } else {
+        systemLabel = 'data unavailable'
+      }
+      text.textContent = systemLabel // 'Systems'
+
+      sysBox.prepend(text)
+      sysBox.prepend(previewSystemBox)
+      sysBox.prepend(previewPageBox)
+      sysBox.prepend(rect)
+    })
   })
 
   return svgDom
