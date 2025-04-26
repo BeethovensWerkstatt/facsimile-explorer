@@ -93,7 +93,9 @@ const verovioModule = {
           'staff@n',
           'clef@shape',
           'clef@line',
-          'annot@class', 'annot@corresp'] //,
+          'annot@class',
+          'annot@corresp',
+          'sb@corresp'] //,
         // unit: 18
       }
 

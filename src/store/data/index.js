@@ -3482,6 +3482,93 @@ const dataModule = {
       })
 
       return affectedStaves
+    },
+
+    systemNumbersByDtSystem: (state, getters) => (sysId, sourceDocPath, dtDocPath) => {
+      if (!sysId || !sourceDocPath || !dtDocPath) {
+        // console.log(843, 'no sysId or sourceDocPath or dtDocPath', sysId, sourceDocPath, dtDocPath)
+        return []
+      }
+      const sourceDoc = getters.documentByPath(sourceDocPath)
+      const dtDoc = getters.documentByPath(dtDocPath)
+
+      if (!sourceDoc) {
+        // console.log(843, 'document at sourceDocPath not yet loaded: ' + sourceDocPath)
+        return []
+      }
+      if (!dtDoc) {
+        // console.log(843, 'document at dtDocPath not yet loaded: ' + dtDocPath)
+        return []
+      }
+      const bwSystem = dtDoc.querySelector('*[*|id="' + sysId + '"]')
+      if (!bwSystem) {
+        // console.log(843, 'bwSystem not found for ' + sysId)
+        return []
+      }
+      const rastrumIds = []
+      bwSystem.querySelectorAll('*|staffDef').forEach(staffDef => {
+        rastrumIds.push(staffDef.getAttribute('decls').split('#')[1])
+      })
+      if (rastrumIds.length === 0) {
+        // console.log(843, 'no rastrumIds found for ' + sysId)
+        return []
+      }
+
+      const rastrums = []
+      rastrumIds.forEach(rastrumId => {
+        const rastrum = sourceDoc.querySelector('rastrum[*|id="' + rastrumId + '"]')
+
+        // gets a one-based position
+        const getPos = (node) => {
+          let count = 1
+          let sibling = node.previousElementSibling
+
+          while (sibling) {
+            if (sibling.localName === 'rastrum') {
+              count++
+            }
+            sibling = sibling.previousElementSibling
+          }
+
+          return count
+        }
+        const pos = getPos(rastrum)
+
+        const w = parseFloat(rastrum.getAttribute('width'))
+        const h = parseFloat(rastrum.getAttribute('system.height'))
+        const x = parseFloat(rastrum.getAttribute('system.leftmar'))
+        const y = parseFloat(rastrum.getAttribute('system.topmar'))
+
+        const layoutId = rastrum.closest('layout').getAttribute('xml:id')
+        const surfaceId = sourceDoc.querySelector('surface[decls="#' + layoutId + '"]').getAttribute('xml:id')
+
+        const allFolia = sourceDoc.querySelectorAll('foliaDesc *')
+        const match = '#' + surfaceId
+        const folium = [...allFolia].find(folium =>
+          folium.getAttribute('outer.recto') === match ||
+          folium.getAttribute('inner.verso') === match ||
+          folium.getAttribute('inner.recto') === match ||
+          folium.getAttribute('outer.verso') === match ||
+          folium.getAttribute('recto') === match ||
+          folium.getAttribute('verso') === match)
+
+        const foliumWidth = parseFloat(folium.getAttribute('width'))
+        const foliumHeight = parseFloat(folium.getAttribute('height'))
+
+        const ratio = parseFloat((foliumWidth / foliumHeight).toFixed(2))
+        const sysX = parseFloat((x / foliumWidth).toFixed(2))
+        const sysY = parseFloat((y / foliumHeight).toFixed(2))
+        const sysW = parseFloat((w / foliumWidth).toFixed(2))
+        const sysH = parseFloat((h / foliumHeight).toFixed(2))
+
+        const r = { pos, ratio, x: sysX, y: sysY, w: sysW, h: sysH }
+
+        if (rastrum) {
+          rastrums.push(r)
+        }
+      })
+      // console.log(843, 'rastrums for sysId: ' + sysId, rastrums)
+      return rastrums
     }
   }
 }

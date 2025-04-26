@@ -145,6 +145,7 @@ export default {
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
+
         const dtPath = target.closest('g[data-dt-path]').getAttribute('data-dt-path')
         console.log('\n841 clicked verovio\nname: ' + name + '\nid: ' + id + '\nmeasure: ' + measure + '\npath: ' + path + '\npurpose: ' + this.purpose + '\ndtPath: ' + dtPath)
         const cvpayload = {
@@ -361,6 +362,14 @@ export default {
 
   svg rect.pageLabelBox {
     fill: $verovioAtPageLabelBox;
+  }
+
+  svg rect.pageBg {
+    fill: #ffffff;
+  }
+
+  svg rect.sysPreview {
+    fill: red;
   }
 }
 
