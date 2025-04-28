@@ -2048,10 +2048,17 @@ const dataModule = {
             genDesc.id = zone.getAttribute('data').substring(1)
             genDesc.zone = zone.getAttribute('xml:id')
             const gd = mei.querySelector('genDesc[*|id="' + genDesc.id + '"]')
-            genDesc.label = gd.getAttribute('label')
-            genDesc.svg = gd.getAttribute('corresp')
+
+            if (!gd) {
+              // this seems to be necessary for when getters don't have latest values for a freshly added gd yet. Eventually resolves all fine, but admittedly doesn't feel correct.
+              return null
+            }
+
+            genDesc.label = gd ? gd.getAttribute('label') : ''
+            genDesc.svg = gd ? gd.getAttribute('corresp') : ''
             return genDesc
-          })
+          }).filter(genDesc => genDesc !== null)
+
           obj.zonesCount = obj.zones.length // exists(mei:zone) inside relevant /surface
           obj.hasFragment = target.indexOf('#xywh=') !== -1
 
