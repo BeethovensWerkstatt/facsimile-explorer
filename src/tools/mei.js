@@ -334,7 +334,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
     .then(response => response.text())
     .then(xmlString => parser.parseFromString(xmlString, 'application/xml'))
 
-  diploTemplate.querySelector('draft').childNodes.forEach(node => {
+  diploTemplate.getElementsByTagNameNS('*', 'draft')[0].childNodes.forEach(node => {
     if (node.nodeType === Node.COMMENT_NODE) {
       node.remove()
     }
@@ -360,7 +360,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   diploTemplate.querySelector('source').setAttribute('target', '../' + filename + '#' + genDescWzId)
   const pb = diploTemplate.querySelector('pb')
   pb.setAttribute('target', '../' + filename + '#' + surfaceId)
-  const draft = diploTemplate.querySelector('draft')
+  const draft = diploTemplate.getElementsByTagNameNS('*', 'draft')[0]
 
   let system = null
   let section = null
