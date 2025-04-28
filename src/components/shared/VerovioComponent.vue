@@ -1,5 +1,5 @@
 <template>
-  <div class="verovioComponent"><div :class="purpose" ref="mei">
+  <div class="verovioComponent" ref="verovioContainer"><div :class="purpose" ref="mei">
     <div class="placeholder">no transcript available ...</div>
   </div></div>
 </template>
@@ -56,7 +56,10 @@ export default {
     ...mapGetters(['diploPageBackgroundVerovioOptions', 'annotTransVerovioOptions'])
   },
   watch: {
-    scale () {
+    scale (newScale, oldScale) {
+      const fac = +newScale / +oldScale
+      const hscroll = this.$refs.verovioContainer.scrollLeft
+      this.$refs.verovioContainer.scrollTo({ left: hscroll * fac, behaviour: 'instant' })
       this.render()
     }
   },
@@ -79,6 +82,8 @@ export default {
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
+          const left = this.$refs.verovioContainer.scrollLeft
+          console.log('VerovioComponent left', left)
           this.$refs.mei.innerHTML = localCopy
 
           if (+this.scale > 0 || !this.scale) {
@@ -96,6 +101,8 @@ export default {
             svgDom.removeAttribute('height')
             svgDom.setAttribute('style', `width: ${percWidth}%; height: ${percHeight}%; max-width: none; max-height: none;`)
           }
+
+          this.$refs.verovioContainer.scrollTo({ left, behaviour: 'smooth' })
         }
 
         if (this.type === 'diploTrans') {
