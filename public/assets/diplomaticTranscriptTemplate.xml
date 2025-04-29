@@ -160,8 +160,8 @@
     <music meiversion="6.0+beethovensWerkstatt">
         <body>
             <mdiv xml:id="%NEW-ID%">
-                <drafts xml:id="%NEW-ID%">
-                    <draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
+                <bw:drafts xml:id="%NEW-ID%">
+                    <bw:draft xml:id="%NEW-ID%" class="#bw_diplomatic_transcript">
                         <!-- pb/@target points to surface ID -->
                         <pb xml:id="%NEW-ID%" target="../%FILENAME%#%SURFACE-ID%"/>
                         <!-- 
@@ -188,8 +188,8 @@
                             </section>
                         </bw:system>
                         -->
-                    </draft>
-                </drafts>
+                    </bw:draft>
+                </bw:drafts>
             </mdiv>
         </body>
     </music>
