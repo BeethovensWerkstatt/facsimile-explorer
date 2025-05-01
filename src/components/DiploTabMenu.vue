@@ -21,7 +21,7 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isNote || isRest || isAccid">
+    <div class="entry" v-if="isNote || isRest || isAccid || isDot">
         <label>@loc</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="loc" setterName="setActiveDiploTransElementAttValue" :min="-10" :max="25" :step="1"/>
@@ -114,6 +114,9 @@ export default {
     },
     isRest () {
       return this.$store.getters.activeDiploTransElementName === 'rest'
+    },
+    isDot () {
+      return this.$store.getters.activeDiploTransElementName === 'dot'
     },
     hasStemLen () {
       const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')

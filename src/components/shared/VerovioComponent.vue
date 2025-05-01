@@ -144,7 +144,7 @@ export default {
         // const isBarline = target.classList.contains('barLine')
 
         const name = target.getAttribute('data-class')
-        const id = (name === 'dots') ? target.closest('.note').getAttribute('data-id') : target.getAttribute('data-id')
+        const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
 
         const meiDom = this.$store.getters[this.getter]
