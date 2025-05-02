@@ -1519,8 +1519,9 @@ const dataModule = {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
       } if (annotElemRef.name === 'dots') {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
-        // console.warn('\n\nLOOKING FOR A DOT!!!')
-        annotElem = atDoc.querySelector('note[*|id="' + annotElemRef.id + '"]')
+        console.warn('\n\nLOOKING FOR A DOT!!!')
+        annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
+        console.log(668, annotElem)
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
         if (!annotElem) {

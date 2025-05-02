@@ -48,9 +48,9 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     name = 'beamSpan'
   } else if (name === 'measure') {
     name = 'barLine'
-  } else if (name === 'note' && annotElem.parentNode.localName === 'chord') {
+  } else if (name === 'note' && annotElem.parentNode.localName === 'chord' && annotElemRef.name !== 'dots') {
     name = 'chord'
-  } else if (name === 'note' && annotElemRef.name === 'dots') {
+  } else if ((name === 'note' || name === 'rest') && annotElemRef.name === 'dots') {
     name = 'dot'
   } else if (name === 'keyAccid') {
     name = 'accid'
@@ -298,6 +298,9 @@ function getDiplomaticClef (annotElem, clef) {
 function getLocAttribute (annotElem) {
   if (!annotElem) {
     console.warn('WARNING: no proper annotElem provided to calculate @loc', annotElem)
+    return 5
+  }
+  if (annotElem.localName === 'rest') {
     return 5
   }
   try {
