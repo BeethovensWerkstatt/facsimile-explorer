@@ -77,11 +77,13 @@ export default {
           const resolvedDraft = draft2score(meiDom)[0]
           const addedSbIndicators = addSbIndicators(resolvedDraft)
           console.log('VerovioComponent', meiDom, addedSbIndicators)
+          // console.log('VerovioComponent', meiDom, addedSbIndicators)
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
           const left = this.$refs.verovioContainer.scrollLeft
           console.log('VerovioComponent left', left)
+          // console.log('VerovioComponent left', left)
           this.$refs.mei.innerHTML = localCopy
 
           if (+this.scale > 0 || !this.scale) {

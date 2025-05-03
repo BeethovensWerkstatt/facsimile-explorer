@@ -1431,7 +1431,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         const controlEvents = node.querySelectorAll('section > *:not(staff)')
         controlEvents.forEach(controlEvent => {
           const ctrlevt = controlEvent.cloneNode(true)
-          console.log('Control Event', ctrlevt.localName)
+          // console.log('Control Event', ctrlevt.localName)
           if (ctrlevt.localName === 'beamSpan') {
             const facs = ctrlevt.getAttribute('facs').split([' '])
             let bbox = null

@@ -181,11 +181,14 @@ export default {
       this.$store.dispatch('setModal', 'initializeDT')
     },
     autoTranscribe (newShapes, oldShapes, newAnnotated, oldAnnotated) {
+      // console.log(356, 'entering autotranscribe')
       if (newShapes.length === 0 || !newAnnotated) {
+        // console.log(356, 'no shapes or no annotated')
         return false
       }
-
+      // console.log(356, 'in between')
       const currentWz = this.$store.getters.currentWritingZoneObject
+      // console.log(356, 'currentWz', currentWz)
       if (!currentWz) {
         return false
       }
