@@ -111,7 +111,7 @@ const mutations = {
   },
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
     state.auth = auth
-    console.log('set access token', state.auth)
+    // console.log('set access token', state.auth)
     try {
       state.octokit = new Octokit({
         auth: state.auth,
@@ -124,7 +124,7 @@ const mutations = {
           state.user = data
           if (store) store(state.auth)
         }).catch(e => {
-          console.log('token invalid', state.auth)
+          // console.log('token invalid', state.auth)
           state.auth = ''
           state.user = {}
           if (remove) remove()
@@ -143,7 +143,7 @@ const mutations = {
   },
 
   SET_COMMIT (state, commit) {
-    console.log('set commit', state.commit?.sha, '->', commit?.sha)
+    // console.log('set commit', state.commit?.sha, '->', commit?.sha)
     if (!commit.tree?.sha) console.warn('incomplete commit', commit)
     state.commit = commit
   },
@@ -170,7 +170,7 @@ const mutations = {
     state.availableAtSymlinks = atSymlinks
   },
   ADD_AVAILABLE_AT_SYMLINK (state, atSymlink) {
-    console.log(913, atSymlink)
+    // console.log(913, atSymlink)
     if (state.availableAtSymlinks.indexOf(atSymlink) === -1) {
       state.availableAtSymlinks.push(atSymlink)
     }

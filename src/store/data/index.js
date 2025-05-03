@@ -5,6 +5,7 @@ import OpenSeadragon from 'openseadragon'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
+import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
@@ -2366,7 +2367,9 @@ const dataModule = {
         return null
       }
 
-      return atDom.cloneNode(true)
+      const preparedAtDom = prepareAtDomForRendering(atDom.cloneNode(true))
+
+      return preparedAtDom
     },
 
     /**

@@ -249,3 +249,53 @@ export const addSbIndicators = (svgDom, atDom) => {
 
   return atDom
 }
+
+/**
+ * This function prepares an AT for rendering by Verovio
+ * @param {*} atDom
+ * @returns
+ */
+export const prepareAtDomForRendering = (atDom) => {
+  const dots = atDom.querySelectorAll('dot')
+  dots.forEach((dot) => {
+    const parent = dot.parentElement
+    // const dotId = dot.getAttribute('xml:id')
+    if (parent.hasAttribute('dots')) {
+      const newCount = parseInt(parent.getAttribute('dots')) + 1
+      parent.setAttribute('dots', newCount)
+      if (dot.hasAttribute('corresp')) {
+        const dotCorresp = dot.getAttribute('corresp')
+        if (parent.hasAttribute('dot-corresp')) {
+          parent.setAttribute('dot-corresp', parent.getAttribute('dot-corresp') + ' ' + dotCorresp)
+        }
+      }
+    } else {
+      parent.setAttribute('dots', '1')
+      if (dot.hasAttribute('corresp')) {
+        parent.setAttribute('dot-corresp', dot.getAttribute('corresp'))
+      }
+    }
+  })
+  return atDom
+}
+
+/**
+ * This function fixes some artifacts of an AT as rendered by Verovio
+ * @param {*} svgDom
+ * @param {*} atDom
+ */
+export const improveAtSvg = (svgDom, atDom) => {
+  const dotBearers = svgDom.querySelectorAll('*[data-dot-corresp]')
+  dotBearers.forEach((dotBearer) => {
+    const corresp = dotBearer.getAttribute('data-dot-corresp')
+    const dotRefs = corresp.split(' ')
+    const dots = dotBearer.querySelectorAll('g.dots:not(.bounding-box)')
+    dots.forEach((dot, i) => {
+      if (dotRefs[i]) {
+        dot.setAttribute('data-corresp', dotRefs[i])
+      }
+    })
+  })
+
+  return svgDom
+}
