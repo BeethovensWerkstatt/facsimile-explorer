@@ -111,7 +111,7 @@ const mutations = {
   },
   SET_ACCESS_TOKEN (state, { auth, store, remove }) {
     state.auth = auth
-    console.log('set access token', state.auth)
+    // console.log('set access token', state.auth)
     try {
       state.octokit = new Octokit({
         auth: state.auth,
@@ -124,7 +124,7 @@ const mutations = {
           state.user = data
           if (store) store(state.auth)
         }).catch(e => {
-          console.log('token invalid', state.auth)
+          // console.log('token invalid', state.auth)
           state.auth = ''
           state.user = {}
           if (remove) remove()
@@ -143,7 +143,7 @@ const mutations = {
   },
 
   SET_COMMIT (state, commit) {
-    console.log('set commit', state.commit?.sha, '->', commit?.sha)
+    // console.log('set commit', state.commit?.sha, '->', commit?.sha)
     if (!commit.tree?.sha) console.warn('incomplete commit', commit)
     state.commit = commit
   },
@@ -170,7 +170,7 @@ const mutations = {
     state.availableAtSymlinks = atSymlinks
   },
   ADD_AVAILABLE_AT_SYMLINK (state, atSymlink) {
-    console.log(913, atSymlink)
+    // console.log(913, atSymlink)
     if (state.availableAtSymlinks.indexOf(atSymlink) === -1) {
       state.availableAtSymlinks.push(atSymlink)
     }
@@ -554,19 +554,19 @@ const actions = {
         tree: newTreeSha,
         parents: [localSHA]
       })
-      console.log('commit 2 GitHub: new commitSha', newCommit.sha)
+      // console.log('commit 2 GitHub: new commitSha', newCommit.sha)
 
-      console.log('commit 2 GitHub: get ref ...')
+      // console.log('commit 2 GitHub: get ref ...')
 
       const remoteCommit = await octoRepo.getLastCommit()
-      console.log('commit 2 GitHub: current commmit', getters.commit, remoteCommit)
+      // console.log('commit 2 GitHub: current commmit', getters.commit, remoteCommit)
       const { sha: remoteSHA, url: headURL } = remoteCommit
       commit('SET_CHANGES_NEED_BRANCHING', remoteSHA !== localSHA)
 
       const targetBranch = branch
       const tmpBranch = 'conflict-' + refdate() + '-' + getters.gh_user.login
       if (getters.changesNeedBranching) {
-        console.log(remoteSHA, localSHA, tmpBranch)
+        // console.log(remoteSHA, localSHA, tmpBranch)
         const newBranch = await octokit.request(`POST /repos/${owner}/${repo}/git/refs`, {
           owner,
           repo,
@@ -578,7 +578,7 @@ const actions = {
       }
 
       // Update the specified branch to point to the new commit
-      console.log('commit 2 GitHub: update "' + branch + '" ...')
+      // console.log('commit 2 GitHub: update "' + branch + '" ...')
       const ref = await octokit.git.updateRef({
         owner,
         repo,
@@ -588,12 +588,12 @@ const actions = {
       console.log('commit 2 GitHub: updateRef "' + branch + '" to ', ref)
 
       if (!getters.changesNeedBranching) { // direct commit
-        console.log('committed')
+        // console.log('committed')
         commit('SET_COMMIT', newCommit)
         dispatch('setCommitResults', { status: 'success', prUrl: null, conflictingUser: null })
       } else {
         // create PR
-        console.log('commit 2 GitHub: create PR ...')
+        // console.log('commit 2 GitHub: create PR ...')
         const { data } = await octokit.request(`POST /repos/${owner}/${repo}/pulls`, {
           owner,
           repo,
@@ -607,7 +607,7 @@ const actions = {
         const prUrl = data.html_url
         const merge = await new Promise((resolve, reject) => {
           try {
-            console.log('commit 2 GitHub: merge PR ...')
+            // console.log('commit 2 GitHub: merge PR ...')
             const merge = octokit.request(`PUT /repos/${owner}/${repo}/pulls/${data.number}/merge`, {
               owner,
               repo,
@@ -617,7 +617,7 @@ const actions = {
               delete_branch_on_merge: true // does this work?
             })
             merge.then(m => {
-              console.log('merge', m)
+              // console.log('merge', m)
               resolve(m)
             }).catch(e => {
               console.warn(e)
@@ -628,10 +628,10 @@ const actions = {
             resolve(null)
           }
         })
-        console.log('commit 2 GitHub: merge result', merge)
+        // console.log('commit 2 GitHub: merge result', merge)
         // merged?
         if (merge?.data.merged) {
-          console.log('merged', tmpBranch)
+          // console.log('merged', tmpBranch)
           dispatch('setCommitResults', { status: 'merged', prUrl: null, conflictingUser: null })
           dispatch('deleteBranch', { ref: tmpBranch })
 

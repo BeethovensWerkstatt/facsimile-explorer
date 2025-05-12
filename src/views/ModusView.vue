@@ -61,7 +61,7 @@ export default {
       console.log(e)
     },
     reload () {
-      console.log('route', this.$route)
+      // console.log('route', this.$route)
       const path = this.$store.getters.getPathByName(this.$route.params.source)
       const modus = this.$route.params.modus
       const page = this.$route.query.page
@@ -87,7 +87,7 @@ export default {
           }
           */
         }
-        console.log('setCurrentPage', currentPage)
+        // console.log('setCurrentPage', currentPage)
         this.$store.dispatch('setCurrentPage', currentPage)
       }
     }

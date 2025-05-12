@@ -1286,7 +1286,7 @@ const guiModule = {
      */
     needInitializeDT: (state, getters) => {
       const currentWz = getters.currentWritingZoneObject
-      console.log(currentWz)
+      // console.log(currentWz)
       if (!currentWz) {
         return false
       }

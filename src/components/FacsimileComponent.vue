@@ -11,6 +11,7 @@ import { mapGetters } from 'vuex'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 import { getEmptyPage, selectables } from '@/tools/mei.js'
 import { useDiploTrans } from '@/store/gui/diplotrans'
+import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
 
 const osdOptions = {
   preserveViewport: false,
@@ -1041,7 +1042,7 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(renderedDiplo)
+            element.append(cleanUpDiplomaticTranscript(renderedDiplo))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1525,6 +1526,10 @@ export default {
         fill: #961010;
         stroke: #961010;
       }
+    }
+
+    .beamSpan polygon {
+      transform: translate(40px, -40px);
     }
   }
 }

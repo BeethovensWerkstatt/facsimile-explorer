@@ -6,8 +6,9 @@
 
 <script>
 import { draft2score, draft2page, addSbIndicators, selectables } from '@/tools/mei.js'
-import { resolveSbIndicators } from '@/tools/annotatedTranscripts.js'
+import { resolveSbIndicators, improveAtSvg } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
+import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
 
 /*
 const rawSelectables = [
@@ -78,12 +79,12 @@ export default {
         if (this.type === 'annotTrans') {
           const resolvedDraft = draft2score(meiDom)[0]
           const addedSbIndicators = addSbIndicators(resolvedDraft)
-          console.log('VerovioComponent', meiDom, addedSbIndicators)
+          // console.log('VerovioComponent', meiDom, addedSbIndicators)
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
           const left = this.$refs.verovioContainer.scrollLeft
-          console.log('VerovioComponent left', left)
+          // console.log('VerovioComponent left', left)
           this.$refs.mei.innerHTML = localCopy
 
           if (+this.scale > 0 || !this.scale) {
@@ -91,6 +92,7 @@ export default {
             const whnum = (att) => +att.match(nre)[1]
 
             const svgDom = resolveSbIndicators(this.$refs.mei.querySelector('svg'), meiDom, this.$store.getters)
+            improveAtSvg(svgDom, meiDom)
             const svgWidth = whnum(svgDom.getAttribute('width'))
             const svgHeight = whnum(svgDom.getAttribute('height'))
             const percHeight = 10 * +this.scale
@@ -109,7 +111,7 @@ export default {
           const resolvedTrans = draft2page(meiDom)
 
           const svg = await this.$store.getters.diplomaticTranscriptForWz(resolvedTrans)
-          const localCopy = svg.repeat(1)
+          const localCopy = cleanUpDiplomaticTranscript(svg.repeat(1))
           this.$refs.mei.innerHTML = localCopy
         }
 

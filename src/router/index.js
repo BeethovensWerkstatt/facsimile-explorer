@@ -37,20 +37,19 @@ const router = createRouter({
  * @type {[type]}
  */
 router.beforeEach((to, from) => {
-  console.log('\nthis is captain speaking, going to')
-  console.log(to)
-  console.log(from)
+  // console.log('\nthis is captain speaking, going to')
+  // console.log(to)
+  // console.log(from)
   try {
     if (to.name === 'modus') {
       const tab = to.params.modus
-      console.log('trying to open tab "' + tab + '", typeof store: ' + typeof store)
+      // console.log('trying to open tab "' + tab + '", typeof store: ' + typeof store)
       store.dispatch('setExplorerTab', tab)
-      console.log('done')
 
       const path = store.getters.documentPathByName(to.params.source)
-      console.log('received the following path from: ' + to.params.source + ': ' + path)
+      // console.log('received the following path from: ' + to.params.source + ': ' + path)
       if (!path) {
-        console.log('I need to retrieve ' + to.params.source)
+        // console.log('I need to retrieve ' + to.params.source)
         store.dispatch('setAwaitedDocument', to.params.source)
         if (to.query.page && parseInt(to.query.page).toFixed(0) === to.query.page) {
           store.dispatch('setAwaitedPage', parseInt(to.query.page))
@@ -62,9 +61,9 @@ router.beforeEach((to, from) => {
           }
         }
       } else {
-        console.log('opening content')
+        // console.log('opening content')
         store.dispatch('loadContent', { path })
-        console.log('content opened')
+        // console.log('content opened')
         // check if queried page is a proper integer
         /* if (to.query.page && parseInt(to.query.page).toFixed(0) === to.query.page) {
           if (path && store.getters.documentPagesForSidebars(path)[parseInt(to.query.page)] !== undefined) {

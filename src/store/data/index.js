@@ -5,6 +5,7 @@ import OpenSeadragon from 'openseadragon'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
 import { rotatePoint } from '@/tools/trigonometry'
+import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
@@ -1444,20 +1445,20 @@ const dataModule = {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
       const atPath = getters.currentWzAtPath
-      console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
+      // console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
-        console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
+        // console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
         return false
       }
       const currentWz = getters.currentWritingZoneObject
       if (!currentWz) {
-        console.log('??? currentWz', currentWz)
+        // console.log('??? currentWz', currentWz)
         return false
       }
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
-      console.log(785, annotElemRef.dtPath)
+      // console.log(785, annotElemRef.dtPath)
       let dtDoc = getters.documentByPath(annotElemRef.dtPath)?.cloneNode(true)
       if (!dtDoc) {
         const docload = new Promise((resolve, reject) => {
@@ -1480,7 +1481,7 @@ const dataModule = {
 
       // check that all necessary documents are available
       if (!atDoc || !dtDoc || !svgDoc) {
-        console.log('??? at, dt, svg', atDoc, dtDoc, svgDoc)
+        // console.log('??? at, dt, svg', atDoc, dtDoc, svgDoc)
         return false
       }
 
@@ -1519,9 +1520,9 @@ const dataModule = {
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
       } if (annotElemRef.name === 'dots') {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
-        console.warn('\n\nLOOKING FOR A DOT!!!')
+        // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
-        console.log(668, annotElem)
+        // console.log(668, annotElem)
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
         if (!annotElem) {
@@ -1540,7 +1541,7 @@ const dataModule = {
       // debug messages
       console.log('-------------------------> "' + (annotElemRef.name === 'dots' ? 'dot' : annotElem.localName) + '"')
       if (annotElem.localName === 'beam' || annotElem.localName === 'beamSpan') {
-        console.log('found beam:', annotElemRef)
+        // console.log('found beam:', annotElemRef)
       }
 
       // retrieve shapes
@@ -1557,7 +1558,7 @@ const dataModule = {
       } else if (!isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')
-          console.log('691 found staff (a)', annotStaffN)
+          // console.log('691 found staff (a)', annotStaffN)
         } else {
           annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
           console.log('691 found staff (b)', annotStaffN)
@@ -1565,17 +1566,17 @@ const dataModule = {
       } else if (isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')
-          console.log('691 found staff (c)', annotStaffN)
+          // console.log('691 found staff (c)', annotStaffN)
         } else if (annotElem.hasAttribute('startid')) {
           const startid = annotElem.getAttribute('startid').split('#')[1]
-          console.log('startid', startid)
+          // console.log('startid', startid)
           const startElem = atDoc.querySelector('*[*|id="' + startid + '"]') // TODO?? annotElemRef.name +
-          console.log('startelem', startElem)
+          // console.log('startelem', startElem)
           annotStaffN = startElem.closest('staff').getAttribute('n')
-          console.log('691 found staff (d)', annotStaffN)
+          // console.log('691 found staff (d)', annotStaffN)
         }
       }
-      console.log('691 annotStaffN', annotStaffN)
+      // console.log('691 annotStaffN', annotStaffN)
 
       // the staff in the DT will be the same as in the AT
       const diploStaffN = annotStaffN // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
@@ -1585,7 +1586,7 @@ const dataModule = {
       // get the rastrum for the staff
       const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
 
-      console.log('691 rastrum', rastrum)
+      // console.log('691 rastrum', rastrum)
 
       const rects = getters.osdRects
       // console.log('691 rects', rects)
@@ -2415,7 +2416,9 @@ const dataModule = {
         return null
       }
 
-      return atDom.cloneNode(true)
+      const preparedAtDom = prepareAtDomForRendering(atDom.cloneNode(true))
+
+      return preparedAtDom
     },
 
     /**

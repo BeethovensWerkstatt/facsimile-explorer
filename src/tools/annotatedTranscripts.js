@@ -34,7 +34,7 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
     let next = wzb.nextElementSibling
     while (next && !next.classList.contains('annot')) {
       if (next.classList.contains('sb')) {
-        console.log(912, 'found sb', next)
+        // console.log(912, 'found sb', next)
 
         const sysBox = document.createElementNS('http://www.w3.org/2000/svg', 'g')
         sysBox.setAttribute('class', 'systemBegin')
@@ -70,11 +70,11 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
     parent.replaceChild(box, wzb)
 
     const atWzBegin = atDom.querySelector('annot[*|id="' + wzb.getAttribute('data-id') + '"]')
-    console.log(911, atWzBegin)
+    // console.log(911, atWzBegin)
     let label = 'x'
 
     if (atWzBegin && atWzBegin.hasAttribute('corresp')) {
-      console.log('911 getting in')
+      // console.log('911 getting in')
       try {
         const relativePath = atWzBegin.getAttribute('corresp').split('#')[0]
         const wzId = atWzBegin.getAttribute('corresp').split('#')[1]
@@ -89,7 +89,7 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
         const sourceLabel = getters.title === 'Notirungsbuch K' || getters.title === '' ? 'NK' : getters.title// sourceInfo.name
 
-        console.log(911, 'wzId', wzId, 'fullPath', fullPath, 'sourceLabel', sourceLabel, 'sourceInfo', sourceInfo)
+        // console.log(911, 'wzId', wzId, 'fullPath', fullPath, 'sourceLabel', sourceLabel, 'sourceInfo', sourceInfo)
 
         const source = getters.documentByPath(fullPath)
         const gendescWZ = source.querySelector('genDesc[*|id="' + wzId + '"]')
@@ -111,7 +111,7 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
         box.setAttribute('data-dt-path', diploTransFilePath)
 
         label = sourceLabel + ' ' + surfaceLabel + ' / ' + wzLabel
-        console.log(911, 'wzLabel', wzLabel)
+        // console.log(911, 'wzLabel', wzLabel)
       } catch (err) {
         console.warn('Unable to retrieve wz label for writingZone', atWzBegin)
       }
@@ -248,4 +248,54 @@ export const addSbIndicators = (svgDom, atDom) => {
   })
 
   return atDom
+}
+
+/**
+ * This function prepares an AT for rendering by Verovio
+ * @param {*} atDom
+ * @returns
+ */
+export const prepareAtDomForRendering = (atDom) => {
+  const dots = atDom.querySelectorAll('dot')
+  dots.forEach((dot) => {
+    const parent = dot.parentElement
+    // const dotId = dot.getAttribute('xml:id')
+    if (parent.hasAttribute('dots')) {
+      const newCount = parseInt(parent.getAttribute('dots')) + 1
+      parent.setAttribute('dots', newCount)
+      if (dot.hasAttribute('corresp')) {
+        const dotCorresp = dot.getAttribute('corresp')
+        if (parent.hasAttribute('dot-corresp')) {
+          parent.setAttribute('dot-corresp', parent.getAttribute('dot-corresp') + ' ' + dotCorresp)
+        }
+      }
+    } else {
+      parent.setAttribute('dots', '1')
+      if (dot.hasAttribute('corresp')) {
+        parent.setAttribute('dot-corresp', dot.getAttribute('corresp'))
+      }
+    }
+  })
+  return atDom
+}
+
+/**
+ * This function fixes some artifacts of an AT as rendered by Verovio
+ * @param {*} svgDom
+ * @param {*} atDom
+ */
+export const improveAtSvg = (svgDom, atDom) => {
+  const dotBearers = svgDom.querySelectorAll('*[data-dot-corresp]')
+  dotBearers.forEach((dotBearer) => {
+    const corresp = dotBearer.getAttribute('data-dot-corresp')
+    const dotRefs = corresp.split(' ')
+    const dots = dotBearer.querySelectorAll('g.dots:not(.bounding-box)')
+    dots.forEach((dot, i) => {
+      if (dotRefs[i]) {
+        dot.setAttribute('data-corresp', dotRefs[i])
+      }
+    })
+  })
+
+  return svgDom
 }
