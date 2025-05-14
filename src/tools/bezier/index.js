@@ -65,7 +65,7 @@ export const controlpoints_to_verovio_svg_bezier = (Q, w = 1) => {
  * @param {boolean=true} up slur direction
  */
 export const boundingbox_default_controlpoints = (bbox, up = true) => {
-  const { y, x, width, height } = bbox
+  const { x, y, width, height } = bbox
   const y1 = up ? y + height : y
   const y2 = up ? y : y + height
   const Q = bezier_reverse([x, y1, x + width / 2, y2, x + width, y1])
@@ -82,4 +82,35 @@ export const boundingbox_default_controlpoints = (bbox, up = true) => {
   ]
   // console.log(bezier_point(q, 1/2), y1, y2)
   return q
+}
+
+/**
+ * calculate curve points for t=0,1/3,2/3,1
+ * @param {Array[float]} Q bezier control points
+ * @returns points of bezier curve at t=0,1/3,2/3,1
+ */
+const bezier_points = Q => [...bezier_point(Q, 0), ...bezier_point(Q, 1/3), ...bezier_point(Q, 2/3), ...bezier_point(Q, 1)]
+
+/**
+ * calculate control points for bezier fitting in bounding box vertically or horizontically
+ * @param {object} param0 { x, y, width, height, horizontal=false, flip=false } SVG bounding box
+ * @returns array of 8 floats for bezier control points (4x c,x)
+ */
+export const createBezier = ({ x, y, width, height, horizontal=false, flip=false }) => {
+  if (flip) {
+    if (horizontal) {
+      x += width
+      width = -width
+    } else {
+      y += height
+      height = -height
+    }
+  }
+  const Px3 = horizontal
+    ? [x, y, x + width, y + (height / 2), x, y + height]
+    : [x, y, x + (width / 2), y + height, x + width, y]
+  const Q3 = bezier_reverse(Px3)
+  const Pxm = bezier_points(Q3)
+  console.log(Px3, Q3, Pxm)
+  return bezier_reverse(Pxm)
 }

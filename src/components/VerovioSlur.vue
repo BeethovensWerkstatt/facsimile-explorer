@@ -9,10 +9,8 @@
         :cx="p[0]"
         :cy="p[1]"
         @mousedown="startgrab(i)"
-        fill="red"
         :r="width * 2"
-        class="cpgrab"
-        :class="{ cpgrapinactive: !active }"
+        :class="{ cpgrab: active, cpgrapinactive: !active }"
       />
     </svg>
   </div>
@@ -22,17 +20,7 @@
 import OpenSeadragon from 'openseadragon'
 // eslint-disable-next-line camelcase
 import { bezier_point, bezier_reverse, controlpoints_to_verovio_svg_bezier } from '@/tools/bezier'
-
-const flattenarray = (arr) => {
-  return arr.reduce((acc, val) => {
-    if (Array.isArray(val)) {
-      acc.push(...flattenarray(val))
-    } else {
-      acc.push(val)
-    }
-    return acc
-  }, [])
-}
+import { flattenarray } from '@/tools'
 
 export default {
   name: 'VerovioSlur',
@@ -125,15 +113,15 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .cpgrab {
-  cursor: grab;
-}
-.cpgrab:hover {
-  fill: blue;
+  cursor: pointer;
+  fill: green;
+  &:hover {
+    fill: red;
+  }
 }
 .cpgrapinactive {
-  cursor: not-allowed;
   display: none;
 }
 </style>
