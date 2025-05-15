@@ -150,7 +150,7 @@ export default {
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
-        const staff = target.closest('.staff').getAttribute('data-n')
+        const staff = target.closest('.staff')?.getAttribute('data-n') || 0
 
         const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
@@ -181,6 +181,9 @@ export default {
             }
             keyAccidN += 1
           }
+        }
+        if (name === 'tie' || name === 'slur') {
+          console.log('clicked tie/slur', target)
         }
 
         console.log('clicked verovio', cvpayload)

@@ -1,6 +1,8 @@
 import { uuid } from '@/tools/uuid.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import store from '@/store'
+// eslint-disable-next-line camelcase
+import { boundingbox_default_controlpoints } from './bezier'
 const parser = new DOMParser()
 
 /**
@@ -110,6 +112,8 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     getDiplomaticMetersig(annotElem, elem)
   } else if (name === 'clef') {
     getDiplomaticClef(annotElem, elem)
+  } else if (name === 'tie' || name === 'slur') {
+    getDiplomaticCurve(annotElem, elem, shapes)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -305,6 +309,12 @@ function getDiplomaticMetersig (annotElem, metersig) {
 
 function getDiplomaticClef (annotElem, clef) {
   console.log('getDiplomaticClef', annotElem, clef)
+}
+
+function getDiplomaticCurve (annotElem, curve, shapes) {
+  const bboxbezier = boundingbox_default_controlpoints(shapes[0].getBBox())
+  console.log('getDiplomaticTie', annotElem, curve, shapes, bboxbezier)
+  curve.setAttribute('bezier', bboxbezier.join(' '))
 }
 
 function getLocAttribute (annotElem) {
