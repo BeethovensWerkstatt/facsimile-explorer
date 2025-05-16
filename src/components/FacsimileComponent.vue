@@ -1011,6 +1011,8 @@ export default {
       options.pageHeight = height
       options.pageWidth = width
 
+      const rastrumsOnCurrentPage = this.$store.getters.rastrumsOnCurrentPage
+
       // console.log('643: height of empty page: ' + typeof height, height)
 
       tk.setOptions(options)
@@ -1024,7 +1026,7 @@ export default {
         // console.log('913 entering ', obj)
 
         if (obj.dt) {
-          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt)
+          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt, rects)
           // console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
@@ -1040,7 +1042,7 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(cleanUpDiplomaticTranscript(renderedDiplo))
+            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, rastrumsOnCurrentPage))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1071,25 +1073,54 @@ export default {
       this.indicateSelectedDTElement()
     },
 
-    renderDiploTrans (toolkit, wzDetails, meiDom) {
+    renderDiploTrans (toolkit, wzDetails, meiDom, rects) {
       /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
         console.log('913a: renderDiploTrans()', meiDom)
         console.log('913a: renderDiploTrans()', wzDetails)
       } */
-      meiDom.querySelectorAll('system').forEach(system => {
+      console.log(614, 'calling Elvis', meiDom)
+      meiDom.querySelectorAll('measure').forEach(measure => {
         // const sb = measure.previousElementSibling
         // console.log('913a: sb', sb)
         // const staves = sb.getAttribute('corresp').split(' ')
         // console.log('913a: staves', staves)
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        system.querySelectorAll('*[x], *[x2]').forEach(event => {
-          if (event.hasAttribute('x')) {
-            const x1 = parseFloat(event.getAttribute('x')) + xOff
-            event.setAttribute('x', x1)
+        const eventsThatRequireSystemMargin = ['barLine']
+
+        const zoneId = measure.getAttribute('facs').substr(1)
+        const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
+        // const sbZone = zone.previousElementSibling
+        const xOffPlusSystem = (parseFloat(zone.getAttribute('ulx'))) / rects.ratio
+
+        // console.log(614, 'zoneId', zoneId, zone, 'rects', rects)
+        measure.querySelectorAll('*[x], *[x2]').forEach(event => {
+          if (event.localName === 'barLine') {
+            console.log(614, 'found a barLine: ', event)
+            console.log(614, 'xOffPlusSystem', xOffPlusSystem)
           }
-          if (event.hasAttribute('x2')) {
-            const x2 = parseFloat(event.getAttribute('x2')) + xOff
-            event.setAttribute('x2', x2)
+          if (eventsThatRequireSystemMargin.indexOf(event.localName) > -1) {
+            // console.log(614, 'found a barLine', event)
+            if (event.hasAttribute('x')) {
+              const x1 = parseFloat(event.getAttribute('x')) + xOffPlusSystem
+              event.setAttribute('x', x1)
+            }
+            if (event.hasAttribute('x2')) {
+              const x2 = parseFloat(event.getAttribute('x2')) + xOffPlusSystem
+              event.setAttribute('x2', x2)
+            }
+          } else {
+            // console.log(614, 'found a non-barLine', event)
+            if (event.hasAttribute('x')) {
+              const x1 = parseFloat(event.getAttribute('x')) + xOff
+              event.setAttribute('x', x1)
+            }
+            if (event.hasAttribute('x2')) {
+              const x2 = parseFloat(event.getAttribute('x2')) + xOff
+              event.setAttribute('x2', x2)
+            }
+          }
+          if (event.localName === 'barLine') {
+            console.log(614, 'fixed a barLine', event)
           }
         })
       })
@@ -1104,41 +1135,6 @@ export default {
       const parser = new DOMParser()
       const svgDom = parser.parseFromString(svgText, 'application/xml')
 
-      svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
-        if (!barLine.closest('.layer')) {
-          barLine.remove()
-        }
-      })
-
-      svgDom.querySelectorAll('.chord:not(.bounding-box)').forEach(chord => {
-        const stem = chord.querySelector('.stem > path')
-
-        if (stem) {
-          const stemDir = meiDom.querySelector('chord[*|id = "' + chord.getAttribute('data-id') + '"]').getAttribute('stem.dir')
-
-          const x = stemDir === 'up'
-            ? parseFloat(parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('x')) + parseFloat(chord.querySelector('.note.bounding-box > rect').getAttribute('width')))
-            : chord.querySelector('.note.bounding-box > rect').getAttribute('x')
-          const arr = stem.getAttribute('d').split(' ')
-          stem.setAttribute('d', 'M' + x + ' ' + arr[1] + ' L' + x + ' ' + arr[3])
-          chord.querySelector('.stem.bounding-box rect').setAttribute('x', x)
-        }
-      })
-
-      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
-        if (!staff.classList.contains('bounding-box')) {
-          // const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
-          // const x = parseFloat(topLineCoordinates[0].substring(1)) - parseFloat(staff.getAttribute('data-pivot'))
-          // const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotate')
-          staff.style.transform = 'rotate(' + rotation + 'deg)'
-          // staff.style.transformOrigin = x + 'px ' + y + 'px'
-        }
-      })
-
-      if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
-        console.log('913a svg', svgDom.querySelector('svg'))
-      }
       return svgDom.querySelector('svg')
     },
 

@@ -4,7 +4,7 @@
  * @param {*} atDom
  */
 export const resolveSbIndicators = (svgDom, atDom, getters) => {
-  const wzBegins = svgDom.querySelectorAll('g.annot')
+  const wzBegins = svgDom.querySelectorAll('g.annot:not(.bounding-box)')
 
   const getMeasure = (node) => {
     let sibling = node.nextElementSibling
@@ -23,6 +23,8 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
   // const path = getters.filepath
   // const pages = getters.documentPagesForSidebars(path)
+
+  // console.log('\n\n\n911 wzBegins', wzBegins)
 
   wzBegins.forEach((wzb, i) => {
     const content = []
@@ -102,7 +104,10 @@ export const resolveSbIndicators = (svgDom, atDom, getters) => {
 
         const surfaceLabel = pageInfo.label // surface.getAttribute('label')
 
-        // console.log(774, 'pages2', getters.documentPagesForSidebars(getters.filepath))
+        // console.log(911, 'genDescWz', gendescWZ)
+        // console.log(911, 'surfaceId', surfaceId)
+        // console.log(911, 'surface', surface)
+        // console.log(911, 'pages2', getters.documentPagesForSidebars(getters.filepath))
 
         const wzIndexPadded = wzLabel.padStart(2, '0')
         const docName = sourceInfo.name
