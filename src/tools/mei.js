@@ -43,7 +43,7 @@ export const selectables = clsSelectables.join(', ')
  * @param {*} x the x coordinate of the new element, relative to the staff and given in mm
  * @returns the generated diplomatic transcription
  */
-export function generateDiplomaticElement (annotElem, shapes, x, svgPath, correspPath, annotElemRef) {
+export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef) {
   let name = annotElem.localName
 
   if (name === 'beam') {
@@ -60,7 +60,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
   elem.setAttribute('xml:id', 'd' + uuid())
-  elem.setAttribute('x', x)
+  elem.setAttribute('x', bbox.mm.x)
 
   const facs = []
   shapes.forEach(shape => {
@@ -101,7 +101,7 @@ export function generateDiplomaticElement (annotElem, shapes, x, svgPath, corres
     console.log('getDiplomaticAccid', annotElem, elem)
     getDiplomaticAccid(annotElem, elem)
   } else if (name === 'barLine') {
-    getDiplomaticBarline(annotElem, elem)
+    getDiplomaticBarline(annotElem, elem, bbox)
   } else if (name === 'dot') {
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
@@ -245,8 +245,12 @@ function getDiplomaticAccid (annotElem, accid) {
  * @param {*} annotElem the annotated barLine to be translated
  * @param {*} barLine the diplomatic barLine to be translated
  */
-function getDiplomaticBarline (annotElem, barLine) {
+function getDiplomaticBarline (annotElem, barLine, bbox) {
   barLine.setAttribute('form', 'single')
+  barLine.setAttribute('x', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  barLine.setAttribute('y', bbox.mm.y)
+  barLine.setAttribute('x2', (parseFloat(bbox.mm.x)).toFixed(1))
+  barLine.setAttribute('y2', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
   // console.log(364, '\n', barLine, '\n', annotElem)
 }
 
@@ -1362,10 +1366,11 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         const systemZone = appendNewElement(outSurface, 'zone')
         const rastrumIDs = [...node.querySelectorAll('staffDef')].map(staffDef => staffDef.getAttribute('decls').split('#')[1])
-        // console.log(714, 'rastrumIDs:', rastrumIDs)
+        console.log(714, 'rastrumIDs:', rastrumIDs)
         const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
           return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
         })
+        console.log(714, 'passed rastrums', rastrums)
         let x1 = pageMM.w
         let y = pageMM.h
         let x2 = 0
@@ -1393,12 +1398,14 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         let measureX = pageMM.w * factor
         let measureX2 = 0
-
+        console.log(714, 'getting in')
         node.querySelectorAll('staff').forEach(staff => {
+          console.log(714, 'staff:', staff)
           const outStaff = measure.appendChild(staff.cloneNode(true))
 
           const staffN = parseInt(staff.getAttribute('n'))
           const scoreDef = staff.closest('system').querySelector('scoreDef')
+          console.log(714, 'scoreDef:', scoreDef)
           const rastrumID = scoreDef.querySelector('staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
           const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
           // TODO: if rastrum is null/undefined set to 0 ???

@@ -1456,9 +1456,11 @@ const dataModule = {
         // console.log('??? currentWz', currentWz)
         return false
       }
+      console.log(785, annotElemRef)
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
-      // console.log(785, annotElemRef.dtPath)
+      console.log(785, annotElemRef.dtPath)
+
       let dtDoc = getters.documentByPath(annotElemRef.dtPath)?.cloneNode(true)
       if (!dtDoc) {
         const docload = new Promise((resolve, reject) => {
@@ -1517,20 +1519,16 @@ const dataModule = {
       }
 
       if (annotElemRef.name === 'barLine') {
+        // for barlines, we need to get the measure element as reference
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
-      } if (annotElemRef.name === 'dots') {
+      } else if (annotElemRef.name === 'dots') {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
         // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
         // console.log(668, annotElem)
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
-        if (!annotElem) {
-          console.log('??? annotElemRef', annotElemRef)
-          return false
-        }
       }
-
       // check if element is already transcribed
       if (annotElem.hasAttribute('corresp') && !annotElemRef.name === 'dots') {
         alert('Element has already been transcribed. Continuing. ', annotElem)
@@ -1539,14 +1537,13 @@ const dataModule = {
       }
 
       // debug messages
-      console.log('-------------------------> "' + (annotElemRef.name === 'dots' ? 'dot' : annotElem.localName) + '"')
+      // console.log('-------------------------> "' + (annotElemRef.name === 'dots' ? 'dot' : annotElem.localName) + '"')
       if (annotElem.localName === 'beam' || annotElem.localName === 'beamSpan') {
         // console.log('found beam:', annotElemRef)
       }
 
       // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
-
       // decides if new element is a control event
       const isAtControlEvent = ['slur', 'tie'].indexOf(annotElemRef.name) !== -1
 
@@ -1584,36 +1581,6 @@ const dataModule = {
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
       // get the rastrum for the staff
-      const rastrum = getters.rastrumsOnCurrentPage[diploStaffN - 1]
-
-      // console.log('691 rastrum', rastrum)
-
-      const rects = getters.osdRects
-      // console.log('691 rects', rects)
-
-      // determine the minimal x position of the DT element
-      let x = 1000000
-      shapes.forEach(shape => {
-        const rendered = document.querySelector('path#' + shape.id)
-        const bbox = rendered.getBBox()
-        // console.log('comparing x=' + x + ' to ' + bbox.x)
-        if (parseFloat(bbox.x) < x) {
-          x = parseFloat(bbox.x)
-        }
-      })
-
-      // console.log('691 x', x)
-
-      // convert x to mm, substracting the x position of the rastrum
-      const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
-      // console.log('691 mm', mm)
-
-      const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
-      const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
-      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, mm, svgPath, correspPath, annotElemRef)
-
-      const isDtControlEvent = ['beamSpan'].indexOf(diplomaticElement.localName) !== -1
-      // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
       const getDiplomaticSection = (annotElem) => {
         // TODO scoreDef/staffDef elements?
@@ -1638,6 +1605,65 @@ const dataModule = {
 
       const diploSection = getDiplomaticSection(annotElem) // diploLayer.closest('measure') */
       const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
+      const diploStaffDef = diploSection.parentElement.querySelector('staffDef[n="' + diploStaffN + '"]')
+      const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+
+      const rastrum = getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
+      // the top rastrum for the current system
+      let topRastrum
+
+      if (+diploStaffN === 1) {
+        topRastrum = rastrum
+      } else {
+        const topDiploStaffDef = diploSection.parentElement.querySelector('staffDef[n="1"]')
+        const topRastrumId = topDiploStaffDef.getAttribute('decls').split('#')[1]
+        topRastrum = getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === topRastrumId)
+      }
+
+      console.log('691 rastrum', rastrum, topRastrum)
+
+      const rects = getters.osdRects
+      console.log('691 rects', rects)
+
+      // determine the minimal x position of the DT element
+      const bbox = { px: { x: null, y: null, w: null, h: null } }
+      shapes.forEach((shape, i) => {
+        const rendered = document.querySelector('path#' + shape.id)
+        const rbox = rendered.getBBox()
+        if (i === 0) {
+          bbox.px.x = rbox.x
+          bbox.px.y = rbox.y
+          bbox.px.w = rbox.width
+          bbox.px.h = rbox.height
+        } else {
+          bbox.px.x = Math.min(bbox.px.x, parseFloat(rbox.x))
+          bbox.px.y = Math.min(bbox.px.y, parseFloat(rbox.y))
+          bbox.px.w = Math.max(bbox.px.w, parseFloat(rbox.x) + parseFloat(rbox.width))
+          bbox.px.h = Math.max(bbox.px.h, parseFloat(rbox.y) + parseFloat(rbox.height))
+        }
+      })
+      const x = bbox.px.x
+
+      // console.log('691 x', x)
+
+      // convert x to mm, substracting the x and y position of the rastrum
+      // which means that the origin is the top staff of the current system
+      const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
+      bbox.mm = {
+        x: parseFloat(mm),
+        y: parseFloat((((bbox.px.y) / rects.ratio) + +rects.image.y - topRastrum.y).toFixed(1)),
+        w: parseFloat(((bbox.px.w) / rects.ratio).toFixed(1)),
+        h: parseFloat(((bbox.px.h) / rects.ratio).toFixed(1)),
+        offX: parseFloat((rastrum.px.x / rects.ratio).toFixed(1))
+      }
+      console.log(771, bbox)
+
+      const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
+      const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
+      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+
+      const isDtControlEvent = ['beamSpan', 'barLine'].indexOf(diplomaticElement.localName) !== -1
+      // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
       if (isDtControlEvent || isAtControlEvent) {
         diploSection.appendChild(diplomaticElement)

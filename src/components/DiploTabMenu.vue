@@ -21,6 +21,24 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
+    <div class="entry" v-if="isBarLine">
+        <label>@y</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+        </div>
+    </div>
+    <div class="entry" v-if="isBarLine">
+        <label>@x2</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+        </div>
+    </div>
+    <div class="entry" v-if="isBarLine">
+        <label>@y2</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+        </div>
+    </div>
     <div class="entry" v-if="isNote || isRest || isAccid || isDot">
         <label>@loc</label>
         <div class="value">
@@ -117,6 +135,9 @@ export default {
     },
     isDot () {
       return this.$store.getters.activeDiploTransElementName === 'dot'
+    },
+    isBarLine () {
+      return this.$store.getters.activeDiploTransElementName === 'barLine'
     },
     hasStemLen () {
       const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')
