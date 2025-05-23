@@ -1,8 +1,7 @@
+import { boundingboxDefaultControlpoints } from '@/tools'
 import { uuid } from '@/tools/uuid.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import store from '@/store'
-// eslint-disable-next-line camelcase
-import { boundingbox_default_controlpoints } from './bezier'
 const parser = new DOMParser()
 
 /**
@@ -316,8 +315,8 @@ function getDiplomaticClef (annotElem, clef) {
 }
 
 function getDiplomaticCurve (annotElem, curve, shapes) {
-  const bboxbezier = boundingbox_default_controlpoints(shapes[0].getBBox())
-  console.log('getDiplomaticTie', annotElem, curve, shapes, bboxbezier)
+  const bboxbezier = boundingboxDefaultControlpoints(shapes[0].getBBox(), annotElem.getAttribute('curvedir') === 'above')
+  console.log('getDiplomaticCurve', annotElem, curve, shapes, bboxbezier, shapes[0].getBBox())
   curve.setAttribute('bezier', bboxbezier.join(' '))
 }
 

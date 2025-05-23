@@ -1,3 +1,44 @@
+
+export class Vector {
+  constructor (x, y) {
+    this.x = x
+    this.y = y
+  }
+
+  add (vector) {
+    return new Vector(this.x + vector.x, this.y + vector.y)
+  }
+
+  sub (vector) {
+    return new Vector(this.x - vector.x, this.y - vector.y)
+  }
+
+  mul (scalar) {
+    return new Vector(this.x * scalar, this.y * scalar)
+  }
+
+  div (scalar) {
+    return new Vector(this.x / scalar, this.y / scalar)
+  }
+
+  length () {
+    return Math.sqrt(this.x ** 2 + this.y ** 2)
+  }
+
+  normalize () {
+    const length = this.length()
+    return new Vector(this.x / length, this.y / length)
+  }
+
+  dot (vector) {
+    return this.x * vector.x + this.y * vector.y
+  }
+
+  toString () {
+    return `${this.x},${this.y}`
+  }
+}
+
 export const flattenarray = (arr) => {
   return arr.reduce((acc, val) => {
     if (Array.isArray(val)) {
@@ -49,21 +90,50 @@ export const verovioSvgBezierToControlpoints = (pathstr) => {
  * @param {*} Q control points
  * @param {*} w width of slur
  * @returns
- * /
-export const controlpointsToVerovioSvgBezier = (Q, w = 1) => {
+ */
+export const controlpointsToTerovioSvgBezier = (Q, w = 1) => {
   if (!Q?.length) {
     return ''
   }
-  const p1 = bezier_point(Q, 1 / 3)
-  const n1 = bezier_norm(Q, 1 / 3)
-  const p2 = bezier_point(Q, 2 / 3)
-  const n2 = bezier_norm(Q, 2 / 3)
-  const a1 = [p1[0] + w * n1[0], p1[1] + w * n1[1]]
-  const a2 = [p2[0] + w * n2[0], p2[1] + w * n2[1]]
-  const b1 = [p1[0] - w * n1[0], p1[1] - w * n1[1]]
-  const b2 = [p2[0] - w * n2[0], p2[1] - w * n2[1]]
-  const Q1 = bezier_reverse([Q[0], Q[1], ...a1, ...a2, Q[6], Q[7]])
-  const Q2 = bezier_reverse([Q[0], Q[1], ...b1, ...b2, Q[6], Q[7]])
-  return `M${Q1[0]},${Q1[1]} C${Q1[2]},${Q1[3]} ${Q1[4]},${Q1[5]} ${Q1[6]},${Q1[7]} C${Q2[4]},${Q2[5]} ${Q2[2]},${Q2[3]} ${Q[0]},${Q[1]}`
+  w /= 2
+  const c1 = new Vector(Q[0], Q[1])
+  const c2 = new Vector(Q[2], Q[3])
+  const c3 = new Vector(Q[4], Q[5])
+  const c4 = new Vector(Q[6], Q[7])
+  const d = c2.add(c3).div(2).sub(c1.add(c4).div(2)).normalize().mul(w)
+  const c2a = c2.add(d)
+  const c2b = c2.sub(d)
+  const c3a = c3.add(d)
+  const c3b = c3.sub(d)
+  return `M${c1} C${c2a} ${c3a} ${c4} C${c3b} ${c2b} ${c1}`
 }
-// */
+
+/**
+ * calculate default control points for slur inside bounding box
+ * @param {number} x upper left x
+ * @param {number} y upper left y
+ * @param {number} width width
+ * @param {number} height height
+ * @param {boolean=true} up wether the slur is up or down
+ * @returns array of control points
+ */
+export const boundingboxDefaultControlpoints = ({ x, y, width, height }, up = true) => {
+  const c1 = new Vector(x, y)
+  const c2 = new Vector(x + width, y)
+  const c3 = new Vector(x + width, y + height)
+  const c4 = new Vector(x, y + height)
+  const m = c1.add(c3).div(2)
+  const cp1 = up ? c4 : c1
+  const cp2 = up ? m.add(new Vector(0, height * 2)) : m.sub(new Vector(0, height * 2))
+  const cp3 = up ? c3 : c2
+
+  const q = [
+    cp1.x, cp1.y,
+    (1 / 3) * cp1.x + (2 / 3) * cp2.x,
+    (1 / 3) * cp1.y + (2 / 3) * cp2.y,
+    (2 / 3) * cp2.x + (1 / 3) * cp3.x,
+    (2 / 3) * cp2.y + (1 / 3) * cp3.y,
+    cp3.x, cp3.y
+  ]
+  return q
+}
