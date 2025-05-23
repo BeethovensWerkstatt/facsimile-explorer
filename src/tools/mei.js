@@ -77,18 +77,18 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   const corresp = existingCorresp ? existingCorresp + ' ' + newCorresp : newCorresp
   if (annotElem.hasAttribute('dots') && annotElemRef.name === 'dots' && (annotElem.localName === 'note' || annotElem.localName === 'rest')) {
     const count = +annotElem.getAttribute('dots')
+    annotElem.removeAttribute('dots')
     for (let i = 0; i < count; i++) {
       const dot = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dot')
+      dot.setAttribute('xml:id', 'd' + uuid())
       if (i === 0) {
         dot.setAttribute('corresp', newCorresp)
       }
       annotElem.appendChild(dot)
     }
-    annotElem.removeAttribute('dots')
   } else {
     annotElem.setAttribute('corresp', corresp)
   }
-  console.log('generateDiplomaticElement', name, annotElem)
 
   if (name === 'note') {
     getDiplomaticNote(annotElem, elem)

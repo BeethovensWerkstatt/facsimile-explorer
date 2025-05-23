@@ -261,27 +261,37 @@ export const addSbIndicators = (svgDom, atDom) => {
  * @returns
  */
 export const prepareAtDomForRendering = (atDom) => {
-  const dots = atDom.querySelectorAll('dot')
+  const clone = atDom.cloneNode(true)
+  const map = new Map()
+  const dots = clone.querySelectorAll('dot')
   dots.forEach((dot) => {
     const parent = dot.parentElement
-    // const dotId = dot.getAttribute('xml:id')
-    if (parent.hasAttribute('dots')) {
-      const newCount = parseInt(parent.getAttribute('dots')) + 1
-      parent.setAttribute('dots', newCount)
-      if (dot.hasAttribute('corresp')) {
-        const dotCorresp = dot.getAttribute('corresp')
-        if (parent.hasAttribute('dot-corresp')) {
-          parent.setAttribute('dot-corresp', parent.getAttribute('dot-corresp') + ' ' + dotCorresp)
-        }
-      }
-    } else {
-      parent.setAttribute('dots', '1')
-      if (dot.hasAttribute('corresp')) {
-        parent.setAttribute('dot-corresp', dot.getAttribute('corresp'))
-      }
+    const parentId = parent.getAttribute('xml:id')
+    if (!map.has(parentId)) {
+      map.set(parentId, parent)
     }
   })
-  return atDom
+  map.forEach((parent) => {
+    const dots = parent.querySelectorAll('dot')
+    const count = dots.length
+
+    const dotAttCount = parent.hasAttribute('dots') ? parseInt(parent.getAttribute('dots')) : 0
+    if (dotAttCount > 0) {
+      console.warn(parent.localName + ' ' + parent.getAttribute('xml:id') + ' has dots attribute and also dots children.')
+    }
+    parent.setAttribute('dots', dotAttCount + count)
+    dots.forEach(dot => dot.remove())
+    const refs = [...dots].map(dot => dot.getAttribute('corresp')).filter(corresp => corresp !== null).join(' ')
+    if (parent.hasAttribute('dot-corresp')) {
+      console.warn(parent.localName + ' ' + parent.getAttribute('xml:id') + ' already has dot-corresp attribute.')
+      parent.setAttribute('dot-corresp', parent.getAttribute('dot-corresp') + ' ' + refs)
+    } else {
+      parent.setAttribute('dot-corresp', refs)
+    }
+    // console.log(611, 'parent resolved', parent)
+  })
+
+  return clone
 }
 
 /**
@@ -294,7 +304,7 @@ export const improveAtSvg = (svgDom, atDom) => {
   dotBearers.forEach((dotBearer) => {
     const corresp = dotBearer.getAttribute('data-dot-corresp')
     const dotRefs = corresp.split(' ')
-    const dots = dotBearer.querySelectorAll('g.dots:not(.bounding-box)')
+    const dots = dotBearer.querySelectorAll('g.dots:not(.bounding-box) ellipse')
     dots.forEach((dot, i) => {
       if (dotRefs[i]) {
         dot.setAttribute('data-corresp', dotRefs[i])
