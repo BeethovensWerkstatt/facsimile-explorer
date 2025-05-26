@@ -1085,7 +1085,7 @@ export default {
         // const staves = sb.getAttribute('corresp').split(' ')
         // console.log('913a: staves', staves)
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        const eventsThatRequireSystemMargin = ['barLine']
+        const eventsThatRequireSystemMargin = ['barLine', 'dynam']
 
         const zoneId = measure.getAttribute('facs').substr(1)
         const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)

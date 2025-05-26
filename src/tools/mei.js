@@ -75,6 +75,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
     getDiplomaticChord(annotElem.parentNode, elem)
+  } else if (name === 'dynam') {
+    getDiplomaticDynam(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -224,6 +226,20 @@ function getDiplomaticDot (annotElem, dot) {
   const loc = getLocAttribute(annotElem)
 
   dot.setAttribute('loc', loc)
+}
+
+/**
+ * translates a dynamic from an annotated note to a diplomatic dynamic
+ * @param {*} annotElem the annotated dynam to be translated
+ * @param {*} dynam the initial dynam that needs specific treatment
+ * @returns the dt:dynam element
+ */
+function getDiplomaticDynam (annotElem, dynam, bbox) {
+  console.log(462, 'getDiplomaticDynam', annotElem, dynam, bbox)
+  dynam.setAttribute('x', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  dynam.setAttribute('y', bbox.mm.y)
+  dynam.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  dynam.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 /**
@@ -1275,7 +1291,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
     const defaultRastrumHeight = factor * 8 // 8vu = 72px
 
-    dtDom.querySelectorAll('scoreDef staffDef').forEach(dtStaffDef => {
+    dtDom.querySelectorAll('scoreDef staffDef').forEach((dtStaffDef, i) => {
       const staffDef = outStaffGrp.appendChild(dtStaffDef.cloneNode(true))
 
       const rastrumIDs = staffDef.getAttribute('decls').split(' ').map(ref => ref.split('#')[1])
@@ -1283,9 +1299,9 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
       })
       staffDef.setAttribute('scale', (100 / defaultRastrumHeight * parseFloat(rastrums[0].getAttribute('system.height')) * factor).toFixed(1) + '%')
-      dtDom.querySelectorAll('staff[n="' + staffDef.getAttribute('n') + '"]').forEach(staff => {
-        staff.setAttribute('rotate', rastrums[0].getAttribute('rotate'))
-      })
+      const staff = dtDom.querySelectorAll('staff')[i]
+      staff.setAttribute('rotate', rastrums[0].getAttribute('rotate'))
+      staff.setAttribute('decls', staffDef.getAttribute('decls'))
     })
 
     dtDom.querySelectorAll('draft > *').forEach(dtNode => {
