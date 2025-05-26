@@ -117,14 +117,16 @@ export const controlpointsToTerovioSvgBezier = (Q, w = 1) => {
  * @param {boolean=true} up wether the slur is up or down
  * @returns array of control points
  */
-export const boundingboxDefaultControlpoints = ({ x, y, width, height }, up = true) => {
+export const boundingboxDefaultControlpoints = (bbox, up = true) => {
+  const { px: { x, y, w, h }, mm } = bbox
+  console.log(mm.w / w, mm.h / h, mm.offX)
   const c1 = new Vector(x, y)
-  const c2 = new Vector(x + width, y)
-  const c3 = new Vector(x + width, y + height)
-  const c4 = new Vector(x, y + height)
+  const c2 = new Vector(x + w, y)
+  const c3 = new Vector(x + w, y + h)
+  const c4 = new Vector(x, y + h)
   const m = c1.add(c3).div(2)
   const cp1 = up ? c4 : c1
-  const cp2 = up ? m.add(new Vector(0, height * 2)) : m.sub(new Vector(0, height * 2))
+  const cp2 = up ? m.add(new Vector(0, h * 2)) : m.sub(new Vector(0, h * 2))
   const cp3 = up ? c3 : c2
 
   const q = [
@@ -135,5 +137,6 @@ export const boundingboxDefaultControlpoints = ({ x, y, width, height }, up = tr
     (2 / 3) * cp2.y + (1 / 3) * cp3.y,
     cp3.x, cp3.y
   ]
+  console.log(bbox, q)
   return q
 }

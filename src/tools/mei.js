@@ -112,7 +112,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'clef') {
     getDiplomaticClef(annotElem, elem)
   } else if (name === 'tie' || name === 'slur') {
-    getDiplomaticCurve(annotElem, elem, shapes)
+    getDiplomaticCurve(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -314,9 +314,9 @@ function getDiplomaticClef (annotElem, clef) {
   console.log('getDiplomaticClef', annotElem, clef)
 }
 
-function getDiplomaticCurve (annotElem, curve, shapes) {
-  const bboxbezier = boundingboxDefaultControlpoints(shapes[0].getBBox(), annotElem.getAttribute('curvedir') === 'above')
-  console.log('getDiplomaticCurve', annotElem, curve, shapes, bboxbezier, shapes[0].getBBox())
+function getDiplomaticCurve (annotElem, curve, bbox) {
+  const bboxbezier = boundingboxDefaultControlpoints(bbox, annotElem.getAttribute('curvedir') === 'above')
+  console.log('getDiplomaticCurve', annotElem, curve, bboxbezier, bbox)
   curve.setAttribute('bezier', bboxbezier.join(' '))
 }
 
