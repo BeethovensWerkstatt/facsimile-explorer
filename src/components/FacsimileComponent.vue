@@ -357,7 +357,7 @@ export default {
      * @return {[type]} [description]
      */
     facsimileOpened (data) {
-      // console.log('FacsimileComponent:facsimileOpened()')
+      console.log('FacsimileComponent:facsimileOpened()')
       this.renderedUri = data.source
       this.$store.dispatch('setLoading', false)
 
@@ -1268,10 +1268,12 @@ export default {
         this.renderGrid()
       })
 
+    /*
     this.unwatchDiploTranscriptsOnCurrentPage = this.$store.watch((state, getters) => getters.renderableDiplomaticTranscriptsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderDiploTransOnPage()
       })
+    */
 
     this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
       (newArr, oldArr) => {
