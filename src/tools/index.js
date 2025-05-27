@@ -118,8 +118,7 @@ export const controlpointsToTerovioSvgBezier = (Q, w = 1) => {
  * @returns array of control points
  */
 export const boundingboxDefaultControlpoints = (bbox, up = true) => {
-  const { px: { x, y, w, h }, mm } = bbox
-  console.log(mm.w / w, mm.h / h, mm.offX)
+  const { mm: { x, y, w, h } } = bbox
   const c1 = new Vector(x, y)
   const c2 = new Vector(x + w, y)
   const c3 = new Vector(x + w, y + h)

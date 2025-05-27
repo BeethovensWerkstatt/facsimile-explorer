@@ -65,6 +65,13 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     measure.append(g)
   })
 
+  // render curves
+  meiDom.querySelectorAll('curve').forEach(curve => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('data-id', curve.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'curve')
+  })
+
   // move flag(s) to the correct position
   const chords = svgDom.querySelectorAll('g.chord')
   console.log(443, 'chords', chords)

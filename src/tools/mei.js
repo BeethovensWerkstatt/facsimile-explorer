@@ -39,7 +39,10 @@ export const selectables = clsSelectables.join(', ')
  * generates a diplomatic transcription from a given annotated transcription and a list of shapes
  * @param {*} annotElem the annotated transcription to be converted
  * @param {*} shapes the shapes to be converted
- * @param {*} x the x coordinate of the new element, relative to the staff and given in mm
+ * @param {*} bbox the bounding box of the annotated transcription in mm and px
+ * @param {*} svgPath the path to the SVG file containing the shapes
+ * @param {*} correspPath the path to the corresponding diplomatic transcription
+ * @param {*} annotElemRef the reference to the annotated element, used for dots
  * @returns the generated diplomatic transcription
  */
 export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef) {
@@ -55,6 +58,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'dot'
   } else if (name === 'keyAccid') {
     name = 'accid'
+  } else if (name === 'tie' || name === 'slur') {
+    name = 'curve'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -111,7 +116,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticMetersig(annotElem, elem)
   } else if (name === 'clef') {
     getDiplomaticClef(annotElem, elem)
-  } else if (name === 'tie' || name === 'slur') {
+  } else if (name === 'curve') {
     getDiplomaticCurve(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
@@ -317,7 +322,7 @@ function getDiplomaticClef (annotElem, clef) {
 function getDiplomaticCurve (annotElem, curve, bbox) {
   const bboxbezier = boundingboxDefaultControlpoints(bbox, annotElem.getAttribute('curvedir') === 'above')
   console.log('getDiplomaticCurve', annotElem, curve, bboxbezier, bbox)
-  curve.setAttribute('bezier', bboxbezier.join(' '))
+  curve.setAttribute('bezier', bboxbezier.map(c => c.toFixed(2)).join(' '))
 }
 
 function getLocAttribute (annotElem) {
