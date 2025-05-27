@@ -1026,7 +1026,7 @@ export default {
         // console.log('913 entering ', obj)
 
         if (obj.dt) {
-          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt, rects)
+          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt, rects, this.$store.getters.documentWithCurrentPage)
           // console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
@@ -1073,12 +1073,12 @@ export default {
       this.indicateSelectedDTElement()
     },
 
-    renderDiploTrans (toolkit, wzDetails, meiDom, rects) {
+    renderDiploTrans (toolkit, wzDetails, meiDom, rects, sourceDom) {
       /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
         console.log('913a: renderDiploTrans()', meiDom)
         console.log('913a: renderDiploTrans()', wzDetails)
       } */
-      console.log(614, 'calling Elvis', meiDom)
+      // console.log(614, 'calling Elvis', meiDom)
       meiDom.querySelectorAll('measure').forEach(measure => {
         // const sb = measure.previousElementSibling
         // console.log('913a: sb', sb)
@@ -1087,41 +1087,49 @@ export default {
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
         const eventsThatRequireSystemMargin = ['barLine', 'dynam']
 
-        const zoneId = measure.getAttribute('facs').substr(1)
-        const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
+        // const zoneId = measure.getAttribute('facs').substr(1)
+        // const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
         // const sbZone = zone.previousElementSibling
-        const xOffPlusSystem = (parseFloat(zone.getAttribute('ulx'))) / rects.ratio
+        // const xOffPlusSystem = (parseFloat(zone.getAttribute('ulx'))) / rects.ratio
 
         // console.log(614, 'zoneId', zoneId, zone, 'rects', rects)
         measure.querySelectorAll('*[x], *[x2]').forEach(event => {
-          if (event.localName === 'barLine') {
-            console.log(614, 'found a barLine: ', event)
-            console.log(614, 'xOffPlusSystem', xOffPlusSystem)
-          }
           if (eventsThatRequireSystemMargin.indexOf(event.localName) > -1) {
             // console.log(614, 'found a barLine', event)
-            if (event.hasAttribute('x')) {
+            /* if (event.hasAttribute('x')) {
               const x1 = parseFloat(event.getAttribute('x')) + xOffPlusSystem
               event.setAttribute('x', x1)
             }
             if (event.hasAttribute('x2')) {
               const x2 = parseFloat(event.getAttribute('x2')) + xOffPlusSystem
               event.setAttribute('x2', x2)
-            }
+            } */
+
+            // console.log(463, 'found a barLine: ', event)
+            // console.log(463, 'xOffPlusSystem', xOffPlusSystem)
+            const staffDef1 = event.closest('score').querySelector('staffDef')
+            // console.log(463, 'staffDef', staffDef1)
+            // console.log(463, 'decls', staffDef1.getAttribute('decls'))
+            const rastrumId = staffDef1.getAttribute('decls').split('#')[1]
+            const rastrum = [...sourceDom.querySelectorAll('rastrum')].find(r => r.getAttribute('xml:id') === rastrumId)
+            // console.log(463, 'rastrum', rastrum)
+
+            event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
           } else {
             // console.log(614, 'found a non-barLine', event)
-            if (event.hasAttribute('x')) {
+            /* if (event.hasAttribute('x')) {
               const x1 = parseFloat(event.getAttribute('x')) + xOff
               event.setAttribute('x', x1)
             }
             if (event.hasAttribute('x2')) {
               const x2 = parseFloat(event.getAttribute('x2')) + xOff
               event.setAttribute('x2', x2)
-            }
+            } */
+            event.setAttribute('ho', xOff.toFixed(1))
           }
-          if (event.localName === 'barLine') {
+          /* if (event.localName === 'barLine') {
             console.log(614, 'fixed a barLine', event)
-          }
+          } */
         })
       })
 

@@ -1530,10 +1530,10 @@ const dataModule = {
       // console.log('691 annotStaffN', annotStaffN)
 
       // the staff in the DT will be the same as in the AT
-      const diploStaffN = annotStaffN.split(' ')[0] // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
+      const diploStaffN = String(annotStaffN).split(' ')[0] // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
       // console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
-
+      // console.log('691 diploStaffN', diploStaffN)
       // get the rastrum for the staff
 
       const getDiplomaticSection = (annotElem) => {
@@ -1555,12 +1555,15 @@ const dataModule = {
         const dtSection = dtDoc.querySelector('system[*|id="' + systemId + '"] section')
         return dtSection
       }
-
+      // console.log('got here 1 diploStaffN', diploStaffN)
       const diploSection = getDiplomaticSection(annotElem) // diploLayer.closest('measure') */
+      // console.log('got here 2 diploSection', diploSection)
       const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
+      // console.log('got here 3 diploLayer', diploLayer)
       const diploStaffDef = diploSection.parentElement.querySelector('staffDef[n="' + diploStaffN + '"]')
+      // console.log('got here 4 diploStaffDef', diploStaffDef)
       const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
-
+      // console.log('got here 5 rastrumId', rastrumId)
       const rastrum = getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
       // the top rastrum for the current system
       let topRastrum
