@@ -1456,10 +1456,10 @@ const dataModule = {
         // console.log('??? currentWz', currentWz)
         return false
       }
-      console.log(785, annotElemRef)
+      // console.log(785, annotElemRef)
       const atDoc = getters.annotatedTranscriptForCurrentWz.cloneNode(true)
       // atDoc.querySelectorAll(':not([*|id])').forEach(noid => console.log('no id:', noid))
-      console.log(785, annotElemRef.dtPath)
+      // console.log(785, annotElemRef.dtPath)
 
       let dtDoc = getters.documentByPath(annotElemRef.dtPath)?.cloneNode(true)
       if (!dtDoc) {
@@ -1545,7 +1545,7 @@ const dataModule = {
       // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
-      const isAtControlEvent = ['slur', 'tie'].indexOf(annotElemRef.name) !== -1
+      const isAtControlEvent = ['slur', 'tie', 'dynam'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN
@@ -1576,7 +1576,7 @@ const dataModule = {
       // console.log('691 annotStaffN', annotStaffN)
 
       // the staff in the DT will be the same as in the AT
-      const diploStaffN = annotStaffN // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
+      const diploStaffN = annotStaffN.split(' ')[0] // dtDoc.querySelector('staffDef[n="' + annotStaffN + '"]').getAttribute('label')
       // console.log('diploStaffN', diploStaffN, getters.rastrumsOnCurrentPage)
       // console.log('staffDef', dtDoc.querySelector('staffDef'))
 
@@ -1620,10 +1620,10 @@ const dataModule = {
         topRastrum = getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === topRastrumId)
       }
 
-      console.log('691 rastrum', rastrum, topRastrum)
+      // console.log('691 rastrum', rastrum, topRastrum)
 
       const rects = getters.osdRects
-      console.log('691 rects', rects)
+      // console.log('691 rects', rects)
 
       // determine the minimal x position of the DT element
       const bbox = { px: { x: null, y: null, w: null, h: null } }
@@ -1649,19 +1649,26 @@ const dataModule = {
       // convert x to mm, substracting the x and y position of the rastrum
       // which means that the origin is the top staff of the current system
       const mm = ((x - rastrum.px.x) / rects.ratio).toFixed(1)
+
+      const origin = { x: rastrum.x, y: rastrum.y }
+
+      const unrotatedPoint = {
+        x: parseFloat(mm), y: parseFloat((((bbox.px.y) / rects.ratio) + +rects.image.y - topRastrum.y).toFixed(1))
+      }
+      const rotatedPoint = rotatePoint(unrotatedPoint, origin, rastrum.rotate)
+      console.log(462, 'unrotatedPoint', unrotatedPoint, 'rotatedPoint', rotatedPoint, 'origin', origin, 'rastrum.rotate', rastrum.rotate)
       bbox.mm = {
-        x: parseFloat(mm),
-        y: parseFloat((((bbox.px.y) / rects.ratio) + +rects.image.y - topRastrum.y).toFixed(1)),
+        x: parseFloat(rotatedPoint.x.toFixed(1)),
+        y: parseFloat(rotatedPoint.y.toFixed(1)),
         w: parseFloat(((bbox.px.w) / rects.ratio).toFixed(1)),
         h: parseFloat(((bbox.px.h) / rects.ratio).toFixed(1)),
         offX: parseFloat((rastrum.px.x / rects.ratio).toFixed(1))
       }
-      console.log(771, bbox)
+      // console.log(771, bbox)
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
-
       const isDtControlEvent = ['beamSpan', 'barLine'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 

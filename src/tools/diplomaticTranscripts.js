@@ -1,3 +1,5 @@
+import { controlpointsToVerovioSvgBezier } from '.'
+
 /**
  * cleans up the diplomatic transcript to overcome Verovio restrictions and other issues
  * @param {} svgDom
@@ -54,6 +56,8 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    // TODO: the "+4" is a constant factor that I do not fully understand yet
     const x1 = (parseFloat(barLine.getAttribute('x')) + 4) * factor
     const y1 = (parseFloat(barLine.getAttribute('y')) + +rastrum.y) * factor
     const x2 = (parseFloat(barLine.getAttribute('x2')) + 4) * factor
@@ -66,10 +70,91 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
   })
 
   // render curves
-  meiDom.querySelectorAll('curve').forEach(curve => {
+  meiDom.querySelectorAll('curve[bezier]').forEach(curve => {
+    const bezier = curve.getAttribute('bezier').split(' ').map(p => parseFloat(p))
+    console.log(571, 'curve', curve, bezier)
+
+    const measure = svgDom.querySelector('g.measure')
+
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.setAttribute('data-id', curve.getAttribute('xml:id'))
     g.setAttribute('data-class', 'curve')
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    const d = controlpointsToVerovioSvgBezier(bezier.map(c => factor * c), 27) // 27 is the width of the curve in Verovio
+    path.setAttribute('d', d)
+    g.append(path)
+    measure.append(g)
+    console.log(571, 'curve', measure)
+  })
+
+  // render dynams
+  meiDom.querySelectorAll('dynam').forEach(dynam => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = dynam.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    console.log(571, 'systemZoneId', systemZoneId)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    console.log(571, 'systemZone s', systemZone)
+    console.log(571, meiDom.querySelectorAll('zone[type="sb"]'))
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const section = dynam.closest('section')
+    const staffN = dynam.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    // const diploStaffDef = section.parentElement.querySelector('staffDef[n="' + staffN + '"]')
+
+    const staff = section.querySelector('staff[n="' + staffN + '"]')
+
+    const rastrumId = staff.getAttribute('decls').split('#')[1]
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    console.log(571, 'barLine', dynam, dynam.closest('section'), rastrum, meiDom, rastrumId, otherRastrumId, rastrumsOnCurrentPage)
+
+    /*
+    <g id="d6iolw9" class="dynam">
+      <text x="2241" y="4211" text-anchor="middle" font-size="0px">
+        <tspan id="k1caa3av" class="text">
+          <tspan font-size="405px">ppo</tspan>
+        </tspan>
+      </text>
+    </g>
+    */
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', dynam.getAttribute('xml:id'))
+    g.setAttribute('data-id', dynam.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'dynam')
+    g.setAttribute('class', 'dynam')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    const x1 = parseFloat(dynam.getAttribute('x')) * factor
+    const y1 = (parseFloat(dynam.getAttribute('y')) + +rastrum.y) * factor
+    // const x2 = (parseFloat(dynam.getAttribute('x2')) + 4) * factor
+    // const y2 = (parseFloat(dynam.getAttribute('y2')) + +rastrum.y) * factor
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', dynam.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', '405px')
+    innerTspan.textContent = dynam.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
   })
 
   // move flag(s) to the correct position

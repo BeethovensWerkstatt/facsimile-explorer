@@ -91,7 +91,7 @@ export const verovioSvgBezierToControlpoints = (pathstr) => {
  * @param {*} w width of slur
  * @returns
  */
-export const controlpointsToTerovioSvgBezier = (Q, w = 1) => {
+export const controlpointsToVerovioSvgBezier = (Q, w = 1) => {
   if (!Q?.length) {
     return ''
   }

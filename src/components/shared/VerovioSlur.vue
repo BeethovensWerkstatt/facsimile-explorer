@@ -17,7 +17,7 @@
 
 <script>
 import OpenSeadragon from 'openseadragon'
-import { controlpointsToTerovioSvgBezier } from '@/tools'
+import { controlpointsToVerovioSvgBezier } from '@/tools'
 
 export default {
   name: 'VerovioSlur',
@@ -92,7 +92,7 @@ export default {
   },
   methods: {
     controlpointsToTerovioSvgBezier (controlpoints, width) {
-      return controlpointsToTerovioSvgBezier(controlpoints, width)
+      return controlpointsToVerovioSvgBezier(controlpoints, width)
     }
   },
   mounted () {
