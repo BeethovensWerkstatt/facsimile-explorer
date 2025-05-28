@@ -79,7 +79,6 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
     console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
-    /*
     const measure = svgDom.querySelector('g.measure')
 
     const section = curve.closest('section')
@@ -99,7 +98,6 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     g.append(path)
     measure.append(g)
     console.log(571, 'curve', measure)
-    */
   })
 
   // render dynams
