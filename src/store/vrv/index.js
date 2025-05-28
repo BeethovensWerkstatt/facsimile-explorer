@@ -99,7 +99,9 @@ const verovioModule = {
           'note@stem.dir',
           'chord@stem.dir',
           'note@dot-corresp',
-          'rest@dot-corresp'] //,
+          'rest@dot-corresp',
+          'dynam@corresp',
+          'dir@corresp'] //,
         // unit: 18
       }
 

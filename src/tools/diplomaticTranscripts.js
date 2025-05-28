@@ -59,10 +59,13 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
 
     // TODO: the "+4" is a constant factor that I do not fully understand yet
-    const x1 = (parseFloat(barLine.getAttribute('x')) + 4) * factor
+    const x1 = (parseFloat(barLine.getAttribute('x')) + parseFloat(barLine.getAttribute('ho'))) * factor
     const y1 = (parseFloat(barLine.getAttribute('y')) + +rastrum.y) * factor
-    const x2 = (parseFloat(barLine.getAttribute('x2')) + 4) * factor
+    const x2 = (parseFloat(barLine.getAttribute('x2')) + parseFloat(barLine.getAttribute('ho'))) * factor
     const y2 = (parseFloat(barLine.getAttribute('y2')) + +rastrum.y) * factor
+
+    // console.log(463, 'barLine ', barLine, '\nx1 ', x1, '\nxy ', y1, '\nx2 ', x2, '\ny2 ', y2, '\nfactor ', factor)
+
     path.setAttribute('d', 'M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2)
     path.setAttribute('stroke-width', '27')
 
@@ -110,21 +113,21 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     console.log(571, meiDom.querySelectorAll('zone[type="sb"]'))
     const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
 
-    const section = dynam.closest('section')
+    // const section = dynam.closest('section')
     const staffN = dynam.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
 
     const index = +staffN - 1
 
     // const diploStaffDef = section.parentElement.querySelector('staffDef[n="' + staffN + '"]')
 
-    const staff = section.querySelector('staff[n="' + staffN + '"]')
+    // const staff = section.querySelector('staff[n="' + staffN + '"]')
 
-    const rastrumId = staff.getAttribute('decls').split('#')[1]
+    // const rastrumId = staff.getAttribute('decls').split('#')[1]
     const otherRastrumId = rastrumIds[index]
 
     const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
 
-    console.log(571, 'barLine', dynam, dynam.closest('section'), rastrum, meiDom, rastrumId, otherRastrumId, rastrumsOnCurrentPage)
+    console.log(571, 'dynam', dynam, 'rastrum', rastrum)
 
     /*
     <g id="d6iolw9" class="dynam">
@@ -144,14 +147,15 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-    const x1 = parseFloat(dynam.getAttribute('x')) * factor
-    const y1 = (parseFloat(dynam.getAttribute('y')) + +rastrum.y) * factor
-    // const x2 = (parseFloat(dynam.getAttribute('x2')) + 4) * factor
-    // const y2 = (parseFloat(dynam.getAttribute('y2')) + +rastrum.y) * factor
+
+    const fontSize = 405 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(dynam.getAttribute('x')) + parseFloat(dynam.getAttribute('ho'))) * factor
+    const y1 = (parseFloat(dynam.getAttribute('y')) + +rastrum.y + (fontSize / 90)) * factor
 
     text.setAttribute('x', x1)
     text.setAttribute('y', y1)
-    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('text-anchor', 'middle')
     text.setAttribute('font-size', '0px')
 
     const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
@@ -159,8 +163,81 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     outerTspan.setAttribute('class', 'text')
 
     const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
-    innerTspan.setAttribute('font-size', '405px')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
     innerTspan.textContent = dynam.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
+  })
+
+  // render dirs
+  meiDom.querySelectorAll('dir').forEach(dir => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = dir.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    // console.log(572, 'systemZoneId', systemZoneId)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    // console.log(572, 'systemZone s', systemZone)
+    // console.log(572, meiDom.querySelectorAll('zone[type="sb"]'))
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    // const section = dynam.closest('section')
+    const staffN = dir.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    // const diploStaffDef = section.parentElement.querySelector('staffDef[n="' + staffN + '"]')
+
+    // const staff = section.querySelector('staff[n="' + staffN + '"]')
+
+    // const rastrumId = staff.getAttribute('decls').split('#')[1]
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    console.log(572, 'dir', dir, 'rastrum', rastrum)
+
+    /*
+    <g id="d6iolw9" class="dynam">
+      <text x="2241" y="4211" text-anchor="middle" font-size="0px">
+        <tspan id="k1caa3av" class="text">
+          <tspan font-size="405px">ppo</tspan>
+        </tspan>
+      </text>
+    </g>
+    */
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', dir.getAttribute('xml:id'))
+    g.setAttribute('data-id', dir.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'dir')
+    g.setAttribute('class', 'dir')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const fontSize = 405 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(dir.getAttribute('x')) + parseFloat(dir.getAttribute('ho'))) * factor
+    const y1 = (parseFloat(dir.getAttribute('y')) + +rastrum.y) * factor
+    const x2 = (parseFloat(dir.getAttribute('x2')) + parseFloat(dir.getAttribute('ho'))) * factor
+    const w = x2 - x1
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+    text.setAttribute('textLength', w + 'px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', dir.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
+    innerTspan.textContent = dir.textContent
 
     outerTspan.append(innerTspan)
     text.append(outerTspan)

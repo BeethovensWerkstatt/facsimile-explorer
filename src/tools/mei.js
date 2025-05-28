@@ -120,6 +120,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticCurve(annotElem, elem, bbox)
   } else if (name === 'dynam') {
     getDiplomaticDynam(annotElem, elem, bbox)
+  } else if (name === 'dir') {
+    getDiplomaticDir(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -278,11 +280,24 @@ function getDiplomaticDot (annotElem, dot) {
  * @returns the dt:dynam element
  */
 function getDiplomaticDynam (annotElem, dynam, bbox) {
-  console.log(462, 'getDiplomaticDynam', annotElem, dynam, bbox)
-  dynam.setAttribute('x', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  dynam.setAttribute('x', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w) / 2).toFixed(1))
   dynam.setAttribute('y', bbox.mm.y)
   dynam.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dynam.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a dir from an annotated note to a diplomatic dir
+ * @param {*} annotElem the annotated dir to be translated
+ * @param {*} dynam the initial dir that needs specific treatment
+ * @returns the dt:dir element
+ */
+function getDiplomaticDir (annotElem, dir, bbox) {
+  dir.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  dir.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  dir.setAttribute('y', bbox.mm.y)
+  dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 /**
@@ -1386,11 +1401,11 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         const systemZone = appendNewElement(outSurface, 'zone')
         const rastrumIDs = [...node.querySelectorAll('staffDef')].map(staffDef => staffDef.getAttribute('decls').split('#')[1])
-        console.log(714, 'rastrumIDs:', rastrumIDs)
+        // console.log(714, 'rastrumIDs:', rastrumIDs)
         const rastrums = [...layout.querySelectorAll('rastrum')].filter(r => {
           return rastrumIDs.indexOf(r.getAttribute('xml:id')) !== -1
         })
-        console.log(714, 'passed rastrums', rastrums)
+        // console.log(714, 'passed rastrums', rastrums)
         let x1 = pageMM.w
         let y = pageMM.h
         let x2 = 0
@@ -1418,14 +1433,14 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         let measureX = pageMM.w * factor
         let measureX2 = 0
-        console.log(714, 'getting in')
+        // console.log(714, 'getting in')
         node.querySelectorAll('staff').forEach(staff => {
           console.log(714, 'staff:', staff)
           const outStaff = measure.appendChild(staff.cloneNode(true))
 
           const staffN = parseInt(staff.getAttribute('n'))
           const scoreDef = staff.closest('system').querySelector('scoreDef')
-          console.log(714, 'scoreDef:', scoreDef)
+          // console.log(714, 'scoreDef:', scoreDef)
           const rastrumID = scoreDef.querySelector('staffDef[n="' + staffN + '"]').getAttribute('decls').split('#')[1]
           const rastrum = layout.querySelector('rastrum[*|id="' + rastrumID + '"]')
           // TODO: if rastrum is null/undefined set to 0 ???
@@ -1456,7 +1471,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
           }
 
           const childName = child.localName
-          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord', 'rest', 'dot']
+          const supportedElements = ['note', 'staff', 'accid', 'barLine', 'chord', 'rest', 'dot', 'dynam']
           const ignoreElements = ['layer']
 
           if (supportedElements.indexOf(childName) !== -1) {
@@ -1475,7 +1490,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             }
             const sbZone = getSbZone(childZone)
 
-            if (childName === 'note' || childName === 'accid' || childName === 'barLine' || childName === 'chord' || childName === 'rest' || childName === 'dot') {
+            if (childName === 'note' || childName === 'accid' || childName === 'barLineX' || childName === 'chord' || childName === 'rest' || childName === 'dot') {
               const ownX = child.hasAttribute('x') ? parseFloat(child.getAttribute('x')) * factor : parseFloat(child.parentNode.getAttribute('x')) * factor
               const fixOwnX = childName === 'barLine' ? ownX * 2 : ownX
               const systemX = parseFloat(sbZone.getAttribute('ulx'))
@@ -1596,7 +1611,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
       // outDom.querySelector('section').appendChild(node)
     })
   } catch (err) {
-    console.error('714: Error in prepareDtForRendering: ' + err, err)
+    // console.error('714: Error in prepareDtForRendering: ' + err, err)
   }
   // console.log('714 outDom: ', outDom)
   return outDom
