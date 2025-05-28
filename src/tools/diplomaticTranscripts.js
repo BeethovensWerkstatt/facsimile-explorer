@@ -5,6 +5,7 @@ import { controlpointsToVerovioSvgBezier } from '.'
  * @param {} svgDom
  */
 export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
       barLine.remove()
@@ -70,22 +71,32 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
   })
 
   // render curves
-  meiDom.querySelectorAll('curve[bezier]').forEach(curve => {
-    const bezier = curve.getAttribute('bezier').split(' ').map(p => parseFloat(p))
-    console.log(571, 'curve', curve, bezier)
+  // console.log(571, 'curves', meiDom.querySelectorAll('curve'))
+  meiDom.querySelectorAll('curve').forEach(curve => {
+    const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
+    console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
+    /*
     const measure = svgDom.querySelector('g.measure')
+
+    const section = curve.closest('section')
+
+    const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+    const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
 
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.setAttribute('data-id', curve.getAttribute('xml:id'))
     g.setAttribute('data-class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-    const d = controlpointsToVerovioSvgBezier(bezier.map(c => factor * c), 27) // 27 is the width of the curve in Verovio
+    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : 4))), 27) // 27 is the width of the curve in Verovio
     path.setAttribute('d', d)
     g.append(path)
     measure.append(g)
     console.log(571, 'curve', measure)
+    */
   })
 
   // render dynams
