@@ -76,6 +76,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
   // render curves
   // console.log(571, 'curves', meiDom.querySelectorAll('curve'))
   meiDom.querySelectorAll('curve').forEach(curve => {
+    /*
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
     console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
@@ -97,7 +98,8 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     path.setAttribute('d', d)
     g.append(path)
     measure.append(g)
-    console.log(571, 'curve', measure)
+    */
+    console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 
   // render dynams

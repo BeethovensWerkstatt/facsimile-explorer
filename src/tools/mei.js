@@ -352,6 +352,7 @@ function getDiplomaticClef (annotElem, clef) {
 
 function getDiplomaticCurve (annotElem, curve, bbox) {
   const bboxbezier = boundingboxDefaultControlpoints(bbox, annotElem.getAttribute('curvedir') === 'above')
+  curve.removeAttribute('x')
   console.log('getDiplomaticCurve', annotElem, curve, bboxbezier, bbox)
   curve.setAttribute('bezier', bboxbezier.map(c => c.toFixed(2)).join(' '))
 }
