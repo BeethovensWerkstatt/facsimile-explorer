@@ -3272,9 +3272,9 @@ const dataModule = {
 
       allWz.forEach(async wzDetails => {
         if (getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1) {
-          // console.log('816: should be able to retrieve dt for', wzDetails.diploTrans)
           const dtDom = getters.documentByPath(wzDetails.diploTrans)
           const dt = prepareDtForRendering({ sourceDom, dtDom })
+          // console.log('816: should be able to retrieve dt for', wzDetails.diploTrans, dtDom, sourceDom, dt)
           if (dt !== null) {
             arr.push({ dt, wzDetails })
           }

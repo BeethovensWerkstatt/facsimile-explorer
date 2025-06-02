@@ -15,7 +15,7 @@
         <label>@xml:id</label>
         <div class="value string">{{elementId}}</div>
     </div>
-    <div class="entry" v-if="elementId">
+    <div class="entry" v-if="elementId && !isCurve">
         <label>@x</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -27,10 +27,16 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y" setterName="setActiveDiploTransElementAttValue" :min="-30" :max="50" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine || isDir">
+    <div class="entry" v-if="isBarLine">
         <label>@x2</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+        </div>
+    </div>
+    <div class="entry" v-if="isDir || isDynam">
+        <label>@width</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="width" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
     <div class="entry" v-if="isBarLine">
@@ -148,6 +154,9 @@ export default {
     hasStemLen () {
       const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')
       return val !== null
+    },
+    isCurve () {
+      return this.$store.getters.activeDiploTransElementName === 'curve'
     }
   }
 }
@@ -158,6 +167,7 @@ export default {
   background-color: #484848;
   color: white;
   padding: .1rem .5rem;
+  min-height: 50.5px;
 
   .entry {
     display: inline-block;

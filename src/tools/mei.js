@@ -294,7 +294,7 @@ function getDiplomaticDynam (annotElem, dynam, bbox) {
  */
 function getDiplomaticDir (annotElem, dir, bbox) {
   dir.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
-  dir.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  dir.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
   dir.setAttribute('y', bbox.mm.y)
   dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
@@ -1436,7 +1436,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
         let measureX2 = 0
         // console.log(714, 'getting in')
         node.querySelectorAll('staff').forEach(staff => {
-          console.log(714, 'staff:', staff)
+          // console.log(714, 'staff:', staff)
           const outStaff = measure.appendChild(staff.cloneNode(true))
 
           const staffN = parseInt(staff.getAttribute('n'))
@@ -1584,7 +1584,45 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             }
             // console.log(ctrlevt)
           }
-          // TODO slur, tie, ...
+          if (ctrlevt.localName === 'curve') {
+            console.log(668, 'curve control event', ctrlevt)
+            /* const facs = ctrlevt.getAttribute('facs').split([' '])
+            let bbox = null
+            const setBBox = (_bbox) => {
+              if (bbox) {
+                bbox.x = Math.min(bbox.x, _bbox.x)
+                bbox.y = Math.min(bbox.y, _bbox.y)
+                bbox.width = Math.max(bbox.width, _bbox.width)
+                bbox.height = Math.max(bbox.height, _bbox.height)
+              } else {
+                bbox = _bbox
+              }
+            }
+            facs.forEach(f => {
+              const shapeid = f.split('#')[1]
+              // console.log(shapeid)
+              const shape = document.querySelector(`[*|id="${shapeid}"]`)
+              // console.log(shape)
+              if (shape) {
+                setBBox(shape.getBBox())
+              }
+            })
+            // console.log(bbox)
+            if (bbox) {
+              const ctrlZone = appendNewElement(outSurface, 'zone')
+              ctrlZone.setAttribute('type', 'curve')
+              ctrlZone.setAttribute('ulx', (bbox.x / factor).toFixed(1))
+              ctrlZone.setAttribute('uly', (bbox.y / factor).toFixed(1))
+              ctrlZone.setAttribute('lrx', ((bbox.x + bbox.width) / factor).toFixed(1))
+              ctrlZone.setAttribute('lry', ((bbox.y + bbox.height) / factor).toFixed(1))
+              ctrlevt.setAttribute('facs', '#' + ctrlZone.getAttribute('xml:id'))
+            } else {
+              ctrlevt.removeAttribute('facs')
+              // console.warn('element has no bbox ...')
+            }
+            // console.log(ctrlevt)
+            */
+          }
           measure.appendChild(ctrlevt)
         })
 

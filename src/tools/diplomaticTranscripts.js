@@ -5,7 +5,7 @@ import { controlpointsToVerovioSvgBezier } from '.'
  * @param {} svgDom
  */
 export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPage) => {
-  console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
+  // console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
       barLine.remove()
@@ -74,9 +74,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
   })
 
   // render curves
-  // console.log(571, 'curves', meiDom.querySelectorAll('curve'))
   meiDom.querySelectorAll('curve').forEach(curve => {
-    /*
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
     console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
@@ -94,11 +92,11 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     g.setAttribute('data-class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : 4))), 27) // 27 is the width of the curve in Verovio
+    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : 4))), 52) // 27 is the width of the curve in Verovio
     path.setAttribute('d', d)
     g.append(path)
     measure.append(g)
-    */
+
     console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 
@@ -222,8 +220,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
 
     const x1 = (parseFloat(dir.getAttribute('x')) + parseFloat(dir.getAttribute('ho'))) * factor
     const y1 = (parseFloat(dir.getAttribute('y')) + +rastrum.y) * factor
-    const x2 = (parseFloat(dir.getAttribute('x2')) + parseFloat(dir.getAttribute('ho'))) * factor
-    const w = x2 - x1
+    const w = (parseFloat(dir.getAttribute('width'))) * factor
 
     text.setAttribute('x', x1)
     text.setAttribute('y', y1)
@@ -247,7 +244,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
 
   // move flag(s) to the correct position
   const chords = svgDom.querySelectorAll('g.chord')
-  console.log(443, 'chords', chords)
+  // console.log(443, 'chords', chords)
   chords.forEach((chord) => {
     if (chord.hasAttribute('data-stem.dir')) {
       const stemDir = chord.getAttribute('data-stem.dir')

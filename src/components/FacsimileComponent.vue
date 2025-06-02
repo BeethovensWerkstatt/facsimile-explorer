@@ -963,6 +963,7 @@ export default {
      * renders all diplomatic transcriptions on current page
      */
     async renderDiploTransOnPage () {
+      console.log(643, 'renderDiploTransOnPage()')
       if (!this.showRenderedStafflines) {
         return null
       }
@@ -1018,13 +1019,13 @@ export default {
       // console.log('643: height of empty page: ' + typeof height, height)
 
       tk.setOptions(options)
-      // console.log('643 again', dtArr)
+      console.log('643 again', dtArr)
 
-      const diplomaticTranscripts = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
+      // const diplomaticTranscripts = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       // console.log('913 diplomaticTranscripts', diplomaticTranscripts)
 
       // ----
-      diplomaticTranscripts.forEach(async obj => {
+      dtArr.forEach(async obj => {
         // console.log('913 entering ', obj)
 
         if (obj.dt) {
@@ -1138,6 +1139,7 @@ export default {
       /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
         console.log('913: meiDom', meiDom)
       } */
+      // console.log('913: meiDom', meiDom)
 
       const meiString = new XMLSerializer().serializeToString(meiDom)
       toolkit.loadData(meiString)
@@ -1276,12 +1278,10 @@ export default {
         this.renderGrid()
       })
 
-    /*
     this.unwatchDiploTranscriptsOnCurrentPage = this.$store.watch((state, getters) => getters.renderableDiplomaticTranscriptsOnCurrentPage,
       (newArr, oldArr) => {
         this.renderDiploTransOnPage()
       })
-    */
 
     this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
       (newArr, oldArr) => {
@@ -1323,7 +1323,12 @@ export default {
       // TODO watch/unwatch on diplo tab ...
       if (this.explorerTab === 'diplo') {
         this.unwatchDiploTransOsdBounds()
-        this.unwatchDiploTranscriptsOnCurrentPage()
+        if (typeof unwatchDiploTranscriptsOnCurrentPage === 'function') {
+          this.unwatchDiploTranscriptsOnCurrentPage()
+        } else {
+          // TODO
+          console.warn('FacsimileComponent:beforeUnmount(): unwatchDiploTranscriptsOnCurrentPage is not a function')
+        }
       }
       this.unwatchUsedShapes()
       this.unwatchSelectedId()
