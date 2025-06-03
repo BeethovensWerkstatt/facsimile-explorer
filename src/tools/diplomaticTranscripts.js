@@ -92,8 +92,11 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     g.setAttribute('data-class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : 4))), 52) // 27 is the width of the curve in Verovio
+    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x))), 52)
     path.setAttribute('d', d)
+    path.setAttribute('stroke-width', '9')
+    path.setAttribute('stroke-linecap', 'round')
+    path.setAttribute('stroke-linejoin', 'round')
     g.append(path)
     measure.append(g)
 

@@ -119,14 +119,15 @@ export const controlpointsToVerovioSvgBezier = (Q, w = 1) => {
  */
 export const boundingboxDefaultControlpoints = (bbox, up = true) => {
   const { mm: { x, y, w, h } } = bbox
-  const c1 = new Vector(x, y)
-  const c2 = new Vector(x + w, y)
-  const c3 = new Vector(x + w, y + h)
-  const c4 = new Vector(x, y + h)
+  const controlfactor = 1.5 // factor from box height to controlpoint distance
+  const c3 = new Vector(x, y)
+  const c4 = new Vector(x + w, y)
+  const c1 = new Vector(x + w, y + h)
+  const c2 = new Vector(x, y + h)
   const m = c1.add(c3).div(2)
-  const cp1 = up ? c4 : c1
-  const cp2 = up ? m.add(new Vector(0, h * 2)) : m.sub(new Vector(0, h * 2))
-  const cp3 = up ? c3 : c2
+  const cp1 = up ? c1 : c4
+  const cp2 = up ? m.sub(new Vector(0, h * controlfactor)) : m.add(new Vector(0, h * controlfactor))
+  const cp3 = up ? c2 : c3
 
   const q = [
     cp1.x, cp1.y,
