@@ -58,7 +58,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
 
-    // TODO: the "+4" is a constant factor that I do not fully understand yet
+    // (*TODO: the "+4" is a constant factor that I do not fully understand yet*)
     const x1 = (parseFloat(barLine.getAttribute('x')) + parseFloat(barLine.getAttribute('ho'))) * factor
     const y1 = (parseFloat(barLine.getAttribute('y')) + +rastrum.y) * factor
     const x2 = (parseFloat(barLine.getAttribute('x2')) + parseFloat(barLine.getAttribute('ho'))) * factor
@@ -92,7 +92,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     g.setAttribute('data-class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-    // shift bezier control points by rastrum position (x, y)
+    // shift bezier control points by rastrum x and y position [x1, y1, x2, y2, x3, y3, x4, y4]
     const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x))), 52)
     path.setAttribute('d', d)
     // taken from verovio generated slur svg

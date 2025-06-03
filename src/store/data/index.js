@@ -3466,6 +3466,40 @@ const dataModule = {
     },
 
     /**
+     * bezier control points of the element currently
+     * activated in the XML editor of DiploTab
+     * (if it has a bezier attribute)
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeDiploTransElementBezier: (state, getters) => {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      const elemId = getters.activeDiploTransElementId
+      if (!filePath || !elemId) {
+        return null
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return null
+      }
+      const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+
+      if (!elem) {
+        return null
+      }
+
+      if (!elem.hasAttribute('bezier')) {
+        return null
+      }
+
+      const bezier = elem.getAttribute('bezier')
+      const bezierArr = bezier.split(' ').map(c => parseFloat(c))
+      return bezierArr
+    },
+
+    /**
      * returns a list of all SVG paths referenced by the current diplomatic transcript
      * @param {*} state
      * @param {*} getters

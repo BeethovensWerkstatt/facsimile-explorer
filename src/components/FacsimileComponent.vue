@@ -139,6 +139,17 @@ export default {
       const tab = this.$store.getters.explorerTab
       const validTabs = ['diplo']
       return validTabs.indexOf(tab) !== -1 && this.type === 'diploTrans'
+    },
+    activeBezier () {
+      const name = this.$store.getters.activeDiploTransElementName
+      if (name === 'curve') {
+        // const id = this.$store.getters.activeDiploTransElementId
+        const bezier = this.$store.getters.activeDiploTransElementAttValue('bezier')
+        const cp = bezier?.split(' ').map(p => parseFloat(p))
+        // const rastrum = this.$store.getters.rastrumForCurrentPage
+        return cp
+      }
+      return null
     }
   },
   methods: {
