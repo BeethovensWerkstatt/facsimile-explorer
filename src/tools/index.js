@@ -126,9 +126,11 @@ export const boundingboxDefaultControlpoints = (bbox, up = true) => {
   const c2 = new Vector(x, y + h)
   const m = c1.add(c3).div(2)
   const cp1 = up ? c1 : c4
+  // calculate middle control point for binary bezier curve
   const cp2 = up ? m.sub(new Vector(0, h * controlfactor)) : m.add(new Vector(0, h * controlfactor))
   const cp3 = up ? c2 : c3
 
+  // calculate control points for cubic bezier curve
   const q = [
     cp1.x, cp1.y,
     (1 / 3) * cp1.x + (2 / 3) * cp2.x,

@@ -92,8 +92,10 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     g.setAttribute('data-class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    // shift bezier control points by rastrum position (x, y)
     const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x))), 52)
     path.setAttribute('d', d)
+    // taken from verovio generated slur svg
     path.setAttribute('stroke-width', '9')
     path.setAttribute('stroke-linecap', 'round')
     path.setAttribute('stroke-linejoin', 'round')
