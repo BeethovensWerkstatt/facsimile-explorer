@@ -21,6 +21,7 @@ const rawSelectables = [
   'clef',
   'slur',
   'tie',
+  'curve',
   'dynam',
   'dir',
   'keyAccid',

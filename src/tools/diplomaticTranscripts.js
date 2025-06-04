@@ -4,7 +4,8 @@ import { controlpointsToVerovioSvgBezier } from '.'
  * cleans up the diplomatic transcript to overcome Verovio restrictions and other issues
  * @param {} svgDom
  */
-export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
+  const { rastrumsOnCurrentPage } = context || {}
   // console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
@@ -75,6 +76,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
 
   // render curves
   meiDom.querySelectorAll('curve').forEach(curve => {
+    const curveid = curve.getAttribute('xml:id')
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
     console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
@@ -88,12 +90,14 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
 
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
-    g.setAttribute('data-id', curve.getAttribute('xml:id'))
+    g.setAttribute('data-id', curveid)
     g.setAttribute('data-class', 'curve')
+    g.setAttribute('class', 'curve')
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
     // shift bezier control points by rastrum x and y position [x1, y1, x2, y2, x3, y3, x4, y4]
-    const d = controlpointsToVerovioSvgBezier(bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x))), 52)
+    const controlpoints = bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x)))
+    const d = controlpointsToVerovioSvgBezier(controlpoints, 52)
     path.setAttribute('d', d)
     // taken from verovio generated slur svg
     path.setAttribute('stroke-width', '9')
@@ -101,7 +105,13 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, rastrumsOnCurrentPag
     path.setAttribute('stroke-linejoin', 'round')
     g.append(path)
     measure.append(g)
-
+    for (let i = 0; i < controlpoints.length; i += 2) {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      circle.setAttribute('cx', controlpoints[i])
+      circle.setAttribute('cy', controlpoints[i + 1])
+      circle.setAttribute('r', '52')
+      g.append(circle)
+    }
     console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 

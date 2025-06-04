@@ -80,13 +80,14 @@ const guiModule = {
     awaitedZone: -1,
     awaitedLayer: -1,
     allDocsLoaded: false,
+    // TODO: we only use one selection for shape, AT and DT -> remove Map
     diploTransActivations: {
       shapes: new Map(),
       annotTrans: new Map()
     },
-    diploTransSelectedId: null,
+    diploTransSelectedId: null, // TODO: remove this? we use activeDiploTransElementId
     diploTransOsdBounds: null,
-    activeDiploTransElementId: null, // todo: was ist das???
+    activeDiploTransElementId: null,
     lockXml: false, // activate read only ranges in XmlEditor
     contextMenu: null
 

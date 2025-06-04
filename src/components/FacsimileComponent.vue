@@ -10,7 +10,7 @@ import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 import { getEmptyPage, selectables } from '@/tools/mei.js'
-import { useDiploTrans } from '@/store/gui/diplotrans'
+// import { useDiploTrans } from '@/store/gui/diplotrans'
 import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
 
 const osdOptions = {
@@ -170,8 +170,8 @@ export default {
         alt: e.originalEvent.altKey
       }
 
-      const dtstore = useDiploTrans()
-      console.log(dtstore.selections.facs)
+      // const dtstore = useDiploTrans()
+      // console.log(dtstore.selections.facs)
 
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation
@@ -320,6 +320,7 @@ export default {
       if (click.target.closest('.diploTrans') && click.target.closest('.measure')) {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(selectables)
+        console.log(365, target, selectables)
         if (target) {
           let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
@@ -1056,7 +1057,7 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, rastrumsOnCurrentPage))
+            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage }))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1071,7 +1072,8 @@ export default {
             })
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
-            existingOverlay.replaceChild(renderedDiplo, existingOverlay.firstChild)
+            // TODO: renderedDiplo is newly created, so we need to cleanUp again???
+            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage }), existingOverlay.firstChild)
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
@@ -1547,6 +1549,10 @@ export default {
       .selectedDiploTrans {
         fill: #961010;
         stroke: #961010;
+      }
+      .curve.selectedDiploTrans path {
+        fill: #961010;
+        stroke: #961010 !important;
       }
     }
 
