@@ -1,7 +1,7 @@
 <template>
-   <div ref="container" class="facsimileContainer" :class="[ explorerTab, { diploTrans: this.type === 'diploTrans' }]">
-      <!--<div style="position: absolute; top: 1em; left: 1em; right: 1em; border: .5px solid red; z-index: 20; padding: .3rem; background-color: #ffffff66;">TileSource: {{ tileSource }}</div>-->
-   </div>
+  <div ref="container" class="facsimileContainer" :class="[ explorerTab, { diploTrans: this.type === 'diploTrans' }]">
+    <!--<div style="position: absolute; top: 1em; left: 1em; right: 1em; border: .5px solid red; z-index: 20; padding: .3rem; background-color: #ffffff66;">TileSource: {{ tileSource }}</div>-->
+  </div>
 </template>
 
 <script>
@@ -66,7 +66,6 @@ export default {
 
   computed: {
     ...mapGetters(['diploTransVerovioOptions']),
-
     /**
      * the tileSource for the current page
      * @return {[type]} [description]
@@ -1057,7 +1056,7 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage }))
+            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage, selectedCurve: this.$store.getters.activeDiploTransElementId }))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1073,7 +1072,7 @@ export default {
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
             // TODO: renderedDiplo is newly created, so we need to cleanUp again???
-            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage }), existingOverlay.firstChild)
+            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage, selectedCurve: this.$store.getters.activeDiploTransElementId }), existingOverlay.firstChild)
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)

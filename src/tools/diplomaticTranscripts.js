@@ -1,3 +1,4 @@
+import OpenSeadragon from 'openseadragon'
 import { controlpointsToVerovioSvgBezier } from '.'
 
 /**
@@ -5,7 +6,7 @@ import { controlpointsToVerovioSvgBezier } from '.'
  * @param {} svgDom
  */
 export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
-  const { rastrumsOnCurrentPage } = context || {}
+  const { rastrumsOnCurrentPage, selectedCurve } = context || {}
   // console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
@@ -105,12 +106,29 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     path.setAttribute('stroke-linejoin', 'round')
     g.append(path)
     measure.append(g)
-    for (let i = 0; i < controlpoints.length; i += 2) {
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      circle.setAttribute('cx', controlpoints[i])
-      circle.setAttribute('cy', controlpoints[i + 1])
-      circle.setAttribute('r', '52')
-      g.append(circle)
+    console.log(836, selectedCurve, curveid)
+    if (selectedCurve && selectedCurve === curveid) {
+      for (let i = 0; i < controlpoints.length; i += 2) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+        circle.setAttribute('cx', controlpoints[i])
+        circle.setAttribute('cy', controlpoints[i + 1])
+        circle.setAttribute('r', '52')
+        circle.setAttribute('class', 'curve-controlpoint')
+        g.append(circle)
+        const tracker = new OpenSeadragon.MouseTracker({
+          element: circle,
+          draghandler: (event) => {
+            const newX = event.position.x / factor - rastrum.x
+            const newY = event.position.y / factor - rastrum.y
+            controlpoints[i] = newX
+            controlpoints[i + 1] = newY
+            circle.setAttribute('cx', newX)
+            circle.setAttribute('cy', newY)
+            path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+          }
+        })
+        console.log(836, tracker)
+      }
     }
     console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
