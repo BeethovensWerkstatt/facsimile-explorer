@@ -1,4 +1,5 @@
 import OpenSeadragon from 'openseadragon'
+import store from '@/store'
 import { controlpointsToVerovioSvgBezier } from '.'
 
 /**
@@ -6,7 +7,7 @@ import { controlpointsToVerovioSvgBezier } from '.'
  * @param {} svgDom
  */
 export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
-  const { rastrumsOnCurrentPage, selectedCurve } = context || {}
+  const { rastrumsOnCurrentPage, selectedElementId, viewer } = context || {}
   // console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
@@ -106,10 +107,11 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     path.setAttribute('stroke-linejoin', 'round')
     g.append(path)
     measure.append(g)
-    console.log(836, selectedCurve, curveid)
-    if (selectedCurve && selectedCurve === curveid) {
-      for (let i = 0; i < controlpoints.length; i += 2) {
+    console.log(836, selectedElementId, curveid)
+    if (selectedElementId && selectedElementId === curveid) {
+      for (const i of [0, 2, 4, 6]) {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+        console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
         circle.setAttribute('cx', controlpoints[i])
         circle.setAttribute('cy', controlpoints[i + 1])
         circle.setAttribute('r', '52')
@@ -117,14 +119,34 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
         g.append(circle)
         const tracker = new OpenSeadragon.MouseTracker({
           element: circle,
-          draghandler: (event) => {
-            const newX = event.position.x / factor - rastrum.x
-            const newY = event.position.y / factor - rastrum.y
+          dragHandler: (event) => {
+            const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+            const viewportCoords = viewer.viewport.windowToViewportCoordinates(windowCoords)
+            const newX = viewportCoords.x * factor
+            const newY = viewportCoords.y * factor
             controlpoints[i] = newX
             controlpoints[i + 1] = newY
+            console.log(836, controlpoints, viewportCoords)
             circle.setAttribute('cx', newX)
             circle.setAttribute('cy', newY)
             path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+          },
+          dragEndHandler: (event) => {
+            const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+            const viewportCoords = viewer.viewport.windowToViewportCoordinates(windowCoords)
+            const newX = viewportCoords.x * factor
+            const newY = viewportCoords.y * factor
+            controlpoints[i] = newX
+            controlpoints[i + 1] = newY
+            // console.log(836, controlpoints, viewportCoords)
+            circle.setAttribute('cx', newX)
+            circle.setAttribute('cy', newY)
+            path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+            // update curve bezier attribute in MEI
+            bezier[i] = (newX / factor) - rastrum.x
+            bezier[i + 1] = (newY / factor) - rastrum.y
+            store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.join(' ') })
+            console.log(836, 'curve bezier updated', bezier)
           }
         })
         console.log(836, tracker)

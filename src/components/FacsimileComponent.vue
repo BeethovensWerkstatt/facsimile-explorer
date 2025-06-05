@@ -1056,7 +1056,11 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage, selectedCurve: this.$store.getters.activeDiploTransElementId }))
+            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
+              rastrumsOnCurrentPage,
+              selectedElementId: this.$store.getters.activeDiploTransElementId,
+              viewer: this.viewer
+            }))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1072,7 +1076,11 @@ export default {
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
             // TODO: renderedDiplo is newly created, so we need to cleanUp again???
-            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, { rastrumsOnCurrentPage, selectedCurve: this.$store.getters.activeDiploTransElementId }), existingOverlay.firstChild)
+            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
+              rastrumsOnCurrentPage,
+              selectedCurve: this.$store.getters.activeDiploTransElementId,
+              viewer: this.viewer
+            }), existingOverlay.firstChild)
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
