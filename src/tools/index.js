@@ -35,7 +35,9 @@ export class Vector {
   }
 
   toString () {
-    return `${this.x},${this.y}`
+    console.log(837, 'Vector.toString()', `${this.x.toFixed(2)},${this.y.toFixed(2)}`)
+    // round to 2 decimals
+    return `${this.x.toFixed(2)},${this.y.toFixed(2)}`
   }
 }
 
@@ -92,6 +94,7 @@ export const verovioSvgBezierToControlpoints = (pathstr) => {
  * @returns
  */
 export const controlpointsToVerovioSvgBezier = (Q, w = 1) => {
+  // console.log(837, 'controlpointsToVerovioSvgBezier')
   if (!Q?.length) {
     return ''
   }
@@ -105,6 +108,7 @@ export const controlpointsToVerovioSvgBezier = (Q, w = 1) => {
   const c2b = c2.sub(d)
   const c3a = c3.add(d)
   const c3b = c3.sub(d)
+  // console.log(837, 'controlpointsToVerovioSvgBezier', `M${c1} C${c2a} ${c3a} ${c4} C${c3b} ${c2b} ${c1}`)
   return `M${c1} C${c2a} ${c3a} ${c4} C${c3b} ${c2b} ${c1}`
 }
 
@@ -125,10 +129,10 @@ export const boundingboxDefaultControlpoints = (bbox, up = true) => {
   const c1 = new Vector(x + w, y + h)
   const c2 = new Vector(x, y + h)
   const m = c1.add(c3).div(2)
-  const cp1 = up ? c1 : c4
+  const cp3 = up ? c1 : c4
   // calculate middle control point for binary bezier curve
   const cp2 = up ? m.sub(new Vector(0, h * controlfactor)) : m.add(new Vector(0, h * controlfactor))
-  const cp3 = up ? c2 : c3
+  const cp1 = up ? c2 : c3
 
   // calculate control points for cubic bezier curve
   const q = [
@@ -139,6 +143,6 @@ export const boundingboxDefaultControlpoints = (bbox, up = true) => {
     (2 / 3) * cp2.y + (1 / 3) * cp3.y,
     cp3.x, cp3.y
   ]
-  console.log(bbox, q)
+  // console.log(bbox, q)
   return q
 }

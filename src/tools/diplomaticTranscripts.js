@@ -79,6 +79,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
   // render curves
   meiDom.querySelectorAll('curve').forEach(curve => {
     const curveid = curve.getAttribute('xml:id')
+    // TODO check for curve on activeDiploTransElementId
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
     console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
@@ -108,7 +109,22 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     g.append(path)
     measure.append(g)
     console.log(836, selectedElementId, curveid)
+    // TODO: react on change curveid event!
     if (selectedElementId && selectedElementId === curveid) {
+      const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      line1.setAttribute('x1', controlpoints[0])
+      line1.setAttribute('y1', controlpoints[1])
+      line1.setAttribute('x2', controlpoints[2])
+      line1.setAttribute('y2', controlpoints[3])
+      line1.setAttribute('stroke-width', 23)
+      g.append(line1)
+      const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      line2.setAttribute('x1', controlpoints[4])
+      line2.setAttribute('y1', controlpoints[5])
+      line2.setAttribute('x2', controlpoints[6])
+      line2.setAttribute('y2', controlpoints[7])
+      line2.setAttribute('stroke-width', 23)
+      g.append(line2)
       for (const i of [0, 2, 4, 6]) {
         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
         console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
@@ -127,6 +143,10 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
             controlpoints[i] = newX
             controlpoints[i + 1] = newY
             console.log(836, controlpoints, viewportCoords)
+            const line = i < 4 ? line1 : line2 // line1 or line2
+            const pidx = ((i % 4) / 2) + 1 // x1,y1 or x2,y2?
+            line.setAttribute('x' + pidx, newX)
+            line.setAttribute('y' + pidx, newY)
             circle.setAttribute('cx', newX)
             circle.setAttribute('cy', newY)
             path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
@@ -145,7 +165,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
             // update curve bezier attribute in MEI
             bezier[i] = (newX / factor) - rastrum.x
             bezier[i + 1] = (newY / factor) - rastrum.y
-            store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.join(' ') })
+            store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
             console.log(836, 'curve bezier updated', bezier)
           }
         })
