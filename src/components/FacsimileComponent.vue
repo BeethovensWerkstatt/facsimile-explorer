@@ -1314,6 +1314,7 @@ export default {
         // console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
+        // TODO add/remove bezier and line editor
       })
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
