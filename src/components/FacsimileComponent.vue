@@ -780,7 +780,7 @@ export default {
                   console.log(836, 'curve bezier updated', bezier)
                 }
               })
-              console.log(836, tracker)
+              this.setMouseTracker(i / 2, tracker)
             }
           }
         })
@@ -791,7 +791,9 @@ export default {
       if (i < 0 || i > this.mouseTracker.length) {
         return
       }
-      if (this.mouseTracker[i]?.destroy) {
+      if (typeof this.mouseTracker[i]?.destroy === 'function') {
+        this.mouseTracker[i].element.closest('g').querySelectorAll('line').forEach(elem => elem.remove())
+        this.mouseTracker[i].element.remove()
         this.mouseTracker[i].destroy()
       }
       this.mouseTracker[i] = mouseTracker
