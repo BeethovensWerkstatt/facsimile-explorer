@@ -1,13 +1,18 @@
-import OpenSeadragon from 'openseadragon'
-import store from '@/store'
+// import OpenSeadragon from 'openseadragon'
+// import store from '@/store'
 import { controlpointsToVerovioSvgBezier } from '.'
+
+/**
+ * get control points for curve bezier attribute for rastrum on position x/y with factor (default 90)
+ */
+export const bezierAttributeToControlpoints = (bezier, { x, y }, factor = 90) => bezier.map((c, i) => factor * (c + (i % 2 ? y : x)))
 
 /**
  * cleans up the diplomatic transcript to overcome Verovio restrictions and other issues
  * @param {} svgDom
  */
 export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
-  const { rastrumsOnCurrentPage, selectedElementId, viewer } = context || {}
+  const { rastrumsOnCurrentPage, selectedElementId } = context || {}
   // console.log(571, 'cleanUpDiplomaticTranscript', svgDom, meiDom, rastrumsOnCurrentPage)
   svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
     if (!barLine.closest('.layer')) {
@@ -99,7 +104,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
     // shift bezier control points by rastrum x and y position [x1, y1, x2, y2, x3, y3, x4, y4]
-    const controlpoints = bezier.map((c, i) => factor * (c + (i % 2 ? rastrum.y : rastrum.x)))
+    const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
     const d = controlpointsToVerovioSvgBezier(controlpoints, 52)
     path.setAttribute('d', d)
     // taken from verovio generated slur svg
@@ -110,6 +115,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     measure.append(g)
     console.log(836, selectedElementId, curveid)
     // TODO: react on change curveid event!
+    /*
     if (selectedElementId && selectedElementId === curveid) {
       const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       line1.setAttribute('x1', controlpoints[0])
@@ -172,6 +178,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
         console.log(836, tracker)
       }
     }
+    */
     console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 

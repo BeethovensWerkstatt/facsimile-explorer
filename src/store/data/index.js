@@ -3408,12 +3408,12 @@ const dataModule = {
     },
 
     /**
-     * retrieves the name of the element currently activated in the XML editor of DiploTab
+     * retrieves the element currently activated in the XML editor of DiploTab
      * @param {*} state
      * @param {*} getters
      * @returns
      */
-    activeDiploTransElementName: (state, getters) => {
+    activeDiploTransElement: (state, getters) => {
       const filePath = getters.currentWritingZoneObject?.diploTrans
       const elemId = getters.activeDiploTransElementId
       if (!filePath || !elemId) {
@@ -3425,6 +3425,17 @@ const dataModule = {
         return null
       }
       const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+      return elem
+    },
+
+    /**
+     * retrieves the name of the element currently activated in the XML editor of DiploTab
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeDiploTransElementName: (state, getters) => {
+      const elem = getters.activeDiploTransElement
 
       if (!elem) {
         return null
