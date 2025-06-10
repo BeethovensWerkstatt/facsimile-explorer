@@ -1408,6 +1408,11 @@ export default {
         // console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
+        if (this.$store.getters.activeDiploTransElementName !== 'curve') {
+          for (const i in this.mouseTracker) {
+            this.setMouseTracker(i, null)
+          }
+        }
       })
 
     this.openFacsimile()
