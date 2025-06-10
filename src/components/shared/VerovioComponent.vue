@@ -312,22 +312,26 @@ export default {
   svg *[data-corresp] {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
+    color: $svgUsedShapeColor;
   }
 
   svg .supplied {
     fill: $svgSuppliedColor;
     stroke: $svgSuppliedColor;
+    color: $svgSuppliedColor;
   }
 
   svg .highlighted {
     fill: $scoreHighlightedColor;
     stroke: $scoreHighlightedColor;
+    color: $scoreHighlightedColor;
   }
 
   svg .barLine.highlighted path {
     fill: $scoreHighlightedColor;
     stroke: $scoreHighlightedColor;
     stroke-width: 60;
+    color: $scoreHighlightedColor;
   }
 
   svg .barLine path:hover {
