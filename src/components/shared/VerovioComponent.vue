@@ -363,6 +363,11 @@ export default {
     fill: black;
   }
 
+  svg g.dots:not(.bounding-box) ellipse:not(*[data-corresp]) {
+    fill: black;
+    stroke: black;
+  }
+
   svg .bounding-box rect {
     display: none;
   }
