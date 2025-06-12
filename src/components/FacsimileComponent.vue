@@ -715,6 +715,7 @@ export default {
             const curve = this.$store.getters.activeDiploTransElement
             const section = curve.closest('section')
             const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+            // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
             const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
             const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
             const g = element

@@ -92,6 +92,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
 
     const section = curve.closest('section')
 
+    // TODO: take rastrum from current accolade
     const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
     const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
 
