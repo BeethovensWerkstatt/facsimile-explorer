@@ -26,7 +26,8 @@ const rawSelectables = [
   'dir',
   'keyAccid',
   'meterSig',
-  'barLine'
+  'barLine',
+  'dots'
   // 'staff',
   // 'measure'
 ]
