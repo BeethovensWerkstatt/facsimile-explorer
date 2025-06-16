@@ -150,13 +150,33 @@ export default {
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
-        const staff = target.closest('.staff')?.getAttribute('data-n') || 0
-
+        // console.log(671, 'clicked', name, id, measure, target)
         const meiDom = this.$store.getters[this.getter]
+        const meiElem = meiDom.querySelector('*[*|id="' + id + '"]')
+        let staff
+        if (target.closest('.staff') && target.closest('.staff').hasAttribute('data-n')) {
+          staff = target.closest('.staff')?.getAttribute('data-n')
+          // console.log(671, 'a')
+        } else if (meiElem && meiElem.hasAttribute('staff')) {
+          // console.log(671, 'b')
+          staff = meiElem.getAttribute('staff')
+        } else if (meiElem && meiElem.hasAttribute('startid')) {
+          // console.log(671, 'c')
+          const startid = meiElem.getAttribute('startid').substring(1)
+          const startElem = meiDom.querySelector('*[*|id="' + startid + '"]')
+          staff = startElem.closest('staff').getAttribute('n')
+        } else {
+          // console.log(671, 'd')
+          staff = 1
+        }
+        // console.log(671, 'staff', staff)
+        // const staff = target.closest('.staff')?.getAttribute('data-n') || 0
+
+        // const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
 
         const dtPath = target.closest('g[data-dt-path]').getAttribute('data-dt-path')
-        console.log('\n841 clicked verovio\nname: ' + name + '\nid: ' + id + '\nmeasure: ' + measure + '\npath: ' + path + '\npurpose: ' + this.purpose + '\ndtPath: ' + dtPath)
+        // console.log('\n841 clicked verovio\nname: ' + name + '\nid: ' + id + '\nmeasure: ' + measure + '\npath: ' + path + '\npurpose: ' + this.purpose + '\ndtPath: ' + dtPath)
         const cvpayload = {
           meiDom,
           path,
@@ -168,6 +188,7 @@ export default {
           purpose: this.purpose,
           callback: () => { this.render() }
         }
+        // console.log(671, 'cvpayload', cvpayload)
 
         if (name === 'keyAccid') {
           const keySig = target.closest('.keySig')
@@ -182,11 +203,11 @@ export default {
             keyAccidN += 1
           }
         }
-        if (name === 'tie' || name === 'slur') {
+        /* if (name === 'tie' || name === 'slur') {
           console.log('clicked tie/slur', target)
-        }
+        } */
 
-        console.log('clicked verovio', cvpayload)
+        // console.log('clicked verovio', cvpayload)
         this.$store.dispatch('clickedVerovio', cvpayload)
       }
     },
@@ -196,7 +217,7 @@ export default {
       const activate = e.type === 'mouseover'
       const target = e.target.closest(selectables)
       if (target !== null) {
-        // console.log('hover:', target)
+        console.log('hover:', target)
         hilite(target)
         const corresp = target.getAttribute('data-corresp')
         if (corresp) {

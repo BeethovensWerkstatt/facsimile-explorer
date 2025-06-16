@@ -1608,6 +1608,9 @@ const dataModule = {
       const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
       // console.log('got here 3 diploLayer', diploLayer)
       const diploStaffDef = diploSection.parentElement.querySelector('staffDef[n="' + diploStaffN + '"]')
+      // console.log(712, 'diploSectionParent', diploSection.parentElement)
+      // console.log(712, 'diploStaffDef', diploStaffDef)
+      // console.log(712, 'diploStaffN', diploStaffN)
       // console.log('got here 4 diploStaffDef', diploStaffDef)
       const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
       // console.log('got here 5 rastrumId', rastrumId)
@@ -1617,10 +1620,12 @@ const dataModule = {
 
       if (+diploStaffN === 1) {
         topRastrum = rastrum
+        // console.log(712, 'topRastrum', topRastrum)
       } else {
         const topDiploStaffDef = diploSection.parentElement.querySelector('staffDef[n="1"]')
         const topRastrumId = topDiploStaffDef.getAttribute('decls').split('#')[1]
         topRastrum = getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === topRastrumId)
+        // console.log(712, 'case 2 topRastrum', topRastrum)
       }
 
       // console.log('691 rastrum', rastrum, topRastrum)

@@ -356,6 +356,22 @@ function getDiplomaticCurve (annotElem, curve, bbox) {
   const bboxbezier = boundingboxDefaultControlpoints(bbox, annotElem.getAttribute('curvedir') === 'above')
   curve.removeAttribute('x')
   console.log('getDiplomaticCurve', annotElem, curve, bboxbezier, bbox)
+  let staff
+  if (annotElem.hasAttribute('staff')) {
+    staff = annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+  } else if (annotElem.closest('staff')) {
+    staff = annotElem.closest('staff').getAttribute('n')
+  } else if (annotElem.hasAttribute('startid')) {
+    const startElem = annotElem.closest('mei').querySelector('*[*|id="' + annotElem.getAttribute('startid').substring(1) + '"]')
+    if (startElem && startElem.closest('staff')) {
+      staff = startElem.closest('staff').getAttribute('n')
+    } else {
+      console.warn('WARNING: Could not determine staff for curve', annotElem, startElem)
+    }
+  } else {
+    staff = 1
+  }
+  curve.setAttribute('staff', staff)
   curve.setAttribute('bezier', bboxbezier.map(c => c.toFixed(2)).join(' '))
 }
 
