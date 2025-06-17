@@ -282,7 +282,8 @@ function getDiplomaticDot (annotElem, dot) {
  * @returns the dt:dynam element
  */
 function getDiplomaticDynam (annotElem, dynam, bbox) {
-  dynam.setAttribute('x', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w) / 2).toFixed(1))
+  dynam.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  dynam.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
   dynam.setAttribute('y', bbox.mm.y)
   dynam.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dynam.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
