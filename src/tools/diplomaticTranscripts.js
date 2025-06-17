@@ -55,7 +55,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
 
     const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
 
-    console.log(571, 'barLine', barLine, barLine.closest('section'))
+    // console.log(571, 'barLine', barLine, barLine.closest('section'))
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.setAttribute('data-id', barLine.getAttribute('xml:id'))
     g.setAttribute('data-class', 'barLine')
@@ -84,7 +84,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
     const curveid = curve.getAttribute('xml:id')
     // TODO check for curve on activeDiploTransElementId
     const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
-    console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
+    // console.log(571, 'curve', curve, bezier, controlpointsToVerovioSvgBezier(bezier))
 
     const measure = svgDom.querySelector('g.measure')
 
@@ -265,7 +265,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context) => {
         const flag = chord.querySelector('g.flag use')
         if (flag) {
           const x = chord.querySelector('g.notehead use').getAttribute('x')
-          console.log(443, 'flag x', x, flag)
+          // console.log(443, 'flag x', x, flag)
           flag.setAttribute('x', x)
         }
       } else if (stemDir === 'up') {

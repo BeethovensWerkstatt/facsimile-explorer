@@ -35,7 +35,7 @@ export class Vector {
   }
 
   toString () {
-    console.log(837, 'Vector.toString()', `${this.x.toFixed(2)},${this.y.toFixed(2)}`)
+    // console.log(837, 'Vector.toString()', `${this.x.toFixed(2)},${this.y.toFixed(2)}`)
     // round to 2 decimals
     return `${this.x.toFixed(2)},${this.y.toFixed(2)}`
   }

@@ -323,7 +323,7 @@ export default {
       if (click.target.closest('.diploTrans') && click.target.closest('.measure')) {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(selectables)
-        console.log(365, target, selectables)
+        // console.log(365, target, selectables)
         if (target) {
           let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
@@ -711,77 +711,145 @@ export default {
         existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach((element, i) => {
           element.classList.add('selectedDiploTrans')
           // console.log(752, element, i)
-          if (i === 0 && this.$store.getters.activeDiploTransElementName === 'curve') {
-            const curve = this.$store.getters.activeDiploTransElement
-            const section = curve.closest('section')
-            const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
-            // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
-            const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
-            const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
-            const g = element
-            const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-            const path = g.querySelector('path')
-            const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
-            const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
-            const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-            line1.setAttribute('x1', controlpoints[0])
-            line1.setAttribute('y1', controlpoints[1])
-            line1.setAttribute('x2', controlpoints[2])
-            line1.setAttribute('y2', controlpoints[3])
-            line1.setAttribute('stroke-width', 23)
-            g.append(line1)
-            const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-            line2.setAttribute('x1', controlpoints[4])
-            line2.setAttribute('y1', controlpoints[5])
-            line2.setAttribute('x2', controlpoints[6])
-            line2.setAttribute('y2', controlpoints[7])
-            line2.setAttribute('stroke-width', 23)
-            g.append(line2)
-            for (const i of [0, 2, 4, 6]) {
-              const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-              console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
-              circle.setAttribute('cx', controlpoints[i])
-              circle.setAttribute('cy', controlpoints[i + 1])
-              circle.setAttribute('r', '52')
-              circle.setAttribute('class', 'curve-controlpoint')
-              g.append(circle)
-              const tracker = new OpenSeadragon.MouseTracker({
-                element: circle,
-                dragHandler: (event) => {
-                  const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                  const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                  const newX = viewportCoords.x * factor
-                  const newY = viewportCoords.y * factor
-                  controlpoints[i] = newX
-                  controlpoints[i + 1] = newY
-                  console.log(836, controlpoints, viewportCoords)
-                  const line = i < 4 ? line1 : line2 // line1 or line2
-                  const pidx = ((i % 4) / 2) + 1 // x1,y1 or x2,y2?
-                  line.setAttribute('x' + pidx, newX)
-                  line.setAttribute('y' + pidx, newY)
-                  circle.setAttribute('cx', newX)
-                  circle.setAttribute('cy', newY)
-                  path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
-                },
-                dragEndHandler: (event) => {
-                  const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                  const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                  const newX = viewportCoords.x * factor
-                  const newY = viewportCoords.y * factor
-                  controlpoints[i] = newX
-                  controlpoints[i + 1] = newY
-                  // console.log(836, controlpoints, viewportCoords)
-                  circle.setAttribute('cx', newX)
-                  circle.setAttribute('cy', newY)
-                  path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
-                  // update curve bezier attribute in MEI
-                  bezier[i] = (newX / factor) - rastrum.x
-                  bezier[i + 1] = (newY / factor) - rastrum.y
-                  this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
-                  console.log(836, 'curve bezier updated', bezier)
-                }
-              })
-              this.setMouseTracker(i / 2, tracker)
+          if (i === 0) {
+            if (this.$store.getters.activeDiploTransElementName === 'barLine') {
+              const barline = this.$store.getters.activeDiploTransElement
+              // console.log(752, 'barLine', element, barline)
+              const section = barline.closest('section')
+              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+              // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
+              const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+              const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
+              const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+              const path = element.querySelector('path')
+              const barpoints = [
+                barline.getAttribute('x'),
+                barline.getAttribute('y'),
+                barline.getAttribute('x2'),
+                barline.getAttribute('y2')
+              ].map(p => parseFloat(p))
+              // bezierAttributeToControlpoints calculates list of x,y coordinates
+              // from the barline x,y,x2,y2 attributes, using rastrum and factor
+              const controlpoints = bezierAttributeToControlpoints(barpoints, rastrum, factor)
+              // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
+              for (const i of [0, 2]) {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+                console.log(836, 'add barLine controller', i, controlpoints[i], i + 1, controlpoints[i + 1])
+                circle.setAttribute('cx', controlpoints[i])
+                circle.setAttribute('cy', controlpoints[i + 1])
+                circle.setAttribute('r', '52')
+                circle.setAttribute('class', 'curve-controlpoint')
+                element.append(circle)
+                const tracker = new OpenSeadragon.MouseTracker({
+                  element: circle,
+                  dragHandler: (event) => {
+                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+                    const newX = viewportCoords.x * factor
+                    const newY = viewportCoords.y * factor
+                    controlpoints[i] = newX
+                    controlpoints[i + 1] = newY
+                    circle.setAttribute('cx', newX)
+                    circle.setAttribute('cy', newY)
+                    path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
+                  },
+                  dragEndHandler: (event) => {
+                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+                    const newX = viewportCoords.x * factor
+                    const newY = viewportCoords.y * factor
+                    controlpoints[i] = newX
+                    controlpoints[i + 1] = newY
+                    // console.log(836, controlpoints, viewportCoords)
+                    circle.setAttribute('cx', newX)
+                    circle.setAttribute('cy', newY)
+                    path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
+                    barpoints[i] = (newX / factor) - rastrum.x
+                    barpoints[i + 1] = (newY / factor) - rastrum.y
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: barpoints[0].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: barpoints[1].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: barpoints[2].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
+                    // update barline x,y,x2,y2 attributes in MEI
+                    // console.log(836, 'barline updated', barpoints)
+                  }
+                })
+                this.setMouseTracker(i / 2, tracker)
+              }
+            } else if (this.$store.getters.activeDiploTransElementName === 'curve') {
+              const curve = this.$store.getters.activeDiploTransElement
+              const section = curve.closest('section')
+              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+              // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
+              const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+              const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
+              const g = element
+              const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+              const path = g.querySelector('path')
+              const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
+              const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
+              const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+              line1.setAttribute('class', 'curve-line')
+              line1.setAttribute('x1', controlpoints[0])
+              line1.setAttribute('y1', controlpoints[1])
+              line1.setAttribute('x2', controlpoints[2])
+              line1.setAttribute('y2', controlpoints[3])
+              line1.setAttribute('stroke-width', 23)
+              g.append(line1)
+              const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+              line2.setAttribute('class', 'curve-line')
+              line2.setAttribute('x1', controlpoints[4])
+              line2.setAttribute('y1', controlpoints[5])
+              line2.setAttribute('x2', controlpoints[6])
+              line2.setAttribute('y2', controlpoints[7])
+              line2.setAttribute('stroke-width', 23)
+              g.append(line2)
+              for (const i of [0, 2, 4, 6]) {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+                // console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
+                circle.setAttribute('cx', controlpoints[i])
+                circle.setAttribute('cy', controlpoints[i + 1])
+                circle.setAttribute('r', '52')
+                circle.setAttribute('class', 'curve-controlpoint')
+                g.append(circle)
+                const tracker = new OpenSeadragon.MouseTracker({
+                  element: circle,
+                  dragHandler: (event) => {
+                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+                    const newX = viewportCoords.x * factor
+                    const newY = viewportCoords.y * factor
+                    controlpoints[i] = newX
+                    controlpoints[i + 1] = newY
+                    console.log(836, controlpoints, viewportCoords)
+                    const line = i < 4 ? line1 : line2 // line1 or line2
+                    const pidx = ((i % 4) / 2) + 1 // x1,y1 or x2,y2?
+                    line.setAttribute('x' + pidx, newX)
+                    line.setAttribute('y' + pidx, newY)
+                    circle.setAttribute('cx', newX)
+                    circle.setAttribute('cy', newY)
+                    path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+                  },
+                  dragEndHandler: (event) => {
+                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+                    const newX = viewportCoords.x * factor
+                    const newY = viewportCoords.y * factor
+                    controlpoints[i] = newX
+                    controlpoints[i + 1] = newY
+                    // console.log(836, controlpoints, viewportCoords)
+                    circle.setAttribute('cx', newX)
+                    circle.setAttribute('cy', newY)
+                    path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+                    // update curve bezier attribute in MEI
+                    bezier[i] = (newX / factor) - rastrum.x
+                    bezier[i + 1] = (newY / factor) - rastrum.y
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
+                    console.log(836, 'curve bezier updated', bezier)
+                  }
+                })
+                this.setMouseTracker(i / 2, tracker)
+              }
             }
           }
         })
@@ -793,10 +861,12 @@ export default {
         return
       }
       if (typeof this.mouseTracker[i]?.destroy === 'function') {
-        this.mouseTracker[i].element.closest('g').querySelectorAll('line').forEach(elem => elem.remove())
+        console.log(836, 'remove MouseTracker', i, this.mouseTracker[i].element)
+        this.mouseTracker[i].element.closest('g').querySelectorAll('.curve-line').forEach(elem => elem.remove())
         this.mouseTracker[i].element.remove()
         this.mouseTracker[i].destroy()
       }
+      console.log(836, 'set MouseTracker', i, mouseTracker)
       this.mouseTracker[i] = mouseTracker
     },
 
@@ -1118,7 +1188,7 @@ export default {
       // console.log('643: height of empty page: ' + typeof height, height)
 
       tk.setOptions(options)
-      console.log('643 again', dtArr)
+      // console.log('643 again', dtArr)
 
       // const diplomaticTranscripts = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
       // console.log('913 diplomaticTranscripts', diplomaticTranscripts)
@@ -1407,13 +1477,11 @@ export default {
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
         // console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        for (const i in this.mouseTracker) {
+          this.setMouseTracker(i, null)
+        }
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
-        if (this.$store.getters.activeDiploTransElementName !== 'curve') {
-          for (const i in this.mouseTracker) {
-            this.setMouseTracker(i, null)
-          }
-        }
       })
 
     this.openFacsimile()
@@ -1445,6 +1513,7 @@ export default {
       }
       this.unwatchUsedShapes()
       this.unwatchSelectedId()
+      this.unwatchSelectedDTElement()
     } catch (err) {
       console.warn('FacsimileComponent:beforeUnmount(): ' + err, err)
     }
@@ -1649,10 +1718,10 @@ export default {
       .selectedDiploTrans {
         fill: #961010;
         stroke: #961010;
-      }
-      .curve.selectedDiploTrans path {
-        fill: #961010;
-        stroke: #961010 !important;
+        color: #961010; // for stroke: currentColor
+        .curve-controlpoint {
+          cursor: pointer;
+        }
       }
     }
 

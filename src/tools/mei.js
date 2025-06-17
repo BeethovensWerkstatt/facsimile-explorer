@@ -1603,7 +1603,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
             // console.log(ctrlevt)
           }
           if (ctrlevt.localName === 'curve') {
-            console.log(668, 'curve control event', ctrlevt)
+            // console.log(668, 'curve control event', ctrlevt)
             /* const facs = ctrlevt.getAttribute('facs').split([' '])
             let bbox = null
             const setBBox = (_bbox) => {

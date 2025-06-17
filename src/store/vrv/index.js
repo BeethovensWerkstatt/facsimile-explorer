@@ -120,7 +120,7 @@ const verovioModule = {
     annotatedTranscriptForWz: (state, getters) => async (dom) => {
       const serializer = new XMLSerializer()
       const vrvToolkit = getters.verovioToolkit
-      console.log('annotatedTranscriptForWz', dom)
+      // console.log('annotatedTranscriptForWz', dom)
       dom.querySelectorAll('keysig').forEach(element => {
         element.setAttribute('template', element.getAttribute('xml:id'))
         console.log('keysig:', element)
