@@ -696,7 +696,57 @@ export default {
     },
 
     /**
+     * creates a control point circle for bezier curves, barlines or else
+     * @param element - the SVG element to which the control point circle should be added
+     * @param controlpoints - array of control point coordinates, e.g. [x1, y1, x2, y2, x3, y3, x4, y4]
+     * @param i - index of the control point in the controlpoints array
+     * @param renderChange - function to render the change in the control point coordinates
+     * @param persistChange - function to persist the change in the store
+     * @param factor - factor for the control point coordinates, default 90 (9px per vu)
+     * @param cls - css class for the control point circle, default 'curve-controlpoint'
+     */
+    createControlPoint (element, controlpoints, i, renderChange, persistChange, factor = 90, cls = 'curve-controlpoint') {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      // console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
+      circle.setAttribute('cx', controlpoints[i])
+      circle.setAttribute('cy', controlpoints[i + 1])
+      circle.setAttribute('r', '52')
+      circle.setAttribute('class', cls)
+      element.append(circle)
+      const tracker = new OpenSeadragon.MouseTracker({
+        element: circle,
+        dragHandler: (event) => {
+          const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+          const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+          const newX = viewportCoords.x * factor
+          const newY = viewportCoords.y * factor
+          controlpoints[i] = newX
+          controlpoints[i + 1] = newY
+          circle.setAttribute('cx', newX)
+          circle.setAttribute('cy', newY)
+          renderChange(controlpoints)
+        },
+        dragEndHandler: (event) => {
+          const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
+          const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
+          const newX = viewportCoords.x * factor
+          const newY = viewportCoords.y * factor
+          controlpoints[i] = newX
+          controlpoints[i + 1] = newY
+          // console.log(836, controlpoints, viewportCoords)
+          circle.setAttribute('cx', newX)
+          circle.setAttribute('cy', newY)
+          renderChange(controlpoints)
+          persistChange(controlpoints, i, newX, newY, factor)
+        }
+      })
+      return tracker
+    },
+
+    /**
      * indicate currently selected DT element
+     *
+     * creates a control points for barlines, curves or else
      */
     indicateSelectedDTElement () {
       // console.log('indicateSelectedDTElement', this.$store.getters.activeDiploTransElementdIds)
@@ -733,37 +783,14 @@ export default {
               const controlpoints = bezierAttributeToControlpoints(barpoints, rastrum, factor)
               // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
               for (const i of [0, 2]) {
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-                // console.log(836, 'add barLine controller', i, controlpoints[i], i + 1, controlpoints[i + 1])
-                circle.setAttribute('cx', controlpoints[i])
-                circle.setAttribute('cy', controlpoints[i + 1])
-                circle.setAttribute('r', '52')
-                circle.setAttribute('class', 'curve-controlpoint')
-                element.append(circle)
-                const tracker = new OpenSeadragon.MouseTracker({
-                  element: circle,
-                  dragHandler: (event) => {
-                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                    const newX = viewportCoords.x * factor
-                    const newY = viewportCoords.y * factor
-                    controlpoints[i] = newX
-                    controlpoints[i + 1] = newY
-                    circle.setAttribute('cx', newX)
-                    circle.setAttribute('cy', newY)
+                const tracker = this.createControlPoint(
+                  element,
+                  controlpoints,
+                  i,
+                  (controlpoints) => {
                     path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
                   },
-                  dragEndHandler: (event) => {
-                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                    const newX = viewportCoords.x * factor
-                    const newY = viewportCoords.y * factor
-                    controlpoints[i] = newX
-                    controlpoints[i + 1] = newY
-                    // console.log(836, controlpoints, viewportCoords)
-                    circle.setAttribute('cx', newX)
-                    circle.setAttribute('cy', newY)
-                    path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
+                  (controlpoints, i, newX, newY, factor) => {
                     barpoints[i] = (newX / factor) - rastrum.x
                     barpoints[i + 1] = (newY / factor) - rastrum.y
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: barpoints[0].toFixed(2) })
@@ -772,8 +799,9 @@ export default {
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
                     // update barline x,y,x2,y2 attributes in MEI
                     // console.log(836, 'barline updated', barpoints)
-                  }
-                })
+                  },
+                  factor
+                )
                 this.setMouseTracker(i / 2, tracker)
               }
             } else if (this.$store.getters.activeDiploTransElementName === 'curve') {
@@ -805,49 +833,25 @@ export default {
               line2.setAttribute('stroke-width', 23)
               g.append(line2)
               for (const i of [0, 2, 4, 6]) {
-                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-                // console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
-                circle.setAttribute('cx', controlpoints[i])
-                circle.setAttribute('cy', controlpoints[i + 1])
-                circle.setAttribute('r', '52')
-                circle.setAttribute('class', 'curve-controlpoint')
-                g.append(circle)
-                const tracker = new OpenSeadragon.MouseTracker({
-                  element: circle,
-                  dragHandler: (event) => {
-                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                    const newX = viewportCoords.x * factor
-                    const newY = viewportCoords.y * factor
-                    controlpoints[i] = newX
-                    controlpoints[i + 1] = newY
-                    console.log(836, controlpoints, viewportCoords)
-                    const line = i < 4 ? line1 : line2 // line1 or line2
-                    const pidx = ((i % 4) / 2) + 1 // x1,y1 or x2,y2?
-                    line.setAttribute('x' + pidx, newX)
-                    line.setAttribute('y' + pidx, newY)
-                    circle.setAttribute('cx', newX)
-                    circle.setAttribute('cy', newY)
+                const tracker = this.createControlPoint(
+                  g,
+                  controlpoints,
+                  i,
+                  (controlpoints) => {
                     path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
+                    line1.setAttribute('x2', controlpoints[2])
+                    line1.setAttribute('y2', controlpoints[3])
+                    line2.setAttribute('x1', controlpoints[4])
+                    line2.setAttribute('y1', controlpoints[5])
                   },
-                  dragEndHandler: (event) => {
-                    const windowCoords = new OpenSeadragon.Point(event.originalEvent.x, event.originalEvent.y)
-                    const viewportCoords = this.viewer.viewport.windowToViewportCoordinates(windowCoords)
-                    const newX = viewportCoords.x * factor
-                    const newY = viewportCoords.y * factor
-                    controlpoints[i] = newX
-                    controlpoints[i + 1] = newY
-                    // console.log(836, controlpoints, viewportCoords)
-                    circle.setAttribute('cx', newX)
-                    circle.setAttribute('cy', newY)
-                    path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
-                    // update curve bezier attribute in MEI
+                  (controlpoints, i, newX, newY, factor) => {
                     bezier[i] = (newX / factor) - rastrum.x
                     bezier[i + 1] = (newY / factor) - rastrum.y
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
-                    console.log(836, 'curve bezier updated', bezier)
-                  }
-                })
+                    // console.log(836, 'curve bezier updated', bezier)
+                  },
+                  factor
+                )
                 this.setMouseTracker(i / 2, tracker)
               }
             }
