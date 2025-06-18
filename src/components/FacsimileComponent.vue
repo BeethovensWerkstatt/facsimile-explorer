@@ -734,7 +734,7 @@ export default {
               // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
               for (const i of [0, 2]) {
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-                console.log(836, 'add barLine controller', i, controlpoints[i], i + 1, controlpoints[i + 1])
+                // console.log(836, 'add barLine controller', i, controlpoints[i], i + 1, controlpoints[i + 1])
                 circle.setAttribute('cx', controlpoints[i])
                 circle.setAttribute('cy', controlpoints[i + 1])
                 circle.setAttribute('r', '52')
@@ -861,12 +861,12 @@ export default {
         return
       }
       if (typeof this.mouseTracker[i]?.destroy === 'function') {
-        console.log(836, 'remove MouseTracker', i, this.mouseTracker[i].element)
+        // console.log(836, 'remove MouseTracker', i, this.mouseTracker[i].element)
         this.mouseTracker[i].element.closest('g').querySelectorAll('.curve-line').forEach(elem => elem.remove())
         this.mouseTracker[i].element.remove()
         this.mouseTracker[i].destroy()
       }
-      console.log(836, 'set MouseTracker', i, mouseTracker)
+      // console.log(836, 'set MouseTracker', i, mouseTracker)
       this.mouseTracker[i] = mouseTracker
     },
 
