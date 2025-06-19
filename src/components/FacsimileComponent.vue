@@ -769,6 +769,7 @@ export default {
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
               // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+              console.log(753, 'barLine rastrum control', rastrumId)
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               const path = element.querySelector('path')

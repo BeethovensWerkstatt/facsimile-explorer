@@ -1,6 +1,7 @@
 // import OpenSeadragon from 'openseadragon'
 // import store from '@/store'
 import { controlpointsToVerovioSvgBezier } from '.'
+import store from '@/store'
 
 /**
  * get control points for curve bezier attribute for rastrum on position x/y with factor (default 90)
@@ -52,6 +53,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
 
     // controlevents are always measured from the top rastrum!!!
     const rastrumId = barLine.closest('measure').querySelector('staff[n="1"]').getAttribute('decls').split('#')[1]
+    if (store.getters.activeDiploTransElementId === barLine.getAttribute('xml:id')) {
+      console.log(753, 'barLine rastrum cleanup', rastrumId)
+    }
 
     const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
 
