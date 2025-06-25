@@ -1497,12 +1497,10 @@ const dataModule = {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
-          console.log('sig:', sign)
+          console.log('sig:', sign, elem)
           let c = 0
           elem.querySelectorAll('keyAccid').forEach(accid => {
-            if (accid.getAttribute('xml:id') === annotElemRef.id) {
-              console.log('found keyAccid:', accid, c)
-            }
+            console.log('found keyAccid:', accid, c)
             c++
           })
         } else if (annotElemRef.name === 'clef') {
@@ -1518,7 +1516,9 @@ const dataModule = {
         console.log('annotElem', annotElemRef.id)
       }
 
-      if (annotElemRef.name === 'barLine') {
+      if (annotElemRef.name === 'keySig') {
+        console.log(352, 'keySig', annotElemRef)
+      } else if (annotElemRef.name === 'barLine') {
         // for barlines, we need to get the measure element as reference
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
       } else if (annotElemRef.name === 'dots') {
@@ -1530,7 +1530,7 @@ const dataModule = {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
       }
       // check if element is already transcribed
-      if (annotElem.hasAttribute('corresp') && !annotElemRef.name === 'dots') {
+      if (annotElem?.hasAttribute('corresp') && !annotElemRef.name === 'dots') {
         alert('Element has already been transcribed. Continuing. ', annotElem)
         // return null
         // ... or ask for unlink?
@@ -1558,7 +1558,7 @@ const dataModule = {
           // console.log('691 found staff (a)', annotStaffN)
         } else {
           annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
-          console.log('691 found staff (b)', annotStaffN)
+          // console.log('691 found staff (b)', annotStaffN)
         }
       } else if (isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
