@@ -69,9 +69,11 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
 
     // (*TODO: the "+4" is a constant factor that I do not fully understand yet*)
-    const x1 = (parseFloat(barLine.getAttribute('x')) + parseFloat(barLine.getAttribute('ho'))) * factor
+    // const x1 = (parseFloat(barLine.getAttribute('x')) + parseFloat(barLine.getAttribute('ho'))) * factor
+    const x1 = (parseFloat(barLine.getAttribute('x')) + +rastrum.x) * factor
     const y1 = (parseFloat(barLine.getAttribute('y')) + +rastrum.y) * factor
-    const x2 = (parseFloat(barLine.getAttribute('x2')) + parseFloat(barLine.getAttribute('ho'))) * factor
+    // const x2 = (parseFloat(barLine.getAttribute('x2')) + parseFloat(barLine.getAttribute('ho'))) * factor
+    const x2 = (parseFloat(barLine.getAttribute('x2')) + +rastrum.x) * factor
     const y2 = (parseFloat(barLine.getAttribute('y2')) + +rastrum.y) * factor
 
     // console.log(463, 'barLine ', barLine, '\nx1 ', x1, '\nxy ', y1, '\nx2 ', x2, '\ny2 ', y2, '\nfactor ', factor)
