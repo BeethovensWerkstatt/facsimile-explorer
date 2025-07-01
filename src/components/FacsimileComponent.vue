@@ -1297,10 +1297,15 @@ export default {
             // console.log(463, 'staffDef', staffDef1)
             // console.log(463, 'decls', staffDef1.getAttribute('decls'))
             const rastrumId = staffDef1.getAttribute('decls').split('#')[1]
+            console.log(463, 'barLine rastrum control', rastrumId)
             const rastrum = [...sourceDom.querySelectorAll('rastrum')].find(r => r.getAttribute('xml:id') === rastrumId)
             // console.log(463, 'rastrum', rastrum)
 
-            event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
+            if (rastrum) {
+              event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
+            } else {
+              console.log(463, 'no rastrum found for ' + rastrumId)
+            }
           } else {
             // console.log(614, 'found a non-barLine', event)
             /* if (event.hasAttribute('x')) {
