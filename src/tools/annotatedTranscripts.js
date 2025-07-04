@@ -299,7 +299,7 @@ export const prepareAtDomForRendering = (atDom) => {
  * @param {*} svgDom
  * @param {*} atDom
  */
-export const improveAtSvg = (svgDom, atDom) => {
+export const improveAtSvg = (svgDom, atDom, dtdom) => {
   const dotBearers = svgDom.querySelectorAll('*[data-dot-corresp]')
   dotBearers.forEach((dotBearer) => {
     const corresp = dotBearer.getAttribute('data-dot-corresp')
@@ -312,5 +312,13 @@ export const improveAtSvg = (svgDom, atDom) => {
     })
   })
 
+  const measureCorresp = svgDom.querySelectorAll('g.measure[data-corresp]')
+  measureCorresp.forEach((measure) => {
+    const corresps = measure.getAttribute('data-corresp').split(' ')
+    for (const corresp of corresps) {
+      const shapeId = corresp.split('#')[1]
+      console.log(845, 'improveAtSvg', shapeId, 'measure corresp', measure)
+    }
+  })
   return svgDom
 }
