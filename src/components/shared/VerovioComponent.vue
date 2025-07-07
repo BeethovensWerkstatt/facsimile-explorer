@@ -117,7 +117,23 @@ export default {
         // natürlich über die Daten koordiniert werden…
         // target.classList.toggle('supplied')
 
-        // const isBarline = target.classList.contains('barLine')
+        const isBarline = target.classList.contains('barLine')
+        if (isBarline) {
+          // const activeDtElementId = this.$store.getters.activeDiploTransElementId
+          const measure = target.closest('.measure')
+          const measureId = measure.getAttribute('data-id')
+          const atDoc = this.$store.getters.annotatedTranscriptForCurrentWz
+          const atElement = atDoc.querySelector(`*[*|id="${measureId}"]`)
+          const corresp = atElement.getAttribute('corresp')
+          const dtElementId = this.$store.getters.activeDiploTransElementId
+          if (dtElementId && !corresp) {
+            console.warn(278, 'No corresp found for barline', dtElementId, atElement)
+            // TODO: set corresp attribute in AT measure element
+            return
+          }
+          // console.log(278, this.$store.getters.activeDiploTransElementAttValue('facs'), measureId, atElement, corresp)
+          // return
+        }
 
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
@@ -189,7 +205,7 @@ export default {
       const activate = e.type === 'mouseover'
       const target = e.target.closest(CSSselectables)
       if (target !== null) {
-        console.log('hover:', target)
+        // console.log('hover:', target)
         hilite(target)
         const corresp = target.getAttribute('data-corresp')
         if (corresp) {
