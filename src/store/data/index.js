@@ -102,7 +102,7 @@ const dataModule = {
      * @param  {[type]} dom                  The DOM of the document
      */
     loadDocumentIntoStore ({ commit, state }, { path, name, dom }) {
-      console.log(278, 'loadDocumentIntoStore', path, name, dom)
+      // console.log(278, 'loadDocumentIntoStore', path, name, dom)
       commit('LOAD_DOCUMENT_INTO_STORE', { path, dom })
       if (name && path) {
         commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
@@ -1553,6 +1553,8 @@ const dataModule = {
       if (annotElemRef.name === 'barLine') {
         // TODO: find better value for staff of the barline
         annotStaffN = 1
+        // console.log(278, 'found staff for barLine', annotStaffN, annotElemRef.name, annotElemRef.id, annotElem)
+        annotElemRef.id = annotElem.getAttribute('xml:id') // use the id of the measure
       } else if (!isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')

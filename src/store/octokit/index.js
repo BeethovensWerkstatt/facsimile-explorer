@@ -700,7 +700,7 @@ const actions = {
    * @return {[type]}             [description]
    */
   logChange ({ commit }, { path, baseMessage, param, xmlIDs = [], isNewDocument = false }) {
-    console.log(278, 'logChange', path, baseMessage, param, xmlIDs, isNewDocument)
+    // console.log(278, 'logChange', path, baseMessage, param, xmlIDs, isNewDocument)
     commit('LOG_CHANGE', { path, baseMessage, param, xmlIDs, isNewDocument })
   },
 
