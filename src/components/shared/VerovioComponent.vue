@@ -302,7 +302,7 @@ export default {
   width: 100%;
   overflow: scroll;
 
-  svg *[data-corresp] {
+  svg *:not(.measure)[data-corresp] {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
     color: $svgUsedShapeColor;
@@ -359,6 +359,12 @@ export default {
   svg g.dots:not(.bounding-box) ellipse:not(*[data-corresp]) {
     fill: black;
     stroke: black;
+  }
+
+  svg g.measure[data-corresp] .barLine path {
+    fill: $svgUsedShapeColor;
+    stroke: $svgUsedShapeColor;
+    color: $svgUsedShapeColor;
   }
 
   svg .bounding-box rect {
