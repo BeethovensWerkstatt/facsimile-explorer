@@ -14,6 +14,7 @@ const rawSelectables = [
   'chord',
   'syl',
   'rest',
+  'mRest',
   'beam',
   'beamSpan',
   'artic',
@@ -35,7 +36,7 @@ const clsSelectables = []
 rawSelectables.forEach(elem => {
   clsSelectables.push('.' + elem + ':not(.bounding-box)')
 })
-export const selectables = clsSelectables.join(', ')
+export const CSSselectables = clsSelectables.join(', ')
 
 /**
  * generates a diplomatic transcription from a given annotated transcription and a list of shapes
@@ -1753,21 +1754,3 @@ function getRenderableDiplomaticNote (note) {
   note.setAttribute('dur', dur)
 }
 */
-export const rawMEISelectables = [
-  'note',
-  'chord',
-  'syl',
-  'rest',
-  'beam',
-  'artic',
-  'accid',
-  'clef',
-  'slur',
-  'dynam',
-  'dir',
-  'keySig',
-  'meterSig',
-  'staff',
-  'measure'
-]
-export const MEIselectables = rawMEISelectables.map(elem => '.' + elem + ':not(.bounding-box').join(', ')

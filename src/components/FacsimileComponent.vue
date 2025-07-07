@@ -10,7 +10,7 @@ import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { controlpointsToVerovioSvgBezier } from '@/tools'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
-import { getEmptyPage, selectables } from '@/tools/mei.js'
+import { getEmptyPage, CSSselectables } from '@/tools/mei.js'
 // import { useDiploTrans } from '@/store/gui/diplotrans'
 import { cleanUpDiplomaticTranscript, bezierAttributeToControlpoints } from '@/tools/diplomaticTranscripts.js'
 
@@ -30,34 +30,6 @@ const osdOptions = {
   },
   silenceMultiImageWarnings: true
 }
-
-/*
-const rawSelectables = [
-  'note',
-  'chord',
-  'syl',
-  'rest',
-  'beam',
-  'beamSpan',
-  'artic',
-  'accid',
-  'clef',
-  'slur',
-  'tie',
-  'dynam',
-  'dir',
-  'keyAccid',
-  'meterSig',
-  'barLine'
-  // 'staff',
-  // 'measure'
-]
-let selectables = []
-rawSelectables.forEach(elem => {
-  selectables.push('.' + elem + ':not(.bounding-box)')
-})
-selectables = selectables.join(', ')
-*/
 
 export default {
   name: 'FacsimileComponent',
@@ -322,7 +294,7 @@ export default {
 
       if (click.target.closest('.diploTrans') && click.target.closest('.measure')) {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
-        const target = click.target.closest(selectables)
+        const target = click.target.closest(CSSselectables)
         // console.log(365, target, selectables)
         if (target) {
           let id = target.getAttribute('data-id')

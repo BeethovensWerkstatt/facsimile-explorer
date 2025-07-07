@@ -5,38 +5,10 @@
 </template>
 
 <script>
-import { draft2score, draft2page, addSbIndicators, selectables } from '@/tools/mei.js'
+import { draft2score, draft2page, addSbIndicators, CSSselectables } from '@/tools/mei.js'
 import { resolveSbIndicators, improveAtSvg } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
 import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
-
-/*
-const rawSelectables = [
-  'note',
-  'chord',
-  'syl',
-  'rest',
-  'beam',
-  'artic',
-  'accid',
-  'clef',
-  'slur',
-  'tie',
-  'dynam',
-  'dir',
-  'keyAccid',
-  'meterSig',
-  'barLine',
-  'dots'
-  // 'staff',
-  // 'measure'
-]
-let selectables = []
-rawSelectables.forEach(elem => {
-  selectables.push('.' + elem + ':not(.bounding-box)')
-})
-selectables = selectables.join(', ')
-*/
 
 export default {
   name: 'VerovioComponent',
@@ -135,7 +107,7 @@ export default {
       els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
     clickListener (e) {
-      const target = e.target.closest(selectables)
+      const target = e.target.closest(CSSselectables)
 
       // console.log('\n\n841 clickListener', target)
 
@@ -215,7 +187,7 @@ export default {
     hoverListener (e) {
       const hilite = (target) => target?.classList[(activate ? 'add' : 'remove')]('highlightHover')
       const activate = e.type === 'mouseover'
-      const target = e.target.closest(selectables)
+      const target = e.target.closest(CSSselectables)
       if (target !== null) {
         console.log('hover:', target)
         hilite(target)

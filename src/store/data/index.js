@@ -102,6 +102,7 @@ const dataModule = {
      * @param  {[type]} dom                  The DOM of the document
      */
     loadDocumentIntoStore ({ commit, state }, { path, name, dom }) {
+      console.log(278, 'loadDocumentIntoStore', path, name, dom)
       commit('LOAD_DOCUMENT_INTO_STORE', { path, dom })
       if (name && path) {
         commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
@@ -1742,7 +1743,7 @@ const dataModule = {
       const corresp = atElem.getAttribute('corresp')
 
       const dtElem = dtDoc.querySelector('*[*|id="' + corresp.split('#')[1] + '"]')
-      console.log('searching for corresponding element in diplomatic transcript: ' + corresp + ', found this:\n', dtElem)
+      console.log(753, 'searching for corresponding element in diplomatic transcript: ' + corresp + ', found this:\n', dtElem)
     },
 
     modifyXml ({ commit, getters, state, dispatch }, { filePath, id, val }) {
