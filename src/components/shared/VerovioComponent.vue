@@ -106,7 +106,7 @@ export default {
       /* const els = this.$refs.mei.querySelector('selectables')
       els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
-    clickListener (e) {
+    async clickListener (e) {
       const target = e.target.closest(CSSselectables)
 
       // console.log('\n\n841 clickListener', target)
@@ -118,17 +118,28 @@ export default {
         // target.classList.toggle('supplied')
 
         const isBarline = target.classList.contains('barLine')
-        if (isBarline) {
+        if (isBarline && this.$store.getters.activeDiploTransElementName === 'barLine') {
           // const activeDtElementId = this.$store.getters.activeDiploTransElementId
           const measure = target.closest('.measure')
           const measureId = measure.getAttribute('data-id')
-          const atDoc = this.$store.getters.annotatedTranscriptForCurrentWz
+          const atDoc = this.$store.getters.annotatedTranscriptForCurrentWz.cloneNode(true)
           const atElement = atDoc.querySelector(`*[*|id="${measureId}"]`)
           const corresp = atElement.getAttribute('corresp')
           const dtElementId = this.$store.getters.activeDiploTransElementId
           if (dtElementId && !corresp) {
             console.warn(278, 'No corresp found for barline', dtElementId, atElement)
             // TODO: set corresp attribute in AT measure element
+            const atPath = this.$store.getters.currentWzAtPath
+            const dtDocPath = this.$store.getters.currentWzDtPath
+            const dtDocName = dtDocPath.split('/').splice(-1)[0]
+            const correspPath = '../diplomaticTranscripts/' + dtDocName + '#'
+            atElement.setAttribute('corresp', correspPath + dtElementId)
+            const baseMessage = 'Set corresp for barline(s) '
+            const xmlIDs = [atElement.getAttribute('xml:id')]
+            const logPayLoad = { path: atPath, baseMessage, param: dtDocName, xmlIDs, isNewDocument: false }
+            console.log(278, logPayLoad)
+            await this.$store.dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+            await this.$store.dispatch('logChange', logPayLoad)
             return
           }
           // console.log(278, this.$store.getters.activeDiploTransElementAttValue('facs'), measureId, atElement, corresp)
