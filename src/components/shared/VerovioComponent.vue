@@ -133,6 +133,7 @@ export default {
             const dtDocPath = this.$store.getters.currentWzDtPath
             const dtDocName = dtDocPath.split('/').splice(-1)[0]
             const correspPath = '../diplomaticTranscripts/' + dtDocName + '#'
+            console.log(278, 'Setting corresp for barline to', `"${correspPath + dtElementId}"`)
             atElement.setAttribute('corresp', correspPath + dtElementId)
             const baseMessage = 'Set corresp for barline(s) '
             const xmlIDs = [atElement.getAttribute('xml:id')]
