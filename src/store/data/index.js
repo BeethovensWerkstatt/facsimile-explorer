@@ -1494,16 +1494,22 @@ const dataModule = {
       if (!uuidRegex.test(annotElemRef.id)) {
         console.warn('not a uuid!', annotElemRef.id)
         console.log('diploTranscribe search for', annotElemRef.name, '...')
+        // TODO: annotElem = closest('staff') -> CSS
         if (annotElemRef.name === 'keyAccid') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
-          console.log('sig:', sign, elem)
+          console.log(279, 'sig:', sign, elem)
           let c = 0
           elem.querySelectorAll('keyAccid').forEach(accid => {
-            console.log('found keyAccid:', accid, c)
+            console.log(279, 'found keyAccid:', accid, c)
             c++
           })
+          const staffs = []
+          for (const array of atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')) {
+            staffs.push(array)
+          }
+          console.log(staffs)
         } else if (annotElemRef.name === 'clef') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
@@ -1547,6 +1553,7 @@ const dataModule = {
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
       const isAtControlEvent = ['slur', 'tie', 'dynam'].indexOf(annotElemRef.name) !== -1
+      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN
@@ -1555,6 +1562,9 @@ const dataModule = {
         annotStaffN = 1
         // console.log(278, 'found staff for barLine', annotStaffN, annotElemRef.name, annotElemRef.id, annotElem)
         annotElemRef.id = annotElem.getAttribute('xml:id') // use the id of the measure
+      } else if (isSignatureElement) {
+        console.log(279, 'Signature Element', annotElemRef.name)
+        annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
       } else if (!isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')
