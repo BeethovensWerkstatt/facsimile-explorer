@@ -1689,6 +1689,7 @@ const dataModule = {
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+      console.log(279, 'diplomaticElement', diplomaticElement, 'annotElemRef', annotElemRef)
       const isDtControlEvent = ['beamSpan', 'barLine'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 

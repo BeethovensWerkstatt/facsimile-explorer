@@ -98,6 +98,7 @@ const verovioModule = {
           'staff@rotate',
           'accid@corresp',
           'keySig@template',
+          'keySig@sig',
           'staff@n',
           'clef@shape',
           'clef@line',
