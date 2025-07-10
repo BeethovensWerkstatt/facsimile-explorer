@@ -1500,16 +1500,7 @@ const dataModule = {
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
           console.log(279, 'sig:', sign, elem)
-          let c = 0
-          elem.querySelectorAll('keyAccid').forEach(accid => {
-            console.log(279, 'found keyAccid:', accid, c)
-            c++
-          })
-          const staffs = []
-          for (const array of atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')) {
-            staffs.push(array)
-          }
-          console.log(staffs)
+          annotElemRef.keySig = sign
         } else if (annotElemRef.name === 'clef') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
@@ -1523,8 +1514,17 @@ const dataModule = {
         console.log('annotElem', annotElemRef.id)
       }
 
-      if (annotElemRef.name === 'keySig') {
-        console.log(352, 'keySig', annotElemRef)
+      // TODO: keySig or keyAccid?
+      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
+
+      if (isSignatureElement) {
+        console.log(279, 'signature:', annotElemRef.name, annotElem)
+        const staffs = []
+        for (const staff of atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')) {
+          staffs.push(staff)
+        }
+        annotElem = staffs[0]
+        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length)
       } else if (annotElemRef.name === 'barLine') {
         // for barlines, we need to get the measure element as reference
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
@@ -1553,7 +1553,6 @@ const dataModule = {
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
       const isAtControlEvent = ['slur', 'tie', 'dynam'].indexOf(annotElemRef.name) !== -1
-      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN

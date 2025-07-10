@@ -110,7 +110,10 @@ const verovioModule = {
           'rest@dot-corresp',
           'dynam@corresp',
           'dir@corresp',
-          'measure@corresp'
+          'measure@corresp',
+          // not essential, but useful for debugging
+          'meterSig@count',
+          'meterSig@unit'
         ] //,
         // unit: 18
       }
