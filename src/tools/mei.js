@@ -55,6 +55,14 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'beamSpan'
   } else if (name === 'measure') {
     name = 'barLine'
+  } if (name === 'staff') {
+    switch (annotElemRef.name) {
+      case 'keyAccid':
+        name = 'accid'
+        break
+      default:
+        name = annotElemRef.name
+    }
   } else if (name === 'note' && annotElem.parentNode.localName === 'chord' && annotElemRef.name !== 'dots') {
     name = 'chord'
   } else if ((name === 'note' || name === 'rest') && annotElemRef.name === 'dots') {
@@ -106,7 +114,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
     console.log('getDiplomaticAccid', annotElem, elem)
-    getDiplomaticAccid(annotElem, elem)
+    getDiplomaticAccid(annotElem, elem, annotElemRef.keySig)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
   } else if (name === 'dot') {
@@ -245,10 +253,15 @@ function getDiplomaticBeam (annotElem, beam) {
  * @param {*} annotElem the annotated accidental to be translated
  * @param {*} accid the diplomatic accid to be translated
  */
-function getDiplomaticAccid (annotElem, accid) {
-  accid.setAttribute('accid', annotElem.getAttribute('accid'))
-  const note = annotElem.closest('note')
-  accid.setAttribute('loc', getLocAttribute(note))
+function getDiplomaticAccid (annotElem, accid, sig) {
+  console.log(279, 'getDiplomaticAccid', annotElem, accid, sig)
+  if (sig) {
+    accid.setAttribute('accid', sig < 0 ? 'f' : 's')
+  } else {
+    accid.setAttribute('accid', annotElem.getAttribute('accid'))
+    const note = annotElem.closest('note')
+    accid.setAttribute('loc', getLocAttribute(note))
+  }
 }
 
 /**

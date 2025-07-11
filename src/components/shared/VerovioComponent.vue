@@ -192,7 +192,10 @@ export default {
 
         if (name === 'keyAccid') {
           const keySig = target.closest('.keySig')
+          const flat = +keySig.getAttribute('data-sig') < 0
           const keyAccids = keySig.querySelectorAll('.keyAccid')
+
+          cvpayload.keyAccid = 0
 
           let keyAccidN = 0
           for (const ka of keyAccids) {
@@ -201,6 +204,9 @@ export default {
               break
             }
             keyAccidN += 1
+          }
+          if (flat) {
+            cvpayload.keyAccid *= -1
           }
         }
         /* if (name === 'tie' || name === 'slur') {

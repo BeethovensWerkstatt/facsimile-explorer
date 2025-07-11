@@ -1514,15 +1514,13 @@ const dataModule = {
         console.log('annotElem', annotElemRef.id)
       }
 
-      // TODO: keySig or keyAccid?
+      // TODO: keySig?
       const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
 
       if (isSignatureElement) {
         console.log(279, 'signature:', annotElemRef.name, annotElem)
-        const staffs = []
-        for (const staff of atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')) {
-          staffs.push(staff)
-        }
+        // TODO: do we need all staffs?
+        const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
         console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length)
       } else if (annotElemRef.name === 'barLine') {
