@@ -15,7 +15,7 @@
         <label>@xml:id</label>
         <div class="value string">{{elementId}}</div>
     </div>
-    <div class="entry" v-if="elementId && !isCurve">
+    <div class="entry" v-if="elementId && !isCurve && !isDeletion">
         <label>@x</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -157,6 +157,9 @@ export default {
     },
     isCurve () {
       return this.$store.getters.activeDiploTransElementName === 'curve'
+    },
+    isDeletion () {
+      return this.$store.getters.activeDiploTransElementName === 'del'
     }
   }
 }

@@ -10,7 +10,7 @@ import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { controlpointsToVerovioSvgBezier } from '@/tools'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
-import { getEmptyPage, selectables } from '@/tools/mei.js'
+import { getEmptyPage, selectables, appendNewElement } from '@/tools/mei.js'
 // import { useDiploTrans } from '@/store/gui/diplotrans'
 import { cleanUpDiplomaticTranscript, bezierAttributeToControlpoints } from '@/tools/diplomaticTranscripts.js'
 
@@ -217,20 +217,21 @@ export default {
           }
 
           const usedShape = click.target.classList.contains('usedShape')
-          console.log('WRITING ZONE:', genDescWzId)
+          // console.log('WRITING ZONE:', genDescWzId)
 
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
             action: () => {
-              console.log('add shape to current DiploTrans element ...')
+              // console.log('add shape to current DiploTrans element')
               // TODO: ask for function (stem/head/etc)
-              const baseMessage = 'add shape to DT at '
               const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
               const id = this.$store.getters.activeDiploTransElementId
+              const baseMessage = 'Add shape to DT at '
               const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
               const origdoc = this.$store.getters.documentByPath(filePath)
               const doc = origdoc?.cloneNode(true)
-              const snippet = doc?.querySelector(`*[*|id="${id}"]`)
+              const allElems = doc.querySelectorAll('mdiv *')
+              const snippet = [...allElems].find(elem => elem.getAttribute('xml:id') === id) // doc?.querySelector(`*[*|id="${id}"]`)
               if (snippet) {
                 const facs = snippet.getAttribute('facs')?.split(' ') || []
                 facs.push(svgPath + '#' + click.target.id)
@@ -241,7 +242,7 @@ export default {
                 this.$store.dispatch('logChange', {
                   path: filePath,
                   baseMessage,
-                  param: 0,
+                  param: id,
                   xmlIDs: [id],
                   isNewDoument: false
                 })
@@ -277,6 +278,62 @@ export default {
             disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
           }
 
+          const setDeletion = {
+            label: 'Deletion',
+            action: async () => {
+              // console.log('identify shape as deletion')
+              const baseMessage = 'transcribe deletion'
+              const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
+              // const id = this.$store.getters.activeDiploTransElementId
+              const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
+              const origdoc = this.$store.getters.documentByPath(filePath)
+              const doc = origdoc?.cloneNode(true)
+              const draft = doc.querySelector('draft')
+
+              if (draft) {
+                const del = appendNewElement(draft, 'del')
+                del.setAttribute('facs', svgPath + '#' + click.target.id)
+
+                const path = appendNewElement(del, 'path', 'http://www.w3.org/2000/svg')
+
+                const rects = this.$store.getters.osdRects
+                const targetBBox = click.target.getBBox()
+                console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
+                const bbox = { px: { x: targetBBox.x, y: targetBBox.y, w: targetBBox.width, h: targetBBox.height } }
+
+                bbox.mm = {
+                  x: parseFloat((bbox.px.x / rects.ratio + +rects.image.x).toFixed(1)),
+                  y: parseFloat((bbox.px.y / rects.ratio + +rects.image.y).toFixed(1)),
+                  w: parseFloat((bbox.px.w / rects.ratio).toFixed(1)),
+                  h: parseFloat((bbox.px.h / rects.ratio).toFixed(1)),
+                  offX: 0
+                }
+
+                const points = []
+                points.push('M' + bbox.mm.x + ',' + bbox.mm.y)
+                points.push('L' + (bbox.mm.x + bbox.mm.w) + ',' + bbox.mm.y)
+                points.push('L' + (bbox.mm.x + bbox.mm.w) + ',' + (bbox.mm.y + bbox.mm.h))
+                points.push('L' + bbox.mm.x + ',' + (bbox.mm.y + bbox.mm.h))
+                points.push('Z')
+
+                path.setAttribute('d', points.join(' '))
+
+                await this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
+                await this.$store.dispatch('logChange', {
+                  path: filePath,
+                  baseMessage,
+                  param: '',
+                  xmlIDs: [draft.getAttribute('xml:id')],
+                  isNewDoument: false
+                })
+                this.$store.dispatch('setActiveDiploTransElementId', del.getAttribute('xml:id'))
+              } else {
+                console.warn('setDeletion: no draft element found!')
+              }
+            },
+            disabled: !wzActive
+          }
+
           const items = []
           if (!wzActive) {
             const wzidx = this.$store.getters.writingZoneIndexOnCurrentPage(genDescWzId)
@@ -292,7 +349,7 @@ export default {
                   label: 'Transcribe shape without AnnotTrans',
                   disabled: !wzActive,
                   items: [
-                    { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
+                    setDeletion, // { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
                     { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
                     { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
                   ]
@@ -1200,7 +1257,7 @@ export default {
 
       // ----
       dtArr.forEach(async obj => {
-        // console.log('913 entering ', obj)
+        console.log('913 entering ', obj)
 
         if (obj.dt) {
           const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt, rects, this.$store.getters.documentWithCurrentPage)
@@ -1208,6 +1265,7 @@ export default {
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
+          const svgForCurrentPage = this.$store.getters.svgForCurrentPage
 
           if (!existingOverlay) {
             // console.log('adding overlay for ' + dt.wzDetails.diploTrans)
@@ -1223,7 +1281,7 @@ export default {
               rastrumsOnCurrentPage,
               selectedElementId: this.$store.getters.activeDiploTransElementId,
               viewer: this.viewer
-            }))
+            }, svgForCurrentPage))
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1243,7 +1301,7 @@ export default {
               rastrumsOnCurrentPage,
               selectedCurve: this.$store.getters.activeDiploTransElementId,
               viewer: this.viewer
-            }), existingOverlay.firstChild)
+            }, svgForCurrentPage), existingOverlay.firstChild)
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
@@ -1872,5 +1930,14 @@ export default {
       opacity: 1;
     }
   }
+}
+
+svg .deletionBack {
+  fill: #000000;
+  opacity: 0.2;
+}
+svg .deletionLine {
+  stroke: #000000 !important;
+  opacity: 0.7;
 }
 </style>

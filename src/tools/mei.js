@@ -1189,7 +1189,7 @@ export async function getRenderableDiplomaticTranscript ({ wzDetails, dtDoc }, e
   return clonedPage
 }
 
-const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/mei') => {
+export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.org/ns/mei') => {
   const elem = parent.appendChild(document.createElementNS(ns, name))
   if (ns === 'http://www.w3.org/2000/svg') {
     elem.setAttribute('id', 's' + uuid())
@@ -1665,7 +1665,11 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
         */
         node.setAttribute('facs', '#' + measureZone.getAttribute('xml:id'))
+      } else if (name === 'del') {
+        console.log(573, 'del node', node)
+        outSection.appendChild(node)
       }
+
       // outDom.querySelector('section').appendChild(node)
     })
   } catch (err) {

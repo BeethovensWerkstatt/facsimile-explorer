@@ -2,6 +2,7 @@
 // import store from '@/store'
 import { controlpointsToVerovioSvgBezier } from '.'
 import store from '@/store'
+import { appendNewElement } from './mei'
 
 /**
  * get control points for curve bezier attribute for rastrum on position x/y with factor (default 90)
@@ -201,10 +202,7 @@ const renderDeletions = (svgDom, meiDom, context, svgForCurrentPage) => {
     console.log(572, 'deletion', deletion, svgForCurrentPage)
     const measure = svgDom.querySelector('g.measure')
 
-    // controlevents are always measured from the top rastrum!!!
-    // const rastrumId = deletion.closest('measure').querySelector('staff[n="1"]').getAttribute('decls').split('#')[1]
-
-    // const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
+    // deletions are always rendered in relation to the full page
 
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.setAttribute('data-id', deletion.getAttribute('xml:id'))
@@ -212,20 +210,41 @@ const renderDeletions = (svgDom, meiDom, context, svgForCurrentPage) => {
     g.setAttribute('class', 'deletion')
 
     measure.append(g)
+    const copiedPath = deletion.querySelector('path').cloneNode(true)
 
-    const shapeIds = deletion.getAttribute('facs').replace(/\s+/g, ' ').trim().split(' ')
-    shapeIds.forEach(shapeFullId => {
-      const shapeId = shapeFullId.split('#')[1] // get the id from the full id
-      const shape = svgForCurrentPage.querySelector('path[id="' + shapeId + '"]')
-      console.log(572, 'shapeId', shapeId, 'shape', shape)
-      if (shape) {
-        const clonedShape = shape.cloneNode(true)
-        clonedShape.setAttribute('data-id', shapeId)
-        clonedShape.setAttribute('data-class', 'deletion')
-        clonedShape.setAttribute('class', 'deletion')
-        g.append(clonedShape)
+    const points = copiedPath.getAttribute('d').split(' ')
+
+    // scale points to Verovio output scale
+    const scalePoint = (point) => {
+      const command = point.substring(0, 1)
+
+      let out
+      if (point.length > 1) {
+        const x = parseFloat(point.substring(1).split(',')[0])
+        const y = parseFloat(point.substring(1).split(',')[1])
+        const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+        out = (x * factor).toFixed(1) + ',' + (y * factor).toFixed(1)
+      } else {
+        out = ''
       }
-    })
+      return command + out
+    }
+    copiedPath.setAttribute('d', points.map(scalePoint).join(' '))
+
+    copiedPath.classList.add('deletionBack')
+    g.append(copiedPath)
+
+    const diagonal1 = appendNewElement(g, 'path', 'http://www.w3.org/2000/svg')
+    diagonal1.setAttribute('d', scalePoint(points[0]) + ' ' + scalePoint(points[2]))
+    diagonal1.setAttribute('stroke-width', '9')
+    diagonal1.classList.add('deletionLine')
+    g.append(diagonal1)
+
+    const diagonal2 = appendNewElement(g, 'path', 'http://www.w3.org/2000/svg')
+    diagonal2.setAttribute('d', scalePoint(points[1]).replace('L', 'M') + ' ' + scalePoint(points[3]))
+    diagonal2.setAttribute('stroke-width', '9')
+    diagonal2.classList.add('deletionLine')
+    g.append(diagonal2)
   })
 }
 

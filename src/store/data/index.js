@@ -3396,15 +3396,15 @@ const dataModule = {
       // console.log('------\nid: ' + id)
       // console.log([...doc.querySelectorAll('layer')])
 
-      const allElems = doc.querySelectorAll('section *[*|id]')
+      const allElems = doc.querySelectorAll('mdiv *')
       // console.log([...allElems])
       const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
 
       // const elem = doc.querySelector('*[*|id="' + id + '"]')
 
       if (!elem) {
-        // console.log('found doc:\n', doc.querySelector('layer'))
-        return 'error 3'
+        console.log('found doc:\n', doc, 'id: ', id, 'allElems:\n', allElems)
+        return 'Error 3: element not found!'
       }
 
       // console.log('found elem:\n', elem)
