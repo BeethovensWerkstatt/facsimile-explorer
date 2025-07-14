@@ -591,7 +591,7 @@ const dataModule = {
      * @param  {[function]} callback           [description]
      */
     clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, dtPath, id, name, measure, staff, purpose, callback, ...opts }) {
-      console.log(opts)
+      console.log(279, 'clickedVerovio extra opts:', opts)
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
@@ -599,7 +599,7 @@ const dataModule = {
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, opts, dtPath })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, dtPath, opts })
           }
           break
         default:
@@ -1446,7 +1446,7 @@ const dataModule = {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
       const atPath = getters.currentWzAtPath
-      // console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
+      console.log('279 diploTranscribe: annotElementRef=', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         // console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
@@ -1516,13 +1516,35 @@ const dataModule = {
 
       // TODO: keySig?
       const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
+      let keyBase = 0
 
       if (isSignatureElement) {
         console.log(279, 'signature:', annotElemRef.name, annotElem)
         // TODO: do we need all staffs?
         const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
-        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length)
+        const clefs = [...atDoc.querySelectorAll('staffDef[n="' + annotElemRef.staff + '"] clef')]
+        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs)
+        if (clefs.length > 0) {
+          const clefpos = (+clefs[0].getAttribute('line') - 1) * 2
+          switch (clefs[0].getAttribute('shape')) {
+            case 'G':
+              keyBase = clefpos + 1
+              break
+            case 'F':
+              keyBase = clefpos + 2
+              break
+            case 'C':
+              keyBase = clefpos + 5
+              break
+            default:
+              keyBase = 0
+              console.warn('unknown clef shape:', clefs[0].getAttribute('shape'))
+              break
+          }
+          console.log(279, 'clef pos:', clefpos, 'keyBase:', keyBase % 7, 'shape:', clefs[0].getAttribute('shape'))
+          annotElemRef.keyBase = keyBase % 7 // position of A for current clef
+        }
       } else if (annotElemRef.name === 'barLine') {
         // for barlines, we need to get the measure element as reference
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')

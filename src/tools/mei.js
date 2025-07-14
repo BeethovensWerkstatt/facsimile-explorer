@@ -114,7 +114,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
     console.log('getDiplomaticAccid', annotElem, elem)
-    getDiplomaticAccid(annotElem, elem, annotElemRef.keySig)
+    getDiplomaticAccid(annotElem, elem, annotElemRef)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
   } else if (name === 'dot') {
@@ -253,10 +253,17 @@ function getDiplomaticBeam (annotElem, beam) {
  * @param {*} annotElem the annotated accidental to be translated
  * @param {*} accid the diplomatic accid to be translated
  */
-function getDiplomaticAccid (annotElem, accid, sig) {
-  console.log(279, 'getDiplomaticAccid', annotElem, accid, sig)
-  if (sig) {
-    accid.setAttribute('accid', sig < 0 ? 'f' : 's')
+function getDiplomaticAccid (annotElem, accid, { keySig, keyAccid, keyBase }) {
+  console.log(279, 'getDiplomaticAccid', annotElem, accid, keySig)
+  if (keySig) {
+    const sharp = keySig >= 0
+    accid.setAttribute('accid', sharp ? 's' : 'f')
+    // get location of accidental in the range of [3-9] TODO: G-clef ... what about F-Clef?
+    const base = keySig < 0 ? 1 : 5
+    const fact = keySig < 0 ? 3 : 4
+    const loc = (keyBase + base + (keyAccid * fact) - 3) % 7 + 3
+    accid.setAttribute('loc', loc)
+    console.log(279, accid)
   } else {
     accid.setAttribute('accid', annotElem.getAttribute('accid'))
     const note = annotElem.closest('note')
