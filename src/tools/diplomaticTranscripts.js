@@ -53,7 +53,8 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     const measure = svgDom.querySelector('g.measure')
 
     // controlevents are always measured from the top rastrum!!!
-    const rastrumId = barLine.closest('measure').querySelector('staff[n="1"]').getAttribute('decls').split('#')[1]
+    const currentMeasure = barLine.closest('measure')
+    const rastrumId = currentMeasure.querySelector('staff[n="1"]').getAttribute('decls').split('#')[1]
     if (store.getters.activeDiploTransElementId === barLine.getAttribute('xml:id')) {
       console.log(753, 'barLine rastrum cleanup', rastrumId)
     }

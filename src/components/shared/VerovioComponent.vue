@@ -5,38 +5,10 @@
 </template>
 
 <script>
-import { draft2score, draft2page, addSbIndicators, selectables } from '@/tools/mei.js'
+import { draft2score, draft2page, addSbIndicators, CSSselectables } from '@/tools/mei.js'
 import { resolveSbIndicators, improveAtSvg } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
 import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
-
-/*
-const rawSelectables = [
-  'note',
-  'chord',
-  'syl',
-  'rest',
-  'beam',
-  'artic',
-  'accid',
-  'clef',
-  'slur',
-  'tie',
-  'dynam',
-  'dir',
-  'keyAccid',
-  'meterSig',
-  'barLine',
-  'dots'
-  // 'staff',
-  // 'measure'
-]
-let selectables = []
-rawSelectables.forEach(elem => {
-  selectables.push('.' + elem + ':not(.bounding-box)')
-})
-selectables = selectables.join(', ')
-*/
 
 export default {
   name: 'VerovioComponent',
@@ -134,8 +106,8 @@ export default {
       /* const els = this.$refs.mei.querySelector('selectables')
       els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
-    clickListener (e) {
-      const target = e.target.closest(selectables)
+    async clickListener (e) {
+      const target = e.target.closest(CSSselectables)
 
       // console.log('\n\n841 clickListener', target)
 
@@ -145,7 +117,35 @@ export default {
         // natürlich über die Daten koordiniert werden…
         // target.classList.toggle('supplied')
 
-        // const isBarline = target.classList.contains('barLine')
+        const isBarline = target.classList.contains('barLine')
+        if (isBarline && this.$store.getters.activeDiploTransElementName === 'barLine') {
+          // const activeDtElementId = this.$store.getters.activeDiploTransElementId
+          const measure = target.closest('.measure')
+          const measureId = measure.getAttribute('data-id')
+          const atDoc = this.$store.getters.annotatedTranscriptForCurrentWz.cloneNode(true)
+          const atElement = atDoc.querySelector(`*[*|id="${measureId}"]`)
+          const corresp = atElement.getAttribute('corresp')
+          const dtElementId = this.$store.getters.activeDiploTransElementId
+          if (dtElementId && !corresp) {
+            console.warn(278, 'No corresp found for barline', dtElementId, atElement)
+            // TODO: set corresp attribute in AT measure element
+            const atPath = this.$store.getters.currentWzAtPath
+            const dtDocPath = this.$store.getters.currentWzDtPath
+            const dtDocName = dtDocPath.split('/').splice(-1)[0]
+            const correspPath = '../diplomaticTranscripts/' + dtDocName + '#'
+            console.log(278, 'Setting corresp for barline to', `"${correspPath + dtElementId}"`)
+            atElement.setAttribute('corresp', correspPath + dtElementId)
+            const baseMessage = 'Set corresp for barline(s) '
+            const xmlIDs = [atElement.getAttribute('xml:id')]
+            const logPayLoad = { path: atPath, baseMessage, param: dtDocName, xmlIDs, isNewDocument: false }
+            console.log(278, logPayLoad)
+            await this.$store.dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+            await this.$store.dispatch('logChange', logPayLoad)
+            return
+          }
+          // console.log(278, this.$store.getters.activeDiploTransElementAttValue('facs'), measureId, atElement, corresp)
+          // return
+        }
 
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
@@ -192,7 +192,10 @@ export default {
 
         if (name === 'keyAccid') {
           const keySig = target.closest('.keySig')
+          const flat = +keySig.getAttribute('data-sig') < 0
           const keyAccids = keySig.querySelectorAll('.keyAccid')
+
+          cvpayload.keyAccid = 0
 
           let keyAccidN = 0
           for (const ka of keyAccids) {
@@ -201,6 +204,9 @@ export default {
               break
             }
             keyAccidN += 1
+          }
+          if (flat) {
+            cvpayload.keyAccid *= -1
           }
         }
         /* if (name === 'tie' || name === 'slur') {
@@ -215,9 +221,9 @@ export default {
     hoverListener (e) {
       const hilite = (target) => target?.classList[(activate ? 'add' : 'remove')]('highlightHover')
       const activate = e.type === 'mouseover'
-      const target = e.target.closest(selectables)
+      const target = e.target.closest(CSSselectables)
       if (target !== null) {
-        console.log('hover:', target)
+        // console.log('hover:', target)
         hilite(target)
         const corresp = target.getAttribute('data-corresp')
         if (corresp) {
@@ -330,7 +336,7 @@ export default {
   width: 100%;
   overflow: scroll;
 
-  svg *[data-corresp] {
+  svg *:not(.measure)[data-corresp] {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
     color: $svgUsedShapeColor;
@@ -387,6 +393,12 @@ export default {
   svg g.dots:not(.bounding-box) ellipse:not(*[data-corresp]) {
     fill: black;
     stroke: black;
+  }
+
+  svg g.measure[data-corresp] .barLine path {
+    fill: $svgUsedShapeColor;
+    stroke: $svgUsedShapeColor;
+    color: $svgUsedShapeColor;
   }
 
   svg .bounding-box rect {

@@ -380,7 +380,7 @@ const guiModule = {
       state.allDocsLoaded = true
     },
 
-    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, staff, path, dtPath }) {
+    TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, staff, path, dtPath, opts }) {
       console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
@@ -389,7 +389,7 @@ const guiModule = {
         } else {
           // TODO we don't need a dict/object if it only contains one item
           state.diploTransActivations.annotTrans.clear()
-          state.diploTransActivations.annotTrans.set(id, { id, name, measure, staff, path, dtPath })
+          state.diploTransActivations.annotTrans.set(id, { id, name, measure, staff, path, dtPath, ...opts })
         }
       } else if (type === 'shape') {
         // state.diploTransActivations.annotTrans.clear()
@@ -738,9 +738,9 @@ const guiModule = {
      * @param  {[type]} path                 [description]
      * @return {[type]}        [description]
      */
-    diploTransToggle ({ commit, getters }, { type, id, name, measure, staff, path, dtPath }) {
+    diploTransToggle ({ commit, getters }, { type, id, name, measure, staff, path, dtPath, opts }) {
       if (getters.activeWritingZone !== null) {
-        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, staff, path, dtPath })
+        commit('TOGGLE_DIPLO_TRANS_ITEM', { type, id, name, measure, staff, path, dtPath, opts })
       }
     },
 

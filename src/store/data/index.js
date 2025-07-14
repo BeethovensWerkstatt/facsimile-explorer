@@ -102,6 +102,7 @@ const dataModule = {
      * @param  {[type]} dom                  The DOM of the document
      */
     loadDocumentIntoStore ({ commit, state }, { path, name, dom }) {
+      // console.log(278, 'loadDocumentIntoStore', path, name, dom)
       commit('LOAD_DOCUMENT_INTO_STORE', { path, dom })
       if (name && path) {
         commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
@@ -590,7 +591,7 @@ const dataModule = {
      * @param  {[function]} callback           [description]
      */
     clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, dtPath, id, name, measure, staff, purpose, callback, ...opts }) {
-      console.log(opts)
+      console.log(279, 'clickedVerovio extra opts:', opts)
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
@@ -598,7 +599,7 @@ const dataModule = {
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, opts, dtPath })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, dtPath, opts })
           }
           break
         default:
@@ -1445,7 +1446,7 @@ const dataModule = {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
       const atPath = getters.currentWzAtPath
-      // console.log('317 diploTranscribe: annotElementRef=', annotElemRef, atPath)
+      console.log('279 diploTranscribe: annotElementRef=', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         // console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
@@ -1493,16 +1494,13 @@ const dataModule = {
       if (!uuidRegex.test(annotElemRef.id)) {
         console.warn('not a uuid!', annotElemRef.id)
         console.log('diploTranscribe search for', annotElemRef.name, '...')
+        // TODO: annotElem = closest('staff') -> CSS
         if (annotElemRef.name === 'keyAccid') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
-          console.log('sig:', sign, elem)
-          let c = 0
-          elem.querySelectorAll('keyAccid').forEach(accid => {
-            console.log('found keyAccid:', accid, c)
-            c++
-          })
+          console.log(279, 'sig:', sign, elem)
+          annotElemRef.keySig = sign
         } else if (annotElemRef.name === 'clef') {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
@@ -1516,8 +1514,48 @@ const dataModule = {
         console.log('annotElem', annotElemRef.id)
       }
 
-      if (annotElemRef.name === 'keySig') {
-        console.log(352, 'keySig', annotElemRef)
+      // TODO: keySig?
+      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
+      let keyBase = 0
+
+      if (isSignatureElement) {
+        console.log(279, 'signature:', annotElemRef.name, annotElem)
+        // TODO: do we need all staffs?
+        const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
+        annotElem = staffs[0]
+        const clefs = [...atDoc.querySelectorAll('staffDef[n="' + annotElemRef.staff + '"] clef')]
+        const meters = [...atDoc.querySelectorAll('scoreDef meterSig')]
+        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs, meters)
+        if (clefs.length > 0) {
+          const shape = clefs[0].getAttribute('shape')
+          const line = +clefs[0].getAttribute('line')
+          annotElemRef.clef = { shape, line }
+          const clefpos = (line - 1) * 2
+          switch (shape) {
+            case 'G':
+              keyBase = clefpos + 1
+              break
+            case 'F':
+              keyBase = clefpos + 2
+              break
+            case 'C':
+              keyBase = clefpos + 5
+              break
+            default:
+              keyBase = 0
+              console.warn('unknown clef shape:', clefs[0].getAttribute('shape'))
+              break
+          }
+          console.log(279, 'clef pos:', clefpos, 'keyBase:', keyBase % 7, 'shape:', clefs[0].getAttribute('shape'))
+          annotElemRef.keyBase = keyBase % 7 // position of A for current clef
+        }
+        if (meters.length > 0) {
+          const count = meters[0].getAttribute('count')
+          const unit = meters[0].getAttribute('unit')
+          const meter = { count: +count, unit: +unit }
+          annotElemRef.meter = meter
+          console.log(279, 'meterSig:', meter)
+        }
       } else if (annotElemRef.name === 'barLine') {
         // for barlines, we need to get the measure element as reference
         annotElem = atDoc.querySelector('measure[*|id="' + annotElemRef.measure + '"]')
@@ -1552,6 +1590,11 @@ const dataModule = {
       if (annotElemRef.name === 'barLine') {
         // TODO: find better value for staff of the barline
         annotStaffN = 1
+        // console.log(278, 'found staff for barLine', annotStaffN, annotElemRef.name, annotElemRef.id, annotElem)
+        annotElemRef.id = annotElem.getAttribute('xml:id') // use the id of the measure
+      } else if (isSignatureElement) {
+        console.log(279, 'Signature Element', annotElemRef.name)
+        annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
       } else if (!isAtControlEvent) {
         if (annotElem.hasAttribute('staff')) {
           annotStaffN = annotElem.getAttribute('staff')
@@ -1677,6 +1720,7 @@ const dataModule = {
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+      console.log(279, 'diplomaticElement', diplomaticElement, 'annotElemRef', annotElemRef)
       const isDtControlEvent = ['beamSpan', 'barLine'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
@@ -1742,7 +1786,7 @@ const dataModule = {
       const corresp = atElem.getAttribute('corresp')
 
       const dtElem = dtDoc.querySelector('*[*|id="' + corresp.split('#')[1] + '"]')
-      console.log('searching for corresponding element in diplomatic transcript: ' + corresp + ', found this:\n', dtElem)
+      console.log(753, 'searching for corresponding element in diplomatic transcript: ' + corresp + ', found this:\n', dtElem)
     },
 
     modifyXml ({ commit, getters, state, dispatch }, { filePath, id, val }) {
