@@ -1524,10 +1524,14 @@ const dataModule = {
         const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
         const clefs = [...atDoc.querySelectorAll('staffDef[n="' + annotElemRef.staff + '"] clef')]
-        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs)
+        const meters = [...atDoc.querySelectorAll('scoreDef meterSig')]
+        console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs, meters)
         if (clefs.length > 0) {
-          const clefpos = (+clefs[0].getAttribute('line') - 1) * 2
-          switch (clefs[0].getAttribute('shape')) {
+          const shape = clefs[0].getAttribute('shape')
+          const line = +clefs[0].getAttribute('line')
+          annotElemRef.clef = { shape, line }
+          const clefpos = (line - 1) * 2
+          switch (shape) {
             case 'G':
               keyBase = clefpos + 1
               break
@@ -1544,6 +1548,13 @@ const dataModule = {
           }
           console.log(279, 'clef pos:', clefpos, 'keyBase:', keyBase % 7, 'shape:', clefs[0].getAttribute('shape'))
           annotElemRef.keyBase = keyBase % 7 // position of A for current clef
+        }
+        if (meters.length > 0) {
+          const count = meters[0].getAttribute('count')
+          const unit = meters[0].getAttribute('unit')
+          const meter = { count: +count, unit: +unit }
+          annotElemRef.meter = meter
+          console.log(279, 'meterSig:', meter)
         }
       } else if (annotElemRef.name === 'barLine') {
         // for barlines, we need to get the measure element as reference

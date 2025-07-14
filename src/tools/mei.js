@@ -124,9 +124,9 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'keyAccid') {
     getDiplomaticKeyAccid(annotElem, elem)
   } else if (name === 'meterSig') {
-    getDiplomaticMetersig(annotElem, elem)
+    getDiplomaticMetersig(annotElem, elem, annotElemRef.meter)
   } else if (name === 'clef') {
-    getDiplomaticClef(annotElem, elem)
+    getDiplomaticClef(annotElem, elem, annotElemRef.clef)
   } else if (name === 'curve') {
     getDiplomaticCurve(annotElem, elem, bbox)
   } else if (name === 'dynam') {
@@ -366,12 +366,20 @@ function getDiplomaticKeyAccid (annotElem, keyAccid) {
   console.log('getDiplomaticKeysig', annotElem, keyAccid)
 }
 
-function getDiplomaticMetersig (annotElem, metersig) {
-  console.log('getDiplomaticMetersig', annotElem, metersig)
+function getDiplomaticMetersig (annotElem, metersig, { count, unit }) {
+  console.log('getDiplomaticMetersig', annotElem, metersig, count, unit)
+  if (count && unit) {
+    metersig.setAttribute('count', count)
+    metersig.setAttribute('unit', unit)
+  } else {
+    console.warn('WARNING: Could not determine count or unit for metersig', annotElem, metersig)
+  }
 }
 
-function getDiplomaticClef (annotElem, clef) {
-  console.log('getDiplomaticClef', annotElem, clef)
+function getDiplomaticClef (annotElem, clef, { shape, line }) {
+  console.log('getDiplomaticClef', annotElem, clef, shape, line)
+  clef.setAttribute('shape', shape)
+  clef.setAttribute('line', line)
 }
 
 function getDiplomaticCurve (annotElem, curve, bbox) {
