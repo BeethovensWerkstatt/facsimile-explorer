@@ -1243,7 +1243,7 @@ export default {
         // const staves = sb.getAttribute('corresp').split(' ')
         // console.log('913a: staves', staves)
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        const eventsThatRequireSystemMargin = ['barLine', 'dynam', 'dir']
+        const eventsThatRequireSystemMargin = ['barLine', 'dynam', 'dir', 'clef', 'meterSig']
 
         // const zoneId = measure.getAttribute('facs').substr(1)
         // const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
@@ -1275,6 +1275,7 @@ export default {
 
             if (rastrum) {
               event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
+              console.log(279, 'setting ho to ' + rastrum.getAttribute('system.leftmar') + ' for ' + event.localName)
             } else {
               console.log(463, 'no rastrum found for ' + rastrumId)
             }

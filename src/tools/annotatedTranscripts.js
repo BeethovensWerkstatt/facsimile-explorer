@@ -290,7 +290,11 @@ export const prepareAtDomForRendering = (atDom) => {
     }
     // console.log(611, 'parent resolved', parent)
   })
-
+  const staffCorresp = clone.querySelectorAll('staff[corresp]')
+  staffCorresp.forEach((staff) => {
+    const corresps = staff.getAttribute('corresp').split(' ')
+    console.log(279, 'prepareAtDomForRendering', staff.getAttribute('xml:id'), 'corresp', corresps)
+  })
   return clone
 }
 

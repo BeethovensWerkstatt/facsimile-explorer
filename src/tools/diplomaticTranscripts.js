@@ -184,6 +184,13 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     }
   }) */
 
+  const clefs = svgDom.querySelectorAll('g.clef')
+  for (const clef of clefs) {
+    const x1 = parseFloat(clef.getAttribute('x')) + parseFloat(clef.getAttribute('ho')) * 90 // 9px per vu, factor 10 as general factor of Verovio
+    clef.setAttribute('x', x1)
+    console.log(279, 'clef x', x1, clef)
+  }
+
   return svgDom
 }
 
