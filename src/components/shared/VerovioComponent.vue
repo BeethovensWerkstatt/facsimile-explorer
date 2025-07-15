@@ -336,7 +336,7 @@ export default {
   width: 100%;
   overflow: scroll;
 
-  svg *:not(.measure)[data-corresp] {
+  svg *:not(.measure):not(.staff)[data-corresp] {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
     color: $svgUsedShapeColor;

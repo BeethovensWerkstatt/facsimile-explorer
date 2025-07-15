@@ -312,12 +312,21 @@ export const improveAtSvg = (svgDom, atDom, dtdom) => {
     })
   })
 
-  const measureCorresp = svgDom.querySelectorAll('g.measure[data-corresp]')
+  const measureCorresp = svgDom.querySelectorAll('g.measure:not(.bounding-box)[data-corresp]')
   measureCorresp.forEach((measure) => {
     const corresps = measure.getAttribute('data-corresp').split(' ')
     for (const corresp of corresps) {
       const shapeId = corresp.split('#')[1]
       console.log(845, 'improveAtSvg', shapeId, 'measure corresp', measure)
+    }
+  })
+
+  const staffCorresp = svgDom.querySelectorAll('g.staff:not(.bounding-box)[data-corresp]')
+  staffCorresp.forEach((staff) => {
+    const corresps = staff.getAttribute('data-corresp').split(' ')
+    for (const corresp of corresps) {
+      const shapeId = corresp.split('#')[1]
+      console.log(845, 'improveAtSvg', shapeId, 'staff corresp', staff)
     }
   })
   return svgDom
