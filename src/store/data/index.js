@@ -1499,9 +1499,11 @@ const dataModule = {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
-          console.log(279, 'sig:', sign, elem)
+          // console.log(279, 'sig:', sign, elem)
           annotElemRef.keySig = sign
-        } else if (annotElemRef.name === 'clef') {
+        }
+        /*
+         else if (annotElemRef.name === 'clef') { // TODO: we don't need the next two clauses ... annotElementRef.id = has to be staff.id
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
           console.log('diploTranscribe use', elem)
@@ -1510,6 +1512,7 @@ const dataModule = {
           annotElemRef.id = elem.getAttribute('xml:id')
           console.log('diploTranscribe use', elem)
         }
+        */
       } else {
         console.log('annotElem', annotElemRef.id)
       }

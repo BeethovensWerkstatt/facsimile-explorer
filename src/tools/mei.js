@@ -113,7 +113,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'beamSpan' || name === 'beam') {
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
-    console.log('getDiplomaticAccid', annotElem, elem)
+    console.log(279, 'getDiplomaticAccid', annotElem, elem)
     getDiplomaticAccid(annotElem, elem, annotElemRef)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
