@@ -184,11 +184,28 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     }
   }) */
 
-  const clefs = svgDom.querySelectorAll('g.clef')
+  const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+  const clefs = meiDom.querySelectorAll('measure clef')
   for (const clef of clefs) {
-    const x1 = parseFloat(clef.getAttribute('x')) + parseFloat(clef.getAttribute('ho')) * 90 // 9px per vu, factor 10 as general factor of Verovio
-    clef.setAttribute('x', x1)
+    const clefId = clef.getAttribute('xml:id')
+    const clefElements = svgDom.querySelectorAll('g.clef[data-id="' + clefId + '"] use,rect')
+    const x1 = (parseFloat(clef.getAttribute('x')) + parseFloat(clef.getAttribute('ho'))) * factor
+    for (const clefElement of clefElements) {
+      clefElement.setAttribute('x', x1)
+    }
     console.log(279, 'clef x', x1, clef)
+  }
+
+  const meterSigs = meiDom.querySelectorAll('measure meterSig')
+  for (const meterSig of meterSigs) {
+    const meterSigId = meterSig.getAttribute('xml:id')
+    const meterSigElements = svgDom.querySelectorAll('g.meterSig[data-id="' + meterSigId + '"] use,rect')
+    const x1 = (parseFloat(meterSig.getAttribute('x')) + parseFloat(meterSig.getAttribute('ho'))) * factor
+    for (const meterSigElement of meterSigElements) {
+      meterSigElement.setAttribute('x', x1)
+    }
+    console.log(279, 'meterSig x', x1, meterSig)
   }
 
   return svgDom
