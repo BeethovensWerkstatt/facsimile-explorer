@@ -1523,6 +1523,7 @@ const dataModule = {
         // TODO: do we need all staffs?
         const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
+        annotElemRef.id = annotElem.getAttribute('xml:id') // use the id of the staff
         const clefs = [...atDoc.querySelectorAll('staffDef[n="' + annotElemRef.staff + '"] clef')]
         const meters = [...atDoc.querySelectorAll('scoreDef meterSig')]
         console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs, meters)
