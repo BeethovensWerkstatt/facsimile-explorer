@@ -1275,7 +1275,7 @@ export default {
 
             if (rastrum) {
               event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
-              console.log(279, 'setting ho to ' + rastrum.getAttribute('system.leftmar') + ' for ' + event.localName)
+              // console.log(279, 'setting ho to ' + rastrum.getAttribute('system.leftmar') + ' for ' + event.localName)
             } else {
               console.log(463, 'no rastrum found for ' + rastrumId)
             }
