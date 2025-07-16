@@ -184,6 +184,12 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     }
   }) */
 
+  // calculate x position for all clefs and meterSigs
+  // this is necessary because the x position in the MEI file is relative to the left
+  // margin of the system, but in the SVG it is relative to the left margin of
+  // the page, so we need to add the left margin of the system to the x
+  // position of the clef and meterSig elements
+  // console.log(279, 'cleanUpDiplomaticTranscript', 'calculating x position for clefs and meterSigs')
   const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
 
   const clefs = meiDom.querySelectorAll('measure clef')
@@ -194,7 +200,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     for (const clefElement of clefElements) {
       clefElement.setAttribute('x', x1)
     }
-    console.log(279, 'clef x', x1, clef)
+    // console.log(279, 'clef x', x1, clef)
   }
 
   const meterSigs = meiDom.querySelectorAll('measure meterSig')
@@ -205,7 +211,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     for (const meterSigElement of meterSigElements) {
       meterSigElement.setAttribute('x', x1)
     }
-    console.log(279, 'meterSig x', x1, meterSig)
+    // console.log(279, 'meterSig x', x1, meterSig)
   }
 
   return svgDom
