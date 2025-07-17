@@ -182,6 +182,7 @@ export default {
           }
 
           const selectFunc = () => {
+            this.$store.dispatch('setActiveDiploTransElementId', null)
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
           const func = (type) => () => {
@@ -246,7 +247,7 @@ export default {
               console.log('TODO: adjust function of shape in DiploTrans')
             },
             // TODO: only possible for some element types, like notes, but not slurs
-            disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
+            disabled: this.$store.getters.activeDiploTransElementId === null && !usedShape
           }
 
           const items = []
