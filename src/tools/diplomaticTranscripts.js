@@ -192,7 +192,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // console.log(279, 'cleanUpDiplomaticTranscript', 'calculating x position for clefs and meterSigs')
   const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
 
-  const clefs = meiDom.querySelectorAll('measure clef')
+  const clefs = meiDom.querySelectorAll('staff clef')
   for (const clef of clefs) {
     const clefId = clef.getAttribute('xml:id')
     const clefElements = svgDom.querySelectorAll('g.clef[data-id="' + clefId + '"] use,rect')
@@ -203,7 +203,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     // console.log(279, 'clef x', x1, clef)
   }
 
-  const meterSigs = meiDom.querySelectorAll('measure meterSig')
+  const meterSigs = meiDom.querySelectorAll('staff meterSig')
   for (const meterSig of meterSigs) {
     const meterSigId = meterSig.getAttribute('xml:id')
     const meterSigElements = svgDom.querySelectorAll('g.meterSig[data-id="' + meterSigId + '"] use,rect')
