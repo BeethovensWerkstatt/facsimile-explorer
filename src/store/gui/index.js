@@ -405,6 +405,7 @@ const guiModule = {
     },
 
     CLEAR_DIPLO_TRANS_ITEMS (state, full = false) {
+      console.log(279, 'clear diplo trans selections', full)
       state.diploTransActivations.shapes = new Map()
       state.diploTransActivations.annotTrans = new Map()
       if (full) {

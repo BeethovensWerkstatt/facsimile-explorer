@@ -608,7 +608,7 @@ export default {
      */
     indicateUsedShapes () {
       const arr = [...this.$store.getters.activeDiploTransUsedShapes]
-      // console.log('FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
+      console.log(279, 'FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
@@ -642,7 +642,7 @@ export default {
      */
     indicateSelectedShapes () {
       const arr2 = [...this.$store.getters.diploTransActivationsInShapes.map(dt => dt.id)]
-      // console.log('FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
+      console.log(279, 'FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {

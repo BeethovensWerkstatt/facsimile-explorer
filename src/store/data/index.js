@@ -1518,7 +1518,7 @@ const dataModule = {
       }
 
       // TODO: keySig?
-      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
+      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) > -1
       let keyBase = 0
 
       if (isSignatureElement) {
