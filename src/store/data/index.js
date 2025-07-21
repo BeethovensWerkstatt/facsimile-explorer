@@ -1499,9 +1499,11 @@ const dataModule = {
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] keySig')
           const sig = elem.getAttribute('sig')
           const sign = +sig.substring(0, 1) * (sig.substring(1, 2) === 'f' ? -1 : 1)
-          console.log(279, 'sig:', sign, elem)
+          // console.log(279, 'sig:', sign, elem)
           annotElemRef.keySig = sign
-        } else if (annotElemRef.name === 'clef') {
+        }
+        /*
+         else if (annotElemRef.name === 'clef') { // TODO: we don't need the next two clauses ... annotElementRef.id = has to be staff.id
           const elem = atDoc.querySelector('staffDef[n="' + annotElemRef.staff + '"] ' + annotElemRef.name)
           annotElemRef.id = elem.getAttribute('xml:id')
           console.log('diploTranscribe use', elem)
@@ -1510,12 +1512,13 @@ const dataModule = {
           annotElemRef.id = elem.getAttribute('xml:id')
           console.log('diploTranscribe use', elem)
         }
+        */
       } else {
         console.log('annotElem', annotElemRef.id)
       }
 
       // TODO: keySig?
-      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) !== -1
+      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) > -1
       let keyBase = 0
 
       if (isSignatureElement) {
@@ -1523,6 +1526,7 @@ const dataModule = {
         // TODO: do we need all staffs?
         const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
+        annotElemRef.id = annotElem.getAttribute('xml:id') // use the id of the staff
         const clefs = [...atDoc.querySelectorAll('staffDef[n="' + annotElemRef.staff + '"] clef')]
         const meters = [...atDoc.querySelectorAll('scoreDef meterSig')]
         console.log(279, 'found staff:', annotElem, annotElem.getAttribute('n'), staffs.length, clefs, meters)

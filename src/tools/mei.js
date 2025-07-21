@@ -113,7 +113,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'beamSpan' || name === 'beam') {
     getDiplomaticBeam(annotElem, elem)
   } else if (name === 'accid') {
-    console.log('getDiplomaticAccid', annotElem, elem)
+    console.log(279, 'getDiplomaticAccid', annotElem, elem)
     getDiplomaticAccid(annotElem, elem, annotElemRef)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
@@ -336,16 +336,26 @@ function getDiplomaticChord (annotElem, chord) {
   const correspPath = annotElem.querySelector('*[corresp]').getAttribute('corresp').split('#')[0] + '#'
   annotElem.setAttribute('corresp', correspPath + chord.getAttribute('xml:id'))
 
+  let dur = annotElem.getAttribute('dur')
+  const durs = annotElem.querySelectorAll('*[dur]')
+  for (const d of durs) {
+    console.log(563, 'getDiplomaticChord(): checking duration in chord', d, annotElem)
+    if (!dur) {
+      dur = d.getAttribute('dur')
+    } else if (d.hasAttribute('dur') && d.getAttribute('dur') !== dur) {
+      console.warn(563, 'getDiplomaticChord(): inconsistent duration in chord!', annotElem)
+    }
+  }
+  chord.setAttribute('dur', dur)
+  console.log(563, 'getDiplomaticChord(): setting duration', dur)
   const notes = annotElem.querySelectorAll('note')
   notes.forEach((note, i) => {
-    const dur = note.getAttribute('dur')
-    if (!chord.hasAttribute('dur')) {
-      chord.setAttribute('dur', dur)
-    } else if (dur !== chord.getAttribute('dur')) {
-      console.warn('getDiplomaticChord(): inconsistent duration in chord!', annotElem)
-    }
     const diploNote = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
     diploNote.setAttribute('xml:id', 'd' + uuid())
+    if (!note.hasAttribute('dur')) {
+      // set duration if not set
+      note.setAttribute('dur', dur)
+    }
     getDiplomaticNote(note, diploNote)
     note.setAttribute('corresp', correspPath + diploNote.getAttribute('xml:id'))
     chord.append(diploNote)

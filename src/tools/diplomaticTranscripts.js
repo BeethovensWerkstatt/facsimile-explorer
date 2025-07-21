@@ -7,7 +7,7 @@ import { appendNewElement } from './mei'
 /**
  * get control points for curve bezier attribute for rastrum on position x/y with factor (default 90)
  */
-export const bezierAttributeToControlpoints = (bezier, { x, y }, factor = 90) => bezier.map((c, i) => factor * (c + (i % 2 ? y : x)))
+export const scaleXYControlpoints = (bezier, { x, y }, factor = 90) => bezier.map((c, i) => factor * (c + (i % 2 ? y : x)))
 
 /**
  * cleans up the diplomatic transcript to overcome Verovio restrictions and other issues; called after the diplomatic transcript has been rendered
@@ -108,7 +108,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
     // shift bezier control points by rastrum x and y position [x1, y1, x2, y2, x3, y3, x4, y4]
-    const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
+    const controlpoints = scaleXYControlpoints(bezier, rastrum, factor)
     const d = controlpointsToVerovioSvgBezier(controlpoints, 52)
     path.setAttribute('d', d)
     // taken from verovio generated slur svg
@@ -184,6 +184,36 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
       console.warn('Error while repositioning beamSpan', b, err)
     }
   }) */
+
+  // calculate x position for all clefs and meterSigs
+  // this is necessary because the x position in the MEI file is relative to the left
+  // margin of the system, but in the SVG it is relative to the left margin of
+  // the page, so we need to add the left margin of the system to the x
+  // position of the clef and meterSig elements
+  // console.log(279, 'cleanUpDiplomaticTranscript', 'calculating x position for clefs and meterSigs')
+  const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+  const clefs = meiDom.querySelectorAll('staff clef')
+  for (const clef of clefs) {
+    const clefId = clef.getAttribute('xml:id')
+    const clefElements = svgDom.querySelectorAll('g.clef[data-id="' + clefId + '"] use,rect')
+    const x1 = (parseFloat(clef.getAttribute('x')) + parseFloat(clef.getAttribute('ho'))) * factor
+    for (const clefElement of clefElements) {
+      clefElement.setAttribute('x', x1)
+    }
+    // console.log(279, 'clef x', x1, clef)
+  }
+
+  const meterSigs = meiDom.querySelectorAll('staff meterSig')
+  for (const meterSig of meterSigs) {
+    const meterSigId = meterSig.getAttribute('xml:id')
+    const meterSigElements = svgDom.querySelectorAll('g.meterSig[data-id="' + meterSigId + '"] use,rect')
+    const x1 = (parseFloat(meterSig.getAttribute('x')) + parseFloat(meterSig.getAttribute('ho'))) * factor
+    for (const meterSigElement of meterSigElements) {
+      meterSigElement.setAttribute('x', x1)
+    }
+    // console.log(279, 'meterSig x', x1, meterSig)
+  }
 
   return svgDom
 }

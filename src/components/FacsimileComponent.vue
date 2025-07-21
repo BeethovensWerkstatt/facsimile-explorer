@@ -13,7 +13,7 @@ import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragme
 import { getEmptyPage, appendNewElement, CSSselectables } from '@/tools/mei.js'
 
 // import { useDiploTrans } from '@/store/gui/diplotrans'
-import { cleanUpDiplomaticTranscript, bezierAttributeToControlpoints } from '@/tools/diplomaticTranscripts.js'
+import { cleanUpDiplomaticTranscript, scaleXYControlpoints } from '@/tools/diplomaticTranscripts.js'
 
 const osdOptions = {
   preserveViewport: false,
@@ -183,6 +183,7 @@ export default {
           }
 
           const selectFunc = () => {
+            this.$store.dispatch('setActiveDiploTransElementId', null)
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
           const func = (type) => () => {
@@ -248,7 +249,7 @@ export default {
               console.log('TODO: adjust function of shape in DiploTrans')
             },
             // TODO: only possible for some element types, like notes, but not slurs
-            disabled: this.$store.getters.diploTransSelectedId === null && !usedShape
+            disabled: this.$store.getters.activeDiploTransElementId === null && !usedShape
           }
 
           const setDeletion = {
@@ -666,7 +667,7 @@ export default {
      */
     indicateUsedShapes () {
       const arr = [...this.$store.getters.activeDiploTransUsedShapes]
-      // console.log('FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
+      console.log(279, 'FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
@@ -700,7 +701,7 @@ export default {
      */
     indicateSelectedShapes () {
       const arr2 = [...this.$store.getters.diploTransActivationsInShapes.map(dt => dt.id)]
-      // console.log('FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
+      console.log(279, 'FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
@@ -795,9 +796,10 @@ export default {
             if (this.$store.getters.activeDiploTransElementName === 'barLine') {
               const barline = this.$store.getters.activeDiploTransElement
               // console.log(752, 'barLine', element, barline)
+              // TODO: rastrum getter for DT element
               const section = barline.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
-              // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
+              // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
               console.log(753, 'barLine rastrum control', rastrumId)
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
@@ -809,9 +811,9 @@ export default {
                 barline.getAttribute('x2'),
                 barline.getAttribute('y2')
               ].map(p => parseFloat(p))
-              // bezierAttributeToControlpoints calculates list of x,y coordinates
+              // scaleXYControlpoints calculates list of x,y coordinates
               // from the barline x,y,x2,y2 attributes, using rastrum and factor
-              const controlpoints = bezierAttributeToControlpoints(barpoints, rastrum, factor)
+              const controlpoints = scaleXYControlpoints(barpoints, rastrum, factor)
               // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
               for (const i of [0, 2]) {
                 const tracker = this.createControlPoint(
@@ -839,14 +841,14 @@ export default {
               const curve = this.$store.getters.activeDiploTransElement
               const section = curve.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
-              // TODO: make ratsrum consistent with cleanUpDiplomaticTranscript
+              // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
-              const g = element
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-              const path = g.querySelector('path')
+              const path = element.querySelector('path')
               const bezier = (curve.getAttribute('bezier') || '').split(' ').map(p => parseFloat(p))
-              const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
+              // scaleXYControlpoints calculates list of x,y coordinates
+              const controlpoints = scaleXYControlpoints(bezier, rastrum, factor)
               const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
               line1.setAttribute('class', 'curve-line')
               line1.setAttribute('x1', controlpoints[0])
@@ -854,7 +856,7 @@ export default {
               line1.setAttribute('x2', controlpoints[2])
               line1.setAttribute('y2', controlpoints[3])
               line1.setAttribute('stroke-width', 23)
-              g.append(line1)
+              element.append(line1)
               const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line')
               line2.setAttribute('class', 'curve-line')
               line2.setAttribute('x1', controlpoints[4])
@@ -862,10 +864,10 @@ export default {
               line2.setAttribute('x2', controlpoints[6])
               line2.setAttribute('y2', controlpoints[7])
               line2.setAttribute('stroke-width', 23)
-              g.append(line2)
+              element.append(line2)
               for (const i of [0, 2, 4, 6]) {
                 const tracker = this.createControlPoint(
-                  g,
+                  element,
                   controlpoints,
                   i,
                   (controlpoints) => {
@@ -880,6 +882,49 @@ export default {
                     bezier[i + 1] = (newY / factor) - rastrum.y
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
                     // console.log(836, 'curve bezier updated', bezier)
+                  },
+                  factor
+                )
+                this.setMouseTracker(i / 2, tracker)
+              }
+            } else if (this.$store.getters.activeDiploTransElementName === 'hairpin') {
+              const hairpin = this.$store.getters.activeDiploTransElement
+              // console.log(752, 'barLine', element, barline)
+              const section = hairpin.closest('section')
+              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+              // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
+              const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
+              console.log(753, 'barLine rastrum control', rastrumId)
+              const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
+              const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+              const path = element.querySelector('path')
+              const barpoints = [
+                hairpin.getAttribute('x'),
+                hairpin.getAttribute('y'),
+                hairpin.getAttribute('x2'),
+                hairpin.getAttribute('y2')
+              ].map(p => parseFloat(p))
+              // scaleXYControlpoints calculates list of x,y coordinates
+              // from the barline x,y,x2,y2 attributes, using rastrum and factor
+              const controlpoints = scaleXYControlpoints(barpoints, rastrum, factor)
+              // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
+              for (const i of [0, 2]) {
+                const tracker = this.createControlPoint(
+                  element,
+                  controlpoints,
+                  i,
+                  (controlpoints) => {
+                    path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
+                  },
+                  (controlpoints, i, newX, newY, factor) => {
+                    barpoints[i] = (newX / factor) - rastrum.x
+                    barpoints[i + 1] = (newY / factor) - rastrum.y
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: barpoints[0].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: barpoints[1].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: barpoints[2].toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
+                    // update barline x,y,x2,y2 attributes in MEI
+                    // console.log(836, 'barline updated', barpoints)
                   },
                   factor
                 )
@@ -1302,7 +1347,7 @@ export default {
         // const staves = sb.getAttribute('corresp').split(' ')
         // console.log('913a: staves', staves)
         const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        const eventsThatRequireSystemMargin = ['barLine', 'dynam', 'dir']
+        const eventsThatRequireSystemMargin = ['barLine', 'dynam', 'dir', 'clef', 'meterSig']
 
         // const zoneId = measure.getAttribute('facs').substr(1)
         // const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
@@ -1334,6 +1379,7 @@ export default {
 
             if (rastrum) {
               event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
+              // console.log(279, 'setting ho to ' + rastrum.getAttribute('system.leftmar') + ' for ' + event.localName)
             } else {
               console.log(463, 'no rastrum found for ' + rastrumId)
             }

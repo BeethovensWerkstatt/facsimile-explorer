@@ -117,6 +117,8 @@ export default {
         // natürlich über die Daten koordiniert werden…
         // target.classList.toggle('supplied')
 
+        /*
+        // helper code to set missing corresp attribute for barlines
         const isBarline = target.classList.contains('barLine')
         if (isBarline && this.$store.getters.activeDiploTransElementName === 'barLine') {
           // const activeDtElementId = this.$store.getters.activeDiploTransElementId
@@ -146,6 +148,7 @@ export default {
           // console.log(278, this.$store.getters.activeDiploTransElementAttValue('facs'), measureId, atElement, corresp)
           // return
         }
+        */
 
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
@@ -336,7 +339,7 @@ export default {
   width: 100%;
   overflow: scroll;
 
-  svg *:not(.measure)[data-corresp] {
+  svg *:not(.measure):not(.staff)[data-corresp] {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
     color: $svgUsedShapeColor;
