@@ -6,7 +6,7 @@ import store from '@/store'
 /**
  * get control points for curve bezier attribute for rastrum on position x/y with factor (default 90)
  */
-export const bezierAttributeToControlpoints = (bezier, { x, y }, factor = 90) => bezier.map((c, i) => factor * (c + (i % 2 ? y : x)))
+export const scaleXYControlpoints = (bezier, { x, y }, factor = 90) => bezier.map((c, i) => factor * (c + (i % 2 ? y : x)))
 
 /**
  * cleans up the diplomatic transcript to overcome Verovio restrictions and other issues; called after the diplomatic transcript has been rendered
@@ -107,7 +107,7 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
     const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
     // shift bezier control points by rastrum x and y position [x1, y1, x2, y2, x3, y3, x4, y4]
-    const controlpoints = bezierAttributeToControlpoints(bezier, rastrum, factor)
+    const controlpoints = scaleXYControlpoints(bezier, rastrum, factor)
     const d = controlpointsToVerovioSvgBezier(controlpoints, 52)
     path.setAttribute('d', d)
     // taken from verovio generated slur svg
