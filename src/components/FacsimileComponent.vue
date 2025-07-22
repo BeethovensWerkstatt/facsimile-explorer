@@ -889,40 +889,49 @@ export default {
               }
             } else if (this.$store.getters.activeDiploTransElementName === 'hairpin') {
               const hairpin = this.$store.getters.activeDiploTransElement
-              // console.log(752, 'barLine', element, barline)
+              const cres = hairpin.getAttribute('form') === 'cres'
+              const opening = +hairpin.getAttribute('opening')
+              console.log(752, 'hairpin', element, cres, opening)
               const section = hairpin.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
               // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
-              console.log(753, 'barLine rastrum control', rastrumId)
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-              const path = element.querySelector('path')
-              const barpoints = [
-                hairpin.getAttribute('x'),
-                hairpin.getAttribute('y'),
-                hairpin.getAttribute('x2'),
-                hairpin.getAttribute('y2')
-              ].map(p => parseFloat(p))
-              // scaleXYControlpoints calculates list of x,y coordinates
-              // from the barline x,y,x2,y2 attributes, using rastrum and factor
-              const controlpoints = scaleXYControlpoints(barpoints, rastrum, factor)
-              // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
+              const polyline = element.querySelector('polyline')
+              const hairpoints = [
+                +hairpin.getAttribute('x'),
+                +hairpin.getAttribute('y'),
+                +hairpin.getAttribute('x2'),
+                +hairpin.getAttribute('y2')
+              ]
+              const controlpoints = scaleXYControlpoints(hairpoints, rastrum, factor)
+              const svgpoints = controlpoints => {
+                const opener = opening * factor / 2
+                return cres
+                  ? `${controlpoints[2]},${controlpoints[3] - opener} ${controlpoints[0]},${controlpoints[1]} ${controlpoints[2]},${controlpoints[3] + opener}`
+                  : `${controlpoints[0]},${controlpoints[1] - opener} ${controlpoints[2]},${controlpoints[3]} ${controlpoints[0]},${controlpoints[1] + opener}`
+              }
+              console.log(752, 'hairpin controlpoints', controlpoints, rastrum, factor, svgpoints(controlpoints))
               for (const i of [0, 2]) {
                 const tracker = this.createControlPoint(
                   element,
                   controlpoints,
                   i,
                   (controlpoints) => {
-                    path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
+                    polyline.setAttribute('points', svgpoints(controlpoints))
                   },
                   (controlpoints, i, newX, newY, factor) => {
-                    barpoints[i] = (newX / factor) - rastrum.x
-                    barpoints[i + 1] = (newY / factor) - rastrum.y
-                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: barpoints[0].toFixed(2) })
-                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: barpoints[1].toFixed(2) })
-                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: barpoints[2].toFixed(2) })
-                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
+                    hairpoints[i] = (newX / factor) - rastrum.x
+                    hairpoints[i + 1] = (newY / factor) - rastrum.y
+                    const x1 = hairpoints[0]
+                    const y1 = hairpoints[1]
+                    const x2 = hairpoints[2]
+                    const y2 = hairpoints[3]
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: x1.toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: y1.toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: x2.toFixed(2) })
+                    this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: y2.toFixed(2) })
                     // update barline x,y,x2,y2 attributes in MEI
                     // console.log(836, 'barline updated', barpoints)
                   },

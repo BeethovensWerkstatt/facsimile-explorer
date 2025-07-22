@@ -97,6 +97,7 @@ const verovioModule = {
           'mRest@corresp',
           'slur@corresp',
           'tie@corresp',
+          'hairpin@corresp',
           'staff@rotate',
           'accid@corresp',
           'keySig@template',
