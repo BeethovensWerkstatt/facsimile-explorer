@@ -268,7 +268,8 @@ export default {
                 const del = appendNewElement(draft, 'del')
                 del.setAttribute('facs', svgPath + '#' + click.target.id)
 
-                const path = appendNewElement(del, 'path', 'http://www.w3.org/2000/svg')
+                const path = appendNewElement(del, 'svg:path', 'http://www.w3.org/2000/svg')
+                console.log(752, 'setDeletion: svg:path', path)
 
                 const rects = this.$store.getters.osdRects
                 const targetBBox = click.target.getBBox()
@@ -783,6 +784,7 @@ export default {
       // console.log('indicateSelectedDTElement', this.$store.getters.activeDiploTransElementdIds)
       const dtid = this.$store.getters.activeDiploTransElementId
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
+      console.log(752, 'indicateSelectedDTElement', dtid, this.$store.getters.activeDiploTransElement)
 
       if (existingOverlay !== null) {
         // console.log('found an overlay')
@@ -941,9 +943,13 @@ export default {
               }
             } else if (this.$store.getters.activeDiploTransElementName === 'del') {
               const del = this.$store.getters.activeDiploTransElement
-              const section = del.closest('section')
-              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
-              console.log(752, 'del', element, del, diploStaffDef)
+              const delpath = del.querySelector('path')
+              const delpoints = delpath.getAttribute('d').split(' ').map(p => p.substrin(1).split(','.map(parseFloat))).flat()
+              console.log(752, 'del', element, del, delpoints)
+              const rects = this.$store.getters.osdRects
+              const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+              const controlpoints = scaleXYControlpoints(delpoints, { x: 0, y: 0 }, factor)
+              console.log(752, 'del controlpoints', controlpoints, rects, factor)
             }
           }
         })

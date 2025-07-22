@@ -3469,6 +3469,7 @@ const dataModule = {
     activeDiploTransElement: (state, getters) => {
       const filePath = getters.currentWritingZoneObject?.diploTrans
       const elemId = getters.activeDiploTransElementId
+
       if (!filePath || !elemId) {
         return null
       }
@@ -3478,6 +3479,7 @@ const dataModule = {
         return null
       }
       const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+      console.log(752, 'activeDiploTransElement', filePath, elemId, elem)
       return elem
     },
 
