@@ -891,6 +891,12 @@ export default {
               const hairpin = this.$store.getters.activeDiploTransElement
               const cres = hairpin.getAttribute('form') === 'cres'
               const opening = +hairpin.getAttribute('opening')
+              const hairpoints = [
+                +hairpin.getAttribute('x'),
+                +hairpin.getAttribute('y'),
+                +hairpin.getAttribute('x2'),
+                +hairpin.getAttribute('y2')
+              ]
               console.log(752, 'hairpin', element, cres, opening)
               const section = hairpin.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
@@ -899,12 +905,6 @@ export default {
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               const polyline = element.querySelector('polyline')
-              const hairpoints = [
-                +hairpin.getAttribute('x'),
-                +hairpin.getAttribute('y'),
-                +hairpin.getAttribute('x2'),
-                +hairpin.getAttribute('y2')
-              ]
               const controlpoints = scaleXYControlpoints(hairpoints, rastrum, factor)
               const svgpoints = controlpoints => {
                 const opener = opening * factor / 2
@@ -939,6 +939,11 @@ export default {
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
+            } else if (this.$store.getters.activeDiploTransElementName === 'del') {
+              const del = this.$store.getters.activeDiploTransElement
+              const section = del.closest('section')
+              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+              console.log(752, 'del', element, del, diploStaffDef)
             }
           }
         })
