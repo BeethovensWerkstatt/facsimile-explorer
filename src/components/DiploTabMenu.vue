@@ -21,13 +21,13 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine || isDynam || isDir">
+    <div class="entry" v-if="isBarLine || isDynam || isDir || isHairpin">
         <label>@y</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y" setterName="setActiveDiploTransElementAttValue" :min="-30" :max="50" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine">
+    <div class="entry" v-if="isBarLine || isHairpin">
         <label>@x2</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -39,10 +39,22 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="width" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine">
+    <div class="entry" v-if="isBarLine || isHairpin">
         <label>@y2</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
+        </div>
+    </div>
+    <div class="entry" v-if="isHairpin">
+        <label>@opening</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="opening" setterName="setActiveDiploTransElementAttValue" :min="0" :max="60" :step="1"/>
+        </div>
+    </div>
+    <div class="entry" v-if="isHairpin">
+        <label>@bw:start.opening</label>
+        <div class="value">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="bw:start.opening" setterName="setActiveDiploTransElementAttValue" :min="0" :max="60" :step="1"/>
         </div>
     </div>
     <div class="entry" v-if="isNote || isRest || isAccid || isDot">
@@ -160,6 +172,9 @@ export default {
     },
     isDeletion () {
       return this.$store.getters.activeDiploTransElementName === 'del'
+    },
+    isHairpin () {
+      return this.$store.getters.activeDiploTransElementName === 'hairpin'
     }
   }
 }

@@ -129,6 +129,8 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // render dirs
   renderDirs(svgDom, meiDom, rastrumsOnCurrentPage)
 
+  renderHairpins(svgDom, meiDom, rastrumsOnCurrentPage)
+
   // move flag(s) to the correct position
   const chords = svgDom.querySelectorAll('g.chord')
   // console.log(443, 'chords', chords)
@@ -345,6 +347,130 @@ const renderDirs = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     outerTspan.append(innerTspan)
     text.append(outerTspan)
     g.append(text)
+    measure.append(g)
+  })
+}
+
+/**
+ * this function renders the hairpins in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderHairpins = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  // output:
+  /*
+  <g data-id="MEI-ID" data-class="hairpin" class="hairpin">
+    <polyline stroke="currentColor"
+      stroke-width="18"
+      stroke-opacity="1"
+      stroke-linecap="square"
+      stroke-linejoin="miter"
+      fill="none"
+      points="19772,696 13943,561 19772,426"></polyline>
+  </g>
+  */
+  meiDom.querySelectorAll('hairpin').forEach(hairpin => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = hairpin.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = hairpin.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', hairpin.getAttribute('xml:id'))
+    g.setAttribute('data-id', hairpin.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'hairpin')
+    g.setAttribute('class', 'hairpin')
+
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const x1 = (parseFloat(hairpin.getAttribute('x')) + +rastrum.x) * factor
+    const y1 = (parseFloat(hairpin.getAttribute('y')) + +rastrum.y) * factor
+    const x2 = (parseFloat(hairpin.getAttribute('x2')) + +rastrum.x) * factor
+    const y2 = (parseFloat(hairpin.getAttribute('y2')) + +rastrum.y) * factor
+    const opening = parseFloat(hairpin.getAttribute('opening')) * factor
+    const startOpening = parseFloat(hairpin.getAttribute('bw:start.opening')) * factor
+
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
+    polyline.setAttribute('stroke', 'currentColor')
+    polyline.setAttribute('stroke-width', '18')
+    polyline.setAttribute('stroke-opacity', '1')
+    polyline.setAttribute('stroke-linecap', 'square')
+    polyline.setAttribute('stroke-linejoin', 'miter')
+    polyline.setAttribute('fill', 'none')
+
+    // console.log(881, polyline, opening, startOpening, rastrum)
+
+    if (hairpin.getAttribute('form') === 'cres' && +hairpin.getAttribute('bw:start.opening') === 0) {
+      // top right – center left – bottom right
+      // console.log(881, 'cres closed')
+      const p1x = x2.toFixed(1)
+      const p1y = (y2 - opening / 2).toFixed(1)
+      const p2x = x1.toFixed(1)
+      const p2y = y1.toFixed(1)
+      const p3x = x2.toFixed(1)
+      const p3y = (y2 + opening / 2).toFixed(1)
+
+      polyline.setAttribute('points', `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`)
+      g.append(polyline)
+    } else if (hairpin.getAttribute('form') === 'cres' && +hairpin.getAttribute('bw:start.opening') !== 0) {
+      // top right – two center left – bottom right
+      // console.log(881, 'cres open')
+
+      const p1x = x2.toFixed(1)
+      const p1y = (y2 - opening / 2).toFixed(1)
+      const p2x = x1.toFixed(1)
+      const p2y = (y1 - startOpening / 2).toFixed(1)
+      const p3x = x1.toFixed(1)
+      const p3y = (y1 + startOpening / 2).toFixed(1)
+      const p4x = x2.toFixed(1)
+      const p4y = (y2 + opening / 2).toFixed(1)
+
+      const polyline2 = polyline.cloneNode(true)
+      polyline.setAttribute('points', `${p1x},${p1y} ${p2x},${p2y}`)
+      polyline2.setAttribute('points', `${p3x},${p3y} ${p4x},${p4y}`)
+      g.append(polyline)
+      g.append(polyline2)
+    } else if (hairpin.getAttribute('form') === 'dim' && +hairpin.getAttribute('bw:start.opening') === 0) {
+      // top left - center right – bottom left
+      // console.log(881, 'dim closed')
+      const p1x = x1.toFixed(1)
+      const p1y = (y1 - opening / 2).toFixed(1)
+      const p2x = x2.toFixed(1)
+      const p2y = y2.toFixed(1)
+      const p3x = x1.toFixed(1)
+      const p3y = (y1 + opening / 2).toFixed(1)
+
+      polyline.setAttribute('points', `${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`)
+      g.append(polyline)
+    } else if (hairpin.getAttribute('form') === 'dim' && +hairpin.getAttribute('bw:start.opening') !== 0) {
+      // top left - two center right – bottom left
+      // console.log(881, 'dim open')
+      const p1x = x1.toFixed(1)
+      const p1y = (y1 - opening / 2).toFixed(1)
+      const p2x = x2.toFixed(1)
+      const p2y = (y2 - startOpening / 2).toFixed(1)
+      const p3x = x2.toFixed(1)
+      const p3y = (y2 + startOpening / 2).toFixed(1)
+      const p4x = x1.toFixed(1)
+      const p4y = (y1 + opening / 2).toFixed(1)
+
+      const polyline2 = polyline.cloneNode(true)
+      polyline.setAttribute('points', `${p1x},${p1y} ${p2x},${p2y}`)
+      polyline2.setAttribute('points', `${p3x},${p3y} ${p4x},${p4y}`)
+      g.append(polyline)
+      g.append(polyline2)
+    }
+
     measure.append(g)
   })
 }

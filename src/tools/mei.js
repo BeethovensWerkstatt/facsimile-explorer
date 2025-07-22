@@ -28,7 +28,8 @@ const rawSelectables = [
   'keyAccid',
   'meterSig',
   'barLine',
-  'dots'
+  'dots',
+  'hairpin'
   // 'staff',
   // 'measure'
 ]
@@ -50,6 +51,8 @@ export const CSSselectables = clsSelectables.join(', ')
  */
 export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef) {
   let name = annotElem.localName
+
+  // console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
 
   if (name === 'beam') {
     name = 'beamSpan'
@@ -133,6 +136,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticDynam(annotElem, elem, bbox)
   } else if (name === 'dir') {
     getDiplomaticDir(annotElem, elem, bbox)
+  } else if (name === 'hairpin') {
+    getDiplomaticHairpin(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -322,6 +327,27 @@ function getDiplomaticDir (annotElem, dir, bbox) {
   dir.setAttribute('y', bbox.mm.y)
   dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * generates a diplomatic hairpin
+ * @param {*} annotElem the annotated hairpin to be translated
+ * @param {*} hairpin the initial hairpin that needs specific treatment
+ * @returns the dt:dir element
+ */
+function getDiplomaticHairpin (annotElem, hairpin, bbox) {
+  hairpin.setAttribute('form', annotElem.getAttribute('form') || 'cres')
+
+  const centerY = (bbox.mm.y + bbox.mm.h / 2).toFixed(1)
+  const opening = bbox.mm.h.toFixed(1)
+  hairpin.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  hairpin.removeAttribute('x')
+  hairpin.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  hairpin.setAttribute('y', centerY)
+  hairpin.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  hairpin.setAttribute('y2', centerY)
+  hairpin.setAttribute('opening', opening)
+  hairpin.setAttribute('bw:start.opening', 0)
 }
 
 /**
