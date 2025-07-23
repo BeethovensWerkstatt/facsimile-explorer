@@ -262,18 +262,18 @@ export default {
               const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
               const origdoc = this.$store.getters.documentByPath(filePath)
               const doc = origdoc?.cloneNode(true)
-              const draft = doc.querySelector('draft')
+              const draft = doc?.querySelector('draft')
 
               if (draft) {
                 const del = appendNewElement(draft, 'del')
                 del.setAttribute('facs', svgPath + '#' + click.target.id)
 
                 const path = appendNewElement(del, 'svg:path', 'http://www.w3.org/2000/svg')
-                console.log(752, 'setDeletion: svg:path', path)
+                // console.log(752, 'setDeletion: svg:path', path)
 
                 const rects = this.$store.getters.osdRects
                 const targetBBox = click.target.getBBox()
-                console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
+                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
                 const bbox = { px: { x: targetBBox.x, y: targetBBox.y, w: targetBBox.width, h: targetBBox.height } }
 
                 bbox.mm = {
@@ -302,6 +302,16 @@ export default {
                   isNewDoument: false
                 })
                 this.$store.dispatch('setActiveDiploTransElementId', del.getAttribute('xml:id'))
+
+                // TEST: log the deletion element
+                const id = del.getAttribute('xml:id')
+                // const file = this.$store.getters.documentByPath(filePath).cloneNode(true)
+                const file = doc.cloneNode(true)
+                const elem = file.querySelector('del[*|id="' + id + '"]')
+                console.log(752, 'setDeletion: element', elem, 'id', id)
+                const serializer = new XMLSerializer()
+                console.log(752, serializer.serializeToString(file))
+                // END TEST
               } else {
                 console.warn('setDeletion: no draft element found!')
               }
@@ -944,7 +954,7 @@ export default {
             } else if (this.$store.getters.activeDiploTransElementName === 'del') {
               const del = this.$store.getters.activeDiploTransElement
               const delpath = del.querySelector('path')
-              const delpoints = delpath.getAttribute('d').split(' ').map(p => p.substrin(1).split(','.map(parseFloat))).flat()
+              const delpoints = delpath.getAttribute('d').split(' ').map(p => p.substring(1).split(',').map(parseFloat)).flat()
               console.log(752, 'del', element, del, delpoints)
               const rects = this.$store.getters.osdRects
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
