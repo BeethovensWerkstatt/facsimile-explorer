@@ -1808,7 +1808,9 @@ const dataModule = {
       }
 
       const file = getters.documentByPath(filePath).cloneNode(true)
-      const elem = file.querySelector('*[*|id="' + id + '"]')
+      // const elem = file.querySelector('*[*|id="' + id + '"]')
+      const allElems = file.getElementsByTagName('*') // querySelectorAll('mdiv *')
+      const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
 
       if (!elem) {
         console.error('@/store/data/index.js:modifyXml(): No element found with ID "#' + id + '" in file "' + filePath + '"') // eslint-disable-line no-console
@@ -3478,7 +3480,9 @@ const dataModule = {
       if (!doc) {
         return null
       }
-      const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+      const allElems = doc.querySelectorAll('mdiv *')
+      const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === elemId)
+      // const elem = doc.querySelector('*[*|id="' + elemId + '"]')
       console.log(752, 'activeDiploTransElement', filePath, elemId, elem)
       return elem
     },

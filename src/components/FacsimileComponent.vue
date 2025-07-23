@@ -303,15 +303,18 @@ export default {
                 })
                 this.$store.dispatch('setActiveDiploTransElementId', del.getAttribute('xml:id'))
 
+                /*
                 // TEST: log the deletion element
                 const id = del.getAttribute('xml:id')
-                // const file = this.$store.getters.documentByPath(filePath).cloneNode(true)
-                const file = doc.cloneNode(true)
-                const elem = file.querySelector('del[*|id="' + id + '"]')
+                const file = this.$store.getters.documentByPath(filePath).cloneNode(true)
+                // const file = doc.cloneNode(true)
+                const allElems = doc.querySelectorAll('mdiv *')
+                const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
+                // const elem = file.querySelector('del[*|id="' + id + '"]')
                 console.log(752, 'setDeletion: element', elem, 'id', id)
                 const serializer = new XMLSerializer()
                 console.log(752, serializer.serializeToString(file))
-                // END TEST
+                // END TEST */
               } else {
                 console.warn('setDeletion: no draft element found!')
               }
@@ -805,7 +808,7 @@ export default {
           element.classList.add('selectedDiploTrans')
           // console.log(752, element, i)
           if (i === 0) {
-            if (this.$store.getters.activeDiploTransElementName === 'barLine') {
+            if (this.$store.getters.activeDiploTransElementName === 'barLine') { // conmtrol barLine
               const barline = this.$store.getters.activeDiploTransElement
               // console.log(752, 'barLine', element, barline)
               // TODO: rastrum getter for DT element
@@ -849,7 +852,7 @@ export default {
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-            } else if (this.$store.getters.activeDiploTransElementName === 'curve') {
+            } else if (this.$store.getters.activeDiploTransElementName === 'curve') { // conmtrol curve
               const curve = this.$store.getters.activeDiploTransElement
               const section = curve.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
@@ -899,7 +902,7 @@ export default {
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-            } else if (this.$store.getters.activeDiploTransElementName === 'hairpin') {
+            } else if (this.$store.getters.activeDiploTransElementName === 'hairpin') { // conmtrol hairpin
               const hairpin = this.$store.getters.activeDiploTransElement
               const cres = hairpin.getAttribute('form') === 'cres'
               const opening = +hairpin.getAttribute('opening')
@@ -951,15 +954,35 @@ export default {
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-            } else if (this.$store.getters.activeDiploTransElementName === 'del') {
+            } else if (this.$store.getters.activeDiploTransElementName === 'del') { // conmtrol deletion
               const del = this.$store.getters.activeDiploTransElement
               const delpath = del.querySelector('path')
-              const delpoints = delpath.getAttribute('d').split(' ').map(p => p.substring(1).split(',').map(parseFloat)).flat()
+              const delpoints = delpath.getAttribute('d').split(' ').filter(p => p.length > 1).map(p => p.substring(1).split(',').map(parseFloat)).flat()
               console.log(752, 'del', element, del, delpoints)
               const rects = this.$store.getters.osdRects
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               const controlpoints = scaleXYControlpoints(delpoints, { x: 0, y: 0 }, factor)
               console.log(752, 'del controlpoints', controlpoints, rects, factor)
+              const svgpoints = controlpoints => {
+                return controlpoints.map((p, i) => {
+                  return (i % 2 === 0 ? 'M' : 'L') + p
+                }).join(' ') + ' Z'
+              }
+              const path = element.querySelector('path')
+              for (const i of [0, 2, 4, 6]) {
+                const tracker = this.createControlPoint(
+                  element,
+                  controlpoints,
+                  i,
+                  (controlpoints) => {
+                    path.setAttribute('points', svgpoints(controlpoints))
+                  },
+                  (controlpoints, i, newX, newY, factor) => {
+                  },
+                  factor
+                )
+                this.setMouseTracker(i / 2, tracker)
+              }
             }
           }
         })
