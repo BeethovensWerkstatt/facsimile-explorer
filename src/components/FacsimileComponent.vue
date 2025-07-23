@@ -964,9 +964,14 @@ export default {
               const controlpoints = scaleXYControlpoints(delpoints, { x: 0, y: 0 }, factor)
               console.log(752, 'del controlpoints', controlpoints, rects, factor)
               const svgpoints = controlpoints => {
-                return controlpoints.map((p, i) => {
-                  return (i % 2 === 0 ? 'M' : 'L') + p
-                }).join(' ') + ' Z'
+                const points = []
+                for (const i of [0, 2, 4, 6]) {
+                  const x = controlpoints[i]
+                  const y = controlpoints[i + 1]
+                  const c = i === 0 ? 'M' : 'L'
+                  points.push(`${c}${x},${y}`)
+                }
+                return points.join(' ') + ' Z'
               }
               const path = element.querySelector('path')
               for (const i of [0, 2, 4, 6]) {
@@ -974,9 +979,12 @@ export default {
                   element,
                   controlpoints,
                   i,
+                  // render change
                   (controlpoints) => {
-                    path.setAttribute('points', svgpoints(controlpoints))
+                    console.log(752, svgpoints(controlpoints))
+                    path.setAttribute('d', svgpoints(controlpoints))
                   },
+                  // persist change
                   (controlpoints, i, newX, newY, factor) => {
                   },
                   factor
