@@ -252,6 +252,7 @@ export default {
             disabled: this.$store.getters.activeDiploTransElementId === null && !usedShape
           }
 
+          // Function to transcribe new Deletion
           const setDeletion = {
             label: 'Deletion',
             action: async () => {
@@ -322,6 +323,53 @@ export default {
             disabled: !wzActive
           }
 
+          // Function to transcribe new unclear element
+          const setUnclear = {
+            label: 'Unclear Symbol',
+            action: async () => {
+              // console.log('identify shape as unclear')
+              const baseMessage = 'transcribe unclear'
+              const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
+              // const id = this.$store.getters.activeDiploTransElementId
+              const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
+              const origdoc = this.$store.getters.documentByPath(filePath)
+              const doc = origdoc?.cloneNode(true)
+              const draft = doc?.querySelector('draft')
+
+              if (draft) {
+                const unclear = appendNewElement(draft, 'unclear')
+                unclear.setAttribute('facs', svgPath + '#' + click.target.id)
+
+                /*
+                const rects = this.$store.getters.osdRects
+                const targetBBox = click.target.getBBox()
+                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
+                const bbox = { px: { x: targetBBox.x, y: targetBBox.y, w: targetBBox.width, h: targetBBox.height } }
+
+                bbox.mm = {
+                  x: parseFloat((bbox.px.x / rects.ratio + +rects.image.x).toFixed(1)),
+                  y: parseFloat((bbox.px.y / rects.ratio + +rects.image.y).toFixed(1)),
+                  w: parseFloat((bbox.px.w / rects.ratio).toFixed(1)),
+                  h: parseFloat((bbox.px.h / rects.ratio).toFixed(1)),
+                  offX: 0
+                } */
+
+                await this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
+                await this.$store.dispatch('logChange', {
+                  path: filePath,
+                  baseMessage,
+                  param: '',
+                  xmlIDs: [draft.getAttribute('xml:id')],
+                  isNewDoument: false
+                })
+                this.$store.dispatch('setActiveDiploTransElementId', unclear.getAttribute('xml:id'))
+              } else {
+                console.warn('setUnclear: no draft element found!')
+              }
+            },
+            disabled: !wzActive
+          }
+
           const items = []
           if (!wzActive) {
             const wzidx = this.$store.getters.writingZoneIndexOnCurrentPage(genDescWzId)
@@ -338,6 +386,7 @@ export default {
                   disabled: !wzActive,
                   items: [
                     setDeletion, // { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
+                    setUnclear,
                     { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
                     { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
                   ]
