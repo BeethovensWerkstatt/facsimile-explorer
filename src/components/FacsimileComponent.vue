@@ -268,7 +268,7 @@ export default {
                 const del = appendNewElement(draft, 'del')
                 del.setAttribute('facs', svgPath + '#' + click.target.id)
 
-                const path = appendNewElement(del, 'svg:path', 'http://www.w3.org/2000/svg')
+                const path = appendNewElement(del, 'path', 'http://www.w3.org/2000/svg')
                 // console.log(752, 'setDeletion: svg:path', path)
 
                 const rects = this.$store.getters.osdRects
@@ -835,9 +835,11 @@ export default {
                   element,
                   controlpoints,
                   i,
+                  // render change
                   (controlpoints) => {
                     path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
                   },
+                  // persist change
                   (controlpoints, i, newX, newY, factor) => {
                     barpoints[i] = (newX / factor) - rastrum.x
                     barpoints[i + 1] = (newY / factor) - rastrum.y
@@ -885,6 +887,7 @@ export default {
                   element,
                   controlpoints,
                   i,
+                  // render change
                   (controlpoints) => {
                     path.setAttribute('d', controlpointsToVerovioSvgBezier(controlpoints, 52))
                     line1.setAttribute('x2', controlpoints[2])
@@ -892,6 +895,7 @@ export default {
                     line2.setAttribute('x1', controlpoints[4])
                     line2.setAttribute('y1', controlpoints[5])
                   },
+                  // persist change
                   (controlpoints, i, newX, newY, factor) => {
                     bezier[i] = (newX / factor) - rastrum.x
                     bezier[i + 1] = (newY / factor) - rastrum.y
@@ -933,9 +937,11 @@ export default {
                   element,
                   controlpoints,
                   i,
+                  // render change
                   (controlpoints) => {
                     polyline.setAttribute('points', svgpoints(controlpoints))
                   },
+                  // persist change
                   (controlpoints, i, newX, newY, factor) => {
                     hairpoints[i] = (newX / factor) - rastrum.x
                     hairpoints[i + 1] = (newY / factor) - rastrum.y
@@ -957,35 +963,58 @@ export default {
             } else if (this.$store.getters.activeDiploTransElementName === 'del') { // conmtrol deletion
               const del = this.$store.getters.activeDiploTransElement
               const delpath = del.querySelector('path')
+              // four edge points for deletion area [x1,y1,x2,y2,x3,y3,x4,y4]
               const delpoints = delpath.getAttribute('d').split(' ').filter(p => p.length > 1).map(p => p.substring(1).split(',').map(parseFloat)).flat()
               console.log(752, 'del', element, del, delpoints)
               const rects = this.$store.getters.osdRects
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+              // scaleXYControlpoints calculates list of x,y coordinates
+              // from the deletion x1,y1,x2,y2,x3,y3,x4,y4 attributes scaled to image coordinates
               const controlpoints = scaleXYControlpoints(delpoints, { x: 0, y: 0 }, factor)
               console.log(752, 'del controlpoints', controlpoints, rects, factor)
+              // create path d-attribute string for background deletion area
               const svgpoints = controlpoints => {
                 const points = []
                 for (const i of [0, 2, 4, 6]) {
                   const x = controlpoints[i]
                   const y = controlpoints[i + 1]
                   const c = i === 0 ? 'M' : 'L'
-                  points.push(`${c}${x},${y}`)
+                  points.push(`${c}${x.toFixed(1)},${y.toFixed(1)}`)
                 }
                 return points.join(' ') + ' Z'
               }
               const path = element.querySelector('path')
               for (const i of [0, 2, 4, 6]) {
+                // create control handle for each of the four deletion points
                 const tracker = this.createControlPoint(
                   element,
                   controlpoints,
                   i,
                   // render change
                   (controlpoints) => {
-                    console.log(752, svgpoints(controlpoints))
+                    // console.log(752, svgpoints(controlpoints))
                     path.setAttribute('d', svgpoints(controlpoints))
+                    // two deletion lines crossed:
+                    const dellines = element.querySelectorAll('.deletionLine')
+                    if (dellines.length === 2) {
+                      dellines[0].setAttribute('d', `M${controlpoints[0]},${controlpoints[1]} L${controlpoints[4]},${controlpoints[5]}`)
+                      dellines[1].setAttribute('d', `M${controlpoints[2]},${controlpoints[3]} L${controlpoints[6]},${controlpoints[7]}`)
+                    }
                   },
                   // persist change
                   (controlpoints, i, newX, newY, factor) => {
+                    controlpoints[i] = newX
+                    controlpoints[i + 1] = newY
+                    delpoints[i] = controlpoints[i] / factor
+                    delpoints[i + 1] = controlpoints[i + 1] / factor
+                    const delpath = del.querySelector('path')
+                    delpath.setAttribute('d', svgpoints(delpoints))
+                    const delpathid = del.getAttribute('data-id')
+                    this.$store.dispatch('modifyXml', {
+                      filePath: this.$store.getters.currentWritingZoneObject.diploTrans,
+                      id: delpathid,
+                      val: (new XMLSerializer()).serializeToString(delpath)
+                    })
                   },
                   factor
                 )
