@@ -1491,7 +1491,8 @@ const dataModule = {
       let annotElem
       // x918f5394-e20d-432b-b4e9-2ef0f4326dd4
       const uuidRegex = /[a-z]([0-9,a-f]{8})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{12})/i
-      if (!uuidRegex.test(annotElemRef.id)) {
+      const isUUID = uuidRegex.test(annotElemRef.id)
+      if (!isUUID) {
         console.warn('not a uuid!', annotElemRef.id)
         console.log('diploTranscribe search for', annotElemRef.name, '...')
         // TODO: annotElem = closest('staff') -> CSS
@@ -1518,7 +1519,7 @@ const dataModule = {
       }
 
       // TODO: keySig?
-      const isSignatureElement = ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) > -1
+      const isSignatureElement = !isUUID && ['clef', 'keySig', 'keyAccid', 'meterSig'].indexOf(annotElemRef.name) > -1
       let keyBase = 0
 
       if (isSignatureElement) {

@@ -105,6 +105,7 @@ const verovioModule = {
           'staff@n',
           'clef@shape',
           'clef@line',
+          'clef@corresp',
           'annot@class',
           'annot@corresp',
           'sb@corresp',

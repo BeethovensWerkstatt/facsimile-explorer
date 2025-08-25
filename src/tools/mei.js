@@ -412,7 +412,8 @@ function getDiplomaticMetersig (annotElem, metersig, { count, unit }) {
   }
 }
 
-function getDiplomaticClef (annotElem, clef, { shape, line }) {
+function getDiplomaticClef (annotElem, clef, annotElementClef) {
+  const { shape, line } = annotElementClef || { shape: annotElem.getAttribute('shape'), line: annotElem.getAttribute('line') }
   console.log('getDiplomaticClef', annotElem, clef, shape, line)
   clef.setAttribute('shape', shape)
   clef.setAttribute('line', line)
