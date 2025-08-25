@@ -110,6 +110,7 @@ const verovioModule = {
           'annot@corresp',
           'sb@corresp',
           'note@stem.dir',
+          // 'note@grace',
           'chord@stem.dir',
           'note@dot-corresp',
           'rest@dot-corresp',
