@@ -1872,6 +1872,16 @@ const dataModule = {
       const oldAT = getters.annotatedTranscriptForCurrentWz
       const oldDT = getters.diplomaticTranscriptForCurrentWz
       if (oldAT && oldDT) {
+        const dtElement = oldDT.querySelectorAll(`*[*|id="${dtElemId}"]`)
+        const dtElemIds = [dtElemId]
+        // select all IDs of child elements, too
+        for (const dtElem of dtElement) {
+          // console.log(890, dtElem)
+          for (const e of dtElem.querySelectorAll('*[*|id]')) {
+            dtElemIds.push(e.getAttribute('xml:id'))
+          }
+        }
+        // console.log(890, dtElemIds)
         const atIds = new Set()
         const dtIds = new Set()
         const AT = oldAT.cloneNode(true)
@@ -1881,11 +1891,13 @@ const dataModule = {
         const correspList = AT.querySelectorAll('*[corresp]')
         for (const el of correspList) {
           const corresp = el.getAttribute('corresp')
-          if (corresp.includes(dtElemId)) {
+          // check if any of the dtElemIds is included
+          if (dtElemIds.some(id => corresp.includes(id))) {
             // console.log('468', corresp)
             atIds.add(el.getAttribute('xml:id'))
             const correspl = corresp.split(' ').filter(corresp => {
-              return corresp.split('#')[1] !== dtElemId
+              // keep only those that do not point to any of the removed DT elements
+              return dtElemIds.indexOf(corresp.split('#')[1]) === -1
             })
             // console.log('469', correspl)
             if (correspl.length > 0) {

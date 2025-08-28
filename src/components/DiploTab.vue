@@ -15,6 +15,7 @@
         <button class="btn" @click="initializeDiploTrans">Initialize Diplomatic Transcription</button>
       </div>
       <div class="menuItem" v-else-if="$store.getters.diplomaticTranscriptForCurrentWz">
+        <button class="btn" @click="downloadAnnotTrans">Download Annotated Transcription</button>
         <button class="btn" @click="downloadDiploTrans">Download Diplomatic Transcription</button>
       </div>
       <div class="osdButtons">
@@ -223,6 +224,15 @@ export default {
         type: 'application/xml'
       })
       fileDownload(data, this.$store.getters.currentWzDtPath.split('/').splice(-1)[0])
+    },
+    downloadAnnotTrans () {
+      const at = this.$store.getters.annotatedTranscriptForCurrentWz // base64dom(dom2base64(this.$store.getters.annotatedTranscriptForCurrentWz))
+      const serializer = new XMLSerializer()
+      const atstring = serializer.serializeToString(at)
+      const data = new Blob([atstring], {
+        type: 'application/xml'
+      })
+      fileDownload(data, this.$store.getters.currentWzAtPath.split('/').splice(-1)[0])
     },
     zoomWZ () {
       const currentWz = this.$store.getters.currentWritingZoneObject
