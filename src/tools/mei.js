@@ -29,7 +29,8 @@ const rawSelectables = [
   'meterSig',
   'barLine',
   'dots',
-  'hairpin'
+  'hairpin',
+  'trill'
   // 'staff',
   // 'measure'
 ]
@@ -146,6 +147,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticDir(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
     getDiplomaticHairpin(annotElem, elem, bbox)
+  } else if (name === 'trill') {
+    getDiplomaticTrill(annotElem, elem, bbox)
   } else if (name === 'metaMark') {
     if (specialModes && specialModes.pitchClarificationLetter) {
       getPitchClarificationLetter(annotElem, elem, bbox)
@@ -344,6 +347,18 @@ function getDiplomaticDir (annotElem, dir, bbox) {
   dir.setAttribute('y', bbox.mm.y)
   dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a trill from an annotated note to a diplomatic trill
+ * @param {*} annotElem the annotated trill to be translated
+ * @param {*} trill the initial trill that needs specific treatment
+ * @returns the dt:trill element
+ */
+function getDiplomaticTrill (annotElem, trill, bbox) {
+  trill.setAttribute('x', +bbox.mm.x.toFixed(1))
+  trill.setAttribute('y', +bbox.mm.y.toFixed(1))
+  trill.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
 }
 
 /**
