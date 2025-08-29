@@ -123,7 +123,10 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'dot') {
     getDiplomaticDot(annotElem, elem)
   } else if (name === 'chord') {
-    getDiplomaticChord(annotElem.parentNode, elem)
+    if (annotElem.localName === 'note') {
+      annotElem = annotElem.parentNode
+    }
+    getDiplomaticChord(annotElem, elem)
   } else if (name === 'keyAccid') {
     getDiplomaticKeyAccid(annotElem, elem)
   } else if (name === 'meterSig') {
@@ -363,8 +366,9 @@ function getDiplomaticHairpin (annotElem, hairpin, bbox) {
 function getDiplomaticChord (annotElem, chord) {
   // console.log(472, ' entering ', annotElem, chord)
 
-  // chords will incorrectly point from a note to the diplomatic chord
-  const correspPath = annotElem.querySelector('*[corresp]').getAttribute('corresp').split('#')[0] + '#'
+  // chords will probably incorrectly point from a note to the diplomatic chord
+  const correspPrefix = annotElem.getAttribute('corresp') || annotElem.querySelector('*[corresp]').getAttribute('corresp')
+  const correspPath = correspPrefix.split('#')[0] + '#'
   annotElem.setAttribute('corresp', correspPath + chord.getAttribute('xml:id'))
 
   let dur = annotElem.getAttribute('dur')
@@ -379,6 +383,8 @@ function getDiplomaticChord (annotElem, chord) {
   }
   chord.setAttribute('dur', dur)
   console.log(563, 'getDiplomaticChord(): setting duration', dur)
+  // annotElem is the chord element. If stem.dir is not set here, stemdir will be null
+  let stemdir = annotElem.getAttribute('stem.dir')
   const notes = annotElem.querySelectorAll('note')
   notes.forEach((note, i) => {
     const diploNote = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
@@ -390,13 +396,22 @@ function getDiplomaticChord (annotElem, chord) {
     getDiplomaticNote(note, diploNote)
     note.setAttribute('corresp', correspPath + diploNote.getAttribute('xml:id'))
     chord.append(diploNote)
+    // if stem.dir is not set in chord element look into notes
+    if (stemdir !== 'up' && stemdir !== 'down' && note.hasAttribute('stem.dir')) {
+      stemdir = note.getAttribute('stem.dir')
+    }
+    /*
     if (i === 0 && !annotElem.hasAttribute('stem.dir')) {
       chord.setAttribute('stem.dir', note.getAttribute('stem.dir'))
     } else if (annotElem.hasAttribute('stem.dir')) {
       chord.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
     }
+    */
     diploNote.removeAttribute('stem.dir')
   })
+  if (stemdir === 'up' || stemdir === 'down') {
+    chord.setAttribute('stem.dir', stemdir)
+  }
   // console.log(472, annotElem, chord)
 }
 
