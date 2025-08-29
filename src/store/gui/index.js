@@ -89,7 +89,8 @@ const guiModule = {
     diploTransOsdBounds: null,
     activeDiploTransElementId: null,
     lockXml: false, // activate read only ranges in XmlEditor
-    contextMenu: null
+    contextMenu: null,
+    pitchClarificationLetterMode: false // if true, only allows to write pitch clarification letters in diplomatic transcripts
 
     /**
      * contextMenu sample: {
@@ -456,6 +457,10 @@ const guiModule = {
      */
     SET_CONTEXT_MENU (state, obj) {
       state.contextMenu = obj
+    },
+
+    SET_PITCH_CLARIFICATION_LETTER_MODE (state, bool) {
+      state.pitchClarificationLetterMode = bool
     }
   },
   /**
@@ -749,6 +754,7 @@ const guiModule = {
 
     diploTransClear ({ commit }, full = false) {
       commit('CLEAR_DIPLO_TRANS_ITEMS', full)
+      commit('PITCH_CLARIFICATION_LETTER_MODE', false)
     },
 
     /**
@@ -820,6 +826,15 @@ const guiModule = {
       if ('pos' in obj && 'items' in obj && obj.items.length > 0) {
         commit('SET_CONTEXT_MENU', obj)
       }
+    },
+
+    /**
+     * sets a mode that only allows to write pitchClarificationLetters in diplomartic transcripts
+     * @param {[type]} commit  [description]
+     * @param {[type]} bool   [description]
+     */
+    setPitchClarificationLetterMode ({ commit }, bool) {
+      commit('SET_PITCH_CLARIFICATION_LETTER_MODE', bool)
     }
   },
   /**
@@ -1292,6 +1307,15 @@ const guiModule = {
       // const annotTransAvailable = getters.availableAnnotatedTranscripts.indexOf(annotTransLink) !== -1
       const diploTransAvailable = getters.availableDiplomaticTranscripts.indexOf(diploTransLink) !== -1
       return /* annotTransAvailable && */ !diploTransAvailable
+    },
+
+    /**
+     * returns whether the pitch clarification letter mode is active
+     * @param {*} state
+     * @returns
+     */
+    pitchClarificationLetterMode: (state) => {
+      return state.pitchClarificationLetterMode
     }
   }
 }

@@ -121,6 +121,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     // console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 
+  // render metaMarks
+  renderMetaMarks(svgDom, meiDom, rastrumsOnCurrentPage)
+
   renderDeletions(svgDom, meiDom, context, svgForCurrentPage)
 
   // render dynams
@@ -537,6 +540,64 @@ const renderDynams = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
     innerTspan.setAttribute('font-size', fontSize + 'px')
     innerTspan.textContent = dynam.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
+  })
+}
+
+/**
+ * renders the metaMarks in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderMetaMarks = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  meiDom.querySelectorAll('metaMark').forEach(metaMark => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = metaMark.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = metaMark.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', metaMark.getAttribute('xml:id'))
+    g.setAttribute('data-id', metaMark.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'metaMark')
+    g.setAttribute('class', 'metaMark')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const fontSize = 555 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(metaMark.getAttribute('x')) + +rastrum.x) * factor
+    const y1 = (parseFloat(metaMark.getAttribute('y')) + +rastrum.y) * factor
+    const w = (parseFloat(metaMark.getAttribute('width'))) * factor
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+    text.setAttribute('textLength', w + 'px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', metaMark.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
+    innerTspan.textContent = metaMark.textContent
 
     outerTspan.append(innerTspan)
     text.append(outerTspan)
