@@ -34,7 +34,8 @@ const rawSelectables = [
   'tempo',
   'pedal',
   'fing',
-  'fermata'
+  'fermata',
+  'octave'
   // 'staff',
   // 'measure'
 ]
@@ -157,6 +158,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticFing(annotElem, elem, bbox)
   } else if (name === 'pedal') {
     getDiplomaticPedal(annotElem, elem, bbox)
+  } else if (name === 'octave') {
+    getDiplomaticOctave(annotElem, elem, bbox)
   } else if (name === 'fermata') {
     getDiplomaticFermata(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
@@ -403,6 +406,24 @@ function getDiplomaticPedal (annotElem, pedal, bbox) {
   pedal.setAttribute('y', bbox.mm.y)
   pedal.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   pedal.setAttribute('dir', annotElem.getAttribute('dir'))
+}
+
+/**
+ * translates an octave from an AT to a diplomatic octave
+ * @param {*} annotElem the annotated octave to be translated
+ * @param {*} octave the initial octave that needs specific treatment
+ * @returns the dt:octave element
+ */
+function getDiplomaticOctave (annotElem, octave, bbox) {
+  octave.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  octave.setAttribute('y', bbox.mm.y)
+  octave.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
+  octave.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  octave.setAttribute('dis', annotElem.getAttribute('dis'))
+  octave.setAttribute('dis.place', annotElem.getAttribute('dis.place'))
+  if (octave.hasAttribute('extender')) {
+    octave.setAttribute('extender', annotElem.getAttribute('extender'))
+  }
 }
 
 /**
