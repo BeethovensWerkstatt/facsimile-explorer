@@ -181,11 +181,11 @@ export default {
     },
     hasAdjustableY () {
       const name = this.$store.getters.activeDiploTransElementName
-      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word'
+      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo'
     },
     hasAdjustableWidth () {
       const name = this.$store.getters.activeDiploTransElementName
-      return name === 'dir' || name === 'dynam' || name === 'word'
+      return name === 'dir' || name === 'dynam' || name === 'word' || name === 'tempo'
     }
   }
 }

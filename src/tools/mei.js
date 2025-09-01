@@ -30,7 +30,8 @@ const rawSelectables = [
   'barLine',
   'dots',
   'hairpin',
-  'trill'
+  'trill',
+  'tempo'
   // 'staff',
   // 'measure'
 ]
@@ -145,6 +146,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticCurve(annotElem, elem, bbox)
   } else if (name === 'dynam') {
     getDiplomaticDynam(annotElem, elem, bbox)
+  } else if (name === 'tempo') {
+    getDiplomaticTempo(annotElem, elem, bbox)
   } else if (name === 'dir') {
     getDiplomaticDir(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
@@ -337,6 +340,20 @@ function getDiplomaticDynam (annotElem, dynam, bbox) {
   dynam.setAttribute('y', bbox.mm.y)
   dynam.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dynam.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a tempo from an annotated note to a diplomatic tempo
+ * @param {*} annotElem the annotated tempo to be translated
+ * @param {*} tempo the initial tempo that needs specific treatment
+ * @returns the dt:tempo element
+ */
+function getDiplomaticTempo (annotElem, tempo, bbox) {
+  tempo.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  tempo.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
+  tempo.setAttribute('y', bbox.mm.y)
+  tempo.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  tempo.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 /**

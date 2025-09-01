@@ -129,6 +129,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // render dynams
   renderDynams(svgDom, meiDom, rastrumsOnCurrentPage)
 
+  // render tempos
+  renderTempos(svgDom, meiDom, rastrumsOnCurrentPage)
+
   // render dirs
   renderDirs(svgDom, meiDom, rastrumsOnCurrentPage)
 
@@ -681,6 +684,64 @@ const renderDynams = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
     innerTspan.setAttribute('font-size', fontSize + 'px')
     innerTspan.textContent = dynam.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
+  })
+}
+
+/**
+ * this function renders the tempos in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderTempos = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  meiDom.querySelectorAll('tempo').forEach(tempo => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = tempo.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = tempo.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', tempo.getAttribute('xml:id'))
+    g.setAttribute('data-id', tempo.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'tempo')
+    g.setAttribute('class', 'tempo')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const fontSize = 405 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(tempo.getAttribute('x')) + +rastrum.x) * factor
+    const y1 = (parseFloat(tempo.getAttribute('y')) + +rastrum.y + fontSize / factor) * factor
+    const w = (parseFloat(tempo.getAttribute('width'))) * factor
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+    text.setAttribute('textLength', w + 'px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', tempo.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
+    innerTspan.textContent = tempo.textContent
 
     outerTspan.append(innerTspan)
     text.append(outerTspan)
