@@ -31,7 +31,8 @@ const rawSelectables = [
   'dots',
   'hairpin',
   'trill',
-  'tempo'
+  'tempo',
+  'pedal'
   // 'staff',
   // 'measure'
 ]
@@ -150,6 +151,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticTempo(annotElem, elem, bbox)
   } else if (name === 'dir') {
     getDiplomaticDir(annotElem, elem, bbox)
+  } else if (name === 'pedal') {
+    getDiplomaticPedal(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
     getDiplomaticHairpin(annotElem, elem, bbox)
   } else if (name === 'trill') {
@@ -368,6 +371,20 @@ function getDiplomaticDir (annotElem, dir, bbox) {
   dir.setAttribute('y', bbox.mm.y)
   dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a pedal from an AT to a diplomatic pedal
+ * @param {*} annotElem the annotated pedal to be translated
+ * @param {*} pedal the initial pedal that needs specific treatment
+ * @returns the dt:pedal element
+ */
+function getDiplomaticPedal (annotElem, pedal, bbox) {
+  pedal.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  pedal.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
+  pedal.setAttribute('y', bbox.mm.y)
+  pedal.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  pedal.setAttribute('dir', annotElem.getAttribute('dir'))
 }
 
 /**

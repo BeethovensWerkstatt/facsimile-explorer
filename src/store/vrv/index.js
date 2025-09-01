@@ -122,7 +122,8 @@ const verovioModule = {
           'meterSig@unit',
           'trill@corresp',
           'syl@corresp',
-          'tempo@corresp'
+          'tempo@corresp',
+          'pedal@corresp'
         ] //,
         // unit: 18
       }
