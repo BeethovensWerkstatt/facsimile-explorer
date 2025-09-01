@@ -1588,7 +1588,7 @@ const dataModule = {
       // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
-      const isAtControlEvent = ['slur', 'tie', 'dynam'].indexOf(annotElemRef.name) !== -1
+      const isAtControlEvent = ['slur', 'tie', 'dynam', 'trill'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN
@@ -1724,7 +1724,12 @@ const dataModule = {
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'
-      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+      const specialModes = {}
+      if (getters.pitchClarificationLetterMode) {
+        specialModes.pitchClarificationLetter = true
+      }
+      const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef, specialModes)
+
       console.log(279, 'diplomaticElement', diplomaticElement, 'annotElemRef', annotElemRef)
       const isDtControlEvent = ['beamSpan', 'barLine'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)

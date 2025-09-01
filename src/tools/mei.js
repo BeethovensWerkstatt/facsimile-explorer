@@ -29,7 +29,8 @@ const rawSelectables = [
   'meterSig',
   'barLine',
   'dots',
-  'hairpin'
+  'hairpin',
+  'trill'
   // 'staff',
   // 'measure'
 ]
@@ -49,7 +50,7 @@ export const CSSselectables = clsSelectables.join(', ')
  * @param {*} annotElemRef the reference to the annotated element, used for dots
  * @returns the generated diplomatic transcription
  */
-export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef) {
+export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef, specialModes) {
   let name = annotElem.localName
 
   // console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
@@ -74,6 +75,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'accid'
   } else if (name === 'tie' || name === 'slur') {
     name = 'curve'
+  } else if (specialModes && specialModes.pitchClarificationLetter) {
+    name = 'metaMark'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -105,6 +108,9 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
       }
       annotElem.appendChild(dot)
     }
+  } else if (specialModes && specialModes.pitchClarificationLetter) {
+    // Pitch Clarification Letters actually need a @corresp on the note they are clarifying, or an InfoBox won't be able to inform about them properly…
+    annotElem.setAttribute('corresp', corresp)
   } else {
     annotElem.setAttribute('corresp', corresp)
   }
@@ -141,6 +147,12 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticDir(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
     getDiplomaticHairpin(annotElem, elem, bbox)
+  } else if (name === 'trill') {
+    getDiplomaticTrill(annotElem, elem, bbox)
+  } else if (name === 'metaMark') {
+    if (specialModes && specialModes.pitchClarificationLetter) {
+      getPitchClarificationLetter(annotElem, elem, bbox)
+    }
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -267,7 +279,7 @@ function getDiplomaticBeam (annotElem, beam) {
  * @param {*} accid the diplomatic accid to be translated
  */
 function getDiplomaticAccid (annotElem, accid, { keySig, keyAccid, keyBase }) {
-  console.log(279, 'getDiplomaticAccid', annotElem, accid, keySig)
+  // console.log(279, 'getDiplomaticAccid', annotElem, accid, keySig)
   if (keySig) {
     const sharp = keySig >= 0
     accid.setAttribute('accid', sharp ? 's' : 'f')
@@ -276,7 +288,7 @@ function getDiplomaticAccid (annotElem, accid, { keySig, keyAccid, keyBase }) {
     const fact = keySig < 0 ? 3 : 4
     const loc = (keyBase + base + (keyAccid * fact) - 3) % 7 + 3
     accid.setAttribute('loc', loc)
-    console.log(279, accid)
+    // console.log(279, accid)
   } else {
     accid.setAttribute('accid', annotElem.getAttribute('accid'))
     const note = annotElem.closest('note')
@@ -338,6 +350,18 @@ function getDiplomaticDir (annotElem, dir, bbox) {
 }
 
 /**
+ * translates a trill from an annotated note to a diplomatic trill
+ * @param {*} annotElem the annotated trill to be translated
+ * @param {*} trill the initial trill that needs specific treatment
+ * @returns the dt:trill element
+ */
+function getDiplomaticTrill (annotElem, trill, bbox) {
+  trill.setAttribute('x', +bbox.mm.x.toFixed(1))
+  trill.setAttribute('y', +bbox.mm.y.toFixed(1))
+  trill.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+}
+
+/**
  * generates a diplomatic hairpin
  * @param {*} annotElem the annotated hairpin to be translated
  * @param {*} hairpin the initial hairpin that needs specific treatment
@@ -361,8 +385,8 @@ function getDiplomaticHairpin (annotElem, hairpin, bbox) {
 
 /**
  * translates a chord to a diplomatic chord
- * @param {*} annotElem the annotated dot to be translated
- * @param {*} barLine the diplomatic dot to be translated
+ * @param {*} annotElem the annotated chord to be translated
+ * @param {*} chord the diplomatic chord to be translated
  */
 function getDiplomaticChord (annotElem, chord) {
   // console.log(472, ' entering ', annotElem, chord)
@@ -410,6 +434,7 @@ function getDiplomaticChord (annotElem, chord) {
     */
     diploNote.removeAttribute('stem.dir')
   })
+
   if (stemdir === 'up' || stemdir === 'down') {
     chord.setAttribute('stem.dir', stemdir)
   }
@@ -461,6 +486,30 @@ function getDiplomaticCurve (annotElem, curve, bbox) {
   }
   curve.setAttribute('staff', staff)
   curve.setAttribute('bezier', bboxbezier.map(c => c.toFixed(2)).join(' '))
+}
+
+/**
+ * generates a pitch clarification letter for the given annotated element
+ * @param {*} annotElem the annotated element
+ * @param {*} metaMark the metaMark element to be modified
+ */
+function getPitchClarificationLetter (annotElem, metaMark, bbox) {
+  try {
+    metaMark.setAttribute('function', 'clarification')
+    metaMark.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+    metaMark.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
+    metaMark.setAttribute('y', bbox.mm.y)
+    const staff = annotElem.closest('staff').getAttribute('n')
+    metaMark.setAttribute('staff', staff)
+
+    const pname = annotElem.getAttribute('pname')
+    if (pname) {
+      const label = pname === 'b' ? 'h' : pname
+      metaMark.innerHTML = label
+    }
+  } catch (err) {
+    console.warn('WARNING: Could not properly generate pitch clarification letter for ' + annotElem, err)
+  }
 }
 
 function getLocAttribute (annotElem) {

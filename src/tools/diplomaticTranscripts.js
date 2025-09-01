@@ -121,6 +121,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
     // console.log(571, 'curve', curve, controlpointsToVerovioSvgBezier)
   })
 
+  // render metaMarks
+  renderMetaMarks(svgDom, meiDom, rastrumsOnCurrentPage)
+
   renderDeletions(svgDom, meiDom, context, svgForCurrentPage)
 
   // render dynams
@@ -128,6 +131,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
 
   // render dirs
   renderDirs(svgDom, meiDom, rastrumsOnCurrentPage)
+
+  // render trills
+  renderTrills(svgDom, meiDom, rastrumsOnCurrentPage)
 
   renderHairpins(svgDom, meiDom, rastrumsOnCurrentPage)
 
@@ -352,6 +358,73 @@ const renderDirs = (svgDom, meiDom, rastrumsOnCurrentPage) => {
 }
 
 /**
+ * this function renders the trills in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderTrills = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  const trills = meiDom.querySelectorAll('trill')
+
+  if (trills.length) {
+    // add a symbol in the defs area…
+    const defs = svgDom.querySelector('defs')
+
+    const symbol = document.createElementNS('http://www.w3.org/2000/svg', 'symbol')
+    symbol.setAttribute('id', 'trill-symbol')
+    symbol.setAttribute('viewBox', '0 0 1000 1000')
+    symbol.setAttribute('overflow', 'inherit')
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttribute('transform', 'scale(1,-1)')
+    path.setAttribute('d', 'M162 167l-36 -115l-1 -10c0 -10 5 -16 16 -19c32 18 48 43 48 75c0 20 -9 43 -27 69zM432 225c0 -21 -11 -36 -31 -37c-15 0 -20 10 -23 25l3 14l2 11l1 9l-4 4c-1 -1 -2 -1 -3 -1c-23 -13 -36 -24 -47 -48l-12 -27c-18 -50 -31 -105 -47 -157h-60l58 214c0 7 -3 5 -5 9 c-7 0 -25 -8 -51 -28l-37 -28c20 -34 31 -67 31 -97c0 -12 -1 -21 -4 -28l-6 -15c-1 -3 -5 -10 -12 -19c-14 -18 -30 -26 -49 -26c-30 0 -67 18 -67 52c1 1 1 6 3 15l20 84c-9 -5 -21 -8 -36 -8c-21 0 -29 7 -40 19c-10 12 -16 27 -16 47c0 23 6 33 17 45s25 18 46 18 c19 0 39 -8 60 -25l34 117h63l-46 -158l38 31l32 20c21 10 35 13 62 15c16 0 24 -7 24 -21l-1 -10l-6 -24c21 37 44 55 70 55c23 0 39 -23 39 -47zM18 208c0 -27 17 -47 45 -47l3 -2l13 4l23 9l14 55c-17 15 -35 22 -55 22c-26 0 -43 -17 -43 -41z')
+
+    symbol.appendChild(path)
+    defs.appendChild(symbol)
+  }
+
+  trills.forEach(trill => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = trill.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = trill.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    const x = (parseFloat(trill.getAttribute('x')) + +rastrum.x) * factor
+    const y = (parseFloat(trill.getAttribute('y')) + +rastrum.y) * factor
+
+    /*
+      <g data-id="x8e1d4d35-2d97-4ce3-9f31-a6ca9dc4cd64" data-class="trill" class="trill">
+        <use href="#E566-tuntfg1" x="31589" y="948" height="720px" width="720px"></use>
+      </g >
+    */
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('data-id', trill.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'trill')
+    g.setAttribute('class', 'trill')
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use')
+    use.setAttribute('href', '#trill-symbol')
+    use.setAttribute('x', x + 'px')
+    use.setAttribute('y', y + 'px')
+    use.setAttribute('height', '720px')
+    use.setAttribute('width', '720px')
+
+    g.append(use)
+    measure.append(g)
+  })
+}
+
+/**
  * this function renders the hairpins in the diplomatic transcription
  * @param {*} svgDom
  * @param {*} meiDom
@@ -535,6 +608,64 @@ const renderDynams = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
     innerTspan.setAttribute('font-size', fontSize + 'px')
     innerTspan.textContent = dynam.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
+  })
+}
+
+/**
+ * renders the metaMarks in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderMetaMarks = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  meiDom.querySelectorAll('metaMark').forEach(metaMark => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = metaMark.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = metaMark.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', metaMark.getAttribute('xml:id'))
+    g.setAttribute('data-id', metaMark.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'metaMark')
+    g.setAttribute('class', 'metaMark')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const fontSize = 555 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(metaMark.getAttribute('x')) + +rastrum.x) * factor
+    const y1 = (parseFloat(metaMark.getAttribute('y')) + +rastrum.y) * factor
+    const w = (parseFloat(metaMark.getAttribute('width'))) * factor
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+    text.setAttribute('textLength', w + 'px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', metaMark.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
+    innerTspan.textContent = metaMark.textContent
 
     outerTspan.append(innerTspan)
     text.append(outerTspan)

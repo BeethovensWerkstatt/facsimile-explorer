@@ -243,14 +243,14 @@ export default {
             disabled: !usedShape
           }
 
-          const adjustFunctionEntry = {
+          /* const adjustFunctionEntry = {
             label: 'Adjust function of shape in DiploTrans',
             action: () => {
               console.log('TODO: adjust function of shape in DiploTrans')
             },
             // TODO: only possible for some element types, like notes, but not slurs
             disabled: this.$store.getters.activeDiploTransElementId === null && !usedShape
-          }
+          } */
 
           // Function to transcribe new Deletion
           const setDeletion = {
@@ -370,6 +370,12 @@ export default {
             disabled: !wzActive
           }
 
+          // adjusted selectFunc that will allow to create pitch clarification letters
+          const pitchClarificationLetterFunc = () => {
+            this.$store.dispatch('setPitchClarificationLetterMode', true)
+            selectFunc()
+          }
+
           const items = []
           if (!wzActive) {
             const wzidx = this.$store.getters.writingZoneIndexOnCurrentPage(genDescWzId)
@@ -387,13 +393,13 @@ export default {
                   items: [
                     setDeletion, // { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
                     setUnclear,
-                    { label: 'Pitch Clarification Letter', action: func('clarification letter'), disabled: !wzActive },
+                    { label: 'Pitch Clarification Letter', action: pitchClarificationLetterFunc, disabled: !wzActive },
                     { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
                   ]
                 },
                 addShapeEntry,
-                activateDTEntry,
-                adjustFunctionEntry
+                activateDTEntry
+                // adjustFunctionEntry
               ].forEach(it => items.push(it))
             }
           }
