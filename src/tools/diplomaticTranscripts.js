@@ -132,6 +132,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // render dirs
   renderDirs(svgDom, meiDom, rastrumsOnCurrentPage)
 
+  // render words
+  renderWords(svgDom, meiDom, rastrumsOnCurrentPage)
+
   // render trills
   renderTrills(svgDom, meiDom, rastrumsOnCurrentPage)
 
@@ -349,6 +352,76 @@ const renderDirs = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
     innerTspan.setAttribute('font-size', fontSize + 'px')
     innerTspan.textContent = dir.textContent
+
+    outerTspan.append(innerTspan)
+    text.append(outerTspan)
+    g.append(text)
+    measure.append(g)
+  })
+}
+
+/**
+ * this function renders the words in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderWords = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  meiDom.querySelectorAll('word').forEach(word => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = word.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = word.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    // console.log(572, 'dir', dir, 'rastrum', rastrum)
+
+    /*
+    <g id="d6iolw9" class="dynam">
+      <text x="2241" y="4211" text-anchor="middle" font-size="0px">
+        <tspan id="k1caa3av" class="text">
+          <tspan font-size="405px">ppo</tspan>
+        </tspan>
+      </text>
+    </g>
+    */
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('id', word.getAttribute('xml:id'))
+    g.setAttribute('data-id', word.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'word')
+    g.setAttribute('class', 'word')
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+
+    const fontSize = 360 // 405px is the font size of the tspan in the original MEI file
+
+    const x1 = (parseFloat(word.getAttribute('x')) + +rastrum.x) * factor
+    const y1 = (parseFloat(word.getAttribute('y')) + +rastrum.y + fontSize / factor) * factor
+    const w = (parseFloat(word.getAttribute('width'))) * factor
+
+    text.setAttribute('x', x1)
+    text.setAttribute('y', y1)
+    text.setAttribute('text-anchor', 'start')
+    text.setAttribute('font-size', '0px')
+    text.setAttribute('textLength', w + 'px')
+
+    const outerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    outerTspan.setAttribute('id', word.getAttribute('xml:id') + '_tspan')
+    outerTspan.setAttribute('class', 'text')
+
+    const innerTspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan')
+    innerTspan.setAttribute('font-size', fontSize + 'px')
+    innerTspan.textContent = word.textContent
 
     outerTspan.append(innerTspan)
     text.append(outerTspan)

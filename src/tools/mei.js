@@ -77,6 +77,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'curve'
   } else if (specialModes && specialModes.pitchClarificationLetter) {
     name = 'metaMark'
+  } else if (name === 'syl') {
+    name = 'word'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -153,6 +155,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     if (specialModes && specialModes.pitchClarificationLetter) {
       getPitchClarificationLetter(annotElem, elem, bbox)
     }
+  } else if (name === 'word') {
+    getDiplomaticWord(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -509,6 +513,20 @@ function getPitchClarificationLetter (annotElem, metaMark, bbox) {
   } catch (err) {
     console.warn('WARNING: Could not properly generate pitch clarification letter for ' + annotElem, err)
   }
+}
+
+/**
+ * translates a syllable from an annotated transcript to a diplomatic word
+ * @param {*} annotElem the annotated syl to be translated
+ * @param {*} word the initial word that needs specific treatment
+ * @returns the dt:word element
+ */
+function getDiplomaticWord (annotElem, word, bbox) {
+  word.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  word.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
+  word.setAttribute('y', bbox.mm.y)
+  word.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
+  word.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 function getLocAttribute (annotElem) {

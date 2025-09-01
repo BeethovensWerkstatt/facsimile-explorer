@@ -33,7 +33,7 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isDir || isDynam">
+    <div class="entry" v-if="hasAdjustableWidth">
         <label>@width</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="width" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -181,7 +181,11 @@ export default {
     },
     hasAdjustableY () {
       const name = this.$store.getters.activeDiploTransElementName
-      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill'
+      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word'
+    },
+    hasAdjustableWidth () {
+      const name = this.$store.getters.activeDiploTransElementName
+      return name === 'dir' || name === 'dynam' || name === 'word'
     }
   }
 }

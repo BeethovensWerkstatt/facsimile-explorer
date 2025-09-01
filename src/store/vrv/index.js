@@ -120,7 +120,8 @@ const verovioModule = {
           // not essential, but useful for debugging
           'meterSig@count',
           'meterSig@unit',
-          'trill@corresp'
+          'trill@corresp',
+          'syl@corresp'
         ] //,
         // unit: 18
       }
