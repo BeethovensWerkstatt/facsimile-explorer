@@ -141,6 +141,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // render pedals
   renderPedals(svgDom, meiDom, rastrumsOnCurrentPage)
 
+  // render fermatas
+  renderFermatas(svgDom, meiDom, rastrumsOnCurrentPage)
+
   // render words
   renderWords(svgDom, meiDom, rastrumsOnCurrentPage)
 
@@ -565,6 +568,83 @@ const renderPedals = (svgDom, meiDom, rastrumsOnCurrentPage) => {
       use.setAttribute('href', '#pedalUp-symbol')
     } else {
       use.setAttribute('href', '#pedalDown-symbol')
+    }
+
+    use.setAttribute('x', x + 'px')
+    use.setAttribute('y', y + 'px')
+    use.setAttribute('height', '720px')
+    use.setAttribute('width', '720px')
+
+    g.append(use)
+    measure.append(g)
+  })
+}
+
+/**
+ * this function renders the fermatas in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderFermatas = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  const fermatas = meiDom.querySelectorAll('fermata')
+
+  if (fermatas.length) {
+    // add a symbol in the defs area…
+    const defs = svgDom.querySelector('defs')
+
+    const symbol1 = document.createElementNS('http://www.w3.org/2000/svg', 'symbol')
+    symbol1.setAttribute('id', 'fermataNorm-symbol')
+    symbol1.setAttribute('viewBox', '0 0 1000 1000')
+    symbol1.setAttribute('overflow', 'inherit')
+
+    const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path1.setAttribute('transform', 'scale(1,-1)')
+    path1.setAttribute('d', 'M0 0c0 0 40 320 300 320s300 -320 300 -320h-32s-38 227 -268 227s-268 -227 -268 -227h-32zM355 52c0 -30 -25 -55 -55 -55s-55 25 -55 55s25 55 55 55s55 -25 55 -55z')
+
+    const symbol2 = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    symbol2.setAttribute('id', 'fermataInv-symbol')
+
+    const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path2.setAttribute('transform', 'scale(1,-1)')
+    path2.setAttribute('d', 'M0 0h32s38 -227 268 -227s268 227 268 227h32s-40 -320 -300 -320s-300 320 -300 320zM355 -52c0 -30 -25 -55 -55 -55s-55 25 -55 55s25 55 55 55s55 -25 55 -55z')
+
+    symbol1.appendChild(path1)
+    defs.appendChild(symbol1)
+
+    symbol2.appendChild(path2)
+    defs.appendChild(symbol2)
+  }
+
+  fermatas.forEach(fermata => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = fermata.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = fermata.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    const x = (parseFloat(fermata.getAttribute('x')) + +rastrum.x) * factor
+    const y = (parseFloat(fermata.getAttribute('y')) + +rastrum.y) * factor
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('data-id', fermata.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'fermata')
+    g.setAttribute('class', 'fermata')
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use')
+    if (fermata.hasAttribute('form') && fermata.getAttribute('form') === 'inv') {
+      use.setAttribute('href', '#fermataInv-symbol')
+    } else {
+      use.setAttribute('href', '#fermataNorm-symbol')
     }
 
     use.setAttribute('x', x + 'px')

@@ -124,7 +124,8 @@ const verovioModule = {
           'syl@corresp',
           'tempo@corresp',
           'pedal@corresp',
-          'fing@corresp'
+          'fing@corresp',
+          'fermata@corresp'
         ] //,
         // unit: 18
       }

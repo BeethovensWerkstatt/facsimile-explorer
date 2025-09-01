@@ -1730,8 +1730,8 @@ const dataModule = {
       }
       const diplomaticElement = generateDiplomaticElement(annotElem, shapes, bbox, svgPath, correspPath, annotElemRef, specialModes)
 
-      console.log(279, 'diplomaticElement', diplomaticElement, 'annotElemRef', annotElemRef)
-      const isDtControlEvent = ['beamSpan', 'barLine', 'pedal', 'dir', 'dynam', 'tempo', 'curve', 'hairpin', 'trill', 'metaMark', 'word', 'fing'].indexOf(diplomaticElement.localName) !== -1
+      // console.log(279, 'diplomaticElement', diplomaticElement, 'annotElemRef', annotElemRef)
+      const isDtControlEvent = ['beamSpan', 'barLine', 'pedal', 'dir', 'dynam', 'tempo', 'curve', 'hairpin', 'trill', 'metaMark', 'word', 'fing', 'fermata'].indexOf(diplomaticElement.localName) !== -1
       // console.log('691 diplomaticElement', diplomaticElement, 'isControlEvent: ' + isControlEvent)
 
       if (isDtControlEvent || isAtControlEvent) {

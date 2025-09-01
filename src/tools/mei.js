@@ -33,7 +33,8 @@ const rawSelectables = [
   'trill',
   'tempo',
   'pedal',
-  'fing'
+  'fing',
+  'fermata'
   // 'staff',
   // 'measure'
 ]
@@ -156,6 +157,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticFing(annotElem, elem, bbox)
   } else if (name === 'pedal') {
     getDiplomaticPedal(annotElem, elem, bbox)
+  } else if (name === 'fermata') {
+    getDiplomaticFermata(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
     getDiplomaticHairpin(annotElem, elem, bbox)
   } else if (name === 'trill') {
@@ -400,6 +403,19 @@ function getDiplomaticPedal (annotElem, pedal, bbox) {
   pedal.setAttribute('y', bbox.mm.y)
   pedal.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   pedal.setAttribute('dir', annotElem.getAttribute('dir'))
+}
+
+/**
+ * translates a fermata from an AT to a diplomatic fermata
+ * @param {*} annotElem the annotated fermata to be translated
+ * @param {*} fermata the initial fermata that needs specific treatment
+ * @returns the dt:fermata element
+ */
+function getDiplomaticFermata (annotElem, fermata, bbox) {
+  fermata.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  fermata.setAttribute('y', bbox.mm.y)
+  fermata.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  fermata.setAttribute('form', annotElem.getAttribute('form'))
 }
 
 /**
