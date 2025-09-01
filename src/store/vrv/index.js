@@ -123,7 +123,8 @@ const verovioModule = {
           'trill@corresp',
           'syl@corresp',
           'tempo@corresp',
-          'pedal@corresp'
+          'pedal@corresp',
+          'fing@corresp'
         ] //,
         // unit: 18
       }

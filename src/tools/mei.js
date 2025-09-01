@@ -32,7 +32,8 @@ const rawSelectables = [
   'hairpin',
   'trill',
   'tempo',
-  'pedal'
+  'pedal',
+  'fing'
   // 'staff',
   // 'measure'
 ]
@@ -151,6 +152,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticTempo(annotElem, elem, bbox)
   } else if (name === 'dir') {
     getDiplomaticDir(annotElem, elem, bbox)
+  } else if (name === 'fing') {
+    getDiplomaticFing(annotElem, elem, bbox)
   } else if (name === 'pedal') {
     getDiplomaticPedal(annotElem, elem, bbox)
   } else if (name === 'hairpin') {
@@ -371,6 +374,19 @@ function getDiplomaticDir (annotElem, dir, bbox) {
   dir.setAttribute('y', bbox.mm.y)
   dir.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   dir.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a fing from an AT to a diplomatic fing(ering)
+ * @param {*} annotElem the annotated fing to be translated
+ * @param {*} fing the initial fing that needs specific treatment
+ * @returns the dt:fing element
+ */
+function getDiplomaticFing (annotElem, fing, bbox) {
+  fing.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  fing.setAttribute('y', bbox.mm.y)
+  fing.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+  fing.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 /**
