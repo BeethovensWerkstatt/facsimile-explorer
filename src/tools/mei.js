@@ -381,7 +381,6 @@ function getDiplomaticDir (annotElem, dir, bbox) {
  */
 function getDiplomaticPedal (annotElem, pedal, bbox) {
   pedal.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
-  pedal.setAttribute('width', (parseFloat(bbox.mm.w)).toFixed(1))
   pedal.setAttribute('y', bbox.mm.y)
   pedal.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   pedal.setAttribute('dir', annotElem.getAttribute('dir'))
