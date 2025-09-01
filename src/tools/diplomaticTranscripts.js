@@ -523,11 +523,9 @@ const renderHairpins = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
     const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
 
-    const staffN = hairpin.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
-
-    const index = +staffN - 1
-
-    const otherRastrumId = rastrumIds[index]
+    // const staffN = hairpin.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+    // const index = +staffN - 1
+    const otherRastrumId = rastrumIds[0] // [index]
 
     const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
 

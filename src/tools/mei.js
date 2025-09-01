@@ -369,6 +369,7 @@ function getDiplomaticTrill (annotElem, trill, bbox) {
  * generates a diplomatic hairpin
  * @param {*} annotElem the annotated hairpin to be translated
  * @param {*} hairpin the initial hairpin that needs specific treatment
+ * @param {*} bbox the bounding box of the annotated transcription in mm and px
  * @returns the dt:dir element
  */
 function getDiplomaticHairpin (annotElem, hairpin, bbox) {
