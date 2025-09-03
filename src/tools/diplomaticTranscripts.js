@@ -144,6 +144,9 @@ export const cleanUpDiplomaticTranscript = (svgDom, meiDom, context, svgForCurre
   // render fermatas
   renderFermatas(svgDom, meiDom, rastrumsOnCurrentPage)
 
+  // render octaves
+  renderOctaves(svgDom, meiDom, rastrumsOnCurrentPage)
+
   // render words
   renderWords(svgDom, meiDom, rastrumsOnCurrentPage)
 
@@ -653,6 +656,138 @@ const renderFermatas = (svgDom, meiDom, rastrumsOnCurrentPage) => {
     use.setAttribute('width', '720px')
 
     g.append(use)
+    measure.append(g)
+  })
+}
+
+/**
+ * this function renders the octaves in the diplomatic transcription
+ * @param {*} svgDom
+ * @param {*} meiDom
+ * @param {*} rastrumsOnCurrentPage
+ */
+const renderOctaves = (svgDom, meiDom, rastrumsOnCurrentPage) => {
+  const octaves = meiDom.querySelectorAll('octave')
+
+  if (octaves.length) {
+    // add a symbol in the defs area…
+    const defs = svgDom.querySelector('defs')
+
+    const symbol = document.createElementNS('http://www.w3.org/2000/svg', 'symbol')
+    symbol.setAttribute('id', 'octave8-symbol')
+    symbol.setAttribute('viewBox', '0 0 1000 1000')
+    symbol.setAttribute('overflow', 'inherit')
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttribute('transform', 'scale(1,-1)')
+    path.setAttribute('d', 'M86 180c-15 17 -25 40 -28 67c0 11 3 22 8 33s13 21 23 29c21 15 47 23 78 23c29 0 53 -9 71 -27s27 -37 28 -58c0 -17 -6 -32 -17 -45s-28 -25 -51 -36c21 -25 32 -52 32 -80c0 -23 -10 -44 -30 -61c-21 -16 -51 -24 -90 -24c-34 0 -61 8 -80 25s-29 37 -30 60 c0 18 7 36 22 55c13 16 34 29 64 39zM98 168c-19 -12 -34 -25 -43 -38s-14 -28 -15 -44c2 -23 9 -38 21 -47s30 -15 55 -18c17 0 29 4 38 12s13 21 14 38c-3 21 -26 54 -70 97zM187 180c26 20 39 44 39 71c0 17 -5 31 -16 44s-25 19 -42 20c-28 0 -44 -15 -47 -44l2 -12 c7 -22 29 -48 64 -79z')
+
+    symbol.appendChild(path)
+    defs.appendChild(symbol)
+  }
+
+  octaves.forEach(octave => {
+    const measure = svgDom.querySelector('g.measure')
+
+    const systemZoneId = octave.closest('measure').previousElementSibling.getAttribute('facs').substr(1)
+    const systemZone = [...meiDom.querySelectorAll('zone[type="sb"]')].find(zone => zone.getAttribute('xml:id') === systemZoneId)
+    const rastrumIds = systemZone.getAttribute('bw.rastrumIDs').split(' ')
+
+    const staffN = octave.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
+
+    const index = +staffN - 1
+
+    const otherRastrumId = rastrumIds[index]
+
+    const rastrum = rastrumsOnCurrentPage.find(rastrum => rastrum.id === otherRastrumId)
+
+    const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
+    const x = (parseFloat(octave.getAttribute('x')) + +rastrum.x) * factor
+    const y = (parseFloat(octave.getAttribute('y')) + +rastrum.y) * factor
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('data-id', octave.getAttribute('xml:id'))
+    g.setAttribute('data-class', 'octave')
+    g.setAttribute('class', 'octave')
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use')
+    if (octave.hasAttribute('dis') && octave.getAttribute('dis') === '15') {
+      use.setAttribute('href', '#octave15-symbol')
+    } else {
+      use.setAttribute('href', '#octave8-symbol')
+    }
+
+    use.setAttribute('x', x + 'px')
+    use.setAttribute('y', y + 'px')
+    use.setAttribute('height', '720px')
+    use.setAttribute('width', '720px')
+
+    g.append(use)
+
+    if (!octave.hasAttribute('extender') && octave.getAttribute('extender') !== 'false') {
+      if (octave.getAttribute('dis.place') === 'above') {
+        const lineX1 = x + 210 // taken from rendered example
+        const lineY1 = y - 230 // taken from rendered example
+        const lineX2 = lineX1 + parseFloat(octave.getAttribute('width')) * factor
+        const d = `M${lineX1} ${lineY1} L${lineX2} ${lineY1}`
+
+        const exPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        exPath.setAttribute('d', d)
+        exPath.setAttribute('stroke-width', '18')
+        exPath.setAttribute('stroke-linecap', 'square')
+        exPath.setAttribute('stroke-dasharray', '36 72')
+
+        g.append(exPath)
+
+        const polyX1 = lineX2
+        const polyY1 = lineY1 + 180
+        const polyX2 = lineX2
+        const polyY2 = lineY1
+        const polyX3 = lineX2 - 90
+        const polyY3 = lineY1
+
+        const points = `${polyX1},${polyY1} ${polyX2},${polyY2} ${polyX3},${polyY3}`
+
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
+        polyline.setAttribute('stroke', 'currentColor')
+        polyline.setAttribute('stroke-width', '18')
+        polyline.setAttribute('stroke-opacity', '1')
+        polyline.setAttribute('fill', 'none')
+        polyline.setAttribute('points', points)
+        g.append(polyline)
+      } else {
+        const lineX1 = x + 210 // taken from rendered example
+        const lineY1 = y - 9 // taken from rendered example
+        const lineX2 = lineX1 + parseFloat(octave.getAttribute('width')) * factor
+        const d = `M${lineX1} ${lineY1} L${lineX2} ${lineY1}`
+
+        const exPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        exPath.setAttribute('d', d)
+        exPath.setAttribute('stroke-width', '18')
+        exPath.setAttribute('stroke-linecap', 'square')
+        exPath.setAttribute('stroke-dasharray', '36 72')
+
+        g.append(exPath)
+
+        const polyX1 = lineX2
+        const polyY1 = lineY1 - 180
+        const polyX2 = lineX2
+        const polyY2 = lineY1
+        const polyX3 = lineX2 - 90
+        const polyY3 = lineY1
+
+        const points = `${polyX1},${polyY1} ${polyX2},${polyY2} ${polyX3},${polyY3}`
+
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
+        polyline.setAttribute('stroke', 'currentColor')
+        polyline.setAttribute('stroke-width', '18')
+        polyline.setAttribute('stroke-opacity', '1')
+        polyline.setAttribute('fill', 'none')
+        polyline.setAttribute('points', points)
+        g.append(polyline)
+      }
+    }
+
     measure.append(g)
   })
 }
