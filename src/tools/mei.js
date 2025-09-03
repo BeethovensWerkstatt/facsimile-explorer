@@ -73,6 +73,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     }
   } else if (name === 'note' && annotElem.parentNode.localName === 'chord' && annotElemRef.name !== 'dots') {
     name = 'chord'
+    annotElemRef.id = annotElem.parentNode.getAttribute('xml:id')
   } else if ((name === 'note' || name === 'rest') && annotElemRef.name === 'dots') {
     name = 'dot'
   } else if (name === 'keyAccid') {
