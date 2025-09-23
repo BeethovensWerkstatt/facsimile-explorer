@@ -9,6 +9,8 @@ import OpenSeadragon from 'openseadragon'
 import { mapGetters } from 'vuex'
 // import { rotatePoint } from '@/tools/trigonometry.js'
 import { controlpointsToVerovioSvgBezier } from '@/tools'
+// Temporary local import for thulemeier; swap to 'import { ... } from "thulemeier"' when published to NPM
+import { render } from 'thulemeier'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
 import { getEmptyPage, appendNewElement, CSSselectables } from '@/tools/mei.js'
 
@@ -1357,7 +1359,7 @@ export default {
      * renders all diplomatic transcriptions on current page
      */
     async renderDiploTransOnPage () {
-      console.log(643, 'renderDiploTransOnPage()')
+      // console.log(643, 'renderDiploTransOnPage()')
       if (!this.showRenderedStafflines) {
         return null
       }
@@ -1392,43 +1394,18 @@ export default {
         }
       })
 
-      // ----
-      const ep = await getEmptyPage(this.$store.getters.documentWithCurrentPage, this.$store.getters.currentSurfaceId)
-      if (!ep) {
-        return null
-      }
-
-      // x const serializer = new XMLSerializer()
-      // x const meiString = serializer.serializeToString(ep)
-
-      const tk = this.$store.getters.verovioToolkit
-      const options = this.$store.getters.diploPageBackgroundVerovioOptions
-      const width = ep.querySelector('surface').getAttribute('lrx')
-      const height = ep.querySelector('surface').getAttribute('lry')
-      options.pageHeight = height
-      options.pageWidth = width
-
-      const rastrumsOnCurrentPage = this.$store.getters.rastrumsOnCurrentPage
-
-      // console.log('643: height of empty page: ' + typeof height, height)
-
-      tk.setOptions(options)
-      // console.log('643 again', dtArr)
-
-      // const diplomaticTranscripts = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
-      // console.log('913 diplomaticTranscripts', diplomaticTranscripts)
-
-      // ----
       dtArr.forEach(async obj => {
         console.log('913 entering ', obj)
 
         if (obj.dt) {
-          const renderedDiplo = this.renderDiploTrans(tk, obj.wzDetails, obj.dt, rects, this.$store.getters.documentWithCurrentPage)
-          // console.log('913: diplo', renderedDiplo)
+          const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
+          console.log('913: draftId', draftId)
+          const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
+          console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
-          const svgForCurrentPage = this.$store.getters.svgForCurrentPage
+          // const svgForCurrentPage = this.$store.getters.svgForCurrentPage
 
           if (!existingOverlay) {
             // console.log('adding overlay for ' + dt.wzDetails.diploTrans)
@@ -1440,11 +1417,13 @@ export default {
             }
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
-            element.append(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
+            element.append(renderedDiplo)
+
+            /* cleanUpDiplomaticTranscript(, obj.dt, {
               rastrumsOnCurrentPage,
               selectedElementId: this.$store.getters.activeDiploTransElementId,
               viewer: this.viewer
-            }, svgForCurrentPage))
+            }, svgForCurrentPage)) */
 
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
@@ -1460,11 +1439,11 @@ export default {
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
             // TODO: renderedDiplo is newly created, so we need to cleanUp again???
-            existingOverlay.replaceChild(cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
+            existingOverlay.replaceChild(renderedDiplo) /* cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
               rastrumsOnCurrentPage,
               selectedCurve: this.$store.getters.activeDiploTransElementId,
               viewer: this.viewer
-            }, svgForCurrentPage), existingOverlay.firstChild)
+            }, svgForCurrentPage), existingOverlay.firstChild) */
             /* const x = viewBox.split(' ')[0]
             const y = viewBox.split(' ')[1]
             const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
@@ -1480,84 +1459,16 @@ export default {
       this.indicateSelectedDTElement()
     },
 
-    renderDiploTrans (toolkit, wzDetails, meiDom, rects, sourceDom) {
-      /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
-        console.log('913a: renderDiploTrans()', meiDom)
-        console.log('913a: renderDiploTrans()', wzDetails)
-      } */
-      // console.log(614, 'calling Elvis', meiDom)
-      meiDom.querySelectorAll('measure').forEach(measure => {
-        // const sb = measure.previousElementSibling
-        // console.log('913a: sb', sb)
-        // const staves = sb.getAttribute('corresp').split(' ')
-        // console.log('913a: staves', staves)
-        const xOff = 0 // parseFloat(measure.getAttribute('x'))
-        const eventsThatRequireSystemMargin = ['barLine', 'dynam', 'dir', 'clef', 'meterSig']
-
-        // const zoneId = measure.getAttribute('facs').substr(1)
-        // const zone = [...meiDom.querySelectorAll('zone[type="measure"]')].find(z => z.getAttribute('xml:id') === zoneId)
-        // const sbZone = zone.previousElementSibling
-        // const xOffPlusSystem = (parseFloat(zone.getAttribute('ulx'))) / rects.ratio
-
-        // console.log(614, 'zoneId', zoneId, zone, 'rects', rects)
-        measure.querySelectorAll('*[x], *[x2]').forEach(event => {
-          if (eventsThatRequireSystemMargin.indexOf(event.localName) > -1) {
-            // console.log(614, 'found a barLine', event)
-            /* if (event.hasAttribute('x')) {
-              const x1 = parseFloat(event.getAttribute('x')) + xOffPlusSystem
-              event.setAttribute('x', x1)
-            }
-            if (event.hasAttribute('x2')) {
-              const x2 = parseFloat(event.getAttribute('x2')) + xOffPlusSystem
-              event.setAttribute('x2', x2)
-            } */
-
-            // console.log(463, 'found a barLine: ', event)
-            // console.log(463, 'xOffPlusSystem', xOffPlusSystem)
-            const staffDef1 = event.closest('score').querySelector('staffDef')
-            // console.log(463, 'staffDef', staffDef1)
-            // console.log(463, 'decls', staffDef1.getAttribute('decls'))
-            const rastrumId = staffDef1.getAttribute('decls').split('#')[1]
-            console.log(463, 'barLine rastrum control', rastrumId)
-            const rastrum = [...sourceDom.querySelectorAll('rastrum')].find(r => r.getAttribute('xml:id') === rastrumId)
-            // console.log(463, 'rastrum', rastrum)
-
-            if (rastrum) {
-              event.setAttribute('ho', rastrum.getAttribute('system.leftmar'))
-              // console.log(279, 'setting ho to ' + rastrum.getAttribute('system.leftmar') + ' for ' + event.localName)
-            } else {
-              console.log(463, 'no rastrum found for ' + rastrumId)
-            }
-          } else {
-            // console.log(614, 'found a non-barLine', event)
-            /* if (event.hasAttribute('x')) {
-              const x1 = parseFloat(event.getAttribute('x')) + xOff
-              event.setAttribute('x', x1)
-            }
-            if (event.hasAttribute('x2')) {
-              const x2 = parseFloat(event.getAttribute('x2')) + xOff
-              event.setAttribute('x2', x2)
-            } */
-            event.setAttribute('ho', xOff.toFixed(1))
-          }
-          /* if (event.localName === 'barLine') {
-            console.log(614, 'fixed a barLine', event)
-          } */
-        })
-      })
-
-      /* if (wzDetails.annotTrans === 'data/sources/D-BNba_MH_60_Engelmann/annotatedTranscripts/D-BNba_MH_60_Engelmann_p010_wz02_at.xml') {
-        console.log('913: meiDom', meiDom)
-      } */
-      // console.log('913: meiDom', meiDom)
-
-      const meiString = new XMLSerializer().serializeToString(meiDom)
-      toolkit.loadData(meiString)
-      const svgText = toolkit.renderToSVG(1, {})
-      const parser = new DOMParser()
-      const svgDom = parser.parseFromString(svgText, 'application/xml')
-
-      return svgDom.querySelector('svg')
+    async renderDiploTrans (meiDom, draftId) {
+      // Use Thulemeier to render diplomatic transcription
+      try {
+        // Use 'fullPage' mode for diplomatic rendering, as in test.js
+        const svgElem = await render(meiDom, { mode: 'singleDraft', id: draftId })
+        return svgElem
+      } catch (err) {
+        console.error('Thulemeier rendering failed:', err)
+        return null
+      }
     },
 
     /**

@@ -4,6 +4,7 @@ import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
 import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
+import { render } from 'thulemeier'
 import { rotatePoint } from '@/tools/trigonometry'
 import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
@@ -3297,35 +3298,9 @@ const dataModule = {
         return null
       }
 
-      const serializer = new XMLSerializer()
-      const meiString = serializer.serializeToString(ep)
-
-      const tk = getters.verovioToolkit
-      const options = getters.diploPageBackgroundVerovioOptions
-      const width = ep.querySelector('surface').getAttribute('lrx')
-      const height = ep.querySelector('surface').getAttribute('lry')
-      options.pageHeight = height
-      options.pageWidth = width
-      tk.setOptions(options)
-      const svgText = tk.renderData(meiString, {})
-
-      const svgDom = parser.parseFromString(svgText, 'application/xml')
-      svgDom.querySelectorAll('.barLine, .system + path, .system.bounding-box, .system .grpSym').forEach(barLine => {
-        barLine.remove()
-      })
-
-      svgDom.querySelectorAll('g.staff[data-rotate]').forEach(staff => {
-        if (!staff.classList.contains('bounding-box')) {
-          const topLineCoordinates = staff.querySelector('path').getAttribute('d').split(' ')
-          const x = topLineCoordinates[0].substring(1)
-          const y = topLineCoordinates[1]
-          const rotation = staff.getAttribute('data-rotate')
-          staff.style.transform = 'rotate(' + rotation + 'deg)'
-          staff.style.transformOrigin = x + 'px ' + y + 'px'
-        }
-      })
-
-      return svgDom.querySelector('svg')
+      // Use thulemeier to render the SVG for the empty page background
+      const svg = await render(ep, { mode: 'emptyPage' })
+      return svg
     },
 
     /**
@@ -3353,62 +3328,7 @@ const dataModule = {
           }
         }
       })
-
-      // console.log('816: diplomaticTranscriptsOnCurrentPage', arr)
-
       return arr
-
-      /* const emptyPage = await getEmptyPage(meiDoc, surface)
-
-      allWz.forEach(async wzDetails => {
-        const dtPath = wzDetails.diploTrans
-        const available = getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1
-        if (available) {
-          console.log('411 wzDetails', wzDetails)
-
-          console.log('411 available', available)
-          const dtDoc = getters.documentByPath(wzDetails.diploTrans) || null
-          console.log('411 pushing dtDoc "' + dtPath + '"', dtDoc)
-          const atDoc = getters.documentByPath(wzDetails.annotTrans) || null
-          console.log('411 pushing atDoc "' + wzDetails.annotTrans + '"', atDoc)
-          const docPath = getters.currentDocPath
-          console.log('411 docPath: ' + docPath)
-          const sourceDoc = getters.documentByPath(docPath)
-          console.log('411 sourceDoc', sourceDoc)
-          const dtAvail = getters.availableDiplomaticTranscripts.indexOf(wzDetails.diploTrans) !== -1
-          const atAvail = getters.availableAnnotatedTranscripts.indexOf(wzDetails.annotTrans) !== -1
-          arr.push({ wzDetails, dtDoc, atDoc, sourceDoc, dtAvail, atAvail })
-        }
-      })
-      setTimeout(() => {
-        //
-      }, 1000)
-      await Promise.all(arr.map(async wz => {
-        try {
-          console.log('411 wzx', wz)
-
-          const func = async () => {
-            const renderableDiplomaticTranscript = await getRenderableDiplomaticTranscript(wz, emptyPage, osdRects, currentPageInfo)
-            console.log('411 renderableDiplomaticTranscript', renderableDiplomaticTranscript)
-            return renderableDiplomaticTranscript
-          }
-
-          if (wz.dtAvail && wz.atAvail) {
-            console.log('411x: alles da…', wz)
-          }
-
-          const renderable = await func()
-          wz.renderable = renderable
-          wz.renderableFunc = func
-        } catch (error) {
-          console.error('411: Error getting renderableDiplomaticTranscript for wz', wz, error)
-        }
-      }))
-
-      console.log('411 resulting arr', arr)
-
-      return arr
-      */
     },
 
     /**

@@ -5,6 +5,18 @@
 npm install
 ```
 
+### Local development: thulemeier import
+
+To use the local thulemeier renderer as a global import (without publishing to NPM), a symlink is set up:
+
+```
+ln -s ../thulemeier node_modules/thulemeier
+```
+
+This allows you to use `import ... from 'thulemeier'` anywhere in the codebase. When thulemeier is published to NPM, simply remove the symlink and install from NPM instead.
+
+**Note:** If you move or rename the thulemeier folder, update the symlink accordingly.
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
