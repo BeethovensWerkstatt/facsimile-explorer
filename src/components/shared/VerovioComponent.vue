@@ -1,5 +1,7 @@
 <template>
-  <div class="verovioComponent" ref="verovioContainer"><div :class="purpose" ref="mei">
+  <div class="verovioComponent" ref="verovioContainer">
+  <MidiPlayer v-if="mididata" :midiBase64="mididata" />
+  <div :class="purpose" ref="mei">
     <div class="placeholder">no transcript available ...</div>
   </div></div>
 </template>
@@ -9,11 +11,17 @@ import { draft2score, draft2page, addSbIndicators, CSSselectables } from '@/tool
 import { resolveSbIndicators, improveAtSvg } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
 import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
+import MidiPlayer from './MidiPlayer.vue'
 
 export default {
   name: 'VerovioComponent',
   components: {
-
+    MidiPlayer
+  },
+  data () {
+    return {
+      mididata: null
+    }
   },
   props: {
     purpose: String,
@@ -58,6 +66,8 @@ export default {
           const left = this.$refs.verovioContainer.scrollLeft
           // console.log('VerovioComponent left', left)
           this.$refs.mei.innerHTML = localCopy
+
+          this.mididata = this.$store.getters.verovioToolkit.renderToMIDI()
 
           if (+this.scale > 0 || !this.scale) {
             const nre = /^([0-9.]*)([a-z]*)$/
