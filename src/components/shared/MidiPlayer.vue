@@ -33,8 +33,11 @@ export default {
       onprogress: (state, progress) => {
         console.log(525, state, progress)
       },
+      onerror: console.warn,
       onsuccess: () => {
+        console.log(525, 'MIDI-Plugin geladen')
         this.MIDI = MIDI
+        this.MIDI.noteOn(0, 60, 0)
       }
     })
   },
@@ -44,30 +47,11 @@ export default {
     }
   },
   methods: {
-    unlockAudio () {
-      if (!this.audioCtx) {
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-      }
-      if (this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume()
-      }
-    },
     async playMidi () {
-      // Initialisiere eigenen AudioContext (unabhängig von MIDI.js)
-      this.unlockAudio()
-      // Versuche, WebAudio zu initialisieren (stummer Ton)
-      if (this.MIDI && typeof this.MIDI.noteOn === 'function') {
-        try {
-          this.MIDI.setVolume(0, 0)
-          this.MIDI.noteOn(0, 60, 0, 0)
-          setTimeout(() => this.MIDI.noteOff(0, 60, 0.01), 20)
-        } catch (e) {
-          console.warn(525, 'WebAudio-Init fehlgeschlagen:', e)
-        }
-      }
+      console.log(525, this.MIDI.WebAudio.getContext())
       this.error = null
       this.isPlaying = false
-      this.MIDI.setVolume(0, 127)
+      this.MIDI.noteOn(0, 60, 127)
       try {
         // base64 zu ArrayBuffer
         if (this.player) {
@@ -89,10 +73,18 @@ export default {
               this.player.stop()
             }
           })
+          this.player.addListener((data) => {
+            // console.log(525, 'MIDI Event:', data)
+            // console.log(525, 'MIDI ETA', this.player.endTime - data.now)
+            if (data.now >= this.player.endTime - 0.1) {
+              // Ende der Wiedergabe fast erreicht
+              this.isPlaying = false
+              this.player.stop()
+              this.player.currentTime = 0
+              console.log(525, 'MIDI-Wiedergabe beendet')
+            }
+          })
         }
-        this.player.addListener((data) => {
-          console.log(525, 'MIDI Event:', data)
-        })
         console.log(525, 'Lade MIDI-Datei von URL:', this.midiurl)
         this.player.loadFile(this.midiurl, () => {
           console.log(525, 'Starte MIDI-Wiedergabe ...')
