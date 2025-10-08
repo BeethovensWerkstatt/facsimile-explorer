@@ -2,6 +2,7 @@
 <template>
   <div>
     <button @click="playMidi" :disabled="!$store.getters.midi || $store.getters.midiPlaying">Abspielen</button>
+    <span>{{ ($store.getters.midiTime / 1000).toFixed(1) }}s / {{ (($store.getters.midiPlayer?.endTime || 0) / 1000).toFixed(1) }}s</span>
     <span v-if="isPlaying">Wiedergabe läuft...</span>
     <span v-if="error" style="color:red">{{ error }}</span>
   </div>
@@ -39,6 +40,8 @@ export default {
   },
   methods: {
     async playMidi () {
+      this.$store.getters.midi.noteOn(0, 60, 127, 0)
+      this.$store.getters.midi.noteOff(0, 60, 0.75)
       this.$store.dispatch('playMidi', this.midiurl)
     }
   }

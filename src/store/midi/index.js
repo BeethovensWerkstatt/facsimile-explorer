@@ -1,16 +1,20 @@
-import * as MIDI from 'midicube'
+import { setTimeout } from 'core-js'
+
+const MIDI = require('midicube')
 
 const state = {
   MIDI: null,
   MIDIplaying: false,
   MIDIerror: null,
-  MIDIplayer: null
+  MIDIplayer: null,
+  MIDItime: 0
 }
 const getters = {
   midi: (state) => state.MIDI,
   midiPlaying: (state) => state.MIDIplaying,
   midiError: (state) => state.MIDIerror,
-  midiPlayer: (state) => state.Midiplayer
+  midiPlayer: (state) => state.MIDIplayer,
+  midiTime: (state) => state.MIDItime
 }
 const mutations = {}
 const actions = {
@@ -25,17 +29,21 @@ const actions = {
       onsuccess: () => {
         console.log(525, 'MIDI-Plugin geladen')
         state.MIDI = MIDI
-        state.MIDI.noteOn(0, 60, 0)
+        state.MIDI.setVolume(0, 127)
+        state.MIDI.noteOn(0, 60, 127, 0)
+        state.MIDI.noteOff(0, 60, 0.75)
       }
     })
-    state.Midiplayer = new MIDI.Player()
-    state.Midiplayer.addListener((data) => {
-      if (data.now >= getters.midiPlayer.endTime - 0.1) {
+    state.MIDIplayer = new MIDI.Player()
+    state.MIDIplayer.addListener((data) => {
+      state.MIDItime = data.now
+      if (data.now >= state.MIDIplayer.endTime - 1) {
         // Ende der Wiedergabe fast erreicht
+        console.log(525, 'MIDI-Wiedergabe beenden ...')
         state.MIDIplayer.stop()
         state.MIDIplaying = false
-        state.Midiplayer.currentTime = 0
-        console.log(525, 'MIDI-Wiedergabe beendet')
+        state.MIDIplayer.currentTime = 0
+        setTimeout(() => { state.MIDItime = 0 }, 500) // kurz danach auch die Zeit zurücksetzen
       }
     })
   },

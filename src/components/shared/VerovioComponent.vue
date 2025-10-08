@@ -1,9 +1,10 @@
 <template>
   <div class="verovioComponent" ref="verovioContainer">
-  <MidiPlayer v-if="mididata" :midiBase64="mididata" />
-  <div :class="purpose" ref="mei">
-    <div class="placeholder">no transcript available ...</div>
-  </div></div>
+    <div :class="purpose" ref="mei">
+      <div class="placeholder">no transcript available ...</div>
+    </div>
+    <MidiPlayer v-if="mididata" :midiBase64="mididata" />
+  </div>
 </template>
 
 <script>
