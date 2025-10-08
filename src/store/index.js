@@ -6,6 +6,7 @@ import octokitModule from '@/store/octokit'
 import verovioModule from '@/store/vrv'
 import guiModule from '@/store/gui'
 import dataModule from '@/store/data'
+import midiModule from '@/store/midi'
 // import VuexPersistence from 'vuex-persist'
 import router from '@/router'
 
@@ -55,7 +56,8 @@ export default createStore({
     octokitModule,
     dataModule,
     verovioModule,
-    guiModule
+    guiModule,
+    midiModule
   },
   // plugins: [vuexLocal.plugin],
   state: {
