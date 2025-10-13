@@ -61,10 +61,10 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   // console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
 
   if (name === 'beam') {
-    name = 'beamSpan'
+    name = 'line'
   } else if (name === 'measure') {
     name = 'barLine'
-  } if (name === 'staff') {
+  } else if (name === 'staff') {
     switch (annotElemRef.name) {
       case 'keyAccid':
         name = 'accid'
@@ -127,10 +127,9 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticNote(annotElem, elem)
   } else if (name === 'rest') {
     getDiplomaticRest(annotElem, elem)
-  } else if (name === 'beamSpan' || name === 'beam') {
-    getDiplomaticBeam(annotElem, elem)
+  } else if (name === 'line') {
+    getDiplomaticBeam(annotElem, elem, bbox)
   } else if (name === 'accid') {
-    console.log(279, 'getDiplomaticAccid', annotElem, elem)
     getDiplomaticAccid(annotElem, elem, annotElemRef)
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
@@ -267,30 +266,13 @@ function getDiplomaticRest (annotElem, rest) {
  * @param {*} annotElem the annotated beam to be translated
  * @param {*} beam the diplomatic beam to be translated
  */
-function getDiplomaticBeam (annotElem, beam) {
-  const dtdoc = store.getters.diplomaticTranscriptForCurrentWz
-  const targets = []
-  annotElem.querySelectorAll('[corresp]').forEach(elem => {
-    console.log('718: investigating ', elem)
-    if (elem.localName === 'chord' || (elem.localName === 'note' && !elem.closest('chord'))) {
-      // multiple associations are possible!
-      for (const correspelem of elem.getAttribute('corresp').split(' ')) {
-        // get uid for corresponding element
-        const corresp = correspelem.split('#')[1]
-        const dtelem = dtdoc.querySelector('*[*|id="' + corresp + '"]')
-        console.log('718: found ', corresp, dtelem)
-        // check target element
-        if (corresp.trim().length > 0 && dtelem) {
-          targets.push('#' + corresp)
-        }
-      }
-    }
-  })
-  beam.setAttribute('plist', targets.join(' '))
-  beam.setAttribute('startid', targets[0])
-  beam.setAttribute('endid', targets.splice(-1)[0])
+function getDiplomaticBeam (annotElem, beam, bbox) {
+  beam.setAttribute('func', 'beam')
   beam.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
-  console.log(718, '\n', beam, '\n', annotElem, '\n', targets)
+  beam.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  beam.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
+  beam.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  beam.setAttribute('y2', (parseFloat(bbox.mm.y)).toFixed(1))
 }
 
 /**
@@ -802,7 +784,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
  * @param {*} surfaceId the xml:id of the <surface> element of the page
  * @returns the MEI document containing the empty rastrums
  */
-export async function getEmptyPage (mei, surfaceId) {
+/* export async function getEmptyPage (mei, surfaceId) {
   if (!mei || !surfaceId) {
     return null
   }
@@ -820,7 +802,7 @@ export async function getEmptyPage (mei, surfaceId) {
   template.querySelector('physDesc').prepend(foliaDesc.cloneNode(true))
 
   return template
-}
+} */
 
 export function initializePageIfNecessary (page, height) {
   const hasScoreDef = page.querySelector('score')
@@ -1373,9 +1355,7 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
 
   try {
     const writingZoneGenDescId = dtDom.querySelector('source').getAttribute('target').split('#')[1]
-    console.log(998, 'writingZoneGenDescId: ', writingZoneGenDescId)
     const writingZoneGenDesc = sourceDom.querySelector('genDesc[*|id="' + writingZoneGenDescId + '"]')
-    console.log(998, 'writingZoneGenDesc: ', writingZoneGenDesc)
     const surfaceGenDesc = writingZoneGenDesc.parentNode
     const surface = sourceDom.querySelector('surface[*|id="' + surfaceGenDesc.getAttribute('corresp').substring(1) + '"]')
     // const writingZoneZone = surface.querySelectorAll('zone').values().find(z => writingZoneGenDesc.getAttribute('xml:id') === z.getAttribute('data').substring(1))
@@ -1416,7 +1396,6 @@ export const prepareDtForRendering = ({ dtDom, sourceDom }) => {
     const sourceId = outDom.querySelector('source').getAttribute('xml:id')
     const draft = outDom.querySelector('draft')
     draft.setAttribute('decls', '#' + sourceId)
-    console.log(998, outDom.querySelector('mei').outerHTML)
   } catch (err) {
     // console.error('714: Error in prepareDtForRendering: ' + err, err)
   }

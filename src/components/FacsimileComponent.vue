@@ -12,10 +12,10 @@ import { controlpointsToVerovioSvgBezier } from '@/tools'
 // Temporary local import for thulemeier; swap to 'import { ... } from "thulemeier"' when published to NPM
 import { render } from 'thulemeier'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
-import { getEmptyPage, appendNewElement, CSSselectables } from '@/tools/mei.js'
+import { appendNewElement, CSSselectables } from '@/tools/mei.js'
 
 // import { useDiploTrans } from '@/store/gui/diplotrans'
-import { cleanUpDiplomaticTranscript, scaleXYControlpoints } from '@/tools/diplomaticTranscripts.js'
+import { scaleXYControlpoints } from '@/tools/diplomaticTranscripts.js'
 
 const osdOptions = {
   preserveViewport: false,
@@ -422,10 +422,10 @@ export default {
         this.$store.dispatch('setActiveSystem', id)
       }
 
-      if (click.target.closest('.diploTrans') && click.target.closest('.measure')) {
+      if (click.target.closest('.diploTrans')/* && click.target.closest('.measure') */) {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(CSSselectables)
-        // console.log(365, target, selectables)
+        // console.log(365, target, CSSselectables)
         if (target) {
           let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
@@ -434,7 +434,7 @@ export default {
             id = target.closest('.chord').getAttribute('data-id')
           }
           this.$store.dispatch('setActiveDiploTransElementId', id)
-          console.log('selecting activeDiploTransElementId: ', id)
+          // console.log('selecting activeDiploTransElementId: ', id)
         }
       }
     },
@@ -1399,9 +1399,9 @@ export default {
 
         if (obj.dt) {
           const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
-          console.log('913: draftId', draftId)
+          // console.log('913: draftId', draftId)
           const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
-          console.log('913: diplo', renderedDiplo)
+          // console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
@@ -1464,6 +1464,7 @@ export default {
       try {
         // Use 'fullPage' mode for diplomatic rendering, as in test.js
         const svgElem = await render(meiDom, { mode: 'singleDraft', id: draftId })
+
         return svgElem
       } catch (err) {
         console.error('Thulemeier rendering failed:', err)

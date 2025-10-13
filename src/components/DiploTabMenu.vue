@@ -27,7 +27,7 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y" setterName="setActiveDiploTransElementAttValue" :min="-30" :max="50" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine || isHairpin">
+    <div class="entry" v-if="hasAdjustableX2">
         <label>@x2</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="x2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
@@ -39,11 +39,15 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="width" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isBarLine || isHairpin">
+    <div class="entry" v-if="hasAdjustableY2">
         <label>@y2</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="y2" setterName="setActiveDiploTransElementAttValue" :min="0" :max="pageWidth" :step="1"/>
         </div>
+    </div>
+    <div class="entry" v-if="maySwapYandY2">
+        <label>swap y/y2</label>
+        <div class="value string button" :onClick="swapActiveDiploTransElementYandY2" title="swap y and y2">&#8645;</div>
     </div>
     <div class="entry" v-if="isHairpin">
         <label>@opening</label>
@@ -70,6 +74,20 @@
         </div>
         <div class="value string button" :onClick="initStemLen" v-else>add attribute</div>
     </div>
+    <div class="entry" v-if="isDir">
+        <label>@lineheight</label>
+        <div class="value" v-if="hasLineheight">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="lineheight" setterName="setActiveDiploTransElementAttValue" :min="0.5" :max="100" :step="0.5" :readOnly="false"/>
+        </div>
+        <div class="value string button" :onClick="initLineheight" v-else>add attribute</div>
+    </div>
+    <div class="entry" v-if="isDir">
+        <label>@rotation</label>
+        <div class="value" v-if="hasRotation">
+            <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="rotation" setterName="setActiveDiploTransElementAttValue" :min="-180" :max="180" :step="1" :readOnly="false"/>
+        </div>
+        <div class="value string button" :onClick="initRotation" v-else>add attribute</div>
+    </div>
     <div class="entry" v-if="elementId">
       <label>unlink</label>
       <div class="value string button" :onClick="removeDTElement" title="remove DT element">&#x2702;</div>
@@ -93,6 +111,18 @@ export default {
   methods: {
     initStemLen () {
       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'stem.len', value: 8 })
+    },
+    initLineheight () {
+      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'lineheight', value: 6 })
+    },
+    initRotation () {
+      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'rotation', value: 0 })
+    },
+    swapActiveDiploTransElementYandY2 () {
+      const y = this.$store.getters.activeDiploTransElementAttValue('y')
+      const y2 = this.$store.getters.activeDiploTransElementAttValue('y2')
+      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: y2 })
+      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: y })
     },
     removeDTElement () {
       if (confirm('Do you relly want to delete the selected DT element?\nThis cannot be undone!')) {
@@ -167,6 +197,14 @@ export default {
       const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')
       return val !== null
     },
+    hasLineheight () {
+      const val = this.$store.getters.activeDiploTransElementAttValue('lineheight')
+      return val !== null
+    },
+    hasRotation () {
+      const val = this.$store.getters.activeDiploTransElementAttValue('rotation')
+      return val !== null
+    },
     isCurve () {
       return this.$store.getters.activeDiploTransElementName === 'curve'
     },
@@ -181,7 +219,19 @@ export default {
     },
     hasAdjustableY () {
       const name = this.$store.getters.activeDiploTransElementName
-      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave'
+      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave' || name === 'line'
+    },
+    hasAdjustableX2 () {
+      const name = this.$store.getters.activeDiploTransElementName
+      return name === 'line' || name === 'barLine' || name === 'hairpin'
+    },
+    hasAdjustableY2 () {
+      const name = this.$store.getters.activeDiploTransElementName
+      return name === 'line' || name === 'barLine' || name === 'hairpin'
+    },
+    maySwapYandY2 () {
+      const name = this.$store.getters.activeDiploTransElementName
+      return name === 'line' || name === 'barLine'
     },
     hasAdjustableWidth () {
       const name = this.$store.getters.activeDiploTransElementName
