@@ -784,7 +784,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
  * @param {*} surfaceId the xml:id of the <surface> element of the page
  * @returns the MEI document containing the empty rastrums
  */
-/* export async function getEmptyPage (mei, surfaceId) {
+export async function getEmptyPage (mei, surfaceId) {
   if (!mei || !surfaceId) {
     return null
   }
@@ -802,7 +802,7 @@ export async function initializeDiploTrans (filename, wzObj, surfaceId, appVersi
   template.querySelector('physDesc').prepend(foliaDesc.cloneNode(true))
 
   return template
-} */
+}
 
 export function initializePageIfNecessary (page, height) {
   const hasScoreDef = page.querySelector('score')
