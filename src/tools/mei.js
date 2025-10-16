@@ -1,7 +1,7 @@
 import { boundingboxDefaultControlpoints } from '@/tools'
 import { uuid } from '@/tools/uuid.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import store from '@/store'
+// import store from '@/store'
 const parser = new DOMParser()
 
 /**

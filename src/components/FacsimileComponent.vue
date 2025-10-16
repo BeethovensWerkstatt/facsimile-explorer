@@ -854,26 +854,27 @@ export default {
       // console.log('indicateSelectedDTElement', this.$store.getters.activeDiploTransElementdIds)
       const dtid = this.$store.getters.activeDiploTransElementId
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
-      console.log(752, 'indicateSelectedDTElement', dtid, this.$store.getters.activeDiploTransElement)
+      // console.log(9272, 'indicateSelectedDTElement', dtid, this.$store.getters.activeDiploTransElement)
 
       if (existingOverlay !== null) {
         // console.log('found an overlay')
         existingOverlay.querySelectorAll('.selectedDiploTrans').forEach(element => {
+          console.log(9272, 'remove selectedDiploTrans from', element)
           element.classList.remove('selectedDiploTrans')
         })
         existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach((element, i) => {
+          console.log(9272, 'add selectedDiploTrans to', element)
           element.classList.add('selectedDiploTrans')
           // console.log(752, element, i)
           if (i === 0) {
-            if (this.$store.getters.activeDiploTransElementName === 'barLine') { // conmtrol barLine
+            if (this.$store.getters.activeDiploTransElementName === 'barLine') { // control barLine
               const barline = this.$store.getters.activeDiploTransElement
-              // console.log(752, 'barLine', element, barline)
               // TODO: rastrum getter for DT element
               const section = barline.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
               // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
-              console.log(753, 'barLine rastrum control', rastrumId)
+              // console.log(753, 'barLine rastrum control', rastrumId)
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               const path = element.querySelector('path')
@@ -897,7 +898,7 @@ export default {
                     path.setAttribute('d', `M${controlpoints[0]} ${controlpoints[1]} L${controlpoints[2]} ${controlpoints[3]}`)
                   },
                   // persist change
-                  (controlpoints, i, newX, newY, factor) => {
+                  async (controlpoints, i, newX, newY, factor) => {
                     barpoints[i] = (newX / factor) - rastrum.x
                     barpoints[i + 1] = (newY / factor) - rastrum.y
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: barpoints[0].toFixed(2) })
@@ -905,12 +906,13 @@ export default {
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: barpoints[2].toFixed(2) })
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
                     // update barline x,y,x2,y2 attributes in MEI
-                    // console.log(836, 'barline updated', barpoints)
+                    console.log(9272, 'barline updated', barpoints)
                   },
                   factor
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
+              console.log(9272, 'barLine', element, barline)
             } else if (this.$store.getters.activeDiploTransElementName === 'curve') { // conmtrol curve
               const curve = this.$store.getters.activeDiploTransElement
               const section = curve.closest('section')
@@ -1464,6 +1466,7 @@ export default {
       try {
         // Use 'fullPage' mode for diplomatic rendering, as in test.js
         const svgElem = await render(meiDom, { mode: 'singleDraft', id: draftId })
+        // console.log(9272, 'renderDiploTrans', svgElem)
 
         return svgElem
       } catch (err) {
@@ -1587,6 +1590,7 @@ export default {
 
     this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage, getters.activeWritingLayer],
       ([newId, newSvg, newLayer], [oldId, oldSvg, oldLayer]) => {
+        // console.log(9272, 'watch SVG: ', newId, newSvg, newLayer, ' / ', oldId, oldSvg, oldLayer)
         if (newSvg) {
           this.renderShapes()
         }
@@ -1602,25 +1606,27 @@ export default {
 
     this.unwatchDiploTranscriptsOnCurrentPage = this.$store.watch((state, getters) => getters.renderableDiplomaticTranscriptsOnCurrentPage,
       (newArr, oldArr) => {
+        // console.log(9272, 'watch diploTranscripts: ', newArr, ' / ', oldArr)
         this.renderDiploTransOnPage()
       })
 
     this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
       (newArr, oldArr) => {
+        // console.log(9272, 'watch usedShapes: ', newArr, ' / ', oldArr)
         this.indicateUsedShapes()
         this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
       (newValue, oldValue) => {
-        // console.log(`select: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        // console.log(9272, 'watch selectedId: ', newValue, ' / ', oldValue)
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
-        // console.log(`select DT: '${JSON.stringify(oldValue)}' => '${JSON.stringify(newValue)}'`)
+        // console.log(9272, 'watch selectedDTElement: ', newValue, ' / ', oldValue)
         for (const i in this.mouseTracker) {
           this.setMouseTracker(i, null)
         }

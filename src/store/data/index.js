@@ -103,7 +103,7 @@ const dataModule = {
      * @param  {[type]} dom                  The DOM of the document
      */
     loadDocumentIntoStore ({ commit, state }, { path, name, dom }) {
-      // console.log(278, 'loadDocumentIntoStore', path, name, dom)
+      // console.log(9272, 'loadDocumentIntoStore', path, name, dom)
       commit('LOAD_DOCUMENT_INTO_STORE', { path, dom })
       if (name && path) {
         commit('SET_DOCUMENTNAME_PATH_MAPPING', { ...state.documentNamePathMapping, [name]: path, [path]: name })
