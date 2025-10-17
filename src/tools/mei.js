@@ -85,6 +85,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'metaMark'
   } else if (name === 'syl') {
     name = 'word'
+  } else if (name === 'mRest') {
+    name = 'rest'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -249,6 +251,8 @@ function getDiplomaticRest (annotElem, rest) {
       glyphName = 'rest32nd'
     } else if (dur === '64') {
       glyphName = 'rest64th'
+    } else if (!dur) { // mRest does not have a duration
+      glyphName = 'restHalf'
     }
 
     if (annotElem.hasAttribute('glyph.name')) {
