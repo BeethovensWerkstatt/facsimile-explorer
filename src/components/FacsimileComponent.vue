@@ -15,7 +15,7 @@ import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragme
 import { appendNewElement, CSSselectables } from '@/tools/mei.js'
 
 // import { useDiploTrans } from '@/store/gui/diplotrans'
-import { scaleXYControlpoints } from '@/tools/diplomaticTranscripts.js'
+import { scaleXYControlpoints, identifyClosestSystem } from '@/tools/diplomaticTranscripts.js'
 
 const osdOptions = {
   preserveViewport: false,
@@ -189,7 +189,7 @@ export default {
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
           const func = (type) => () => {
-            console.log('make "' + click.target.id + '" a ' + type + ' (wz: ' + svgGroupWzId + ')')
+            console.log('make "' + click.target.id + '" a "' + type + '" (wz: ' + svgGroupWzId + ')')
           }
 
           const usedShape = click.target.classList.contains('usedShape')
@@ -372,6 +372,74 @@ export default {
             disabled: !wzActive
           }
 
+          const setNavigationalSign = {
+            label: 'Navigation Sign',
+            action: async () => {
+              const baseMessage = 'transcribe navigation sign'
+              const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
+              // const id = this.$store.getters.activeDiploTransElementId
+              const svgPath = '../svg/' + this.$store.getters.currentSvgPath.split('/').splice(-1)[0]
+              const origdoc = this.$store.getters.documentByPath(filePath)
+              const doc = origdoc?.cloneNode(true)
+              const draft = doc?.querySelector('draft')
+
+              console.log(331, 'target', click.target)
+              console.log(331, 'parent', click.target.parentElement)
+              console.log(331, 'grandparent', click.target.parentElement?.parentElement)
+
+              if (draft) {
+                const rects = this.$store.getters.osdRects
+                const targetBBox = click.target.getBBox()
+                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
+
+                const wzShapes = click.target.parentElement?.parentElement?.querySelectorAll('path')
+                const systems = draft.querySelectorAll('system')
+                const rastrumsOnCurrentPage = this.$store.getters.rastrumsOnCurrentPage
+
+                // Identify the closest system to the clicked shape with relative positioning
+                const targetSystem = identifyClosestSystem(targetBBox, systems, wzShapes, rastrumsOnCurrentPage, rects)
+
+                console.log(641, 'Target system with relative position:', targetSystem)
+
+                let positionX, positionY
+
+                if (targetSystem && targetSystem.relativePosition) {
+                  // Use relative position to top rastrum
+                  positionX = parseFloat(targetSystem.relativePosition.relativeX.toFixed(1))
+                  positionY = parseFloat(targetSystem.relativePosition.relativeY.toFixed(1))
+                  console.log('Using relative position to rastrum:', targetSystem.relativePosition.rastrumId,
+                    'at', positionX, positionY)
+                } else {
+                  // Fallback to absolute positioning (old method)
+                  console.warn('No relative positioning available, using absolute coordinates')
+                  positionX = parseFloat((targetBBox.x / rects.ratio + +rects.image.x).toFixed(1))
+                  positionY = parseFloat((targetBBox.y / rects.ratio + +rects.image.y).toFixed(1))
+                }
+                const section = targetSystem.element.querySelector('section')
+                const metaMark = appendNewElement(section, 'metaMark')
+                metaMark.setAttribute('function', 'navigation')
+                metaMark.setAttribute('x', positionX)
+                metaMark.setAttribute('y', positionY)
+                metaMark.setAttribute('target', '#')
+                metaMark.setAttribute('facs', svgPath + '#' + click.target.id)
+                metaMark.textContent = '⦻'
+
+                await this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
+                await this.$store.dispatch('logChange', {
+                  path: filePath,
+                  baseMessage,
+                  param: '',
+                  xmlIDs: [section.getAttribute('xml:id')],
+                  isNewDoument: false
+                })
+                this.$store.dispatch('setActiveDiploTransElementId', metaMark.getAttribute('xml:id'))
+              } else {
+                console.warn('setNavigationalSign: no draft element found!')
+              }
+            },
+            disabled: !wzActive
+          }
+
           // adjusted selectFunc that will allow to create pitch clarification letters
           const pitchClarificationLetterFunc = () => {
             this.$store.dispatch('setPitchClarificationLetterMode', true)
@@ -396,7 +464,7 @@ export default {
                     setDeletion, // { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
                     setUnclear,
                     { label: 'Pitch Clarification Letter', action: pitchClarificationLetterFunc, disabled: !wzActive },
-                    { label: 'Navigational Sign', action: func('nav sign'), disabled: !wzActive }
+                    setNavigationalSign// { label: 'Navigational Sign', action: func('navSign'), disabled: !wzActive }
                   ]
                 },
                 addShapeEntry,
