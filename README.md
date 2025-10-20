@@ -62,10 +62,9 @@ or
 ./start-dev.sh
 ```
 
-Now http://localhost:8080/ work with github access_token callback at http://localhost:8080/auth
+Now http://localhost:8080/ works with github access_token callback at http://localhost:8080/auth
 
 The `Dockerfile` must also provide an nginx reverse proxy to Github.
-
 `CLIENT_ID` and `CLIENT_SECRET` must be passed as environment variables.
 
 ### Customize configuration
