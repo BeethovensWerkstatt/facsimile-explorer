@@ -35,7 +35,8 @@ const rawSelectables = [
   'pedal',
   'fing',
   'fermata',
-  'octave'
+  'octave',
+  'f'
   // 'staff',
   // 'measure'
 ]
@@ -174,6 +175,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     }
   } else if (name === 'word') {
     getDiplomaticWord(annotElem, elem, bbox)
+  } else if (name === 'f') {
+    getDiplomaticF(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -596,6 +599,19 @@ function getDiplomaticWord (annotElem, word, bbox) {
   word.setAttribute('y', bbox.mm.y)
   word.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
   word.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * translates a f marking from an annotated transcript to a diplomatic f
+ * @param {*} annotElem the annotated f to be translated
+ * @param {*} f the initial f that needs specific treatment
+ * @returns the dt:f element
+ */
+function getDiplomaticF (annotElem, f, bbox) {
+  f.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  f.setAttribute('y', (parseFloat(bbox.mm.y)).toFixed(1))
+  f.setAttribute('staff', annotElem.closest('harm').getAttribute('staff'))
+  f.innerHTML = annotElem.innerHTML.replace(/\s+/g, ' ').trim()
 }
 
 function getLocAttribute (annotElem) {
