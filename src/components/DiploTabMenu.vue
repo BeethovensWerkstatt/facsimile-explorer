@@ -61,7 +61,7 @@
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="bw:start.opening" setterName="setActiveDiploTransElementAttValue" :min="0" :max="60" :step="1"/>
         </div>
     </div>
-    <div class="entry" v-if="isNote || isRest || isAccid || isDot">
+    <div class="entry" v-if="hasAdjustableLoc">
         <label>@loc</label>
         <div class="value">
             <SliderInput label="" getterName="activeDiploTransElementAttValue" idParam="loc" setterName="setActiveDiploTransElementAttValue" :min="-10" :max="25" :step="1"/>
@@ -194,16 +194,22 @@ export default {
       return this.$store.getters.activeDiploTransElementName === 'dir'
     },
     hasStemLen () {
-      const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')
-      return val !== null
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('stem.len')
+      // const val = this.$store.getters.activeDiploTransElementAttValue('stem.len')
+      // return val !== null
     },
     hasLineheight () {
-      const val = this.$store.getters.activeDiploTransElementAttValue('lineheight')
-      return val !== null
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('lineheight')
+      // const val = this.$store.getters.activeDiploTransElementAttValue('lineheight')
+      // return val !== null
     },
     hasRotation () {
-      const val = this.$store.getters.activeDiploTransElementAttValue('rotation')
-      return val !== null
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('rotation')
+      // const val = this.$store.getters.activeDiploTransElementAttValue('rotation')
+      // return val !== null
     },
     isCurve () {
       return this.$store.getters.activeDiploTransElementName === 'curve'
@@ -217,25 +223,37 @@ export default {
     isUnclear () {
       return this.$store.getters.activeDiploTransElementName === 'unclear'
     },
+    hasAdjustableLoc () {
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('loc')
+    },
     hasAdjustableY () {
-      const name = this.$store.getters.activeDiploTransElementName
-      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave' || name === 'line' || name === 'f' || name === 'artic' || name === 'num'
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('y')
+      // const name = this.$store.getters.activeDiploTransElementName
+      // return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave' || name === 'line' || name === 'f' || name === 'artic' || name === 'num'
     },
     hasAdjustableX2 () {
-      const name = this.$store.getters.activeDiploTransElementName
-      return name === 'line' || name === 'barLine' || name === 'hairpin'
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('x2')
+      // const name = this.$store.getters.activeDiploTransElementName
+      // return name === 'line' || name === 'barLine' || name === 'hairpin'
     },
     hasAdjustableY2 () {
-      const name = this.$store.getters.activeDiploTransElementName
-      return name === 'line' || name === 'barLine' || name === 'hairpin'
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('y2')
+      // const name = this.$store.getters.activeDiploTransElementName
+      // return name === 'line' || name === 'barLine' || name === 'hairpin'
     },
     maySwapYandY2 () {
       const name = this.$store.getters.activeDiploTransElementName
       return name === 'line' || name === 'barLine'
     },
     hasAdjustableWidth () {
-      const name = this.$store.getters.activeDiploTransElementName
-      return name === 'dir' || name === 'dynam' || name === 'word' || name === 'tempo' || name === 'octave'
+      const elem = this.$store.getters.activeDiploTransElement
+      return elem && elem.hasAttribute('width')
+      // const name = this.$store.getters.activeDiploTransElementName
+      // return name === 'dir' || name === 'dynam' || name === 'word' || name === 'tempo' || name === 'octave'
     }
   }
 }

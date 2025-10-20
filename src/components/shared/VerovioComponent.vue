@@ -108,74 +108,24 @@ export default {
     },
     async clickListener (e) {
       const target = e.target.closest(CSSselectables)
-
-      // console.log('\n\n841 clickListener', target)
-
       if (target !== null) {
-        // TODO: Hier müssen wir auf this.purpose reagieren und unterschiedliche
-        // Aktionen ausführen. Hier erstmal nur zur Anschauung – das müsste
-        // natürlich über die Daten koordiniert werden…
-        // target.classList.toggle('supplied')
-
-        /*
-        // helper code to set missing corresp attribute for barlines
-        const isBarline = target.classList.contains('barLine')
-        if (isBarline && this.$store.getters.activeDiploTransElementName === 'barLine') {
-          // const activeDtElementId = this.$store.getters.activeDiploTransElementId
-          const measure = target.closest('.measure')
-          const measureId = measure.getAttribute('data-id')
-          const atDoc = this.$store.getters.annotatedTranscriptForCurrentWz.cloneNode(true)
-          const atElement = atDoc.querySelector(`*[*|id="${measureId}"]`)
-          const corresp = atElement.getAttribute('corresp')
-          const dtElementId = this.$store.getters.activeDiploTransElementId
-          if (dtElementId && !corresp) {
-            console.warn(278, 'No corresp found for barline', dtElementId, atElement)
-            // TODO: set corresp attribute in AT measure element
-            const atPath = this.$store.getters.currentWzAtPath
-            const dtDocPath = this.$store.getters.currentWzDtPath
-            const dtDocName = dtDocPath.split('/').splice(-1)[0]
-            const correspPath = '../diplomaticTranscripts/' + dtDocName + '#'
-            console.log(278, 'Setting corresp for barline to', `"${correspPath + dtElementId}"`)
-            atElement.setAttribute('corresp', correspPath + dtElementId)
-            const baseMessage = 'Set corresp for barline(s) '
-            const xmlIDs = [atElement.getAttribute('xml:id')]
-            const logPayLoad = { path: atPath, baseMessage, param: dtDocName, xmlIDs, isNewDocument: false }
-            console.log(278, logPayLoad)
-            await this.$store.dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
-            await this.$store.dispatch('logChange', logPayLoad)
-            return
-          }
-          // console.log(278, this.$store.getters.activeDiploTransElementAttValue('facs'), measureId, atElement, corresp)
-          // return
-        }
-        */
-
         const name = target.getAttribute('data-class')
         const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
-        // console.log(671, 'clicked', name, id, measure, target)
         const meiDom = this.$store.getters[this.getter]
         const meiElem = meiDom.querySelector('*[*|id="' + id + '"]')
         let staff
         if (target.closest('.staff') && target.closest('.staff').hasAttribute('data-n')) {
           staff = target.closest('.staff')?.getAttribute('data-n')
-          // console.log(671, 'a')
         } else if (meiElem && meiElem.hasAttribute('staff')) {
-          // console.log(671, 'b')
           staff = meiElem.getAttribute('staff')
         } else if (meiElem && meiElem.hasAttribute('startid')) {
-          // console.log(671, 'c')
           const startid = meiElem.getAttribute('startid').substring(1)
           const startElem = meiDom.querySelector('*[*|id="' + startid + '"]')
           staff = startElem.closest('staff').getAttribute('n')
         } else {
-          // console.log(671, 'd')
           staff = 1
         }
-        // console.log(671, 'staff', staff)
-        // const staff = target.closest('.staff')?.getAttribute('data-n') || 0
-
-        // const meiDom = this.$store.getters[this.getter]
         const path = this.$store.getters[this.pathGetter]
 
         const dtPath = target.closest('g[data-dt-path]').getAttribute('data-dt-path')
@@ -192,6 +142,9 @@ export default {
           callback: () => { this.render() }
         }
         // console.log(671, 'cvpayload', cvpayload)
+        if (name === 'barLine' && e.target.localName === 'use') {
+          cvpayload.context = 'repeatDot'
+        }
 
         if (name === 'keyAccid') {
           const keySig = target.closest('.keySig')
