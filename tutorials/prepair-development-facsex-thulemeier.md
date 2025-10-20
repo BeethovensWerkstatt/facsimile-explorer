@@ -90,7 +90,7 @@ The script contains the following command, wich can be adjusted, if files are re
 docker compose --env-file .env.devel.local up -d
 ```
 
-To stop the application run `./stop-.dev.sh` or:
+To stop the application run `./stop-dev.sh` or:
 ```bash
 docker compose down
 ```
