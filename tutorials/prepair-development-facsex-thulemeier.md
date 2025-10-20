@@ -68,6 +68,12 @@ For more control you can execute the installation directly with:
 docker compose run --rm -u 1000 webpack npm i --legacy-peer-deps
 ```
 
+*It is also possible to run the initialization with local installation of node:*
+```bash
+npm i --legacy-peer-deps
+```
+*But this might lead to compatibility issues due to different node versions locally installed and inside the container.*
+
 Create symbolic link to the `thulemeier` project with  
 ```.bash
 ln -s ../thulemeier node_modules
