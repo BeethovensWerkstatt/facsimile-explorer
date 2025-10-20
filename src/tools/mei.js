@@ -37,7 +37,10 @@ const rawSelectables = [
   'fermata',
   'octave',
   'f',
-  'tuplet'
+  'tuplet',
+  'mRpt',
+  'halfmRpt',
+  'beatRpt'
   // 'staff',
   // 'measure'
 ]
@@ -96,6 +99,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'rest'
   } else if (name === 'tuplet') {
     name = 'num'
+  } else if (name === 'mRpt' || name === 'halfmRpt' || name === 'beatRpt') {
+    name = 'line'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -141,6 +146,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'line') {
     if (origName === 'beam') {
       getDiplomaticBeam(annotElem, elem, bbox)
+    } else if (origName === 'mRpt' || origName === 'halfmRpt' || origName === 'beatRpt') {
+      getDiplomaticRepeatLine(annotElem, elem, bbox)
     }
   } else if (name === 'accid') {
     getDiplomaticAccid(annotElem, elem, annotElemRef)
@@ -293,6 +300,7 @@ function getDiplomaticRest (annotElem, rest) {
  * translates an annotated beam to a diplomatic beam
  * @param {*} annotElem the annotated beam to be translated
  * @param {*} beam the diplomatic beam to be translated
+ * @param {*} bbox the bounding box of the shapes of the beam
  */
 function getDiplomaticBeam (annotElem, beam, bbox) {
   beam.setAttribute('func', 'beam')
@@ -301,6 +309,21 @@ function getDiplomaticBeam (annotElem, beam, bbox) {
   beam.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
   beam.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
   beam.setAttribute('y2', (parseFloat(bbox.mm.y)).toFixed(1))
+}
+
+/**
+ * translates an mRpt etc. to a diplomatic line
+ * @param {*} annotElem the annotated beam to be translated
+ * @param {*} beam the diplomatic beam to be translated
+ * @param {*} bbox the bounding box of the shapes of the mRpt
+ */
+function getDiplomaticRepeatLine (annotElem, rpt, bbox) {
+  rpt.setAttribute('func', 'repeat')
+  rpt.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
+  rpt.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  rpt.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
+  rpt.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  rpt.setAttribute('y2', (parseFloat(bbox.mm.y)).toFixed(1))
 }
 
 /**
