@@ -66,7 +66,11 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   if (name === 'beam') {
     name = 'line'
   } else if (name === 'measure') {
-    name = 'barLine'
+    if (annotElemRef.context === 'repeatDot') {
+      name = 'dot'
+    } else {
+      name = 'barLine'
+    }
   } else if (name === 'staff') {
     switch (annotElemRef.name) {
       case 'keyAccid':
@@ -143,7 +147,11 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'barLine') {
     getDiplomaticBarline(annotElem, elem, bbox)
   } else if (name === 'dot') {
-    getDiplomaticDot(annotElem, elem)
+    if (annotElemRef.context === 'repeatDot') {
+      getDiplomaticRepeatDot(annotElem, elem, bbox)
+    } else {
+      getDiplomaticDot(annotElem, elem)
+    }
   } else if (name === 'chord') {
     if (annotElem.localName === 'note') {
       annotElem = annotElem.parentNode
@@ -339,8 +347,19 @@ function getDiplomaticBarline (annotElem, barLine, bbox) {
  */
 function getDiplomaticDot (annotElem, dot) {
   const loc = getLocAttribute(annotElem)
-
   dot.setAttribute('loc', loc)
+  dot.setAttribute('type', 'augmentation')
+}
+
+/**
+ * translates a repeat dot from an annotated note to a diplomatic dot
+ * @param {*} annotElem the annotated dot to be translated
+ * @param {*} dot the diplomatic dot to be translated
+ * @param {*} bbox the bounding box of the shapes of the dot
+ */
+function getDiplomaticRepeatDot (annotElem, dot, bbox) {
+  dot.setAttribute('y', bbox.mm.y)
+  dot.setAttribute('type', 'repeat')
 }
 
 /**

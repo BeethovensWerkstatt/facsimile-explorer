@@ -591,8 +591,7 @@ const dataModule = {
      * @param  {[string]} purpose              [description]
      * @param  {[function]} callback           [description]
      */
-    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, dtPath, id, name, measure, staff, purpose, callback, ...opts }) {
-      console.log(279, 'clickedVerovio extra opts:', opts)
+    clickedVerovio ({ commit, getters, dispatch }, { meiDom, path, dtPath, id, name, measure, staff, purpose, callback, context, ...opts }) {
       if (!meiDom) return
       switch (purpose) {
         case 'proofreading':
@@ -600,7 +599,7 @@ const dataModule = {
           break
         case 'transcribing':
           if (getters.explorerTab === 'diplo') {
-            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, dtPath, opts })
+            dispatch('diploTransToggle', { type: 'annotTrans', id, name, measure, staff, path, dtPath, opts, context })
           }
           break
         default:
@@ -1524,7 +1523,7 @@ const dataModule = {
       let keyBase = 0
 
       if (isSignatureElement) {
-        console.log(279, 'signature:', annotElemRef.name, annotElem)
+        // console.log(279, 'signature:', annotElemRef.name, annotElem)
         // TODO: do we need all staffs?
         const staffs = [...atDoc.querySelectorAll('staff[n="' + annotElemRef.staff + '"]')]
         annotElem = staffs[0]
