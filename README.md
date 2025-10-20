@@ -5,6 +5,14 @@
 npm install
 ```
 
+To ensure the right node version is used, the script `init-dev.sh` can be run once:
+
+```
+./init-dev.sh
+```
+
+This script starts `npm install` inside the container `webpack` defined in `docker-compose.yml`.
+
 ### Local development: thulemeier import
 
 To use the local thulemeier renderer as a global import (without publishing to NPM), a symlink is set up:
@@ -46,6 +54,12 @@ except the call to `/auth`, which ist a reverse proxy to
 
 ```
 docker-compose up -d --env-file=.env.local
+```
+
+or
+
+```
+./start-dev.sh
 ```
 
 Now http://localhost:8080/ work with github access_token callback at http://localhost:8080/auth
