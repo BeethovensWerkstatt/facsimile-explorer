@@ -219,7 +219,7 @@ export default {
     },
     hasAdjustableY () {
       const name = this.$store.getters.activeDiploTransElementName
-      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave' || name === 'line' || name === 'f' || name === 'artic'
+      return name === 'metaMark' || name === 'barLine' || name === 'dynam' || name === 'dir' || name === 'hairpin' || name === 'trill' || name === 'word' || name === 'tempo' || name === 'fing' || name === 'fermata' || name === 'octave' || name === 'line' || name === 'f' || name === 'artic' || name === 'num'
     },
     hasAdjustableX2 () {
       const name = this.$store.getters.activeDiploTransElementName

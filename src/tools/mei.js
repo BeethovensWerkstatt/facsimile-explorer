@@ -36,7 +36,8 @@ const rawSelectables = [
   'fing',
   'fermata',
   'octave',
-  'f'
+  'f',
+  'tuplet'
   // 'staff',
   // 'measure'
 ]
@@ -57,6 +58,7 @@ export const CSSselectables = clsSelectables.join(', ')
  * @returns the generated diplomatic transcription
  */
 export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, correspPath, annotElemRef, specialModes) {
+  const origName = annotElem.localName
   let name = annotElem.localName
 
   // console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
@@ -88,6 +90,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'word'
   } else if (name === 'mRest') {
     name = 'rest'
+  } else if (name === 'tuplet') {
+    name = 'num'
   }
 
   const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', name)
@@ -131,7 +135,9 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'rest') {
     getDiplomaticRest(annotElem, elem)
   } else if (name === 'line') {
-    getDiplomaticBeam(annotElem, elem, bbox)
+    if (origName === 'beam') {
+      getDiplomaticBeam(annotElem, elem, bbox)
+    }
   } else if (name === 'accid') {
     getDiplomaticAccid(annotElem, elem, annotElemRef)
   } else if (name === 'barLine') {
@@ -179,6 +185,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticWord(annotElem, elem, bbox)
   } else if (name === 'f') {
     getDiplomaticF(annotElem, elem, bbox)
+  } else if (name === 'num' && origName === 'tuplet') {
+    getDiplomaticTupletNum(annotElem, elem, bbox)
   } else {
     console.warn('TODO: @/tools/mei.js:generateDiplomaticElement() does not yet support ' + name + ' elements')
   }
@@ -456,6 +464,28 @@ function getDiplomaticArtic (annotElem, artic, bbox) {
   artic.setAttribute('x', +bbox.mm.x.toFixed(1))
   artic.setAttribute('y', +bbox.mm.y.toFixed(1))
   artic.setAttribute('artic', annotElem.getAttribute('artic'))
+}
+
+/**
+ * translates a tuplet number from an annotated tuplet to a diplomatic tuplet number
+ * @param {*} annotElem the annotated tuplet to be translated
+ * @param {*} tuplet the initial tuplet that needs specific treatment
+ * @returns the dt:num element
+ */
+function getDiplomaticTupletNum (annotElem, tuplet, bbox) {
+  tuplet.setAttribute('x', +bbox.mm.x.toFixed(1))
+  tuplet.setAttribute('y', +bbox.mm.y.toFixed(1))
+  tuplet.setAttribute('type', 'tuplet')
+
+  const num = annotElem.getAttribute('num')
+  const numbase = annotElem.getAttribute('numbase')
+  const numFormat = annotElem.getAttribute('num.format')
+
+  if (numFormat === 'ratio' && num && numbase) {
+    tuplet.textContent = num + ':' + numbase
+  } else {
+    tuplet.textContent = num
+  }
 }
 
 /**
