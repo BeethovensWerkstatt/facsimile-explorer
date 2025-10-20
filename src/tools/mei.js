@@ -215,11 +215,6 @@ function getDiplomaticNote (annotElem, note) {
       note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
     }
 
-    const grace = annotElem.getAttribute('grace')
-    if (grace) {
-      note.setAttribute('grace', grace)
-    }
-
     // log('diplomatic note:', note)
   } catch (err) {
     console.warn('WARNING: Could not properly generate diplomatic note for ' + annotElem, err)
