@@ -169,6 +169,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     getDiplomaticHairpin(annotElem, elem, bbox)
   } else if (name === 'trill') {
     getDiplomaticTrill(annotElem, elem, bbox)
+  } else if (name === 'artic') {
+    getDiplomaticArtic(annotElem, elem, bbox)
   } else if (name === 'metaMark') {
     if (specialModes && specialModes.pitchClarificationLetter) {
       getPitchClarificationLetter(annotElem, elem, bbox)
@@ -434,6 +436,18 @@ function getDiplomaticTrill (annotElem, trill, bbox) {
   trill.setAttribute('x', +bbox.mm.x.toFixed(1))
   trill.setAttribute('y', +bbox.mm.y.toFixed(1))
   trill.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
+}
+
+/**
+ * translates an artic from an annotated note to a diplomatic artic
+ * @param {*} annotElem the annotated artic to be translated
+ * @param {*} artic the initial artic that needs specific treatment
+ * @returns the dt:artic element
+ */
+function getDiplomaticArtic (annotElem, artic, bbox) {
+  artic.setAttribute('x', +bbox.mm.x.toFixed(1))
+  artic.setAttribute('y', +bbox.mm.y.toFixed(1))
+  artic.setAttribute('artic', annotElem.getAttribute('artic'))
 }
 
 /**

@@ -398,6 +398,11 @@ export default {
     stroke: black;
   }
 
+  svg g.artic:not(.data-corresp) {
+    fill: black;
+    stroke: black;
+  }
+
   svg g.measure[data-corresp] .barLine path {
     fill: $svgUsedShapeColor;
     stroke: $svgUsedShapeColor;
