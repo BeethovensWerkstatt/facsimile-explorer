@@ -1721,7 +1721,8 @@ const dataModule = {
         h: parseFloat(((bbox.px.h) / rects.ratio).toFixed(1)),
         offX: parseFloat((rastrum.px.x / rects.ratio).toFixed(1))
       }
-      // console.log(771, bbox)
+      const vuH = 8 / rastrum.h * bbox.mm.h
+      bbox.vu = { h: vuH }
 
       const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
       const correspPath = '../diplomaticTranscripts/' + dtDocName + '.xml#'

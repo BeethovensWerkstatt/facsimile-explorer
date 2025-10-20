@@ -127,7 +127,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   }
 
   if (name === 'note') {
-    getDiplomaticNote(annotElem, elem)
+    getDiplomaticNote(annotElem, elem, bbox)
   } else if (name === 'rest') {
     getDiplomaticRest(annotElem, elem)
   } else if (name === 'line') {
@@ -142,7 +142,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     if (annotElem.localName === 'note') {
       annotElem = annotElem.parentNode
     }
-    getDiplomaticChord(annotElem, elem)
+    getDiplomaticChord(annotElem, elem, bbox)
   } else if (name === 'keyAccid') {
     getDiplomaticKeyAccid(annotElem, elem)
   } else if (name === 'meterSig') {
@@ -190,8 +190,9 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
  * translates an annotated note to a diplomatic note
  * @param {*} annotElem the annotated note to be translated
  * @param {*} note the diplomatic note to be translated
+ * @param {*} bbox the bounding box of the shapes of the note
  */
-function getDiplomaticNote (annotElem, note) {
+function getDiplomaticNote (annotElem, note, bbox) {
   try {
     const loc = getLocAttribute(annotElem)
 
@@ -211,13 +212,20 @@ function getDiplomaticNote (annotElem, note) {
       headshape = annotElem.getAttribute('head.shape')
     }
     note.setAttribute('head.shape', headshape)
-    note.setAttribute('dur', dur)
 
-    // stem direction
+    // stem direction and length
     if (annotElem.hasAttribute('stem.dir')) {
       note.setAttribute('stem.dir', annotElem.getAttribute('stem.dir'))
+      note.setAttribute('stem.len', Math.round(bbox.vu.h))
     } else if (dur !== '1') {
       note.setAttribute('stem.dir', loc < 4 ? 'up' : 'down')
+      note.setAttribute('stem.len', Math.round(bbox.vu.h))
+    }
+
+    // flags (if any)
+    if (parseInt(dur) > 4 && !annotElem.closest('beam')) {
+      const flags = Math.log2(parseInt(dur) / 4)
+      note.setAttribute('bw:stem.flags', flags)
     }
 
     // log('diplomatic note:', note)
@@ -477,10 +485,7 @@ function getDiplomaticHairpin (annotElem, hairpin, bbox) {
  * @param {*} annotElem the annotated chord to be translated
  * @param {*} chord the diplomatic chord to be translated
  */
-function getDiplomaticChord (annotElem, chord) {
-  // console.log(472, ' entering ', annotElem, chord)
-
-  // chords will probably incorrectly point from a note to the diplomatic chord
+function getDiplomaticChord (annotElem, chord, bbox) {
   const correspPrefix = annotElem.getAttribute('corresp') || annotElem.querySelector('*[corresp]').getAttribute('corresp')
   const correspPath = correspPrefix.split('#')[0] + '#'
   annotElem.setAttribute('corresp', correspPath + chord.getAttribute('xml:id'))
@@ -488,26 +493,22 @@ function getDiplomaticChord (annotElem, chord) {
   let dur = annotElem.getAttribute('dur')
   const durs = annotElem.querySelectorAll('*[dur]')
   for (const d of durs) {
-    console.log(563, 'getDiplomaticChord(): checking duration in chord', d, annotElem)
     if (!dur) {
       dur = d.getAttribute('dur')
     } else if (d.hasAttribute('dur') && d.getAttribute('dur') !== dur) {
-      console.warn(563, 'getDiplomaticChord(): inconsistent duration in chord!', annotElem)
+      console.warn('getDiplomaticChord(): inconsistent duration in chord!', annotElem)
     }
   }
-  chord.setAttribute('dur', dur)
-  console.log(563, 'getDiplomaticChord(): setting duration', dur)
+
+  // chord.setAttribute('dur', dur)
   // annotElem is the chord element. If stem.dir is not set here, stemdir will be null
   let stemdir = annotElem.getAttribute('stem.dir')
   const notes = annotElem.querySelectorAll('note')
   notes.forEach((note, i) => {
     const diploNote = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
     diploNote.setAttribute('xml:id', 'd' + uuid())
-    if (!note.hasAttribute('dur')) {
-      // set duration if not set
-      note.setAttribute('dur', dur)
-    }
-    getDiplomaticNote(note, diploNote)
+
+    getDiplomaticNote(note, diploNote, bbox)
     note.setAttribute('corresp', correspPath + diploNote.getAttribute('xml:id'))
     chord.append(diploNote)
     // if stem.dir is not set in chord element look into notes
@@ -522,12 +523,23 @@ function getDiplomaticChord (annotElem, chord) {
     }
     */
     diploNote.removeAttribute('stem.dir')
+    diploNote.removeAttribute('stem.len')
   })
 
   if (stemdir === 'up' || stemdir === 'down') {
     chord.setAttribute('stem.dir', stemdir)
+    const minLoc = Math.min(...Array.from(chord.querySelectorAll('note')).map(note => parseInt(note.getAttribute('loc'))))
+    const maxLoc = Math.max(...Array.from(chord.querySelectorAll('note')).map(note => parseInt(note.getAttribute('loc'))))
+    const vuDist = maxLoc - minLoc
+    const stemLen = Math.max(bbox.vu.h - vuDist, 0)
+    chord.setAttribute('stem.len', Math.round(stemLen))
   }
-  // console.log(472, annotElem, chord)
+
+  // flags (if any)
+  if (parseInt(dur) > 4 && !annotElem.closest('beam')) {
+    const flags = Math.log2(parseInt(dur) / 4)
+    chord.setAttribute('bw:stem.flags', flags)
+  }
 }
 
 function getDiplomaticKeyAccid (annotElem, keyAccid) {
