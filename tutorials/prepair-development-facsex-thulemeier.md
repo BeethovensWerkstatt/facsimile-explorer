@@ -81,5 +81,17 @@ ln -s ../thulemeier node_modules
 
 ## Running the application
 
-With `./start-dev.sh` in the facsimile-explorer project folder the development environment should be started.  
+With `./start-dev.sh` in the facsimile-explorer project folder the development environment should be started.
+
 All missing docker images are loaded on the first run. The containers for the reverse proxy (nginx) and the webapp backend are also build on the first run. This might take a minute (or two 😉).
+
+The script contains the following command, wich can be adjusted, if files are renamed:
+```bash
+docker compose --env-file .env.devel.local up -d
+```
+
+To stop the application run `./stop-.dev.sh` or:
+```bash
+docker compose down
+```
+
