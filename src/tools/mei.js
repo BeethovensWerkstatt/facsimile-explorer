@@ -40,7 +40,9 @@ const rawSelectables = [
   'tuplet',
   'mRpt',
   'halfmRpt',
-  'beatRpt'
+  'beatRpt',
+  'bTrem',
+  'fTrem'
   // 'staff',
   // 'measure'
 ]
@@ -99,7 +101,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'rest'
   } else if (name === 'tuplet') {
     name = 'num'
-  } else if (name === 'mRpt' || name === 'halfmRpt' || name === 'beatRpt') {
+  } else if (name === 'mRpt' || name === 'halfmRpt' || name === 'beatRpt' || name === 'bTrem' || name === 'fTrem') {
     name = 'line'
   }
 
@@ -146,8 +148,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (name === 'line') {
     if (origName === 'beam') {
       getDiplomaticBeam(annotElem, elem, bbox)
-    } else if (origName === 'mRpt' || origName === 'halfmRpt' || origName === 'beatRpt') {
-      getDiplomaticRepeatLine(annotElem, elem, bbox)
+    } else if (origName === 'mRpt' || origName === 'halfmRpt' || origName === 'beatRpt' || origName === 'bTrem' || origName === 'fTrem') {
+      getDiplomaticRepeatLine(annotElem, elem, bbox, origName)
     }
   } else if (name === 'accid') {
     getDiplomaticAccid(annotElem, elem, annotElemRef)
@@ -317,8 +319,8 @@ function getDiplomaticBeam (annotElem, beam, bbox) {
  * @param {*} beam the diplomatic beam to be translated
  * @param {*} bbox the bounding box of the shapes of the mRpt
  */
-function getDiplomaticRepeatLine (annotElem, rpt, bbox) {
-  rpt.setAttribute('func', 'repeat')
+function getDiplomaticRepeatLine (annotElem, rpt, bbox, elemName) {
+  rpt.setAttribute('func', elemName)
   rpt.setAttribute('staff', annotElem.closest('staff').getAttribute('n'))
   rpt.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
   rpt.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))

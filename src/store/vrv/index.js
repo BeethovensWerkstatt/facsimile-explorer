@@ -126,7 +126,12 @@ const verovioModule = {
           'pedal@corresp',
           'fing@corresp',
           'fermata@corresp',
-          'octave@corresp'
+          'octave@corresp',
+          'mRpt@corresp',
+          'halfmRpt@corresp',
+          'beatRpt@corresp',
+          'bTrem@corresp',
+          'fTrem@corresp'
         ] //,
         // unit: 18
       }
