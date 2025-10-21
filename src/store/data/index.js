@@ -1588,7 +1588,7 @@ const dataModule = {
       // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
-      const isAtControlEvent = ['slur', 'tie', 'dynam', 'trill'].indexOf(annotElemRef.name) !== -1
+      const isAtControlEvent = ['slur', 'tie', 'dynam', 'trill', 'bTrem', 'fTrem', 'mRpt', 'halfmRpt', 'beatRpt'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN
@@ -1619,6 +1619,8 @@ const dataModule = {
           // console.log('startelem', startElem)
           annotStaffN = startElem.closest('staff').getAttribute('n')
           // console.log('691 found staff (d)', annotStaffN)
+        } else {
+          annotStaffN = annotElem.closest('staff')?.getAttribute('n') || annotElem.closest('staffDef')?.getAttribute('n') || 1
         }
       }
       // console.log('691 annotStaffN', annotStaffN)
@@ -1708,8 +1710,11 @@ const dataModule = {
 
       const origin = { x: rastrum.x, y: rastrum.y }
 
+      const atControlEventsToUseSecondStaffProperly = ['fTrem', 'bTrem', 'mRpt', 'halfmRpt', 'beatRpt']
+      const rastrumY = atControlEventsToUseSecondStaffProperly.includes(annotElemRef.name) ? rastrum.y : topRastrum.y
+
       const unrotatedPoint = {
-        x: parseFloat(mm), y: parseFloat((((bbox.px.y) / rects.ratio) + +rects.image.y - topRastrum.y).toFixed(1))
+        x: parseFloat(mm), y: parseFloat((((bbox.px.y) / rects.ratio) + +rects.image.y - rastrumY).toFixed(1))
       }
       const rotatedPoint = rotatePoint(unrotatedPoint, origin, rastrum.rotate)
       console.log(462, 'unrotatedPoint', unrotatedPoint, 'rotatedPoint', rotatedPoint, 'origin', origin, 'rastrum.rotate', rastrum.rotate)
