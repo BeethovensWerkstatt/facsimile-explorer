@@ -2196,7 +2196,7 @@ const dataModule = {
           obj.id = surfaceId
           obj.label = label
           obj.surfaceModernIndex = surfaceIndex
-          obj.modernLabel = isReconstruction ? surfaceLabel : null
+          obj.modernLabel = isReconstruction ? surfaceLabel : label
 
           obj.document = name
 
