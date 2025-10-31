@@ -188,9 +188,6 @@ export default {
             this.$store.dispatch('setActiveDiploTransElementId', null)
             this.$store.dispatch('diploTransToggle', { type: 'shape', id: click.target.id, wzgroup: svgGroupWzId })
           }
-          const func = (type) => () => {
-            console.log('make "' + click.target.id + '" a "' + type + '" (wz: ' + svgGroupWzId + ')')
-          }
 
           const usedShape = click.target.classList.contains('usedShape')
           // console.log('WRITING ZONE:', genDescWzId)

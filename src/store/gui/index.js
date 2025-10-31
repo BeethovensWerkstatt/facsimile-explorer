@@ -754,7 +754,7 @@ const guiModule = {
 
     diploTransClear ({ commit }, full = false) {
       commit('CLEAR_DIPLO_TRANS_ITEMS', full)
-      commit('PITCH_CLARIFICATION_LETTER_MODE', false)
+      commit('SET_PITCH_CLARIFICATION_LETTER_MODE', false)
     },
 
     /**
