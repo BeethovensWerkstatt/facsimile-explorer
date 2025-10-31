@@ -288,7 +288,7 @@ const guiModule = {
      * @param {[type]} id     [description]
      */
     SET_ACTIVE_WRITINGZONE (state, id) {
-      console.log('set active writing zone', id)
+      // console.log('set active writing zone', id)
       state.activeWritingZone = id
     },
 
@@ -382,7 +382,7 @@ const guiModule = {
     },
 
     TOGGLE_DIPLO_TRANS_ITEM (state, { id, type, name, measure, staff, path, dtPath, context, opts }) {
-      console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
+      // console.log('toggle diplo trans item:', type, name, state.diploTransActivations)
       if (type === 'annotTrans') {
         // state.diploTransActivations.shapes.clear()
         if (state.diploTransActivations.annotTrans.has(id)) {
@@ -408,7 +408,7 @@ const guiModule = {
     },
 
     CLEAR_DIPLO_TRANS_ITEMS (state, full = false) {
-      console.log(279, 'clear diplo trans selections', full)
+      // console.log(279, 'clear diplo trans selections', full)
       state.diploTransActivations.shapes = new Map()
       state.diploTransActivations.annotTrans = new Map()
       if (full) {
@@ -765,7 +765,7 @@ const guiModule = {
     setActiveWritingZoneForShape ({ dispatch, getters }, { type, wzgroup }) {
       if (type === 'shape' && wzgroup) {
         const genDescWzId = getters.genWzIdForShape(wzgroup)
-        console.log(genDescWzId)
+        // console.log(genDescWzId)
         if (genDescWzId && genDescWzId !== getters.activeWritingZone) {
           dispatch('setActiveWritingZone', genDescWzId)
         }

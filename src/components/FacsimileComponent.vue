@@ -148,9 +148,6 @@ export default {
         alt: e.originalEvent.altKey
       }
 
-      // const dtstore = useDiploTrans()
-      // console.log(dtstore.selections.facs)
-
       const origin = new OpenSeadragon.Point(0, 0)
       const deg = this.$store.getters.currentPageRotation
 
@@ -164,8 +161,6 @@ export default {
       // if (onPage) {
       click.page = clickedPagePos
       // }
-
-      // console.log(click, click.target.localName)
 
       // check for click to svg shape
       if (click.target.localName === 'path' || click.target.localName === 'polygon') {
@@ -195,8 +190,6 @@ export default {
           const addShapeEntry = {
             label: 'Add shape to current DiploTrans element',
             action: () => {
-              // console.log('add shape to current DiploTrans element')
-              // TODO: ask for function (stem/head/etc)
               const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
               const id = this.$store.getters.activeDiploTransElementId
               const baseMessage = 'Add shape to DT at '
@@ -210,7 +203,7 @@ export default {
                 facs.push(svgPath + '#' + click.target.id)
                 const afacs = facs.join(' ')
                 snippet.setAttribute('facs', afacs)
-                console.log('facs:', afacs, snippet)
+                // console.log('facs:', afacs, snippet)
                 this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
                 this.$store.dispatch('logChange', {
                   path: filePath,
@@ -242,15 +235,6 @@ export default {
             disabled: !usedShape
           }
 
-          /* const adjustFunctionEntry = {
-            label: 'Adjust function of shape in DiploTrans',
-            action: () => {
-              console.log('TODO: adjust function of shape in DiploTrans')
-            },
-            // TODO: only possible for some element types, like notes, but not slurs
-            disabled: this.$store.getters.activeDiploTransElementId === null && !usedShape
-          } */
-
           // Function to transcribe new Deletion
           const setDeletion = {
             label: 'Deletion',
@@ -269,11 +253,9 @@ export default {
                 del.setAttribute('facs', svgPath + '#' + click.target.id)
 
                 const path = appendNewElement(del, 'path', 'http://www.w3.org/2000/svg')
-                // console.log(752, 'setDeletion: svg:path', path)
 
                 const rects = this.$store.getters.osdRects
                 const targetBBox = click.target.getBBox()
-                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
                 const bbox = { px: { x: targetBBox.x, y: targetBBox.y, w: targetBBox.width, h: targetBBox.height } }
 
                 bbox.mm = {
@@ -302,19 +284,6 @@ export default {
                   isNewDoument: false
                 })
                 this.$store.dispatch('setActiveDiploTransElementId', del.getAttribute('xml:id'))
-
-                /*
-                // TEST: log the deletion element
-                const id = del.getAttribute('xml:id')
-                const file = this.$store.getters.documentByPath(filePath).cloneNode(true)
-                // const file = doc.cloneNode(true)
-                const allElems = doc.querySelectorAll('mdiv *')
-                const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
-                // const elem = file.querySelector('del[*|id="' + id + '"]')
-                console.log(752, 'setDeletion: element', elem, 'id', id)
-                const serializer = new XMLSerializer()
-                console.log(752, serializer.serializeToString(file))
-                // END TEST */
               } else {
                 console.warn('setDeletion: no draft element found!')
               }
@@ -326,7 +295,6 @@ export default {
           const setUnclear = {
             label: 'Unclear Symbol',
             action: async () => {
-              // console.log('identify shape as unclear')
               const baseMessage = 'transcribe unclear'
               const filePath = this.$store.getters.currentWritingZoneObject?.diploTrans
               // const id = this.$store.getters.activeDiploTransElementId
@@ -338,20 +306,6 @@ export default {
               if (draft) {
                 const unclear = appendNewElement(draft, 'unclear')
                 unclear.setAttribute('facs', svgPath + '#' + click.target.id)
-
-                /*
-                const rects = this.$store.getters.osdRects
-                const targetBBox = click.target.getBBox()
-                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
-                const bbox = { px: { x: targetBBox.x, y: targetBBox.y, w: targetBBox.width, h: targetBBox.height } }
-
-                bbox.mm = {
-                  x: parseFloat((bbox.px.x / rects.ratio + +rects.image.x).toFixed(1)),
-                  y: parseFloat((bbox.px.y / rects.ratio + +rects.image.y).toFixed(1)),
-                  w: parseFloat((bbox.px.w / rects.ratio).toFixed(1)),
-                  h: parseFloat((bbox.px.h / rects.ratio).toFixed(1)),
-                  offX: 0
-                } */
 
                 await this.$store.dispatch('loadDocumentIntoStore', { path: filePath, dom: doc })
                 await this.$store.dispatch('logChange', {
@@ -380,14 +334,9 @@ export default {
               const doc = origdoc?.cloneNode(true)
               const draft = doc?.querySelector('draft')
 
-              console.log(331, 'target', click.target)
-              console.log(331, 'parent', click.target.parentElement)
-              console.log(331, 'grandparent', click.target.parentElement?.parentElement)
-
               if (draft) {
                 const rects = this.$store.getters.osdRects
                 const targetBBox = click.target.getBBox()
-                // console.log(784, 'bbox', click.target.getBBox(), 'rects', rects)
 
                 const wzShapes = click.target.parentElement?.parentElement?.querySelectorAll('path')
                 const systems = draft.querySelectorAll('system')
@@ -396,16 +345,12 @@ export default {
                 // Identify the closest system to the clicked shape with relative positioning
                 const targetSystem = identifyClosestSystem(targetBBox, systems, wzShapes, rastrumsOnCurrentPage, rects)
 
-                console.log(641, 'Target system with relative position:', targetSystem)
-
                 let positionX, positionY
 
                 if (targetSystem && targetSystem.relativePosition) {
                   // Use relative position to top rastrum
                   positionX = parseFloat(targetSystem.relativePosition.relativeX.toFixed(1))
                   positionY = parseFloat(targetSystem.relativePosition.relativeY.toFixed(1))
-                  console.log('Using relative position to rastrum:', targetSystem.relativePosition.rastrumId,
-                    'at', positionX, positionY)
                 } else {
                   // Fallback to absolute positioning (old method)
                   console.warn('No relative positioning available, using absolute coordinates')
@@ -490,7 +435,7 @@ export default {
       if (click.target.closest('.diploTrans')/* && click.target.closest('.measure') */) {
         const wzId = click.target.closest('.diploTrans').getAttribute('data-diploTrans')
         const target = click.target.closest(CSSselectables)
-        // console.log(365, target, CSSselectables)
+
         if (target) {
           let id = target.getAttribute('data-id')
           this.$store.dispatch('setActiveWritingZone', wzId)
@@ -499,7 +444,6 @@ export default {
             id = target.closest('.chord').getAttribute('data-id')
           }
           this.$store.dispatch('setActiveDiploTransElementId', id)
-          // console.log('selecting activeDiploTransElementId: ', id)
         }
       }
     },
@@ -509,7 +453,7 @@ export default {
      * @return {[type]} [description]
      */
     openFacsimile () {
-      console.log('FacsimileComponent:openFasimile() started')
+      // console.log('FacsimileComponent:openFasimile() started')
       if (!this.tileSource) {
         // console.log('Page not available (yet)')
         return null
@@ -539,7 +483,7 @@ export default {
      * @return {[type]} [description]
      */
     facsimileOpened (data) {
-      console.log('FacsimileComponent:facsimileOpened()')
+      // console.log('FacsimileComponent:facsimileOpened()')
       this.renderedUri = data.source
       this.$store.dispatch('setLoading', false)
 
@@ -562,8 +506,6 @@ export default {
 
       this.renderShapes()
       this.renderSystems()
-
-      // console.log('facsimileOpened', data)
     },
 
     /**
@@ -618,12 +560,6 @@ export default {
      * @return {[type]} [description]
      */
     renderGrid () {
-      // console.log('FacsimileComponent:renderGrid()')
-      // temporary condition
-      /* if (this.viewer) {
-        return null
-      } */
-
       this.$refs.container.querySelectorAll('.grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
@@ -803,7 +739,6 @@ export default {
      */
     indicateUsedShapes () {
       const arr = [...this.$store.getters.activeDiploTransUsedShapes]
-      console.log(279, 'FacsimileComponent:indicateUsedShapes(): starting with this array:\n', arr)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
@@ -837,7 +772,6 @@ export default {
      */
     indicateSelectedShapes () {
       const arr2 = [...this.$store.getters.diploTransActivationsInShapes.map(dt => dt.id)]
-      console.log(279, 'FacsimileComponent:indicateSelectedShapes(): hilighting with this array:\n', arr2)
       const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
 
       if (existingOverlay !== null) {
@@ -874,7 +808,6 @@ export default {
      */
     createControlPoint (element, controlpoints, i, renderChange, persistChange, factor = 90, cls = 'curve-controlpoint') {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      // console.log(836, i, i + 1, controlpoints[i], controlpoints[i + 1])
       circle.setAttribute('cx', controlpoints[i])
       circle.setAttribute('cy', controlpoints[i + 1])
       circle.setAttribute('r', '52')
@@ -900,7 +833,6 @@ export default {
           const newY = viewportCoords.y * factor
           controlpoints[i] = newX
           controlpoints[i + 1] = newY
-          // console.log(836, controlpoints, viewportCoords)
           circle.setAttribute('cx', newX)
           circle.setAttribute('cy', newY)
           renderChange(controlpoints)
@@ -916,21 +848,15 @@ export default {
      * creates a control points for barlines, curves or else
      */
     indicateSelectedDTElement () {
-      // console.log('indicateSelectedDTElement', this.$store.getters.activeDiploTransElementdIds)
       const dtid = this.$store.getters.activeDiploTransElementId
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
-      // console.log(9272, 'indicateSelectedDTElement', dtid, this.$store.getters.activeDiploTransElement)
 
       if (existingOverlay !== null) {
-        // console.log('found an overlay')
         existingOverlay.querySelectorAll('.selectedDiploTrans').forEach(element => {
-          console.log(9272, 'remove selectedDiploTrans from', element)
           element.classList.remove('selectedDiploTrans')
         })
         existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach((element, i) => {
-          console.log(9272, 'add selectedDiploTrans to', element)
           element.classList.add('selectedDiploTrans')
-          // console.log(752, element, i)
           if (i === 0) {
             if (this.$store.getters.activeDiploTransElementName === 'barLine') { // control barLine
               const barline = this.$store.getters.activeDiploTransElement
@@ -939,7 +865,6 @@ export default {
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
               // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
-              // console.log(753, 'barLine rastrum control', rastrumId)
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               const path = element.querySelector('path')
@@ -952,7 +877,6 @@ export default {
               // scaleXYControlpoints calculates list of x,y coordinates
               // from the barline x,y,x2,y2 attributes, using rastrum and factor
               const controlpoints = scaleXYControlpoints(barpoints, rastrum, factor)
-              // console.log(752, 'barline controlpoints', controlpoints, rastrum, factor)
               for (const i of [0, 2]) {
                 const tracker = this.createControlPoint(
                   element,
@@ -971,13 +895,11 @@ export default {
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: barpoints[2].toFixed(2) })
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: barpoints[3].toFixed(2) })
                     // update barline x,y,x2,y2 attributes in MEI
-                    console.log(9272, 'barline updated', barpoints)
                   },
                   factor
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-              console.log(9272, 'barLine', element, barline)
             } else if (this.$store.getters.activeDiploTransElementName === 'curve') { // conmtrol curve
               const curve = this.$store.getters.activeDiploTransElement
               const section = curve.closest('section')
@@ -1024,7 +946,6 @@ export default {
                     bezier[i] = (newX / factor) - rastrum.x
                     bezier[i + 1] = (newY / factor) - rastrum.y
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'bezier', value: bezier.map(c => c.toFixed(2)).join(' ') })
-                    // console.log(836, 'curve bezier updated', bezier)
                   },
                   factor
                 )
@@ -1040,7 +961,6 @@ export default {
                 +hairpin.getAttribute('x2'),
                 +hairpin.getAttribute('y2')
               ]
-              console.log(752, 'hairpin', element, cres, opening)
               const section = hairpin.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
               // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
@@ -1055,7 +975,7 @@ export default {
                   ? `${controlpoints[2]},${controlpoints[3] - opener} ${controlpoints[0]},${controlpoints[1]} ${controlpoints[2]},${controlpoints[3] + opener}`
                   : `${controlpoints[0]},${controlpoints[1] - opener} ${controlpoints[2]},${controlpoints[3]} ${controlpoints[0]},${controlpoints[1] + opener}`
               }
-              console.log(752, 'hairpin controlpoints', controlpoints, rastrum, factor, svgpoints(controlpoints))
+              // console.log(752, 'hairpin controlpoints', controlpoints, rastrum, factor, svgpoints(controlpoints))
               for (const i of [0, 2]) {
                 const tracker = this.createControlPoint(
                   element,
@@ -1089,13 +1009,13 @@ export default {
               const delpath = del.querySelector('path')
               // four edge points for deletion area [x1,y1,x2,y2,x3,y3,x4,y4]
               const delpoints = delpath.getAttribute('d').split(' ').filter(p => p.length > 1).map(p => p.substring(1).split(',').map(parseFloat)).flat()
-              console.log(752, 'del', element, del, delpoints)
-              const rects = this.$store.getters.osdRects
+              // console.log(752, 'del', element, del, delpoints)
+              // const rects = this.$store.getters.osdRects
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
               // scaleXYControlpoints calculates list of x,y coordinates
               // from the deletion x1,y1,x2,y2,x3,y3,x4,y4 attributes scaled to image coordinates
               const controlpoints = scaleXYControlpoints(delpoints, { x: 0, y: 0 }, factor)
-              console.log(752, 'del controlpoints', controlpoints, rects, factor)
+              // console.log(752, 'del controlpoints', controlpoints, rects, factor)
               // create path d-attribute string for background deletion area
               const svgpoints = controlpoints => {
                 const points = []
@@ -1180,13 +1100,13 @@ export default {
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: linepoints[2].toFixed(2) })
                     this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: linepoints[3].toFixed(2) })
                     // update barline x,y,x2,y2 attributes in MEI
-                    console.log(9272, 'barline updated', linepoints)
+                    // console.log(9272, 'barline updated', linepoints)
                   },
                   factor
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-              console.log(9272, 'line', element, linepoints, func)
+              // console.log(9272, 'line', element, linepoints, func)
             }
           }
         })
@@ -1288,26 +1208,6 @@ export default {
 
       tiledImage.setRotation(tileSource.degrees)
       tiledImage.setPosition(newPos)
-      // tiledImage.fitBounds(rect)
-      // console.log('setPos to ', newPos)
-      /* const rotation = parseFloat(this.$store.getters.currentPageRotation)
-
-      if (!rotation) {
-        return null
-      }
-
-      const pageDimensions = this.$store.getters.currentPageDimensions
-
-      if (!pageDimensions) {
-        return null
-      }
-
-      console.log('pageDim', pageDimensions)
-      const center = new OpenSeadragon.Point(parseFloat(pageDimensions.mmWidth) / 2, parseFloat(pageDimensions.mmHeight) / 2)
-
-      const page = getMediaFragmentInnerBoxRect(OpenSeadragon, this.$store.getters)
-      console.log('page', page) */
-      // this.viewer.viewport.setRotationWithPivot(rotation, page.location.getCenter())
     },
 
     renderPageBorders () {
@@ -1505,20 +1405,15 @@ export default {
       })
 
       dtArr.forEach(async obj => {
-        console.log('913 entering ', obj)
-
         if (obj.dt) {
           const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
-          // console.log('913: draftId', draftId)
           const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
-          // console.log('913: diplo', renderedDiplo)
 
           const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
           const activeWritingZone = this.$store.getters.activeWritingZone
           // const svgForCurrentPage = this.$store.getters.svgForCurrentPage
 
           if (!existingOverlay) {
-            // console.log('adding overlay for ' + dt.wzDetails.diploTrans)
             const element = document.createElement('div')
             element.classList.add('overlay')
             element.classList.add('diploTrans')
@@ -1549,15 +1444,7 @@ export default {
           } else {
             // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
             // TODO: renderedDiplo is newly created, so we need to cleanUp again???
-            existingOverlay.replaceChild(renderedDiplo) /* cleanUpDiplomaticTranscript(renderedDiplo, obj.dt, {
-              rastrumsOnCurrentPage,
-              selectedCurve: this.$store.getters.activeDiploTransElementId,
-              viewer: this.viewer
-            }, svgForCurrentPage), existingOverlay.firstChild) */
-            /* const x = viewBox.split(' ')[0]
-            const y = viewBox.split(' ')[1]
-            const w = parseFloat(viewBox.split(' ')[2]) - parseFloat(x)
-            const h = parseFloat(viewBox.split(' ')[3]) - parseFloat(y) */
+            existingOverlay.replaceChild(renderedDiplo)
             const location = pageLocation // new OpenSeadragon.Rect(x, y, w, h)
             if (obj.wzDetails.id === activeWritingZone) {
               existingOverlay.classList.add('activeDiploTrans')
@@ -1574,8 +1461,6 @@ export default {
       try {
         // Use 'fullPage' mode for diplomatic rendering, as in test.js
         const svgElem = await render(meiDom, { mode: 'singleDraft', id: draftId })
-        // console.log(9272, 'renderDiploTrans', svgElem)
-
         return svgElem
       } catch (err) {
         console.error('Thulemeier rendering failed:', err)
@@ -1588,15 +1473,6 @@ export default {
      * @return {[type]} [description]
      */
     focusActiveWritingZone () {
-      // const currentZone = this.$store.getters.currentWritingZoneObject
-      // const xywh = currentZone.xywh.split(',')
-
-      // const image = this.viewer.world.getItemAt(0)
-      // const pos = image.imageToViewportRectangle(parseInt(xywh[0]), parseInt(xywh[1]), parseInt(xywh[2]), parseInt(xywh[3]))
-
-      // console.log('FacsimileComponent.vue: skipping focusActiveWritingZone()', pos)
-      // this.viewer.viewport.fitBoundsWithConstraints(pos)
-
       const oldActive = this.$refs.container.querySelector('.activeDiploTrans')
 
       if (oldActive !== null) {
@@ -1698,7 +1574,6 @@ export default {
 
     this.unwatchSVG = this.$store.watch((state, getters) => [getters.activeWritingZone, getters.svgForCurrentPage, getters.activeWritingLayer],
       ([newId, newSvg, newLayer], [oldId, oldSvg, oldLayer]) => {
-        // console.log(9272, 'watch SVG: ', newId, newSvg, newLayer, ' / ', oldId, oldSvg, oldLayer)
         if (newSvg) {
           this.renderShapes()
         }
@@ -1714,27 +1589,23 @@ export default {
 
     this.unwatchDiploTranscriptsOnCurrentPage = this.$store.watch((state, getters) => getters.renderableDiplomaticTranscriptsOnCurrentPage,
       (newArr, oldArr) => {
-        // console.log(9272, 'watch diploTranscripts: ', newArr, ' / ', oldArr)
         this.renderDiploTransOnPage()
       })
 
     this.unwatchUsedShapes = this.$store.watch((state, getters) => getters.activeDiploTransUsedShapes,
       (newArr, oldArr) => {
-        // console.log(9272, 'watch usedShapes: ', newArr, ' / ', oldArr)
         this.indicateUsedShapes()
         this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedId = this.$store.watch((state, getters) => getters.diploTransActivationsInShapes,
       (newValue, oldValue) => {
-        // console.log(9272, 'watch selectedId: ', newValue, ' / ', oldValue)
         this.indicateSelectedShapes()
         this.indicateSelectedDTElement()
       })
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
-        // console.log(9272, 'watch selectedDTElement: ', newValue, ' / ', oldValue)
         for (const i in this.mouseTracker) {
           this.setMouseTracker(i, null)
         }

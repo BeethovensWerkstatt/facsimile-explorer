@@ -66,7 +66,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   const origName = annotElem.localName
   let name = annotElem.localName
 
-  // console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+  console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
 
   if (name === 'beam') {
     name = 'line'
@@ -618,9 +618,8 @@ function getDiplomaticChord (annotElem, chord, bbox) {
 
 function getDiplomaticKeyAccid (annotElem, keyAccid) {
   const loc = annotElem.getAttribute('loc')
-  console.log('keyAccid:', loc)
   keyAccid.setAttribute('loc', loc)
-  console.log('getDiplomaticKeysig', annotElem, keyAccid)
+  console.log('883 getDiplomaticKeysig', annotElem, keyAccid)
 }
 
 function getDiplomaticMetersig (annotElem, metersig, { count, unit }) {
