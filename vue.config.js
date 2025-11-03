@@ -9,7 +9,8 @@ module.exports = defineConfig({
       // configuration options
       fallback: {
         path: false, // require.resolve('path-browserify')
-        fs: false
+        fs: false,
+        util: false
       }
     }
   }
