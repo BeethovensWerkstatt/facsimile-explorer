@@ -2184,7 +2184,7 @@ const dataModule = {
           const target = graphic.getAttributeNS('', 'target').trim()
           const surfaceN = surface.hasAttribute('n') ? surface.getAttributeNS('', 'n').trim() : i
           const surfaceLabel = surface.hasAttribute('label') ? surface.getAttributeNS('', 'label').trim() : surfaceN
-          const label = isReconstruction ? i : surfaceLabel
+          const label = !isReconstruction ? i : surfaceLabel
 
           const position = (folium.getAttribute('outer.recto') === match ||
             folium.getAttribute('inner.recto') === match ||
@@ -2196,7 +2196,7 @@ const dataModule = {
           obj.id = surfaceId
           obj.label = label
           obj.surfaceModernIndex = surfaceIndex
-          obj.modernLabel = isReconstruction ? surfaceLabel : label
+          obj.modernLabel = isReconstruction ? label : surfaceLabel
 
           obj.document = name
 

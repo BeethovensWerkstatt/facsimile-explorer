@@ -294,8 +294,8 @@ export const prepareAtDomForRendering = (atDom) => {
   })
   const staffCorresp = clone.querySelectorAll('staff[corresp]')
   staffCorresp.forEach((staff) => {
-    const corresps = staff.getAttribute('corresp').split(' ')
-    console.log(279, 'prepareAtDomForRendering', staff.getAttribute('xml:id'), 'corresp', corresps)
+    // const corresps = staff.getAttribute('corresp').split(' ')
+    // console.log(279, 'prepareAtDomForRendering', staff.getAttribute('xml:id'), 'corresp', corresps)
   })
   return clone
 }
@@ -306,7 +306,7 @@ export const prepareAtDomForRendering = (atDom) => {
  * @param {*} atDom
  */
 export const improveAtSvg = (svgDom, atDom) => {
-  console.log(279, 'improveAtSvg', svgDom, atDom)
+  // console.log(279, 'improveAtSvg', svgDom, atDom)
   const dotBearers = svgDom.querySelectorAll('*[data-dot-corresp]')
   dotBearers.forEach((dotBearer) => {
     const corresp = dotBearer.getAttribute('data-dot-corresp')
@@ -321,11 +321,11 @@ export const improveAtSvg = (svgDom, atDom) => {
 
   const measureCorresp = svgDom.querySelectorAll('g.measure:not(.bounding-box)[data-corresp]')
   measureCorresp.forEach((measure) => {
-    const corresps = measure.getAttribute('data-corresp').split(' ')
+    /* const corresps = measure.getAttribute('data-corresp').split(' ')
     for (const corresp of corresps) {
-      const shapeId = corresp.split('#')[1]
-      console.log(845, 'improveAtSvg', shapeId, 'measure corresp', measure)
-    }
+      // const shapeId = corresp.split('#')[1]
+      // console.log(845, 'improveAtSvg', shapeId, 'measure corresp', measure)
+    } */
   })
 
   // we need the current WZ DT Dom to resolve the type of the corresponding element
@@ -333,22 +333,22 @@ export const improveAtSvg = (svgDom, atDom) => {
   const staffCorresp = svgDom.querySelectorAll('g.staff:not(.bounding-box)[data-corresp]')
   const dtPath = store.getters.currentWzDtPath
   const dtDom = dtPath ? store.getters.documentByPath(dtPath) : null
-  console.log(279, 'improveAtSvg', 'staffCorresp', staffCorresp, dtPath, dtDom)
+  // console.log(279, 'improveAtSvg', 'staffCorresp', staffCorresp, dtPath, dtDom)
   staffCorresp.forEach((staff) => {
     const corresps = staff.getAttribute('data-corresp').split(' ')
     for (const corresp of corresps) {
       const dtElementId = corresp.split('#')[1]
       const dtElement = dtDom.querySelector('*[*|id="' + dtElementId + '"]')
-      console.log(279, 'improveAtSvg', dtElementId, 'staff corresp', dtElement)
+      // console.log(279, 'improveAtSvg', dtElementId, 'staff corresp', dtElement)
       const dtName = (dtElement?.localName || '').replace('accid', 'keyAccid') // keyAccid is a special case, as it is rendered as keyAccid in the SVG, but the DT uses accid
       if (dtName) {
         const elements = staff.querySelectorAll(`*[data-class="${dtName}"]`)
         for (const element of elements) {
           element.setAttribute('data-corresp', corresp)
-          console.log(279, 'improveAtSvg', dtElementId, 'staff corresp', staff, dtName)
+          // console.log(279, 'improveAtSvg', dtElementId, 'staff corresp', staff, dtName)
         }
       } else {
-        console.warn(279, 'improveAtSvg', dtElementId, 'staff corresp', staff, dtName)
+        console.warn('improveAtSvg', dtElementId, 'staff corresp', staff, dtName)
       }
     }
   })
