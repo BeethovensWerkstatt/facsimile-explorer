@@ -3,7 +3,7 @@
 # 1. set up the build environment and compile the app
 # 2. run it with nginx
 #########################
-FROM node:22 as build-stage
+FROM node:22 AS build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
@@ -17,7 +17,7 @@ RUN gulp gitlog
 # now move on to deploying it
 #########################
 
-FROM nginx as production-stage
+FROM nginx AS production-stage
 RUN apt-get update
 RUN apt-get install -y jq
 RUN mkdir /app
