@@ -353,5 +353,66 @@ export const improveAtSvg = (svgDom, atDom) => {
     }
   })
 
+  fixScoreDefChildIds(svgDom, atDom)
+
   return svgDom
+}
+
+const fixScoreDefChildIds = (svgDom, meiDom) => {
+  console.log('771 fixScoreDefChildIds')
+  const firstScoreDef = meiDom.querySelector('scoreDef')
+
+  const firstMeasureStavesSvg = svgDom.querySelector('g.measure:not(.bounding-box)').querySelectorAll('g.staff:not(.bounding-box)')
+
+  firstMeasureStavesSvg.forEach((staffSvg, index) => {
+    const n = index + 1
+    const staffDef = firstScoreDef.querySelector('staffDef[n="' + n + '"]')
+    const meterSigSvg = staffSvg.querySelector('g.meterSig:not(.bounding-box)')
+    const meterSigMei = staffDef.querySelector('meterSig')
+
+    if (meterSigSvg && meterSigMei) {
+      meterSigSvg.setAttribute('data-id', meterSigMei.getAttribute('xml:id'))
+      if (meterSigMei.hasAttribute('corresp')) {
+        meterSigSvg.setAttribute('data-corresp', meterSigMei.getAttribute('corresp'))
+      } else {
+        meterSigSvg.removeAttribute('data-corresp')
+      }
+    }
+
+    const clefSvg = staffSvg.querySelector('g.clef:not(.bounding-box)')
+    const clefMei = staffDef.querySelector('clef')
+    if (clefSvg && clefMei) {
+      clefSvg.setAttribute('data-id', clefMei.getAttribute('xml:id'))
+      if (clefMei.hasAttribute('corresp')) {
+        clefSvg.setAttribute('data-corresp', clefMei.getAttribute('corresp'))
+      } else {
+        clefSvg.removeAttribute('data-corresp')
+      }
+    }
+
+    const keySigSvg = staffSvg.querySelector('g.keySig:not(.bounding-box)')
+    const keySigMei = staffDef.querySelector('keySig')
+    if (keySigSvg && keySigMei) {
+      keySigSvg.setAttribute('data-id', keySigMei.getAttribute('xml:id'))
+      if (keySigMei.hasAttribute('corresp')) {
+        keySigSvg.setAttribute('data-corresp', keySigMei.getAttribute('corresp'))
+      } else {
+        keySigSvg.removeAttribute('data-corresp')
+      }
+
+      const keyAccidsSvg = keySigSvg.querySelectorAll('g.keyAccid:not(.bounding-box)')
+      const keyAccidsMei = keySigMei.querySelectorAll('keyAccid')
+      keyAccidsSvg.forEach((keyAccidSvg, ki) => {
+        const keyAccidMei = keyAccidsMei[ki]
+        if (keyAccidMei) {
+          keyAccidSvg.setAttribute('data-id', keyAccidMei.getAttribute('xml:id'))
+          if (keyAccidMei.hasAttribute('corresp')) {
+            keyAccidSvg.setAttribute('data-corresp', keyAccidMei.getAttribute('corresp'))
+          } else {
+            keyAccidSvg.removeAttribute('data-corresp')
+          }
+        }
+      })
+    }
+  })
 }

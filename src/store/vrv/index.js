@@ -102,6 +102,8 @@ const verovioModule = {
           'accid@corresp',
           'keySig@template',
           'keySig@sig',
+          'keyAccid@corresp',
+          'keyAccid@xml:id',
           'staff@n',
           'clef@shape',
           'clef@line',
@@ -120,6 +122,7 @@ const verovioModule = {
           // not essential, but useful for debugging
           'meterSig@count',
           'meterSig@unit',
+          'meterSig@corresp',
           'trill@corresp',
           'syl@corresp',
           'tempo@corresp',
