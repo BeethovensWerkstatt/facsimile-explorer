@@ -19,7 +19,6 @@
     "codemirror-readonly-ranges": "^0.1.0-alpha.2",
     "core-js": "^3.8.3",
     "js-file-download": "^0.4.12",
-    "liquifier": "github:BeethovensWerkstatt/liquifier",
     "octokit": "^3.1.1",
     "openseadragon": "^4.1.0",
     "pinia": "^2.1.4",
@@ -35,7 +34,8 @@
     "xml-beautifier": "^0.5.0",
     "xml-formatter": "^3.4.1",
     "xmldom": "^0.6.0",
-    "thulemeier": "file:../thulemeier"
+    "thulemeier": "github:BeethovensWerkstatt/thulemeier",
+    "liquifier": "github:BeethovensWerkstatt/liquifier"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
