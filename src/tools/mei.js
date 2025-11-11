@@ -468,7 +468,7 @@ function getDiplomaticOctave (annotElem, octave, bbox) {
   octave.setAttribute('staff', annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0])
   octave.setAttribute('dis', annotElem.getAttribute('dis'))
   octave.setAttribute('dis.place', annotElem.getAttribute('dis.place'))
-  if (octave.hasAttribute('extender')) {
+  if (annotElem.hasAttribute('extender')) {
     octave.setAttribute('extender', annotElem.getAttribute('extender'))
   }
 }
