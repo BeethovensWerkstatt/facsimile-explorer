@@ -1064,7 +1064,7 @@ export default {
                 )
                 this.setMouseTracker(i / 2, tracker)
               }
-            } else if (this.$store.getters.activeDiploTransElementName === 'line') { // control beam
+            } else if (this.$store.getters.activeDiploTransElementName === 'line') { // control beam, b
               const line = this.$store.getters.activeDiploTransElement
               const section = line.closest('section')
               const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
@@ -1072,7 +1072,6 @@ export default {
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
               const factor = 90 // 9px per vu, factor 10 as general factor of Verovio
-              const beamLineWidth = 90
               const linepoints = [
                 +line.getAttribute('x'),
                 +line.getAttribute('y'),
@@ -1081,6 +1080,7 @@ export default {
               ]
               const func = line.getAttribute('func')
               if (func === 'beam') {
+                const beamLineWidth = 90
                 const path = element.querySelector('polygon')
                 const controlpoints = scaleXYControlpoints(linepoints, rastrum, factor)
                 for (const i of [0, 2]) {
@@ -1091,6 +1091,35 @@ export default {
                     // render change
                     (controlpoints) => {
                       path.setAttribute('points', `${controlpoints[0]},${controlpoints[1] - beamLineWidth} ${controlpoints[2]},${controlpoints[3] - beamLineWidth} ${controlpoints[2]},${controlpoints[3]} ${controlpoints[0]},${controlpoints[1]}`)
+                    },
+                    // persist change
+                    async (controlpoints, i, newX, newY, factor) => {
+                      linepoints[i] = (newX / factor) - rastrum.x
+                      linepoints[i + 1] = (newY / factor) - rastrum.y
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: linepoints[0].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: linepoints[1].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: linepoints[2].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: linepoints[3].toFixed(2) })
+                      // update barline x,y,x2,y2 attributes in MEI
+                      // console.log(9272, 'barline updated', linepoints)
+                    },
+                    factor
+                  )
+                  this.setMouseTracker(i / 2, tracker)
+                }
+                // console.log(9272, 'line', element, linepoints, func)
+              } else if (func === 'bTrem') {
+                const tremLineWidth = 40
+                const path = element.querySelector('polygon')
+                const controlpoints = scaleXYControlpoints(linepoints, rastrum, factor)
+                for (const i of [0, 2]) {
+                  const tracker = this.createControlPoint(
+                    element,
+                    controlpoints,
+                    i,
+                    // render change
+                    (controlpoints) => {
+                      path.setAttribute('points', `${controlpoints[0]},${controlpoints[1] - tremLineWidth} ${controlpoints[2]},${controlpoints[3] - tremLineWidth} ${controlpoints[2]},${controlpoints[3]} ${controlpoints[0]},${controlpoints[1]}`)
                     },
                     // persist change
                     async (controlpoints, i, newX, newY, factor) => {
