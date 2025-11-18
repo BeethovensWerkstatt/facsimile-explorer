@@ -1067,7 +1067,8 @@ export default {
             } else if (this.$store.getters.activeDiploTransElementName === 'line') { // control beam, b
               const line = this.$store.getters.activeDiploTransElement
               const section = line.closest('section')
-              const diploStaffDef = section.parentElement.querySelector('staffDef[n="1"]')
+              const staffn = line.getAttribute('staff') || '1'
+              const diploStaffDef = section.parentElement.querySelector(`staffDef[n="${staffn}"]`)
               // TODO: make rastrum consistent with cleanUpDiplomaticTranscript
               const rastrumId = diploStaffDef.getAttribute('decls').split('#')[1]
               const rastrum = this.$store.getters.rastrumsOnCurrentPage.find(rastrum => rastrum.id === rastrumId)
@@ -1110,7 +1111,7 @@ export default {
                 // console.log(9272, 'line', element, linepoints, func)
               } else if (func === 'bTrem') {
                 const tremLineWidth = 40
-                const path = element.querySelector('polygon')
+                const path = element.querySelector('polygon') // TODO: path or polygon?
                 const controlpoints = scaleXYControlpoints(linepoints, rastrum, factor)
                 for (const i of [0, 2]) {
                   const tracker = this.createControlPoint(
