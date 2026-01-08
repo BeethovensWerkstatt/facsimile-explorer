@@ -42,7 +42,34 @@ npm run lint
 
 ### development
 
-To authenticate against Github, an application has to be registered with a callback
+#### GitHub OAuth Setup
+
+To authenticate against Github, an OAuth application has to be registered. Follow these steps to create `CLIENT_ID` and `CLIENT_SECRET`:
+
+1. **Register a new OAuth App on GitHub:**
+   - Go to [GitHub Developer Settings](https://github.com/settings/developers)
+   - Click on "OAuth Apps" → "New OAuth App"
+   - Fill in the application details:
+     - **Application name**: e.g., "Facsimile Explorer Dev"
+     - **Homepage URL**: e.g., `http://localhost:8080` (for development)
+     - **Authorization callback URL**: `https://<domain>/authenticate` (or `http://localhost:8080/authenticate` for development)
+   - Click "Register application"
+
+2. **Retrieve credentials:**
+   - After registration, you'll see your **Client ID** immediately
+   - Click "Generate a new client secret" to create the **Client Secret**
+   - **Important:** Copy the client secret immediately - it won't be shown again!
+
+3. **Configure environment variables:**
+   - Create a `.env.local` file in the project root (if it doesn't exist)
+   - Add the credentials:
+     ```
+     CLIENT_ID=your_client_id_here
+     CLIENT_SECRET=your_client_secret_here
+     ```
+   - **Never commit** `.env.local` to version control!
+
+The OAuth flow works as follows: The app redirects to GitHub for authentication with the callback
 `https://<domain>/authenticate`. This will call `https://<domain>/auth?code=<code>`
 to receive a token from Github. It is working as a reverse proxy in NGINX adding
 `CLIENT_ID` and `CLIENT_SECRET` to the request as needed.
