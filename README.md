@@ -98,6 +98,8 @@ To authenticate against GitHub and save changes, you need to register an OAuth a
      CLIENT_ID=your_client_id_here
      CLIENT_SECRET=your_client_secret_here
      ```
+     *If you choose another name for the file, ensure to reference it in Docker commands
+      and update the scripts accordingly.*
    - **Never commit** `.env.local` to version control!
 
 ### 5. Install dependencies
@@ -209,27 +211,5 @@ docker-compose -f docker-compose_static.yml up -d --env-file=.env.local
 
 Both setups use the script `40-create-ghcred.sh` which runs on container startup to dynamically create `/GH_OAUTH_CLIENT.conf` from the environment variables `CLIENT_ID` and `CLIENT_SECRET`. This file is included in the NGINX configuration to handle the OAuth flow securely.
 
-## Development Commands
-
-The following npm commands are available for development without Docker:
-
-### Compile and hot-reload for development
-
-```bash
-npm run serve
-```
-
-### Compile and minify for production
-
-```bash
-npm run build
-```
-
-### Lint and fix files
-
-```bash
-npm run lint
-```
-
-### Customize configuration
+### Customize VueJS configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
