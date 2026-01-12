@@ -1,58 +1,90 @@
 # facsimile-explorer
 
+*This is the `dev`elopment branch of the facsimile-explorer, which is still under steady activity.
+When this project reaches a release state, this branch will be merged into `main`.*
+
+The [facsimile-explorer](https://fx.beethovens-werkstatt.de/) is a work tool of Beethovens Werkstatt
+to prepare data for the VideApp. It is built with [Vue.js](https://vuejs.org/) and uses our
+self-developed [thulemeier](https://github.com/BeethovensWerkstatt/thulemeier/) library for rendering
+MEI encoded diplomatic transcripts.
+
+## Motivation and background
+
+The facsimile-explorer allows to access a GitHub project containing MEI files and allows to
+create links between elements between in different files. This work is quite error-prone
+when done manually, so the facsimile-explorer provides a graphical user interface to
+facilitate this task. About the project and its background, see the
+[project page](https://beethovens-werkstatt.de/).
+
+## Prerequisites
+
+Before setting up the facsimile-explorer, ensure you have the following:
+
+- **Docker** and **Docker Compose** installed on your system
+- A **GitHub account** for OAuth authentication and data repositories
+
 ## Project setup
-```
-npm install
-```
 
-To ensure the right node version is used, the script `init-dev.sh` can be run once:
+Follow these steps to set up the facsimile-explorer for development:
 
-```
-./init-dev.sh
-```
+### 1. Clone repositories
 
-This script starts `npm install` inside the container `webpack` defined in `docker-compose.yml`.
+```bash
+# Clone the facsimile-explorer repository
+git clone https://github.com/BeethovensWerkstatt/facsimile-explorer.git
+cd facsimile-explorer
 
-### Local development: thulemeier import
-
-To use the local thulemeier renderer as a global import (without publishing to NPM), a symlink is set up:
-
-```
-ln -s ../thulemeier node_modules/thulemeier
+# Clone the thulemeier library into a sibling folder
+cd ..
+git clone https://github.com/BeethovensWerkstatt/thulemeier.git
+cd facsimile-explorer
 ```
 
-This allows you to use `import ... from 'thulemeier'` anywhere in the codebase. When thulemeier is published to NPM, simply remove the symlink and install from NPM instead.
+### 2. Fork data repositories
 
-**Note:** If you move or rename the thulemeier folder, update the symlink accordingly.
+Fork the following repositories to your own GitHub account (needed to save changes):
 
-### Compiles and hot-reloads for development
+- <https://github.com/BeethovensWerkstatt/data>
+- <https://github.com/BeethovensWerkstatt/data-cache>
+
+### 3. Configure data repository
+
+After forking, you need to configure which repository and branch the facsimile-explorer should use. Edit the file `public/config.json`:
+
+```json
+{
+  "repository": {
+    "owner": "your-github-username",
+    "repo": "data",
+    "branch": "dev",
+    "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
+  },
+  "root": "data/sources",
+  "app": {
+    "version": "0.2.1"
+  }
+}
 ```
-npm run serve
-```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+Update the following fields:
+- **`owner`**: Your GitHub username (where you forked the data repository)
+- **`repo`**: Repository name (usually `data`)
+- **`branch`**: The branch to use (e.g., `dev` or `main`)
+- **`default`**: Path to the default file to load on startup (optional)
 
-### Lints and fixes files
-```
-npm run lint
-```
+This configuration tells the application which repository to read from and write to when you save changes.
 
-### development
+### 4. Set up GitHub OAuth application
 
-#### GitHub OAuth Setup
-
-To authenticate against Github, an OAuth application has to be registered. Follow these steps to create `CLIENT_ID` and `CLIENT_SECRET`:
+To authenticate against GitHub and save changes, you need to register an OAuth application:
 
 1. **Register a new OAuth App on GitHub:**
    - Go to [GitHub Developer Settings](https://github.com/settings/developers)
    - Click on "OAuth Apps" → "New OAuth App"
    - Fill in the application details:
      - **Application name**: e.g., "Facsimile Explorer Dev"
-     - **Homepage URL**: e.g., `http://localhost:8080` (for development)
-     - **Authorization callback URL**: `https://<domain>/authenticate` (or `http://localhost:8080/authenticate` for development)
+     - **Homepage URL**: `http://localhost:8080`
+     - **Authorization callback URL**: `http://localhost:8080/authenticate`
    - Click "Register application"
 
 2. **Retrieve credentials:**
@@ -61,38 +93,143 @@ To authenticate against Github, an OAuth application has to be registered. Follo
    - **Important:** Copy the client secret immediately - it won't be shown again!
 
 3. **Configure environment variables:**
-   - Create a `.env.local` file in the project root (if it doesn't exist)
-   - Add the credentials:
-     ```
+   - Create a `.env.local` file in the project root:
+     ```bash
      CLIENT_ID=your_client_id_here
      CLIENT_SECRET=your_client_secret_here
      ```
    - **Never commit** `.env.local` to version control!
 
-The OAuth flow works as follows: The app redirects to GitHub for authentication with the callback
-`https://<domain>/authenticate`. This will call `https://<domain>/auth?code=<code>`
-to receive a token from Github. It is working as a reverse proxy in NGINX adding
-`CLIENT_ID` and `CLIENT_SECRET` to the request as needed.
+### 5. Install dependencies
 
-For development NGINX proxy and vue webapp server are separated in two containers.
-The NGINX container passes all requests to the node container serving the vue app
-except the call to `/auth`, which ist a reverse proxy to 
-`https://github.com/login/oauth/access_token?client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`. This way we are not distracted by CORS issues.
+The local development folder is mounted into the Docker containers, so dependencies must be installed before first run:
 
-```
-docker-compose up -d --env-file=.env.local
+```bash
+./init-dev.sh
 ```
 
-or
+This script runs `npm install` inside the `webpack` container defined in `docker-compose.yml`.
 
+Alternatively, if you have Node.js installed locally:
+
+```bash
+npm install
 ```
+
+### 6. Set up thulemeier symlink
+
+To use the local thulemeier library (located in the sibling folder) without publishing to NPM:
+
+```bash
+ln -s ../thulemeier node_modules/thulemeier
+```
+
+**Note:** If you move or rename the thulemeier folder, update the symlink accordingly. When thulemeier is published to NPM, remove the symlink and install from NPM instead.
+
+### 7. Start the development environment
+
+```bash
 ./start-dev.sh
 ```
 
-Now http://localhost:8080/ works with github access_token callback at http://localhost:8080/auth
+Or manually:
 
-The `Dockerfile` must also provide an nginx reverse proxy to Github.
-`CLIENT_ID` and `CLIENT_SECRET` must be passed as environment variables.
+```bash
+docker-compose up -d --env-file=.env.local
+```
+
+The application is now available at **<http://localhost:8080>** with GitHub OAuth authentication enabled.
+
+### 8. Stop the development environment
+
+```bash
+./stop-dev.sh
+```
+
+Or manually:
+
+```bash
+docker-compose down
+```
+
+## Docker & Docker Compose Architecture
+
+The project uses Docker containers to provide a consistent development and production environment.
+
+### Development Setup (`docker-compose.yml`)
+
+For local development, the application uses a **two-container architecture**:
+
+- **`front` (NGINX container)**
+  - Built from `nginx-ghcred/Dockerfile`
+  - Listens on port `8080`
+  - Acts as reverse proxy for:
+    - GitHub OAuth authentication (`/auth` endpoint)
+    - Forwarding all other requests to the webpack dev server
+  - Uses configuration from `docker-nginx.conf`
+  - Receives `CLIENT_ID` and `CLIENT_SECRET` as environment variables
+
+- **`webpack` (Node.js container)**
+  - Built from `node-ghcred/Dockerfile`
+  - Runs the Vue.js dev server with hot-reload (`npm run serve`)
+  - Mounts the project directory and thulemeier library as volumes
+  - Accessible only through the NGINX proxy (not directly exposed)
+
+**Key advantage:** This separation avoids CORS issues during development while keeping OAuth credentials secure. The NGINX proxy adds `CLIENT_ID` and `CLIENT_SECRET` to GitHub API requests server-side.
+
+**OAuth flow:** The app redirects to GitHub for authentication with the callback `http://localhost:8080/authenticate`. This calls `http://localhost:8080/auth?code=<code>` to receive an access token from GitHub. The NGINX container proxies this request to `https://github.com/login/oauth/access_token` with the credentials added server-side.
+
+### Production Setup (`docker-compose_static.yml`)
+
+For production deployment, a **single-container architecture** is used:
+
+- **`fx` (all-in-one container)**
+  - Multi-stage Dockerfile:
+    - **Stage 1 (build-stage):** Compiles the Vue.js app with Node.js
+    - **Stage 2 (production-stage):** Serves the static build with NGINX
+  - Listens on port `80`
+  - Includes OAuth reverse proxy configuration
+  - Uses `nginx.conf` for production settings
+
+**Key advantage:** Smaller footprint and simpler deployment with a pre-compiled static application.
+
+Start production environment:
+
+```bash
+./start-static.sh
+```
+
+Or manually:
+
+```bash
+docker-compose -f docker-compose_static.yml up -d --env-file=.env.local
+```
+
+### OAuth Configuration in Containers
+
+Both setups use the script `40-create-ghcred.sh` which runs on container startup to dynamically create `/GH_OAUTH_CLIENT.conf` from the environment variables `CLIENT_ID` and `CLIENT_SECRET`. This file is included in the NGINX configuration to handle the OAuth flow securely.
+
+## Development Commands
+
+The following npm commands are available for development without Docker:
+
+### Compile and hot-reload for development
+
+```bash
+npm run serve
+```
+
+### Compile and minify for production
+
+```bash
+npm run build
+```
+
+### Lint and fix files
+
+```bash
+npm run lint
+```
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
