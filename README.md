@@ -183,7 +183,11 @@ For local development, the application uses a **two-container architecture**:
 
 *This setup is used mainly to test the production build of the Docker-image locally.
 If you just want to try the image created from our development workflow, you can just
-pull the current image with:* `docker pull ghcr.io/beethovenswerkstatt/facsimile-explorer:latest`
+pull the current image with:*
+
+```bash
+docker pull ghcr.io/beethovenswerkstatt/facsimile-explorer:latest
+```
 
 For production deployment, a **single-container architecture** is used:
 
