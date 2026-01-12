@@ -98,6 +98,8 @@ To authenticate against GitHub and save changes, you need to register an OAuth a
      CLIENT_ID=your_client_id_here
      CLIENT_SECRET=your_client_secret_here
      ```
+     *If you choose another name (e.g. `.env.local`) for the file, ensure to reference
+      it in Docker commands and update the scripts accordingly.*
    - **Never commit** `.env.devel.local` to version control!
 
 ### 5. Install dependencies
