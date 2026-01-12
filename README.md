@@ -93,14 +93,12 @@ To authenticate against GitHub and save changes, you need to register an OAuth a
    - **Important:** Copy the client secret immediately - it won't be shown again!
 
 3. **Configure environment variables:**
-   - Create a `.env.local` file in the project root:
+   - Create a `.env.devel.local` file in the project root:
      ```bash
      CLIENT_ID=your_client_id_here
      CLIENT_SECRET=your_client_secret_here
      ```
-     *If you choose another name for the file, ensure to reference it in Docker commands
-      and update the scripts accordingly.*
-   - **Never commit** `.env.local` to version control!
+   - **Never commit** `.env.devel.local` to version control!
 
 ### 5. Install dependencies
 
@@ -137,7 +135,7 @@ ln -s ../thulemeier node_modules/thulemeier
 Or manually:
 
 ```bash
-docker-compose up -d --env-file=.env.local
+docker-compose up -d --env-file=.env.devel.local
 ```
 
 The application is now available at **<http://localhost:8080>** with GitHub OAuth authentication enabled.
@@ -183,6 +181,10 @@ For local development, the application uses a **two-container architecture**:
 
 ### Production Setup (`docker-compose_static.yml`)
 
+*This setup is used mainly to test the production build of the Docker-image locally.
+If you just want to try the image created from our development workflow, you can just
+pull the current image with:* `docker pull ghcr.io/beethovenswerkstatt/facsimile-explorer:latest`
+
 For production deployment, a **single-container architecture** is used:
 
 - **`fx` (all-in-one container)**
@@ -204,7 +206,7 @@ Start production environment:
 Or manually:
 
 ```bash
-docker-compose -f docker-compose_static.yml up -d --env-file=.env.local
+docker-compose -f docker-compose_static.yml up -d --env-file=.env.devel.local
 ```
 
 ### OAuth Configuration in Containers
