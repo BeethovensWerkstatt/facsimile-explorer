@@ -40,12 +40,31 @@ git clone https://github.com/BeethovensWerkstatt/thulemeier.git
 cd facsimile-explorer
 ```
 
+**Note:** *The thulemeier library is planned to be published on npm in the future. Once published, cloning the repository locally will no longer be necessary, as it can be installed directly via* `npm install thulemeier`.
+
 ### 2. Fork data repositories
 
 Fork the following repositories to your own GitHub account (needed to save changes):
 
 - <https://github.com/BeethovensWerkstatt/data>
 - <https://github.com/BeethovensWerkstatt/data-cache>
+
+**IMPORTANT:**
+
+1. Make sure to fork both repositories, as the facsimile-explorer uses the `data-cache` repository
+   to store temporary data when saving changes to the main `data` repository.
+2. The data repository contains GitHub Actions that automatically update the `data-cache` repository
+   when changes are pushed to `data`.
+   * Ensure that GitHub Actions are enabled in your forked repositories.
+   * The Action in the `data` repository must point to your forked `data-cache` repository.
+     You can check this in the file **`.github/workflows/render-transcriptions.yml`** in the `data` repository.
+     In the step **`Checkout cache repository`**, ensure that the `repository` field points to your forked `data-cache` repository.
+  
+   *If you do not want to use the automatic update feature, you can disable or remove this workflow.*
+3. The workflows **`.github/workflows/trigger_api_dev.yml`** and
+   **`.github/workflows/trigger_api_main.yml`** in the `data` repository
+   are used to trigger updates to an external API (if configured).
+   You should **remove these workflows** to prevent unintended API calls from your forked repository.
 
 ### 3. Configure data repository
 
@@ -137,7 +156,7 @@ ln -s ../thulemeier node_modules/thulemeier
 Or manually:
 
 ```bash
-docker-compose up -d --env-file=.env.devel.local
+docker compose up -d --env-file=.env.devel.local
 ```
 
 The application is now available at **<http://localhost:8080>** with GitHub OAuth authentication enabled.
@@ -151,7 +170,7 @@ The application is now available at **<http://localhost:8080>** with GitHub OAut
 Or manually:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## Docker & Docker Compose Architecture
@@ -181,6 +200,20 @@ For local development, the application uses a **two-container architecture**:
 
 **OAuth flow:** The app redirects to GitHub for authentication with the callback `http://localhost:8080/authenticate`. This calls `http://localhost:8080/auth?code=<code>` to receive an access token from GitHub. The NGINX container proxies this request to `https://github.com/login/oauth/access_token` with the credentials added server-side.
 
+#### Inspect logs
+
+If startup fails, you can inspect the logs of the containers with:
+
+for the front (NGINX) container:
+```bash
+docker compose logs -f front
+```
+or for the webpack container:
+```bash
+docker compose logs -f webpack
+```
+
+
 ### Production Setup (`docker-compose_static.yml`)
 
 *This setup is used mainly to test the production build of the Docker-image locally.
@@ -191,7 +224,7 @@ pull the current image with:*
 docker pull ghcr.io/beethovenswerkstatt/facsimile-explorer:latest
 ```
 
-For production deployment, a **single-container architecture** is used:
+For (testing) production deployment, a **single-container architecture** is used:
 
 - **`fx` (all-in-one container)**
   - Multi-stage Dockerfile:
@@ -200,8 +233,6 @@ For production deployment, a **single-container architecture** is used:
   - Listens on port `80`
   - Includes OAuth reverse proxy configuration
   - Uses `nginx.conf` for production settings
-
-**Key advantage:** Smaller footprint and simpler deployment with a pre-compiled static application.
 
 Start production environment:
 
@@ -212,7 +243,27 @@ Start production environment:
 Or manually:
 
 ```bash
-docker-compose -f docker-compose_static.yml up -d --env-file=.env.devel.local
+docker compose -f docker-compose_static.yml up -d --env-file=.env.devel.local
+```
+
+Stop production environment:
+
+```bash
+./stop-static.sh
+```
+
+Or manually:
+
+```bash
+docker compose -f docker-compose_static.yml down
+```
+
+#### Inspect logs
+
+If startup fails, you can inspect the logs of the `fx` container with:
+
+```bash
+docker compose -f docker-compose_static.yml logs -f fx
 ```
 
 ### OAuth Configuration in Containers
