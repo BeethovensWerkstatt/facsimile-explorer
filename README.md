@@ -11,7 +11,7 @@ MEI encoded diplomatic transcripts.
 ## Motivation and background
 
 The facsimile-explorer allows to access a GitHub project containing MEI files and allows to
-create links between elements between in different files. This work is quite error-prone
+create links between elements in different files. This work is quite error-prone
 when done manually, so the facsimile-explorer provides a graphical user interface to
 facilitate this task. About the project and its background, see the
 [project page](https://beethovens-werkstatt.de/).
@@ -32,19 +32,16 @@ Follow these steps to set up the facsimile-explorer for development:
 ```bash
 # Clone the facsimile-explorer repository
 git clone https://github.com/BeethovensWerkstatt/facsimile-explorer.git
-cd facsimile-explorer
 
 # Clone the thulemeier library into a sibling folder
-cd ..
 git clone https://github.com/BeethovensWerkstatt/thulemeier.git
-cd facsimile-explorer
 ```
 
 **Note:** *The thulemeier library is planned to be published on npm in the future. Once published, cloning the repository locally will no longer be necessary, as it can be installed directly via* `npm install thulemeier`.
 
 ### 2. Fork data repositories
 
-Fork the following repositories to your own GitHub account (needed to save changes):
+Fork the following repositories to your own GitHub account (needed to save changes; you can keep the default settings for the forks):
 
 - <https://github.com/BeethovensWerkstatt/data>
 - <https://github.com/BeethovensWerkstatt/data-cache>
@@ -64,7 +61,7 @@ Fork the following repositories to your own GitHub account (needed to save chang
 3. The workflows **`.github/workflows/trigger_api_dev.yml`** and
    **`.github/workflows/trigger_api_main.yml`** in the `data` repository
    are used to trigger updates to an external API (if configured).
-   You should **remove these workflows** to prevent unintended API calls from your forked repository.
+   You should **disable or remove these workflows** to prevent unintended API calls from your forked repository.
 
 ### 3. Configure data repository
 
@@ -156,7 +153,7 @@ ln -s ../thulemeier node_modules/thulemeier
 Or manually:
 
 ```bash
-docker compose up -d --env-file=.env.devel.local
+docker compose --env-file .env.devel.local up -d
 ```
 
 The application is now available at **<http://localhost:8080>** with GitHub OAuth authentication enabled.
@@ -243,7 +240,7 @@ Start production environment:
 Or manually:
 
 ```bash
-docker compose -f docker-compose_static.yml up -d --env-file=.env.devel.local
+docker compose -f docker-compose_static.yml --env-file .env.devel.local up -d --build
 ```
 
 Stop production environment:
