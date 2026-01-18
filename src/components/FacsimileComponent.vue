@@ -1257,6 +1257,10 @@ export default {
         return null
       }
 
+      if (!this.showPageBorders) {
+        return null
+      }
+
       const pageDimensions = this.$store.getters.currentPageDimensions
 
       if (!pageDimensions) {
