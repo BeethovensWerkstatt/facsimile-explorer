@@ -1638,7 +1638,12 @@ const dataModule = {
 
         const getSystemId = (elem) => {
           let id = null
-          let current = elem.previousElementSibling
+          let current = elem
+          // jump add/del elements to find the section
+          while (current && current?.parentElement?.localName !== 'section') {
+            current = current.parentElement
+          }
+          // elem.previousElementSibling
           while (current && !id) {
             if (current.localName === 'sb' && current.hasAttribute('corresp')) {
               id = current.getAttribute('corresp').split('#')[1]
@@ -1652,8 +1657,21 @@ const dataModule = {
         const dtSection = dtDoc.querySelector('system[*|id="' + systemId + '"] section')
         return dtSection
       }
+      /*
+      const annotBranch = []
+      let parent = annotElem
+      while (parent) {
+        annotBranch.push(parent)
+        if (parent?.previousElementSibling?.localName === 'sb') {
+          console.log(712, parent, parent.previousElementSibling, parent.parentElement)
+        }
+        parent = parent.parentElement
+      }
+      console.log(712, 'annotBranch', annotBranch)
+      */
       // console.log('got here 1 diploStaffN', diploStaffN)
       const diploSection = getDiplomaticSection(annotElem) // diploLayer.closest('measure') */
+      console.log(712, 'diploSection', diploSection)
       // console.log('got here 2 diploSection', diploSection)
       const diploLayer = diploSection.querySelector('staff[n="' + diploStaffN + '"] layer') // dtDoc.querySelector('staff[n="' + annotStaffN + '"] layer')
       // console.log('got here 3 diploLayer', diploLayer)
