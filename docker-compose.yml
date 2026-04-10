@@ -15,7 +15,6 @@ services:
     volumes:
       - ./:/usr/app/
       - ../thulemeier:/usr/app/../thulemeier
-      - ../liquifier:/usr/app/../liquifier
     environment:
       - CLIENT_ID=${CLIENT_ID}
     working_dir: /usr/app/

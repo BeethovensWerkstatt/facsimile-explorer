@@ -34,7 +34,7 @@
     "xml-beautifier": "^0.5.0",
     "xml-formatter": "^3.4.1",
     "xmldom": "^0.6.0",
-    "thulemeier": "github:BeethovensWerkstatt/thulemeier#jpv/dev",
+    "thulemeier": "github:BeethovensWerkstatt/thulemeier",
     "liquifier": "github:BeethovensWerkstatt/liquifier"
   },
   "devDependencies": {

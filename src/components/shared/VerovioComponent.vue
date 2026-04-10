@@ -110,7 +110,20 @@ export default {
       const target = e.target.closest(CSSselectables)
       if (target !== null) {
         const name = target.getAttribute('data-class')
-        const id = (name === 'dots') ? target.closest('.note, .rest').getAttribute('data-id') : target.getAttribute('data-id')
+        const getNoteOrRest = (target) => {
+          let noteOrRest = target.closest('.note, .rest')
+          if (!noteOrRest) {
+            const chord = target.closest('.chord')
+            noteOrRest = chord?.querySelector('.note')
+            let eli = target // ellipse for dot
+            while (eli.previousElementSibling?.localName === 'ellipse') {
+              eli = eli.previousElementSibling
+              noteOrRest = noteOrRest?.nextElementSibling
+            }
+          }
+          return noteOrRest
+        }
+        const id = (name === 'dots') ? getNoteOrRest(target).getAttribute('data-id') : target.getAttribute('data-id')
         const measure = target.closest('.measure').getAttribute('data-id')
         const meiDom = this.$store.getters[this.getter]
         const meiElem = meiDom.querySelector('*[*|id="' + id + '"]')
