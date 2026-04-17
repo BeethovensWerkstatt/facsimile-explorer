@@ -1963,6 +1963,53 @@ const dataModule = {
       } else {
         console.warn('removeDTElement: no DT or AT!')
       }
+    },
+    /**
+     * Toggle unclear state of transcription element in the diplomatic transcript by wrapping it in an <unclear> element or unwrapping it if already wrapped.
+     * @param {object} provide `getters, setters`
+     * @param {object} `dtElemId` the ID of the DT element to toggle the unclear status for
+     */
+    toggle_DTelement_unclear ({ getters, dispatch }, { dtElemId }) {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      if (!filePath || !dtElemId) {
+        return null
+      }
+      const oldDT = getters.documentByPath(filePath)
+      if (!oldDT) {
+        return null
+      }
+      const DT = oldDT.cloneNode(true)
+      const dtElem = DT.querySelector(`*[*|id="${dtElemId}"]`)
+      if (!dtElem) {
+        console.error(`DT element ${dtElemId} not found!`)
+        return
+      }
+      const parent = dtElem.parentElement
+      console.log(735, 'toggle_DTelement_unclear', parent?.localName)
+      // only wrap if not already wrapped
+      if (parent?.localName !== 'unclear') {
+        const wrapper = document.createElement('unclear')
+        wrapper.setAttribute('xml:id', 'unclear_' + dtElemId) // or generate new id?
+        wrapper.setAttribute('reason', 'unclear in source')
+        dtElem.replaceWith(wrapper)
+        wrapper.appendChild(dtElem)
+
+        console.log(735, 'wrapped element', wrapper)
+
+        const baseMessage = 'mark DT element as unclear'
+        const param = ` ${dtElemId}`
+        dispatch('loadDocumentIntoStore', { path: filePath, dom: DT })
+        dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [wrapper.parentElement.getAttribute('xml:id')], isNewDocument: false })
+      } else {
+        // unwrap
+        const grandparent = parent.parentElement
+        parent.replaceWith(...parent.childNodes)
+
+        const baseMessage = 'unmark DT element as unclear'
+        const param = ` ${dtElemId}`
+        dispatch('loadDocumentIntoStore', { path: filePath, dom: DT })
+        dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [grandparent.getAttribute('xml:id')], isNewDocument: false })
+      }
     }
   },
 
@@ -3680,6 +3727,24 @@ const dataModule = {
       })
       // console.log(843, 'rastrums for sysId: ' + sysId, rastrums)
       return rastrums
+    },
+    get_DTelement_unclear: (state, getters) => (elemId) => {
+      const filePath = getters.currentWritingZoneObject?.diploTrans
+      if (!filePath || !elemId) {
+        return null
+      }
+
+      const doc = getters.documentByPath(filePath)
+      if (!doc) {
+        return null
+      }
+      const elem = doc.querySelector('*[*|id="' + elemId + '"]')
+      if (!elem) {
+        return null
+      }
+
+      const unclear = elem.parentElement?.localName === 'unclear' ? elem.parentElement : null
+      return unclear
     }
   }
 }

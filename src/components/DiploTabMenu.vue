@@ -89,6 +89,12 @@
         <div class="value string button" :onClick="initRotation" v-else>add attribute</div>
     </div>
     <div class="entry" v-if="elementId">
+      <label>unclear</label>
+      <div class="value">
+        <input v-model="unclearFunc" type="checkbox"/>
+      </div>
+    </div>
+    <div class="entry" v-if="elementId">
       <label>unlink</label>
       <div class="value string button" :onClick="removeDTElement" title="remove DT element">&#x2702;</div>
     </div>
@@ -254,6 +260,19 @@ export default {
       return elem && elem.hasAttribute('width')
       // const name = this.$store.getters.activeDiploTransElementName
       // return name === 'dir' || name === 'dynam' || name === 'word' || name === 'tempo' || name === 'octave'
+    },
+    unclearFunc: {
+      get () {
+        return this.$store.getters.get_DTelement_unclear(this.elementId)
+      },
+      set (unclear) {
+        console.log(735, 'set unclearFunc:', unclear)
+        if (!this.elementId) {
+          console.warn('No active DT element to toggle unclear state for!')
+          return
+        }
+        this.$store.dispatch('toggle_DTelement_unclear', { dtElemId: this.elementId })
+      }
     }
   }
 }
