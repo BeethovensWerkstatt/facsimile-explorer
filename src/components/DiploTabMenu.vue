@@ -91,7 +91,7 @@
     <div class="entry" v-if="elementId">
       <label>unclear</label>
       <div class="value">
-        <input v-model="unclearFunc" type="checkbox"/>
+        <input :checked="unclearFunc" @change="unclearFunc = !unclearFunc" type="checkbox"/>
       </div>
     </div>
     <div class="entry" v-if="elementId">
@@ -113,11 +113,6 @@ export default {
   },
   components: {
     SliderInput
-  },
-  watch: {
-    unclearFunc (newVal) {
-      console.log(735, 'watch unclearFunc, newVal:', newVal)
-    }
   },
   methods: {
     initStemLen () {
