@@ -114,6 +114,11 @@ export default {
   components: {
     SliderInput
   },
+  watch: {
+    unclearFunc (newVal) {
+      console.log(735, 'watch unclearFunc, newVal:', newVal)
+    }
+  },
   methods: {
     initStemLen () {
       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'stem.len', value: 8 })
