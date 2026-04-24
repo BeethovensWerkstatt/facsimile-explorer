@@ -1741,6 +1741,14 @@ export default {
       opacity: .6;
     }
   }
+  .unclear {
+    fill: rgb(126, 84, 17);
+    stroke: rgb(237, 17, 17);
+  }
+  .unclear:hover {
+    fill: rgb(237, 17, 17);
+    stroke: rgb(126, 84, 17);
+  }
 
   &.sketchGroups {
     .shapeOverlay {
