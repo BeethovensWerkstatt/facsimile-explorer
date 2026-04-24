@@ -52,6 +52,17 @@ export default {
           const resolvedDraft = draft2score(meiDom)[0]
           const addedSbIndicators = addSbIndicators(resolvedDraft)
           // console.log('VerovioComponent', meiDom, addedSbIndicators)
+          for (const el of addedSbIndicators.querySelectorAll('*[corresp]')) {
+            const datacorresp = el.getAttribute('corresp')
+            if (datacorresp) {
+              const dtid = datacorresp.split('#')[1]
+              const unclear = this.$store.getters.get_DTelement_unclear(dtid)
+              if (unclear) {
+                el.setAttribute('class', el.getAttribute('class') + ' unclear')
+                console.log(735, 'VerovioComponent:render(): found unclear', datacorresp, dtid, this.$store.getters.get_DTelement_unclear(dtid).getAttribute('reason'))
+              }
+            }
+          }
 
           const svg = await this.$store.getters.annotatedTranscriptForWz(addedSbIndicators)
           const localCopy = svg.repeat(1)
