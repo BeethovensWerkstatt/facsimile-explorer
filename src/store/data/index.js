@@ -1568,7 +1568,22 @@ const dataModule = {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
         // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
-        console.log(668, annotElem)
+        const dotsCount = annotElem.getAttribute('dots')
+        const dotElems = atDoc.querySelectorAll('dot')
+        console.log(668, dotsCount, dotElems?.length)
+        if (dotsCount > 0) {
+          for (let i = 0; i < dotsCount; i++) {
+            const dotElem = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dot')
+            dotElem.setAttribute('xml:id', uuid()) // annotElemRef.id + '_dot' + (i + 1))
+            dotElem.setAttribute('corresp', '#' + annotElemRef.id)
+            annotElem.append(dotElem)
+          }
+          annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
+        } else {
+          // TODO find dot idx from ellipse.@cx
+          // set/add corresp on the right dot element
+          // look for chord/note/rest
+        }
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
       }
