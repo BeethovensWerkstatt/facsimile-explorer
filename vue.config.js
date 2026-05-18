@@ -6,6 +6,9 @@ module.exports = defineConfig({
 
     ],
     resolve: {
+      alias: {
+        jsdom: false
+      },
       // configuration options
       fallback: {
         path: false, // require.resolve('path-browserify')
