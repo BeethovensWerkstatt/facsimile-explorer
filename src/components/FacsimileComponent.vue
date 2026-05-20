@@ -424,6 +424,8 @@ export default {
         } else {
           this.$store.dispatch('clickedSvgShape', click.target.id)
         }
+      } else if (click.target.localName === 'ellipse') {
+        console.log(668, 'clicked on ellipse ' + click.target.parentElement.getAttribute('data-id') + ' / ' + click.target.getAttribute('data-id') + ' – this.type: ' + this.type)
       }
 
       // check for click to system

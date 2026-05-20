@@ -1568,7 +1568,8 @@ const dataModule = {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
         // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
-        const dotsCount = annotElem.getAttribute('dots')
+        console.log(668, 'found annotElem for dots:', annotElem)
+        const dotsCount = annotElem.getAttribute('dots') || 0
         const dotElems = atDoc.querySelectorAll('dot')
         console.log(668, dotsCount, dotElems?.length)
         if (dotsCount > 0) {
@@ -1579,10 +1580,15 @@ const dataModule = {
             annotElem.append(dotElem)
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
+          annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
+          dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+          dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
         } else {
           // TODO find dot idx from ellipse.@cx
           // set/add corresp on the right dot element
           // look for chord/note/rest
+          const cx = annotElem.getAttribute('cx')
+          console.log(668, 'looking for dot with cx', cx)
         }
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
