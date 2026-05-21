@@ -1,3 +1,6 @@
+/**
+ * tools for various purposes
+ */
 
 export class Vector {
   constructor (x, y) {

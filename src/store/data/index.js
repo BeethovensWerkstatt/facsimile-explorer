@@ -1,5 +1,5 @@
 // import { dom2base64, str2base64 } from '@/tools/github'
-import { uuid } from '@/tools/uuid.js'
+import { getXUUID, uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
@@ -1446,7 +1446,7 @@ const dataModule = {
       const shapesRefs = getters.diploTransActivationsInShapes
       const annotElemRef = getters.diploTransActivationsInAnnotTrans
       const atPath = getters.currentWzAtPath
-      console.log('279 diploTranscribe: annotElementRef=', annotElemRef, atPath)
+      console.log(279, 668, 'diploTranscribe: annotElementRef =', annotElemRef, atPath)
 
       if (shapesRefs.length === 0 || !annotElemRef) {
         // console.log('??? shapesRefs, annotElemRef', shapesRefs, annotElemRef)
@@ -1489,9 +1489,8 @@ const dataModule = {
       }
 
       let annotElem
-      // x918f5394-e20d-432b-b4e9-2ef0f4326dd4
-      const uuidRegex = /[a-z]([0-9,a-f]{8})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{4})-([0-9,a-f]{12})/i
-      const isUUID = uuidRegex.test(annotElemRef.id)
+      const xuuid = getXUUID(annotElemRef.id)
+      const isUUID = !!xuuid
       if (!isUUID) {
         console.warn('not a uuid!', annotElemRef.id)
         console.log('diploTranscribe search for', annotElemRef.name, '...')
@@ -1568,15 +1567,13 @@ const dataModule = {
         // get note instead of dot, as dots in AT are encoded as attributes, not elements (in DT as elements)
         // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
-        console.log(668, 'found annotElem for dots:', annotElem)
         const dotsCount = annotElem.getAttribute('dots') || 0
         const dotElems = atDoc.querySelectorAll('dot')
         console.log(668, dotsCount, dotElems?.length)
         if (dotsCount > 0) {
           for (let i = 0; i < dotsCount; i++) {
             const dotElem = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dot')
-            dotElem.setAttribute('xml:id', uuid()) // annotElemRef.id + '_dot' + (i + 1))
-            dotElem.setAttribute('corresp', '#' + annotElemRef.id)
+            dotElem.setAttribute('xml:id', annotElemRef.id + '_dot' + (i + 1)) // use note id + suffix for dot id
             annotElem.append(dotElem)
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
@@ -1588,8 +1585,9 @@ const dataModule = {
           // set/add corresp on the right dot element
           // look for chord/note/rest
           const cx = annotElem.getAttribute('cx')
-          console.log(668, 'looking for dot with cx', cx)
+          console.log(668, 'looking for dot with x', cx)
         }
+        console.log(668, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
       }

@@ -1,13 +1,6 @@
 import store from '@/store'
 import { Url } from './net'
-
-function uuidv4 () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = Math.random() * 16 | 0
-    const v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
-}
+import { uuid } from './uuid'
 
 export const fixLink = uri => {
   const uri2 = new Url(uri?.replace('http://', 'https://'))
@@ -25,12 +18,12 @@ function addPage (canvas, infoJson, n, meta, meiPageTemplate, meiSurfaceTemplate
   const height = infoJson.height
   const width = infoJson.width
 
-  const surfaceId = 's' + uuidv4()
-  const graphicId = 'g' + uuidv4()
-  const pageId = 'p' + uuidv4()
+  const surfaceId = 's' + uuid()
+  const graphicId = 'g' + uuid()
+  const pageId = 'p' + uuid()
 
-  // const mdivId = 'm' + uuidv4()
-  // const sectionId = 's' + uuidv4()
+  // const mdivId = 'm' + uuid()
+  // const sectionId = 's' + uuid()
 
   const page = meiPageTemplate.querySelector('page').cloneNode(true)
   page.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', pageId)
@@ -109,7 +102,7 @@ export async function iiifManifest2mei (json, url, parser) {
       const file = meiFileTemplate.querySelector('mei').cloneNode(true)
 
       // set file id
-      file.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', 'm' + uuidv4())
+      file.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:id', 'm' + uuid())
       // set file title
       file.querySelector('title').textContent = json.label
       // set reference to Manifest
