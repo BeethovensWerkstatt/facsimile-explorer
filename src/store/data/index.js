@@ -1578,14 +1578,15 @@ const dataModule = {
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
           annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
-          dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
           dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
         } else {
           // TODO find dot idx from ellipse.@cx
           // set/add corresp on the right dot element
           // look for chord/note/rest
-          const cx = annotElem.getAttribute('cx')
-          console.log(668, 'looking for dot with x', cx)
+          const elliptElems = annotElem.parentElement.querySelectorAll('ellipse')
+          const cx = [...elliptElems].map(e => e.getAttribute('cx')).sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
+          const dotIdx = cx.indexOf(annotElemRef.target)
+          console.log(668, 'dot idx:', dotIdx, 'from cx values:', cx, 'and target:', annotElemRef.target)
         }
         console.log(668, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
       } else {

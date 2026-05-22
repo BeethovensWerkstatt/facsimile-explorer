@@ -141,6 +141,17 @@ export default {
           purpose: this.purpose,
           callback: () => { this.render() }
         }
+        if (name === 'dots') {
+          const eliptElems = target.querySelectorAll('ellipse')
+          const cx = [...eliptElems].sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
+          for (const di in cx) {
+            if (e.target === eliptElems[di]) {
+              cvpayload.dotidx = parseInt(di) + 1
+              console.log(668, 'dot idx:', cvpayload.dotidx, 'from cx values:', cx, 'and target:', e.target)
+              break
+            }
+          }
+        }
         // console.log(671, 'cvpayload', cvpayload)
         if (name === 'barLine' && e.target.localName === 'use') {
           cvpayload.context = 'repeatDot'
