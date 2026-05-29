@@ -1584,9 +1584,9 @@ const dataModule = {
           // set/add corresp on the right dot element
           // look for chord/note/rest
           const elliptElems = annotElem.parentElement.querySelectorAll('ellipse')
-          const cx = [...elliptElems].map(e => e.getAttribute('cx')).sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
-          const dotIdx = cx.indexOf(annotElemRef.target)
-          console.log(668, 'dot idx:', dotIdx, 'from cx values:', cx, 'and target:', annotElemRef.target)
+          const elliptElemsSorted = [...elliptElems].map(e => e.getAttribute('cx')).sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
+          const dotIdx = elliptElemsSorted.indexOf(annotElemRef.target) + 1 // get the index of the current dot from the sorted list of cx values, add 1 to get the dot number (starting from 1)
+          console.log(668, 'dot idx:', dotIdx, 'from cx values:', elliptElemsSorted, 'and target:', annotElemRef.target)
         }
         console.log(668, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
       } else {
