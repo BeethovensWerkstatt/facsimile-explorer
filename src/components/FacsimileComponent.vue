@@ -425,7 +425,10 @@ export default {
           this.$store.dispatch('clickedSvgShape', click.target.id)
         }
       } else if (click.target.localName === 'ellipse') {
-        console.log(668, 'clicked on ellipse ' + click.target.parentElement.getAttribute('data-id') + ' / ' + click.target.getAttribute('data-id') + ' – this.type: ' + this.type)
+        const dtelemid = click.target.closest('*[data-id]')?.getAttribute('data-id')
+        console.log(668, 'clicked on ellipse ' + click.target.parentElement.getAttribute('data-id') + ' / ' +
+                    dtelemid + ' – this.type: ' + this.type)
+        this.$store.dispatch('setActiveDiploTransElementId', dtelemid)
       }
 
       // check for click to system
