@@ -1578,7 +1578,8 @@ const dataModule = {
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
           annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
-          dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
+          await dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
+          await dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
         } else {
           // TODO find dot idx from ellipse.@cx
           // set/add corresp on the right dot element
