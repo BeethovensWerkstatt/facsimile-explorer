@@ -2,6 +2,7 @@ const gulp = require('gulp')
 const git = require('gulp-git')
 const fs = require('fs')
 const { execSync } = require('child_process')
+const { Octokit } = require('@octokit/rest')
 
 const readGitInfo = args => {
   const stdout = execSync(`git ${args}`, { encoding: 'utf8' })
@@ -13,6 +14,53 @@ const readGitInfo = args => {
     author: v[1],
     subject: v[2],
     commit: v[3]
+  }
+}
+
+const readGitHubInfo = async (owner, repo, ref) => {
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN || process.env.GH_TOKEN || undefined
+  })
+  const commitResp = await octokit.rest.repos.getCommit({
+    owner,
+    repo,
+    ref
+  })
+  const branchResp = await octokit.rest.repos.getBranch({
+    owner,
+    repo,
+    branch: ref
+  })
+  const commit = commitResp.data
+
+  return {
+    version: [
+      commit.commit.author?.date || '',
+      commit.commit.author?.name || '',
+      commit.commit.message || '',
+      commit.sha || '',
+      ''
+    ].join('\n'),
+    date: commit.commit.author?.date || '',
+    author: commit.commit.author?.name || '',
+    subject: commit.commit.message || '',
+    commit: commit.sha || '',
+    branch: branchResp.data.name || ref,
+    html_url: commit.html_url
+  }
+}
+
+const readThulemeierInfo = async () => {
+  try {
+    const info = readGitInfo('-C ../thulemeier log -n 1 --pretty="%ai%n%an%n%s%n%H%n"')
+    info.branch = execSync('git -C ../thulemeier rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim()
+    return info
+  } catch (localErr) {
+    try {
+      return await readGitHubInfo('BeethovensWerkstatt', 'thulemeier', 'dev')
+    } catch (githubErr) {
+      return null
+    }
   }
 }
 
@@ -40,14 +88,11 @@ const gitlog = file => async function () {
         function (err, stdout) {
           if (err) throw err
           json.branch = stdout.trim()
-          try {
-            json.thulemeier = readGitInfo('-C ../thulemeier log -n 1 --pretty="%ai%n%an%n%s%n%H%n"')
-            json.thulemeier.branch = execSync('git -C ../thulemeier rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim()
-          } catch (thulemeierErr) {
-            json.thulemeier = null
-          }
-          fs.writeFile(file, JSON.stringify(json, null, 2), function () {
-            console.log(json, 'fertig')
+          readThulemeierInfo().then(thulemeier => {
+            json.thulemeier = thulemeier
+            fs.writeFile(file, JSON.stringify(json, null, 2), function () {
+              console.log(json, 'fertig')
+            })
           })
         }
       )
