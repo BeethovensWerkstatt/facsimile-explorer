@@ -1609,7 +1609,7 @@ const dataModule = {
       // retrieve shapes
       const shapes = shapesRefs.map(shapeRef => svgDoc.querySelector('path[*|id="' + shapeRef.id + '"]'))
       // decides if new element is a control event
-      const isAtControlEvent = ['slur', 'tie', 'dynam', 'trill', 'bTrem', 'fTrem', 'mRpt', 'halfmRpt', 'beatRpt'].indexOf(annotElemRef.name) !== -1
+      const isAtControlEvent = ['slur', 'tie', 'dynam', 'trill', 'bTrem', 'fTrem', 'mRpt', 'halfmRpt', 'beatRpt', 'gliss'].indexOf(annotElemRef.name) !== -1
 
       // determine the staff in the AT
       let annotStaffN

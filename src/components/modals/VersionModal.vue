@@ -30,24 +30,52 @@
               <td><a :href="commiturl" target="_blank" v-if="version.commit">{{ version.commit }}</a><template v-else>N/A</template></td>
             </tr>
           </table>
+          <hr v-if="version.thulemeier?.commit" />
+          <h5 v-if="version.thulemeier?.commit">Thulemeier Version</h5>
+          <table v-if="version.thulemeier?.commit">
+            <tr class="subject">
+              <th>Subject</th>
+              <td>{{ version.thulemeier.subject }}</td>
+            </tr>
+            <tr class="date">
+              <th>Date</th>
+              <td>{{ thulemeierDate }}</td>
+            </tr>
+            <tr>
+              <th class="author">Author</th>
+              <td>{{ version.thulemeier.author }}</td>
+            </tr>
+            <tr class="branch">
+              <th>Branch</th>
+              <td>{{ version.thulemeier.branch }}</td>
+            </tr>
+            <tr class="commit">
+              <th>Commit</th>
+              <td><a :href="thulemeierCommiturl" target="_blank">{{ version.thulemeier.commit }}</a></td>
+            </tr>
+          </table>
           <hr />
           <h5>Data Version</h5>
           <table>
             <tr class="subject">
               <td>Message</td>
-              <td><a :href="commit?.html_url" target="_blank">{{ commit?.message || 'N/A' }} {{ commit?.sha }}</a></td>
-            </tr>
-            <tr>
-              <th class="author">Author</th>
-              <td>{{ commit?.author?.name || 'N/A' }}</td>
+              <td><a :href="commit?.html_url" target="_blank">{{ commit?.message || 'N/A' }}</a></td>
             </tr>
             <tr class="date">
               <th>Date</th>
               <td>{{ datadate }}</td>
             </tr>
+            <tr>
+              <th class="author">Author</th>
+              <td>{{ commit?.author?.name || 'N/A' }}</td>
+            </tr>
             <tr class="branch">
               <th>Branch</th>
               <td>{{ config?.repository?.owner || '?' }} / {{ config?.repository?.repo || '?' }} / {{ config?.repository?.branch || '?' }}</td>
+            </tr>
+            <tr class="commit">
+              <th>Commit</th>
+              <td><a :href="commiturl" target="_blank" v-if="commit">{{ commit.sha }}</a><template v-else>N/A</template></td>
             </tr>
           </table>
         </div>
@@ -81,6 +109,16 @@ export default {
     },
     commiturl () {
       return 'https://github.com/BeethovensWerkstatt/facsimile-explorer/commits/' + this.version.commit
+    },
+    thulemeierDate () {
+      if (this.version.thulemeier?.date) {
+        const d = new Date(this.version.thulemeier.date)
+        return d.toLocaleString()
+      }
+      return 'N/A'
+    },
+    thulemeierCommiturl () {
+      return 'https://github.com/BeethovensWerkstatt/thulemeier/commits/' + this.version.thulemeier.commit
     },
     datadate () {
       if (this.commit?.author?.date) {

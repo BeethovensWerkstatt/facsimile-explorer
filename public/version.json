@@ -1,8 +1,16 @@
 {
-  "version": "2029-12-31 23:59:00 +0100\nYOU\nDEVELOPMENT\n\n\n",
-  "date": "2029-12-31 23:59:00 +0100",
-  "author": "YOU",
-  "subject": "Current Development",
-  "commit": "",
-  "branch": "dev"
+  "version": "2026-05-29 10:27:58 +0200\njpvoigt\nfind AT dot index\n880b9f030b1e2edf97d5ec23c0aaea27d4111f29\n\n",
+  "date": "2026-05-29 10:27:58 +0200",
+  "author": "jpvoigt",
+  "subject": "find AT dot index",
+  "commit": "880b9f030b1e2edf97d5ec23c0aaea27d4111f29",
+  "branch": "dev",
+  "thulemeier": {
+    "version": "2026-06-02 16:44:10 +0200\njpvoigt\nfix C-Clef positions\n57ae8f7942a78cbd39892fc6305db72ed6105f2d\n\n",
+    "date": "2026-06-02 16:44:10 +0200",
+    "author": "jpvoigt",
+    "subject": "fix C-Clef positions",
+    "commit": "57ae8f7942a78cbd39892fc6305db72ed6105f2d",
+    "branch": "dev"
+  }
 }
