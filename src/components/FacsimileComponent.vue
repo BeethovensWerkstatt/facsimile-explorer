@@ -1143,6 +1143,38 @@ export default {
                   this.setMouseTracker(i / 2, tracker)
                 }
                 // console.log(9272, 'line', element, linepoints, func)
+              } else if (func === 'gliss') {
+                // const glissLineWidth = 40
+                const path = element.querySelector('polygon') // TODO: polygon, path or line?
+                const controlpoints = scaleXYControlpoints(linepoints, rastrum, factor)
+                for (const i of [0, 2]) {
+                  const tracker = this.createControlPoint(
+                    element,
+                    controlpoints,
+                    i,
+                    // render change
+                    (controlpoints) => {
+                      path.setAttribute('x1', controlpoints[0])
+                      path.setAttribute('y1', controlpoints[1])
+                      path.setAttribute('x2', controlpoints[2])
+                      path.setAttribute('y2', controlpoints[3])
+                    },
+                    // persist change
+                    async (controlpoints, i, newX, newY, factor) => {
+                      linepoints[i] = (newX / factor) - rastrum.x
+                      linepoints[i + 1] = (newY / factor) - rastrum.y
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x', value: linepoints[0].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: linepoints[1].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: linepoints[2].toFixed(2) })
+                      this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: linepoints[3].toFixed(2) })
+                      // update barline x,y,x2,y2 attributes in MEI
+                      // console.log(9272, 'barline updated', linepoints)
+                    },
+                    factor
+                  )
+                  this.setMouseTracker(i / 2, tracker)
+                }
+                // console.log(9272, 'line', element, linepoints, func)
               } else {
                 console.log(9272, 'control line func ' + func + ' not implemented')
               }

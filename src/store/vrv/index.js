@@ -134,7 +134,8 @@ const verovioModule = {
           'halfmRpt@corresp',
           'beatRpt@corresp',
           'bTrem@corresp',
-          'fTrem@corresp'
+          'fTrem@corresp',
+          'gliss@corresp'
         ] //,
         // unit: 18
       }

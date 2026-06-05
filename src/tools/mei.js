@@ -42,7 +42,8 @@ const rawSelectables = [
   'halfmRpt',
   'beatRpt',
   'bTrem',
-  'fTrem'
+  'fTrem',
+  'gliss'
   // 'staff',
   // 'measure'
 ]
@@ -101,7 +102,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     name = 'rest'
   } else if (name === 'tuplet') {
     name = 'num'
-  } else if (name === 'mRpt' || name === 'halfmRpt' || name === 'beatRpt' || name === 'bTrem' || name === 'fTrem') {
+  } else if (name === 'mRpt' || name === 'halfmRpt' || name === 'beatRpt' || name === 'bTrem' || name === 'fTrem' || name === 'gliss') {
     name = 'line'
   }
 
@@ -150,6 +151,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
       getDiplomaticBeam(annotElem, elem, bbox)
     } else if (origName === 'mRpt' || origName === 'halfmRpt' || origName === 'beatRpt' || origName === 'bTrem' || origName === 'fTrem') {
       getDiplomaticRepeatLine(annotElem, elem, bbox, origName)
+    } else if (origName === 'gliss') {
+      getDiplomaticGliss(annotElem, elem, bbox, origName)
     }
   } else if (name === 'accid') {
     getDiplomaticAccid(annotElem, elem, annotElemRef)
@@ -326,6 +329,15 @@ function getDiplomaticRepeatLine (annotElem, rpt, bbox, elemName) {
   rpt.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
   rpt.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
   rpt.setAttribute('y2', (parseFloat(bbox.mm.y)).toFixed(1))
+}
+
+function getDiplomaticGliss (annotElem, gliss, bbox, elemName) {
+  gliss.setAttribute('func', elemName)
+  gliss.setAttribute('staff', annotElem.closest('staff')?.getAttribute('n') || '1')
+  gliss.setAttribute('x', (parseFloat(bbox.mm.x)).toFixed(1))
+  gliss.setAttribute('y', (parseFloat(bbox.mm.y) + parseFloat(bbox.mm.h)).toFixed(1))
+  gliss.setAttribute('x2', (parseFloat(bbox.mm.x) + parseFloat(bbox.mm.w)).toFixed(1))
+  gliss.setAttribute('y2', (parseFloat(bbox.mm.y)).toFixed(1))
 }
 
 /**
