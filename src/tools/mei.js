@@ -768,12 +768,15 @@ function getLocAttribute (annotElem) {
 
     let loc = 4
 
+    // console.log(8936, 'last clef', clefShape, clefLine, 'pitch', annotElem.getAttribute('pname'), pitchValue, 'octave', octaveValue)
     if (clefShape === 'G' && clefLine === '2') {
       loc = (octaveValue - 4) * 7 + pitchValue - 2
     } else if (clefShape === 'F' && clefLine === '4') {
       loc = (octaveValue - 3) * 7 + pitchValue + 3
     } else if (clefShape === 'C' && clefLine === '3') {
-      loc = (octaveValue - 4) * 7 + pitchValue
+      // console.log(8936, 'C clef on line 3, treating as G clef on line 2 for loc calculation')
+      loc = (octaveValue - 3) * 7 + pitchValue - 3
+      // console.log(8936, 'calculated loc for C clef on line 3:', loc)
     }
 
     // F4 in treble should be 1: (4-4) * 7 + 3 - 2
