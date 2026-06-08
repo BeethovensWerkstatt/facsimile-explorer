@@ -1908,6 +1908,8 @@ const dataModule = {
       const baseMessage = 'adjust XML for '
       const param = '//' + elem.localName + '#' + elemId
 
+      console.log(3409, 'setActiveDiploTransElementAttValue', elemId, attName, value, 'for element', elem, 'in file', filePath)
+
       dispatch('loadDocumentIntoStore', { path: filePath, dom: newDoc })
       dispatch('logChange', { path: filePath, baseMessage, param, xmlIDs: [elemId], isNewDocument: false })
     },
