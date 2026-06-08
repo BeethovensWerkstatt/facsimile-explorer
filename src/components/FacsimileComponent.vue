@@ -856,11 +856,14 @@ export default {
       const dtid = this.$store.getters.activeDiploTransElementId
       const existingOverlay = this.$refs.container.querySelector('.diploTrans.activeDiploTrans')
 
+      console.log(3904, 'indicateSelectedDTElement', { dtid })
+
       if (existingOverlay !== null) {
         existingOverlay.querySelectorAll('.selectedDiploTrans').forEach(element => {
           element.classList.remove('selectedDiploTrans')
         })
         existingOverlay.querySelectorAll(`*[data-id="${dtid}"]`).forEach((element, i) => {
+          console.log(3904, 'selecting element', element)
           element.classList.add('selectedDiploTrans')
           if (i === 0) {
             if (this.$store.getters.activeDiploTransElementName === 'barLine') { // control barLine
@@ -1144,7 +1147,7 @@ export default {
                 }
                 // console.log(9272, 'line', element, linepoints, func)
               } else if (func === 'gliss') {
-                // const glissLineWidth = 40
+                const glissLineWidth = 30
                 const path = element.querySelector('polygon') // TODO: polygon, path or line?
                 const controlpoints = scaleXYControlpoints(linepoints, rastrum, factor)
                 for (const i of [0, 2]) {
@@ -1154,10 +1157,7 @@ export default {
                     i,
                     // render change
                     (controlpoints) => {
-                      path.setAttribute('x1', controlpoints[0])
-                      path.setAttribute('y1', controlpoints[1])
-                      path.setAttribute('x2', controlpoints[2])
-                      path.setAttribute('y2', controlpoints[3])
+                      path.setAttribute('points', `${controlpoints[0]},${controlpoints[1] - glissLineWidth} ${controlpoints[2]},${controlpoints[3] - glissLineWidth} ${controlpoints[2]},${controlpoints[3]} ${controlpoints[0]},${controlpoints[1]}`)
                     },
                     // persist change
                     async (controlpoints, i, newX, newY, factor) => {
@@ -1167,8 +1167,6 @@ export default {
                       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y', value: linepoints[1].toFixed(2) })
                       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'x2', value: linepoints[2].toFixed(2) })
                       this.$store.dispatch('setActiveDiploTransElementAttValue', { id: 'y2', value: linepoints[3].toFixed(2) })
-                      // update barline x,y,x2,y2 attributes in MEI
-                      // console.log(9272, 'barline updated', linepoints)
                     },
                     factor
                   )
@@ -1444,7 +1442,7 @@ export default {
      * renders all diplomatic transcriptions on current page
      */
     async renderDiploTransOnPage () {
-      // console.log(643, 'renderDiploTransOnPage()')
+      console.log(3904, 'renderDiploTransOnPage()')
       if (!this.showRenderedStafflines) {
         return null
       }
@@ -1479,7 +1477,7 @@ export default {
         }
       })
 
-      dtArr.forEach(async obj => {
+      const renderPromises = dtArr.map(async obj => {
         if (obj.dt) {
           const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
           const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
@@ -1528,6 +1526,7 @@ export default {
           }
         }
       })
+      await Promise.all(renderPromises)
       this.indicateSelectedDTElement()
     },
 
@@ -1681,6 +1680,7 @@ export default {
 
     this.unwatchSelectedDTElement = this.$store.watch((state, getters) => getters.activeDiploTransElementId,
       (newValue, oldValue) => {
+        console.log(3904, 'activeDiploTransElementId changed', newValue)
         for (const i in this.mouseTracker) {
           this.setMouseTracker(i, null)
         }
