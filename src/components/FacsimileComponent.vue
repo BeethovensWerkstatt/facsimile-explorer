@@ -1477,7 +1477,7 @@ export default {
         }
       })
 
-      dtArr.forEach(async obj => {
+      const renderPromises = dtArr.map(async obj => {
         if (obj.dt) {
           const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
           const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
@@ -1526,9 +1526,8 @@ export default {
           }
         }
       })
-      setTimeout(() => { // to ensure that the DOM is updated before we try to indicate the selected element
-        this.indicateSelectedDTElement()
-      }, 0)
+      await Promise.all(renderPromises)
+      this.indicateSelectedDTElement()
     },
 
     async renderDiploTrans (meiDom, draftId) {
