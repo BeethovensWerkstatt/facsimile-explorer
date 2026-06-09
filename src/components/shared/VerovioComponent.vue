@@ -8,7 +8,7 @@
 import { draft2score, draft2page, addSbIndicators, CSSselectables } from '@/tools/mei.js'
 import { resolveSbIndicators, improveAtSvg } from '@/tools/annotatedTranscripts.js'
 import { mapGetters } from 'vuex'
-import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
+// import { cleanUpDiplomaticTranscript } from '@/tools/diplomaticTranscripts.js'
 
 export default {
   name: 'VerovioComponent',
@@ -83,7 +83,7 @@ export default {
           const resolvedTrans = draft2page(meiDom)
 
           const svg = await this.$store.getters.diplomaticTranscriptForWz(resolvedTrans)
-          const localCopy = cleanUpDiplomaticTranscript(svg.repeat(1))
+          const localCopy = svg.repeat(1) // cleanUpDiplomaticTranscript(svg.repeat(1))
           this.$refs.mei.innerHTML = localCopy
         }
 

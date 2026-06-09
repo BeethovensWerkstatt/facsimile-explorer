@@ -9,6 +9,7 @@
       <div class="modal-body">
         <div class="content">
           <table>
+          <tbody>
             <tr class="subject">
               <th>Subject</th>
               <td>{{ version.subject }}</td>
@@ -29,12 +30,14 @@
               <th>Commit</th>
               <td><a :href="commiturl" target="_blank" v-if="version.commit">{{ version.commit }}</a><template v-else>N/A</template></td>
             </tr>
+          </tbody>
           </table>
           <hr v-if="version.thulemeier?.commit" />
           <h5 v-if="version.thulemeier?.commit">Thulemeier Version</h5>
           <table v-if="version.thulemeier?.commit">
-            <tr class="subject">
-              <th>Subject</th>
+            <tbody>
+              <tr class="subject">
+                <th>Subject</th>
               <td>{{ version.thulemeier.subject }}</td>
             </tr>
             <tr class="date">
@@ -53,10 +56,12 @@
               <th>Commit</th>
               <td><a :href="thulemeierCommiturl" target="_blank">{{ version.thulemeier.commit }}</a></td>
             </tr>
+            </tbody>
           </table>
           <hr />
           <h5>Data Version</h5>
           <table>
+            <tbody>
             <tr class="subject">
               <td>Message</td>
               <td><a :href="commit?.html_url" target="_blank">{{ commit?.message || 'N/A' }}</a></td>
@@ -77,6 +82,7 @@
               <th>Commit</th>
               <td><a :href="commiturl" target="_blank" v-if="commit">{{ commit.sha }}</a><template v-else>N/A</template></td>
             </tr>
+            </tbody>
           </table>
         </div>
       </div>
