@@ -1569,7 +1569,7 @@ const dataModule = {
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
         const dotsCount = annotElem.getAttribute('dots') || 0
         const dotElems = atDoc.querySelectorAll('dot')
-        console.log(668, dotsCount, dotElems?.length)
+        console.log(6883, dotsCount, dotElems?.length)
         if (dotsCount > 0) {
           for (let i = 0; i < dotsCount; i++) {
             const dotElem = document.createElementNS('http://www.music-encoding.org/ns/mei', 'dot')
@@ -1578,8 +1578,8 @@ const dataModule = {
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
           annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
-          await dispatch('loadDocumentIntoStore', { path: atPath, dom: atDoc })
-          await dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
+          dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
+          annotElem = annotElem.querySelector('dot:nth-of-type(1)') // select the first dot element for the reference
         } else {
           // TODO find dot idx from ellipse.@cx
           // set/add corresp on the right dot element
@@ -1587,9 +1587,10 @@ const dataModule = {
           const elliptElems = annotElem.parentElement.querySelectorAll('ellipse')
           const elliptElemsSorted = [...elliptElems].map(e => e.getAttribute('cx')).sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
           const dotIdx = elliptElemsSorted.indexOf(annotElemRef.target) + 1 // get the index of the current dot from the sorted list of cx values, add 1 to get the dot number (starting from 1)
-          console.log(668, 'dot idx:', dotIdx, 'from cx values:', elliptElemsSorted, 'and target:', annotElemRef.target)
+          console.log(6883, 'dot idx:', dotIdx, 'from cx values:', elliptElemsSorted, 'and target:', annotElemRef.target)
+          annotElem = annotElem.querySelector('dot:nth-of-type(' + dotIdx + ')')
         }
-        console.log(668, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
+        console.log(6883, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
       }
