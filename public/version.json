@@ -1,16 +1,16 @@
 {
-  "version": "2026-05-29 10:27:58 +0200\njpvoigt\nfind AT dot index\n880b9f030b1e2edf97d5ec23c0aaea27d4111f29\n\n",
-  "date": "2026-05-29 10:27:58 +0200",
+  "version": "2026-06-08 13:26:21 +0200\njpvoigt\nMerge branch 'dev' into jpv/dots\ne03ab7b05fcfcd01115558eac18c4b9e25d42473\n\n",
+  "date": "2026-06-08 13:26:21 +0200",
   "author": "jpvoigt",
-  "subject": "find AT dot index",
-  "commit": "880b9f030b1e2edf97d5ec23c0aaea27d4111f29",
-  "branch": "dev",
+  "subject": "Merge branch 'dev' into jpv/dots",
+  "commit": "e03ab7b05fcfcd01115558eac18c4b9e25d42473",
+  "branch": "jpv/dots",
   "thulemeier": {
-    "version": "2026-06-02 16:44:10 +0200\njpvoigt\nfix C-Clef positions\n57ae8f7942a78cbd39892fc6305db72ed6105f2d\n\n",
-    "date": "2026-06-02 16:44:10 +0200",
+    "version": "2026-06-08 10:30:29 +0200\njpvoigt\nrevert invasive/wrong note@loc correction\nc85db80b11b1bfaa74f3b4cfd1a3b31915668dcb\n\n",
+    "date": "2026-06-08 10:30:29 +0200",
     "author": "jpvoigt",
-    "subject": "fix C-Clef positions",
-    "commit": "57ae8f7942a78cbd39892fc6305db72ed6105f2d",
+    "subject": "revert invasive/wrong note@loc correction",
+    "commit": "c85db80b11b1bfaa74f3b4cfd1a3b31915668dcb",
     "branch": "dev"
   }
 }
