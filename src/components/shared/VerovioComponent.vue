@@ -80,6 +80,7 @@ export default {
         }
 
         if (this.type === 'diploTrans') {
+          console.log(6883, 'rendering verovio component for type', this.type, 'with getter', this.getter)
           const resolvedTrans = draft2page(meiDom)
 
           const svg = await this.$store.getters.diplomaticTranscriptForWz(resolvedTrans)

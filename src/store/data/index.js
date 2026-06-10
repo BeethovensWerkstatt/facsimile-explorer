@@ -1489,6 +1489,9 @@ const dataModule = {
       }
 
       let annotElem
+      // in HTML an ID may not start with a digit, so a UUID is prefixed with a letter.
+      // for special types a suffix might be added, so that the actual ID is letter + uuid + suffix.
+      // getXUUID extracts the uuid, the letter and the optional suffix from such an ID, and returns null if the ID does not contain a uuid.
       const xuuid = getXUUID(annotElemRef.id)
       const isUUID = !!xuuid
       if (!isUUID) {
@@ -1568,7 +1571,7 @@ const dataModule = {
         // console.warn('\n\nLOOKING FOR A DOT!!!')
         annotElem = atDoc.querySelector('*[*|id="' + annotElemRef.id + '"]')
         const dotsCount = annotElem.getAttribute('dots') || 0
-        const dotElems = atDoc.querySelectorAll('dot')
+        let dotElems = atDoc.querySelectorAll('dot')
         console.log(6883, dotsCount, dotElems?.length)
         if (dotsCount > 0) {
           for (let i = 0; i < dotsCount; i++) {
@@ -1577,19 +1580,10 @@ const dataModule = {
             annotElem.append(dotElem)
           }
           annotElem.removeAttribute('dots') // remove dots attribute, as we now have dot elements
-          annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
           dispatch('logChange', { path: atPath, baseMessage: 'replace dots attribute with dot elements for ', param: annotElemRef.id, xmlIDs: [annotElem.getAttribute('xml:id')], isNewDocument: false })
-          annotElem = annotElem.querySelector('dot:nth-of-type(1)') // select the first dot element for the reference
-        } else {
-          // TODO find dot idx from ellipse.@cx
-          // set/add corresp on the right dot element
-          // look for chord/note/rest
-          const elliptElems = annotElem.parentElement.querySelectorAll('ellipse')
-          const elliptElemsSorted = [...elliptElems].map(e => e.getAttribute('cx')).sort((a, b) => parseInt(a.getAttribute('cx')) - parseInt(b.getAttribute('cx')))
-          const dotIdx = elliptElemsSorted.indexOf(annotElemRef.target) + 1 // get the index of the current dot from the sorted list of cx values, add 1 to get the dot number (starting from 1)
-          console.log(6883, 'dot idx:', dotIdx, 'from cx values:', elliptElemsSorted, 'and target:', annotElemRef.target)
-          annotElem = annotElem.querySelector('dot:nth-of-type(' + dotIdx + ')')
+          dotElems = atDoc.querySelectorAll('dot')
         }
+        annotElem.removeAttribute('dot-corresp') // remove dot-corresp to the note, as we now have it on the dot elements [remove artefact]
         console.log(6883, 'modified annotElem for dots:', new XMLSerializer().serializeToString(annotElem))
       } else {
         annotElem = atDoc.querySelector(annotElemRef.name + '[*|id="' + annotElemRef.id + '"]')
@@ -2593,6 +2587,7 @@ const dataModule = {
      * @return {[type]}         [description]
      */
     annotatedTranscriptForCurrentWz: (state, getters) => {
+      console.log(6883, 'get annotated transcript for current wz')
       const path = getters.currentWzAtPath
       if (!path) {
         return null
