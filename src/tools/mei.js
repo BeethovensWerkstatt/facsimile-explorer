@@ -147,12 +147,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
       dotidx = dotElems.length - 1 // fallback to first last element
     }
     const dotElem = dotElems[dotidx]
-    dotElem.setAttribute('corresp', corresp)
-    const refs = dotElem.getAttribute('corresp') ? dotElem.getAttribute('corresp').split(' ') : []
-    console.log(6883, 'setting corresp on dot element', dotElem, refs)
-    refs.push(newCorresp)
-    console.log(6883, 'setting corresp on dot element', dotElem, refs)
-    dotElem.setAttribute('corresp', refs.join(' '))
+    dotElem.setAttribute('corresp', newCorresp)
   } else {
     annotElem.setAttribute('corresp', corresp)
   }
