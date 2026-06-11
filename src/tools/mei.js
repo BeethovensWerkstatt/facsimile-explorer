@@ -67,7 +67,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   const origName = annotElem.localName
   let name = annotElem.localName
 
-  console.log(881, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
+  console.log(6883, annotElem, shapes, bbox, svgPath, correspPath, annotElemRef)
 
   if (name === 'beam') {
     name = 'line'
@@ -138,8 +138,8 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   } else if (specialModes && specialModes.pitchClarificationLetter) {
     // Pitch Clarification Letters actually need a @corresp on the note they are clarifying, or an InfoBox won't be able to inform about them properly…
     annotElem.setAttribute('corresp', corresp)
-  } else if (name === 'dot' && annotElemRef.name === 'dots' && (annotElemRef.localName === 'note' || annotElemRef.localName === 'rest')) {
-    // TODO: search dot children of the note/rest and add the corresp to the right one (e.g. in case of multiple dots)
+  } else if (annotElemRef.name === 'dots' && (annotElem.localName === 'note' || annotElem.localName === 'rest')) {
+    // search dot children of the note/rest and add the corresp to the right one (e.g. in case of multiple dots)
     const dotElems = annotElem.querySelectorAll('dot')
     let dotidx = Array.from(dotElems).findIndex(dot => !dot.hasAttribute('corresp')) // find first dot element without corresp
     if (dotidx === -1) {
@@ -148,7 +148,7 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
     }
     const dotElem = dotElems[dotidx]
     dotElem.setAttribute('corresp', corresp)
-    console.log('setting corresp on dot element', dotElem)
+    console.log(6883, 'setting corresp on dot element', dotElem)
     const refs = dotElem.getAttribute('corresp') ? dotElem.getAttribute('corresp').split(' ') : []
     refs.push(newCorresp)
     dotElem.setAttribute('corresp', refs.join(' '))
