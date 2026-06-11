@@ -276,7 +276,6 @@ export const prepareAtDomForRendering = (atDom) => {
   map.forEach((parent) => {
     const dots = parent.querySelectorAll('dot')
     const count = dots.length
-    console.log(6883, 'prepareAtDomForRendering', 'processing parent', parent.localName, parent.getAttribute('xml:id'), 'with', count, 'dots', dots)
 
     const dotAttCount = parent.hasAttribute('dots') ? parseInt(parent.getAttribute('dots')) : 0
     if (dotAttCount > 0) {
@@ -291,7 +290,6 @@ export const prepareAtDomForRendering = (atDom) => {
     } else {
       parent.setAttribute('dot-corresp', refs)
     }
-    console.log(6883, 'prepareAtDomForRendering', 'after processing parent', parent.localName, parent.getAttribute('xml:id'), 'dots attribute is now', parent.getAttribute('dots'), 'dot-corresp is now', parent.getAttribute('dot-corresp'))
   })
   const staffCorresp = clone.querySelectorAll('staff[corresp]')
   staffCorresp.forEach((staff) => {
