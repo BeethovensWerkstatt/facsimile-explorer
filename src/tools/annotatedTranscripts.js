@@ -279,18 +279,17 @@ export const prepareAtDomForRendering = (atDom) => {
 
     const dotAttCount = parent.hasAttribute('dots') ? parseInt(parent.getAttribute('dots')) : 0
     if (dotAttCount > 0) {
-      console.warn(parent.localName + ' ' + parent.getAttribute('xml:id') + ' has dots attribute and also dots children.')
+      console.warn(6883, parent.localName + ' ' + parent.getAttribute('xml:id') + ' has dots attribute and also dots children.')
     }
     parent.setAttribute('dots', dotAttCount + count)
     dots.forEach(dot => dot.remove())
     const refs = [...dots].map(dot => dot.getAttribute('corresp')).filter(corresp => corresp !== null).join(' ')
     if (parent.hasAttribute('dot-corresp')) {
-      console.warn(parent.localName + ' ' + parent.getAttribute('xml:id') + ' already has dot-corresp attribute.')
+      console.warn(6883, parent.localName + ' ' + parent.getAttribute('xml:id') + ' already has dot-corresp attribute.')
       parent.setAttribute('dot-corresp', parent.getAttribute('dot-corresp') + ' ' + refs)
     } else {
       parent.setAttribute('dot-corresp', refs)
     }
-    // console.log(611, 'parent resolved', parent)
   })
   const staffCorresp = clone.querySelectorAll('staff[corresp]')
   staffCorresp.forEach((staff) => {
