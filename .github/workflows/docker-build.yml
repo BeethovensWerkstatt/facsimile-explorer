@@ -71,3 +71,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           secrets: |
             CLIENT_ID=${{ env.CLIENT_ID }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
