@@ -41,7 +41,7 @@
           <div class="vscale">
             <input type="range" v-model="annotScale" min="0.2" max="5" step=".01" />
           </div>
-          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="resolvedAtSymlinkForCurrentWz" :scale="annotScale"/>
+          <VerovioComponent purpose="transcribing" type="annotTrans" getter="annotatedTranscriptForCurrentWzPrepared" pathGetter="resolvedAtSymlinkForCurrentWz" :scale="annotScale"/>
         </div>
         <div class="mainBox">
           <FacsimileComponent type="diploTrans" ref="facsShapes"/>
@@ -105,7 +105,7 @@ export default {
     },
     verifyAnnotTransLoaded () {
       const atPath = this.$store.getters.currentWzAtPath
-      const at = this.$store.getters.annotatedTranscriptForCurrentWz
+      const at = this.$store.getters.annotatedTranscriptForCurrentWzPrepared
       if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
         this.$store.dispatch('loadXmlFile', {
           path: atPath
@@ -226,7 +226,7 @@ export default {
       fileDownload(data, this.$store.getters.currentWzDtPath.split('/').splice(-1)[0])
     },
     downloadAnnotTrans () {
-      const at = this.$store.getters.annotatedTranscriptForCurrentWz // base64dom(dom2base64(this.$store.getters.annotatedTranscriptForCurrentWz))
+      const at = this.$store.getters.annotatedTranscriptForCurrentWzPrepared // base64dom(dom2base64(this.$store.getters.annotatedTranscriptForCurrentWz))
       const serializer = new XMLSerializer()
       const atstring = serializer.serializeToString(at)
       const data = new Blob([atstring], {
