@@ -1241,7 +1241,7 @@ const guiModule = {
         dt: state.activeDiploTransElementId
       }
       if (chain.dt) {
-        const atdoc = getters.annotatedTranscriptForCurrentWz
+        const atdoc = getters.annotatedTranscriptForCurrentWzPrepared
         const dtdoc = getters.diplomaticTranscriptForCurrentWz
         atdoc.querySelectorAll('[corresp]').forEach(elm => {
           const corresp = elm.getAttribute('corresp').split('#')[1]

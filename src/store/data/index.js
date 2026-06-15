@@ -1910,7 +1910,7 @@ const dataModule = {
     removeDTElement ({ getters, dispatch }) {
       const baseMessage = 'remove DT element'
       const dtElemId = getters.activeDiploTransElementId
-      // console.log('remove DT element', dtElemId)
+      // console.log(6883, 'remove DT element', dtElemId)
       const oldAT = getters.annotatedTranscriptForCurrentWz
       const oldDT = getters.diplomaticTranscriptForCurrentWz
       if (oldAT && oldDT) {
@@ -1923,7 +1923,7 @@ const dataModule = {
             dtElemIds.push(e.getAttribute('xml:id'))
           }
         }
-        // console.log(890, dtElemIds)
+        console.log(6883, 'remove DT element', dtElemIds)
         const atIds = new Set()
         const dtIds = new Set()
         const AT = oldAT.cloneNode(true)
@@ -1931,15 +1931,27 @@ const dataModule = {
         const DT = oldDT.cloneNode(true)
         const dtPath = getters.currentWzDtPath
         const correspList = AT.querySelectorAll('*[corresp]')
+        const countLocalNames = {}
         for (const el of correspList) {
           const corresp = el.getAttribute('corresp')
           // check if any of the dtElemIds is included
+          // console.log(6883, 'remove DT element', el.localName, corresp, dtElemIds)
+          countLocalNames[el.localName] = (countLocalNames[el.localName] || 0) + 1
+          dtElemIds.forEach(id => {
+            if (corresp.includes(id)) {
+              console.log(6883, 'remove DT element', corresp, 'because it includes', id)
+            }
+          })
           if (dtElemIds.some(id => corresp.includes(id))) {
-            // console.log('468', corresp)
+            console.log(6883, 'remove DT element', corresp)
             atIds.add(el.getAttribute('xml:id'))
             const correspl = corresp.split(' ').filter(corresp => {
               // keep only those that do not point to any of the removed DT elements
-              return dtElemIds.indexOf(corresp.split('#')[1]) === -1
+              if (dtElemIds.indexOf(corresp.split('#')[1]) === -1) {
+                return true
+              }
+              console.log(6883, 'remove corresp', corresp, 'from element', el)
+              return false
             })
             // console.log('469', correspl)
             if (correspl.length > 0) {
@@ -1952,6 +1964,8 @@ const dataModule = {
             console.error('no AT element found!')
           }
         }
+        console.log(6883, 'remove DT element, count local names of AT elements with corresp to removed DT element:', countLocalNames)
+        console.log(6883, 'remove DT element, dots:', Array.from(AT.querySelectorAll('dot')).map(dot => ({ id: dot.getAttribute('xml:id'), corresp: dot.getAttribute('corresp') })))
         const dtElem = DT.querySelectorAll(`*[*|id="${dtElemId}"]`)
         for (const el of dtElem) {
           // console.log(el)
@@ -2576,10 +2590,10 @@ const dataModule = {
     },
 
     /**
-     * retrieves an annotated transcript for a given path
-     * @param  {[type]} state                 [description]
-     * @param  {[type]} getters               [description]
-     * @return {[type]}         [description]
+       * retrieves an annotated transcript for a given path
+       * @param  {[type]} state                 [description]
+       * @param  {[type]} getters               [description]
+       * @returns an annotated transcript for the current writing zone, or null if no annotated transcript is available for the current writing zone
      */
     annotatedTranscriptForCurrentWz: (state, getters) => {
       // console.log(6883, 'get annotated transcript for current wz')
@@ -2609,7 +2623,21 @@ const dataModule = {
       if (!atDom) {
         return null
       }
+      return atDom.cloneNode(true)
+    },
 
+    /**
+     * retrieves a prepared annotated transcript for the current writing zone
+     * @param {*} state   [description]
+     * @param {*} getters [description]
+     * @returns annotated transcript prepared for rendering with Verovio
+     */
+    annotatedTranscriptForCurrentWzPrepared: (state, getters) => {
+      const atDom = getters.annotatedTranscriptForCurrentWz
+
+      if (!atDom) {
+        return null
+      }
       const preparedAtDom = prepareAtDomForRendering(atDom.cloneNode(true))
 
       return preparedAtDom

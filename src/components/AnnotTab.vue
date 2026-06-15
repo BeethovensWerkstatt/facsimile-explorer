@@ -21,7 +21,7 @@
             <a :href="currentAnnotTabMEIFriendURL" :title="currentAnnotTabFileName" class="btn btn-sm btn-primary" target="_blank"><i class="icon icon-edit"></i> edit AT</a>
             <div class="AT-fileinfo">{{ currentAnnotTabFileName }}</div>
           </div>
-          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWz" pathGetter="currentWzAtPath"/>
+          <VerovioComponent purpose="proofreading" type="annotTrans" getter="annotatedTranscriptForCurrentWzPrepared" pathGetter="currentWzAtPath"/>
         </template>
         <template v-else-if="activeWritingZone === null">
           You need to select a writing zone on the left.
@@ -114,7 +114,7 @@ export default {
     },
     verifyAnnotTransLoaded () {
       const atPath = this.$store.getters.currentWzAtPath
-      const at = this.$store.getters.annotatedTranscriptForCurrentWz
+      const at = this.$store.getters.annotatedTranscriptForCurrentWzPrepared
       if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
         this.$store.dispatch('loadXmlFile', {
           path: atPath
@@ -166,7 +166,7 @@ export default {
       return ''
     },
     annotatedTranscriptForCurrentWz () {
-      return this.$store.getters.annotatedTranscriptForCurrentWz
+      return this.$store.getters.annotatedTranscriptForCurrentWzPrepared
     },
     previewImageUri () {
       return this.$store.getters.currentWzImageUri
