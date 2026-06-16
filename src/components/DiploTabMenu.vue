@@ -7,6 +7,10 @@
       <div class="value" :title="stateTitle">{{ stateLabel }}</div>
     </div>
     -->
+    <div class="entry">
+      <label>Cleanup</label>
+      <div class="value string button" @click="$store.dispatch('removeOrphanCorresps')" title="Remove orphan corresp attributes">&#129529;</div>
+    </div>
     <div class="entry" v-if="elementId">
       <label>close</label>
       <div class="value string button" @click="$store.dispatch('setActiveDiploTransElementId', null)">X</div>

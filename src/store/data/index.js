@@ -1992,6 +1992,45 @@ const dataModule = {
       }
     },
     /**
+     * removes corresps in the AT that point to the removed DT element
+     * @param {*} param0
+     */
+    removeOrphanCorresps ({ getters, dispatch }) {
+      const oldAT = getters.annotatedTranscriptForCurrentWz
+      const oldDT = getters.diplomaticTranscriptForCurrentWz
+      if (oldAT && oldDT) {
+        const atPath = getters.currentWzAtPath
+        // const dtPath = getters.currentWzDtPath
+        const AT = oldAT.cloneNode(true)
+        const DT = oldDT.cloneNode(true)
+        const correspList = AT.querySelectorAll('*[corresp]')
+        const removedCorresps = []
+        for (const el of correspList) {
+          if (['pb', 'sb', 'annot'].includes(el.localName)) {
+            continue
+          }
+          const corresp = el.getAttribute('corresp')
+          const correspIds = corresp.split(' ').map(c => c.split('#')[1])
+          const newCorresps = correspIds.filter(id => !!DT.querySelector(`*[*|id="${id}"]`))
+          if (newCorresps.length !== correspIds.length) {
+            const elname = el.localName
+            console.log(6883, 'remove orphan corresp', corresp, 'from element', elname)
+            removedCorresps.push(...correspIds.filter(id => !newCorresps.includes(id)))
+            if (newCorresps.length > 0) {
+              el.setAttribute('corresp', newCorresps.map(id => `#${id}`).join(' '))
+            } else {
+              el.removeAttribute('corresp')
+            }
+          }
+        }
+        console.log(6883, 'remove orphan corresps, removed corresps:', removedCorresps)
+        dispatch('loadDocumentIntoStore', { path: atPath, dom: AT })
+        dispatch('logChange', { path: atPath, baseMessage: 'remove orphan corresp to removed DT element', param: '', xmlIDs: removedCorresps, isNewDocument: false })
+      } else {
+        console.warn(6883, 'removeOrphanCorresps: no DT or AT!')
+      }
+    },
+    /**
      * Toggle unclear state of transcription element in the diplomatic transcript by wrapping it in an <unclear> element or unwrapping it if already wrapped.
      * @param {object} provide `getters, setters`
      * @param {object} `dtElemId` the ID of the DT element to toggle the unclear status for
