@@ -605,6 +605,12 @@ function getDiplomaticChord (annotElem, chord, bbox) {
     diploNote.setAttribute('xml:id', 'd' + uuid())
 
     getDiplomaticNote(note, diploNote, bbox)
+    if (diploNote.hasAttribute('bw:stem.flags')) {
+      diploNote.removeAttribute('bw:stem.flags')
+    }
+    if (note.hasAttribute('staff')) {
+      diploNote.setAttribute('staff', note.getAttribute('staff'))
+    }
     note.setAttribute('corresp', correspPath + diploNote.getAttribute('xml:id'))
     chord.append(diploNote)
     // if stem.dir is not set in chord element look into notes
@@ -745,24 +751,39 @@ function getLocAttribute (annotElem) {
   }
   try {
     let staffN = annotElem.closest('staff').getAttribute('n')
-    // TODO do we need other?
     if (annotElem.hasAttribute('staff')) {
-      staffN = annotElem.getAttribute('staff')
+      staffN = annotElem.getAttribute('staff').replace(/\s+/g, ' ').trim().split(' ')[0]
     }
     if (!staffN) {
       console.warn('WARNING: Could not determine staff number for ' + annotElem)
     }
-    const clefs = [...annotElem.closest('music').querySelectorAll('staff[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"][clef\\.line], *[*|id="' + annotElem.getAttribute('xml:id') + '"]')]
-    clefs.sort((a, b) => {
-      if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) {
-        return -1
-      } else {
-        return 1
-      }
-    })
+    const music = annotElem.closest('music')
+    const currentMeasure = annotElem.closest('measure')
+    const measures = [...music.querySelectorAll('measure')]
+    const currentMeasureIndex = measures.indexOf(currentMeasure)
+    const clefs = [...music.querySelectorAll('staff[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"] clef, staffDef[n="' + staffN + '"][clef\\.line]')]
+    const currentMeasureClefs = clefs.filter(clef => clef.closest('measure') === currentMeasure)
+    let lastClef
 
-    const annotIndex = clefs.indexOf(annotElem)
-    const lastClef = clefs[annotIndex - 1]
+    if (currentMeasureClefs.length > 0) {
+      const currentEvent = annotElem.closest('chord') || annotElem
+      const currentOnset = getLayerEventOnset(currentEvent)
+      lastClef = currentMeasureClefs
+        .filter(clef => getLayerEventOnset(clef) <= currentOnset)
+        .pop()
+    }
+
+    if (!lastClef) {
+      lastClef = clefs
+        .filter(clef => {
+          const clefMeasure = clef.closest('measure')
+          if (clefMeasure) {
+            return measures.indexOf(clefMeasure) < currentMeasureIndex
+          }
+          return clef.compareDocumentPosition(annotElem) & Node.DOCUMENT_POSITION_FOLLOWING
+        })
+        .pop()
+    }
 
     if (!lastClef) {
       console.warn('WARNING: Could not determine last clef for ' + annotElem)
@@ -778,7 +799,6 @@ function getLocAttribute (annotElem) {
 
     let loc = 4
 
-    // console.log(8936, 'last clef', clefShape, clefLine, 'pitch', annotElem.getAttribute('pname'), pitchValue, 'octave', octaveValue)
     if (clefShape === 'G' && clefLine === '2') {
       loc = (octaveValue - 4) * 7 + pitchValue - 2
     } else if (clefShape === 'F' && clefLine === '4') {
@@ -802,6 +822,23 @@ function getLocAttribute (annotElem) {
     console.warn('WARNING: Could not properly retrieve the @loc attribute for ' + annotElem + ' ' + annotElem.getAttribute('xml:id'), err)
     return 5
   }
+}
+
+function getLayerEventOnset (element) {
+  const layer = element.closest('layer')
+  let event = element
+  while (event.parentElement !== layer) {
+    event = event.parentElement
+  }
+
+  let onset = 0
+  for (let sibling = event.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+    const dur = parseInt(sibling.getAttribute('dur') || sibling.querySelector('note[dur]')?.getAttribute('dur'))
+    if (dur) {
+      onset += 1 / dur
+    }
+  }
+  return onset
 }
 
 /**

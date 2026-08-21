@@ -180,7 +180,7 @@ export default {
           console.log('clicked tie/slur', target)
         } */
 
-        // console.log('clicked verovio', cvpayload)
+        // console.log('661 clicked verovio', cvpayload)
         this.$store.dispatch('clickedVerovio', cvpayload)
       }
     },

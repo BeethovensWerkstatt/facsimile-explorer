@@ -1,0 +1,4 @@
+[submodule "thulemeier"]
+	path = thulemeier
+	url = https://github.com/BeethovensWerkstatt/thulemeier.git
+	branch = dev
