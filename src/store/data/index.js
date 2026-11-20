@@ -3,7 +3,7 @@ import { getXUUID, uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, generateStandaloneDiplomaticElement, standaloneDtTypes, prepareDtForRendering } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, generateStandaloneDiplomaticElement, standaloneDtTypes, prepareDtForRendering, appendNewElement, addPageFeatureZone, setPageFeatureZoneGeometry, findPageFeature } from '@/tools/mei.js'
 import { render } from 'thulemeier'
 import { rotatePoint } from '@/tools/trigonometry'
 import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
@@ -21,6 +21,52 @@ const parser = new DOMParser()
  * @type {XMLSerializer}
  */
 const serializer = new XMLSerializer()
+
+/**
+ * calculates the geometry of a page feature's zone from its (rendered) shapes
+ * @param {string[]} shapeIds IDs of the SVG shapes
+ * @param {*} page details of the current page
+ * @param {number} ratio pixels per mm
+ * @returns geometry as expected by setPageFeatureZoneGeometry(), or null if no shape is rendered
+ */
+const pageFeatureGeometry = (shapeIds, page, ratio) => {
+  // SVG coordinates are image pixels, so the bbox of the shapes directly gives the IIIF region
+  const boxes = shapeIds.map(id => document.querySelector('path[id="' + id + '"]')?.getBBox()).filter(Boolean)
+  if (boxes.length === 0) {
+    return null
+  }
+  const x = Math.max(0, Math.floor(Math.min(...boxes.map(b => b.x))))
+  const y = Math.max(0, Math.floor(Math.min(...boxes.map(b => b.y))))
+  const w = Math.min(Math.ceil(Math.max(...boxes.map(b => b.x + b.width))), page.width) - x
+  const h = Math.min(Math.ceil(Math.max(...boxes.map(b => b.y + b.height))), page.height) - y
+  const region = [x, y, w, h]
+  return {
+    region,
+    image: page.uri.split('#')[0].replace(/\/$/, '') + '/' + region.join(',') + '/full/0/default.jpg',
+    mm: { width: parseFloat((w / ratio).toFixed(1)), height: parseFloat((h / ratio).toFixed(1)) }
+  }
+}
+
+/**
+ * moves a shape to another group of an SVG (e.g. 'unassigned' or 'pageFeatures'), creating the group if necessary
+ * @param {*} svgDom the SVG document
+ * @param {string} shapeId ID of the shape
+ * @param {string} groupClass class of the target group
+ */
+const moveShapeToGroup = (svgDom, shapeId, groupClass) => {
+  const svgShape = svgDom.querySelector('path[id="' + shapeId + '"]')
+  if (!svgShape) {
+    console.warn('moveShapeToGroup: shape ' + shapeId + ' not found on the current page!')
+    return
+  }
+  let group = svgDom.querySelector('g.' + groupClass)
+  if (!group) {
+    group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    group.setAttribute('class', groupClass)
+    svgDom.querySelector('svg').append(group)
+  }
+  group.append(svgShape)
+}
 
 /**
  * @namespace store.data
@@ -1897,6 +1943,150 @@ const dataModule = {
     },
 
     /**
+     * adds a page feature for a shape on the current page to the <physDesc> of the source file:
+     * a <plateNum>, a <stamp> or a marginal note (both as <annot> inside <addDesc>). The shape is
+     * recorded in a <zone> of the page's surface. The new element is activated in the XML editor.
+     * @param {*} param0
+     * @param {*} param1 type: 'plateNum', 'pageNum', 'stamp', 'marginalNote' or 'inkBlot'; shape: the clicked SVG path
+     */
+    async addPageFeature ({ getters, dispatch }, { type, shape }) {
+      const page = getters.currentPageInfo
+      const docPath = page && getters.documentPathByName(page.document)
+      const doc = docPath && getters.documentByPath(docPath)?.cloneNode(true)
+      const physDesc = doc?.querySelector('physDesc')
+      const surface = doc?.querySelector('surface[*|id="' + page.id + '"]')
+      const svgTarget = surface?.querySelector('graphic[type="shapes"]')?.getAttribute('target')
+      if (!physDesc || !svgTarget || !shape) {
+        console.warn('addPageFeature: no physDesc, SVG reference or shape found!')
+        return false
+      }
+
+      // SVG coordinates are image pixels, so the shape's bbox directly gives the IIIF region
+      const geometry = pageFeatureGeometry([shape.id], page, getters.osdRects.ratio)
+      if (!geometry) {
+        return false
+      }
+
+      // the element carrying @facs to the zone: <plateNum> or <annot> (which also wraps a <stamp>)
+      let container
+      if (type === 'plateNum') {
+        container = appendNewElement(physDesc, 'plateNum')
+        appendNewElement(container, 'num').textContent = '?'
+      } else {
+        const addDesc = physDesc.querySelector('addDesc') || appendNewElement(physDesc, 'addDesc')
+        container = appendNewElement(addDesc, 'annot')
+        if (type === 'marginalNote') {
+          appendNewElement(container, 'add').textContent = '?'
+        } else if (type === 'inkBlot') {
+          appendNewElement(container, 'damage').setAttribute('type', 'inkBlot')
+        } else if (type === 'pageNum') {
+          const num = appendNewElement(container, 'num')
+          num.setAttribute('type', 'pageNum')
+          num.textContent = '?'
+        } else {
+          appendNewElement(container, 'stamp')
+        }
+      }
+      addPageFeatureZone(surface, container, { type, shapeRef: svgTarget + '#' + shape.id, geometry })
+      const element = container
+
+      // the shape is no longer unassigned, but belongs to the page features
+      const svgPath = getters.currentSvgPath
+      const svgDom = getters.svgForCurrentPage.cloneNode(true)
+      moveShapeToGroup(svgDom, shape.id, 'pageFeatures')
+
+      await dispatch('loadDocumentIntoStore', { path: docPath, dom: doc })
+      await dispatch('loadDocumentIntoStore', { path: svgPath, dom: svgDom })
+      await dispatch('logChange', {
+        path: docPath,
+        baseMessage: 'add ' + type + ' to ',
+        param: page.document,
+        xmlIDs: [element.getAttribute('xml:id')],
+        isNewDocument: false
+      })
+      await dispatch('logChange', {
+        path: svgPath,
+        baseMessage: 'add ' + type + ' to ',
+        param: page.document,
+        xmlIDs: [svgDom.querySelector('svg').getAttribute('id')],
+        isNewDocument: false
+      })
+      await dispatch('setActiveDiploTransElementId', element.getAttribute('xml:id'))
+    },
+
+    /**
+     * removes the active page feature (plateNum, stamp or marginal note) from the source file
+     * and moves its shapes back to the unassigned group
+     */
+    async removePageFeature ({ getters, dispatch }) {
+      const docPath = getters.activeXmlFilePath
+      const doc = docPath && getters.documentByPath(docPath)?.cloneNode(true)
+      const feature = findPageFeature(doc, getters.activeDiploTransElementId)
+      if (!feature) {
+        console.warn('removePageFeature: no page feature found!')
+        return false
+      }
+
+      const { elem, zone } = feature
+      const parentId = elem.parentElement.getAttribute('xml:id')
+      const shapeIds = zone.getAttribute('corresp').split(' ').map(ref => ref.split('#')[1])
+      zone.remove()
+      elem.remove()
+
+      const svgPath = getters.currentSvgPath
+      const svgDom = getters.svgForCurrentPage.cloneNode(true)
+      shapeIds.forEach(id => moveShapeToGroup(svgDom, id, 'unassigned'))
+
+      const docName = getters.documentNameByPath(docPath)
+      const baseMessage = 'remove ' + elem.localName + ' from '
+      await dispatch('setActiveDiploTransElementId', null)
+      await dispatch('loadDocumentIntoStore', { path: docPath, dom: doc })
+      await dispatch('loadDocumentIntoStore', { path: svgPath, dom: svgDom })
+      await dispatch('logChange', { path: docPath, baseMessage, param: docName, xmlIDs: [parentId], isNewDocument: false })
+      await dispatch('logChange', { path: svgPath, baseMessage, param: docName, xmlIDs: [svgDom.querySelector('svg').getAttribute('id')], isNewDocument: false })
+    },
+
+    /**
+     * adds a shape to, or removes it from the active page feature. The zone (pixel corners, IIIF link
+     * and dimensions) is recalculated from the remaining shapes.
+     * @param {*} param0
+     * @param {*} param1 shape: the clicked SVG path; remove: true to remove, false to add the shape
+     */
+    async changePageFeatureShape ({ getters, dispatch }, { shape, remove }) {
+      const docPath = getters.activeXmlFilePath
+      const doc = docPath && getters.documentByPath(docPath)?.cloneNode(true)
+      const feature = findPageFeature(doc, getters.activeDiploTransElementId)
+      const page = getters.currentPageInfo
+      const svgTarget = doc?.querySelector('surface[*|id="' + page?.id + '"] graphic[type="shapes"]')?.getAttribute('target')
+      if (!feature || !svgTarget || !shape) {
+        console.warn('changePageFeatureShape: no page feature, SVG reference or shape found!')
+        return false
+      }
+
+      const { elem, zone } = feature
+      const refs = zone.getAttribute('corresp').split(' ').filter(ref => ref.split('#')[1] !== shape.id)
+      if (!remove) {
+        refs.push(svgTarget + '#' + shape.id)
+      }
+      const geometry = pageFeatureGeometry(refs.map(ref => ref.split('#')[1]), page, getters.osdRects.ratio)
+      if (!geometry) {
+        return false
+      }
+      zone.setAttribute('corresp', refs.join(' '))
+      setPageFeatureZoneGeometry(zone, geometry)
+
+      const svgPath = getters.currentSvgPath
+      const svgDom = getters.svgForCurrentPage.cloneNode(true)
+      moveShapeToGroup(svgDom, shape.id, remove ? 'unassigned' : 'pageFeatures')
+
+      const baseMessage = (remove ? 'remove shape from ' : 'add shape to ') + elem.localName + ' in '
+      await dispatch('loadDocumentIntoStore', { path: docPath, dom: doc })
+      await dispatch('loadDocumentIntoStore', { path: svgPath, dom: svgDom })
+      await dispatch('logChange', { path: docPath, baseMessage, param: page.document, xmlIDs: [zone.getAttribute('xml:id')], isNewDocument: false })
+      await dispatch('logChange', { path: svgPath, baseMessage, param: page.document, xmlIDs: [svgDom.querySelector('svg').getAttribute('id')], isNewDocument: false })
+    },
+
+    /**
      * sets shapes of the current active element
      * @param {*} param0
      * @param {*} shapes
@@ -3617,7 +3807,9 @@ const dataModule = {
 
       const allElems = doc.querySelectorAll('mdiv *')
       // console.log([...allElems])
-      const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id)
+      // elements outside of mdiv (e.g. in the meiHead of a source file) are found by a search of the whole document
+      const elem = [...allElems].find(elem => elem.getAttribute('xml:id') === id) ||
+        [...doc.getElementsByTagName('*')].find(elem => elem.getAttribute('xml:id') === id)
 
       // const elem = doc.querySelector('*[*|id="' + id + '"]')
 
@@ -3629,6 +3821,34 @@ const dataModule = {
       // console.log('found elem:\n', elem)
 
       return serializer.serializeToString(elem)
+    },
+
+    /**
+     * the page feature (plateNum or annot with its zone) active in the XML editor, if any
+     * @param {*} state
+     * @param {*} getters
+     * @returns { elem, zone } or null
+     */
+    activePageFeature: (state, getters) => {
+      return findPageFeature(getters.documentByPath(getters.activeXmlFilePath), getters.activeDiploTransElementId)
+    },
+
+    /**
+     * path of the file containing the element that is active in the XML editor of the DiploTab:
+     * the DT of the current writing zone, or the source file for elements like <plateNum>
+     * @param {*} state
+     * @param {*} getters
+     * @returns
+     */
+    activeXmlFilePath: (state, getters) => {
+      const dtPath = getters.currentWritingZoneObject?.diploTrans
+      const id = getters.activeDiploTransElementId
+      const contains = doc => !!doc && [...doc.getElementsByTagName('*')].some(elem => elem.getAttribute('xml:id') === id)
+      if (!id || contains(getters.documentByPath(dtPath))) {
+        return dtPath
+      }
+      const sourcePath = getters.documentPathByName(getters.currentPageInfo?.document)
+      return contains(getters.documentByPath(sourcePath)) ? sourcePath : dtPath
     },
 
     /**

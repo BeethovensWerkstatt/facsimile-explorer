@@ -251,7 +251,7 @@ export default {
     },
     editorSettings () {
       return {
-        filePath: this.$store.getters.currentWritingZoneObject?.diploTrans,
+        filePath: this.$store.getters.activeXmlFilePath,
         id: this.$store.getters.activeDiploTransElementId
       }
     }

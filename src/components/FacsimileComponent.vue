@@ -389,6 +389,49 @@ export default {
           }
 
           const items = []
+          // page features (plateNum, stamp, marginal note) are recorded in the source file; activating one loads it into the XML editor
+          if (click.target.closest('.pageFeatures')) {
+            const sourceDoc = this.$store.getters.documentWithCurrentPage
+            const zone = [...(sourceDoc?.querySelectorAll('surface zone[corresp]') || [])]
+              .find(zone => zone.getAttribute('corresp').split(' ').some(ref => ref.split('#')[1] === click.target.id))
+            const featureId = zone?.getAttribute('data')?.substring(1)
+            const activeFeature = this.$store.getters.activePageFeature
+            const isActiveShape = !!zone && activeFeature?.zone.getAttribute('xml:id') === zone.getAttribute('xml:id')
+            items.push({
+              label: 'Activate page feature',
+              action: () => this.$store.dispatch('setActiveDiploTransElementId', featureId),
+              disabled: !featureId
+            })
+            items.push({
+              label: 'Remove shape from current page feature',
+              action: () => {
+                if (zone.getAttribute('corresp').split(' ').length > 1) {
+                  this.$store.dispatch('changePageFeatureShape', { shape: click.target, remove: true })
+                } else if (confirm('This is the only shape of the page feature.\nDo you want to remove the whole page feature?\nThis cannot be undone!')) {
+                  this.$store.dispatch('removePageFeature')
+                }
+              },
+              disabled: !isActiveShape
+            })
+          }
+          // shapes outside of any writing zone are page features (e.g. plate numbers) that are recorded in the source file
+          if (click.target.closest('.unassigned')) {
+            items.push({
+              label: 'Page Feature',
+              items: [
+                { label: 'Plate Number', action: () => this.$store.dispatch('addPageFeature', { type: 'plateNum', shape: click.target }) },
+                { label: 'Page Number', action: () => this.$store.dispatch('addPageFeature', { type: 'pageNum', shape: click.target }) },
+                { label: 'Stamp', action: () => this.$store.dispatch('addPageFeature', { type: 'stamp', shape: click.target }) },
+                { label: 'Marginal Note', action: () => this.$store.dispatch('addPageFeature', { type: 'marginalNote', shape: click.target }) },
+                { label: 'Ink Blot', action: () => this.$store.dispatch('addPageFeature', { type: 'inkBlot', shape: click.target }) }
+              ]
+            })
+            items.push({
+              label: 'Add Shape to Current Page Feature',
+              action: () => this.$store.dispatch('changePageFeatureShape', { shape: click.target, remove: false }),
+              disabled: !this.$store.getters.activePageFeature
+            })
+          }
           if (!wzActive) {
             const wzidx = this.$store.getters.writingZoneIndexOnCurrentPage(genDescWzId)
             const label = 'select writing zone' + (wzidx >= 0 ? ` (${wzidx + 1})` : '')
@@ -1878,6 +1921,16 @@ export default {
     &:hover {
       stroke-width: 10px;
       stroke: lighten($svgUnassignedShapeColor, 15%);
+    }
+  }
+
+  .pageFeatures path {
+    fill: $svgPageFeatureColor;
+    stroke: $svgPageFeatureColor;
+    fill-rule: evenodd;
+    &:hover {
+      stroke-width: 10px;
+      stroke: lighten($svgPageFeatureColor, 15%);
     }
   }
 

@@ -11,7 +11,7 @@
       <label>Cleanup</label>
       <div class="value string button" @click="$store.dispatch('removeOrphanCorresps')" title="Remove orphan corresp attributes">&#129529;</div>
     </div>
-    <div class="entry" v-if="elementId">
+    <div class="entry" v-if="elementId || isPageFeature">
       <label>close</label>
       <div class="value string button" @click="$store.dispatch('setActiveDiploTransElementId', null)">X</div>
     </div>
@@ -102,6 +102,10 @@
       <label>unlink</label>
       <div class="value string button" :onClick="removeDTElement" title="remove DT element">&#x2702;</div>
     </div>
+    <div class="entry" v-if="isPageFeature">
+      <label>unlink</label>
+      <div class="value string button" :onClick="removePageFeature" title="remove page feature and release its shape">&#x2702;</div>
+    </div>
     <!-- <div class="entry" :onClick="test">Push</div> -->
   </div>
 </template>
@@ -139,6 +143,11 @@ export default {
         this.$store.dispatch('removeDTElement')
       }
     },
+    removePageFeature () {
+      if (confirm('Do you really want to delete the selected page feature?\nIts shape will be unassigned again. This cannot be undone!')) {
+        this.$store.dispatch('removePageFeature')
+      }
+    },
     test () {
       // const doc = this.$store.getters.documentByPath(this.filePath)
       // console.log('got doc: \n', doc)
@@ -170,7 +179,12 @@ export default {
       }
     },
     elementId () {
-      return this.$store.getters.activeDiploTransElementId
+      // only DT elements can be adjusted with this menu
+      return this.$store.getters.activeDiploTransElement ? this.$store.getters.activeDiploTransElementId : null
+    },
+    // plateNum, stamp and marginal notes (annot) are linked to a shape in the source file
+    isPageFeature () {
+      return !!this.$store.getters.activePageFeature
     },
     pageWidth () {
       const width = this.$store.getters.currentPageDetails?.mmWidth

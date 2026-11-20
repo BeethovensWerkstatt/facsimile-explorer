@@ -1628,6 +1628,55 @@ export const appendNewElement = (parent, name, ns = 'http://www.music-encoding.o
 }
 
 /**
+ * adds a <zone> to a surface for the shapes of a page feature and links it with the element describing the feature:
+ * the element points to the zone with @facs, the zone back with @data and to the shapes with @corresp.
+ * @param {*} surface the <surface> of the current page
+ * @param {*} container the element describing the feature (plateNum or annot)
+ * @param {*} zoneData { type, shapeRef, geometry } where geometry is as in setPageFeatureZoneGeometry()
+ * @returns the new zone
+ */
+export const addPageFeatureZone = (surface, container, { type, shapeRef, geometry }) => {
+  const zone = appendNewElement(surface, 'zone')
+  Object.entries({ type, corresp: shapeRef, data: '#' + container.getAttribute('xml:id') })
+    .forEach(([att, value]) => zone.setAttribute(att, value))
+  setPageFeatureZoneGeometry(zone, geometry)
+  container.setAttribute('facs', '#' + zone.getAttribute('xml:id'))
+  return zone
+}
+
+/**
+ * (re)sets position and size of a page feature's zone: the pixel corners of the zone, a <graphic> with the
+ * IIIF link to the image region, and a <figDesc> with the <dimensions> in mm
+ * @param {*} zone the <zone>
+ * @param {*} geometry { region: [x, y, w, h] in image pixels, image: IIIF URL, mm: { width, height } }
+ */
+export const setPageFeatureZoneGeometry = (zone, { region: [x, y, w, h], image, mm }) => {
+  Object.entries({ ulx: x, uly: y, lrx: x + w, lry: y + h }).forEach(([att, value]) => zone.setAttribute(att, value))
+  zone.querySelectorAll('graphic, figDesc').forEach(child => child.remove())
+  appendNewElement(zone, 'graphic').setAttribute('target', image)
+  const dimensions = appendNewElement(appendNewElement(zone, 'figDesc'), 'dimensions')
+  dimensions.setAttribute('unit', 'mm')
+  appendNewElement(dimensions, 'height').textContent = mm.height
+  appendNewElement(dimensions, 'width').textContent = mm.width
+}
+
+/**
+ * finds a page feature (plateNum or annot with a link to a zone) by ID, together with its zone
+ * @param {*} doc the source document
+ * @param {*} id the xml:id of the element
+ * @returns { elem, zone } or null
+ */
+export const findPageFeature = (doc, id) => {
+  const all = doc ? [...doc.getElementsByTagName('*')] : []
+  const elem = id && all.find(elem => elem.getAttribute('xml:id') === id)
+  if (!elem || !elem.hasAttribute('facs') || !['plateNum', 'annot'].includes(elem.localName)) {
+    return null
+  }
+  const zone = all.find(zone => zone.localName === 'zone' && '#' + zone.getAttribute('xml:id') === elem.getAttribute('facs'))
+  return zone ? { elem, zone } : null
+}
+
+/**
  * Converts a diplomatic transcription into a renderable MEI, tailored towards the Thulemeier library
  * @param {*} node
  * @returns

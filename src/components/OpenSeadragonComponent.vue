@@ -625,6 +625,15 @@ export default {
     }
   }
 
+  .pageFeatures path {
+    fill: $svgPageFeatureColor;
+    stroke: $svgPageFeatureColor;
+    &:hover {
+      stroke-width: 10px;
+      stroke: lighten($svgPageFeatureColor, 15%);
+    }
+  }
+
   .writingZone path {
     fill: #666666;
     stroke: #666666;
