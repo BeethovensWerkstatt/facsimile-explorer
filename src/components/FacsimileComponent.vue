@@ -12,7 +12,7 @@ import { controlpointsToVerovioSvgBezier } from '@/tools'
 // Temporary local import for thulemeier; swap to 'import { ... } from "thulemeier"' when published to NPM
 import { render } from 'thulemeier'
 import { /* getMediaFragmentBBoxRect, getMediaFragmentRect, */ /* getMediaFragmentInnerBoxRect, */ getOsdRects } from '@/tools/facsimileHelpers.js'
-import { appendNewElement, CSSselectables } from '@/tools/mei.js'
+import { appendNewElement, CSSselectables, standaloneDtTypes } from '@/tools/mei.js'
 
 // import { useDiploTrans } from '@/store/gui/diplotrans'
 import { scaleXYControlpoints, identifyClosestSystem } from '@/tools/diplomaticTranscripts.js'
@@ -406,7 +406,20 @@ export default {
                     setDeletion, // { label: 'Deletion', action: func('deletion'), disabled: !wzActive },
                     setUnclear,
                     { label: 'Pitch Clarification Letter', action: pitchClarificationLetterFunc, disabled: !wzActive },
-                    setNavigationalSign// { label: 'Navigational Sign', action: func('navSign'), disabled: !wzActive }
+                    setNavigationalSign, // { label: 'Navigational Sign', action: func('navSign'), disabled: !wzActive }
+                    { separator: true },
+                    ...[
+                      { label: 'Events', control: false },
+                      { label: 'Control events', control: true }
+                    ].map(({ label, control }) => ({
+                      label,
+                      disabled: !wzActive,
+                      items: standaloneDtTypes.filter(type => !!type.control === control).map(type => ({
+                        label: type.label,
+                        action: () => this.$store.dispatch('diploTranscribe_withoutAT', { typeId: type.id, shape: click.target }),
+                        disabled: !wzActive
+                      }))
+                    }))
                   ]
                 },
                 addShapeEntry,

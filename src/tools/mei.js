@@ -224,6 +224,118 @@ export function generateDiplomaticElement (annotElem, shapes, bbox, svgPath, cor
   return elem
 }
 
+const f1 = (n) => parseFloat(parseFloat(n).toFixed(1))
+const textAttrs = ({ bbox, staff }) => ({ x: f1(bbox.mm.x), y: f1(bbox.mm.y), width: f1(bbox.mm.w), staff })
+const posAttrs = ({ bbox, staff }) => ({ x: f1(bbox.mm.x), y: f1(bbox.mm.y), staff })
+const lineAttrs = (func) => ({ bbox, staff }) => ({
+  func,
+  staff,
+  x: f1(bbox.mm.x),
+  y: f1(bbox.mm.y + bbox.mm.h),
+  x2: f1(bbox.mm.x + bbox.mm.w),
+  y2: f1(bbox.mm.y)
+})
+
+/**
+ * DT element types that can be created from a shape without a corresponding AT element.
+ * name: DT element name; control: true for elements that live in the section (not the layer);
+ * attrs: attributes (null removes) based on the shape's bbox and the staff; text: placeholder content;
+ * addChildren: optional function to add required children
+ */
+export const standaloneDtTypes = [
+  { id: 'note', label: 'Note', name: 'note', attrs: ({ bbox }) => ({ loc: 4, 'head.shape': 'quarter', 'stem.dir': 'up', 'stem.len': Math.round(bbox.vu.h) }) },
+  {
+    id: 'chord',
+    label: 'Chord',
+    name: 'chord',
+    attrs: ({ bbox }) => ({ 'stem.dir': 'up', 'stem.len': Math.round(bbox.vu.h) }),
+    addChildren: (chord) => {
+      const note = document.createElementNS('http://www.music-encoding.org/ns/mei', 'note')
+      note.setAttribute('xml:id', 'd' + uuid())
+      note.setAttribute('loc', 4)
+      note.setAttribute('head.shape', 'quarter')
+      chord.append(note)
+    }
+  },
+  { id: 'rest', label: 'Rest', name: 'rest', attrs: () => ({ loc: 5, 'glyph.name': 'restQuarter', 'glyph.auth': 'smufl' }) },
+  { id: 'accid', label: 'Accidental', name: 'accid', attrs: () => ({ accid: 's', loc: 5 }) },
+  { id: 'dot', label: 'Augmentation Dot', name: 'dot', attrs: () => ({ loc: 4, type: 'augmentation' }) },
+  { id: 'repeatDot', label: 'Repeat Dot', name: 'dot', attrs: ({ bbox }) => ({ y: f1(bbox.mm.y), type: 'repeat' }) },
+  {
+    id: 'barLine',
+    label: 'Barline',
+    name: 'barLine',
+    control: true,
+    attrs: ({ bbox }) => ({ form: 'single', x: f1(bbox.mm.x + bbox.mm.w), y: f1(bbox.mm.y), x2: f1(bbox.mm.x), y2: f1(bbox.mm.y + bbox.mm.h) })
+  },
+  { id: 'clef', label: 'Clef', name: 'clef', attrs: () => ({ shape: 'G', line: 2 }) },
+  { id: 'meterSig', label: 'Meter Signature', name: 'meterSig', attrs: () => ({ count: 4, unit: 4 }) },
+  {
+    id: 'curve',
+    label: 'Slur / Tie',
+    name: 'curve',
+    control: true,
+    attrs: ({ bbox, staff }) => ({ x: null, staff, bezier: boundingboxDefaultControlpoints(bbox, true).map(c => c.toFixed(2)).join(' ') })
+  },
+  { id: 'dynam', label: 'Dynamics', name: 'dynam', control: true, attrs: textAttrs, text: '?' },
+  {
+    id: 'hairpin',
+    label: 'Hairpin',
+    name: 'hairpin',
+    control: true,
+    attrs: ({ bbox, staff }) => {
+      const centerY = f1(bbox.mm.y + bbox.mm.h / 2)
+      return { form: 'cres', staff, x: f1(bbox.mm.x), y: centerY, x2: f1(bbox.mm.x + bbox.mm.w), y2: centerY, opening: f1(bbox.mm.h), 'bw:start.opening': 0 }
+    }
+  },
+  { id: 'tempo', label: 'Tempo', name: 'tempo', control: true, attrs: textAttrs, text: '?' },
+  { id: 'dir', label: 'Directive', name: 'dir', control: true, attrs: textAttrs, text: '?' },
+  { id: 'word', label: 'Text / Syllable', name: 'word', control: true, attrs: textAttrs, text: '?' },
+  { id: 'fing', label: 'Fingering', name: 'fing', control: true, attrs: posAttrs, text: '?' },
+  { id: 'f', label: 'Figured Bass', name: 'f', attrs: posAttrs, text: '?' },
+  { id: 'pedal', label: 'Pedal', name: 'pedal', control: true, attrs: (p) => ({ ...posAttrs(p), dir: 'down' }) },
+  { id: 'octave', label: 'Octave Line', name: 'octave', control: true, attrs: (p) => ({ ...textAttrs(p), dis: 8, 'dis.place': 'above' }) },
+  { id: 'fermata', label: 'Fermata', name: 'fermata', control: true, attrs: (p) => ({ ...posAttrs(p), form: 'norm' }) },
+  { id: 'trill', label: 'Trill', name: 'trill', control: true, attrs: posAttrs },
+  { id: 'artic', label: 'Articulation', name: 'artic', attrs: ({ bbox }) => ({ x: f1(bbox.mm.x), y: f1(bbox.mm.y), artic: 'stacc' }) },
+  { id: 'tuplet', label: 'Tuplet Number', name: 'num', attrs: ({ bbox }) => ({ x: f1(bbox.mm.x), y: f1(bbox.mm.y), type: 'tuplet' }), text: '3' },
+  { id: 'beam', label: 'Beam', name: 'line', control: true, attrs: lineAttrs('beam') },
+  { id: 'repeatLine', label: 'Repeat Line (mRpt etc.)', name: 'line', control: true, attrs: lineAttrs('mRpt') },
+  { id: 'gliss', label: 'Glissando', name: 'line', control: true, attrs: lineAttrs('gliss') }
+]
+
+/**
+ * generates a diplomatic element for a shape without a corresponding annotated element,
+ * relying on default values for everything that cannot be derived from the shape.
+ * @param {*} type an entry of standaloneDtTypes
+ * @param {*} shapes the shapes to be converted
+ * @param {*} bbox the bounding box of the shapes in mm and vu
+ * @param {*} svgPath the path to the SVG file containing the shapes
+ * @param {*} staff the n of the staff the element is placed on
+ * @returns the generated diplomatic element
+ */
+export function generateStandaloneDiplomaticElement (type, shapes, bbox, svgPath, staff) {
+  const elem = document.createElementNS('http://www.music-encoding.org/ns/mei', type.name)
+  elem.setAttribute('xml:id', 'd' + uuid())
+  elem.setAttribute('x', bbox.mm.x)
+  elem.setAttribute('facs', shapes.map(shape => svgPath + '#' + shape.getAttribute('id')).join(' '))
+
+  Object.entries(type.attrs({ bbox, staff })).forEach(([key, value]) => {
+    if (value === null) {
+      elem.removeAttribute(key)
+    } else {
+      elem.setAttribute(key, value)
+    }
+  })
+  if (type.text) {
+    elem.textContent = type.text
+  }
+  if (type.addChildren) {
+    type.addChildren(elem)
+  }
+  return elem
+}
+
 /**
  * translates an annotated note to a diplomatic note
  * @param {*} annotElem the annotated note to be translated

@@ -1,14 +1,10 @@
 <template>
   <div class="contextMenuBack" v-if="visible" @click="close">
-    <div class="contextMenu" :style="{ top, left }">
-      <div class="item level1" :class="{ disabled: item.disabled, activated: this.level1 === n }" v-for="(item, n) in contextMenu.items" :key="n" @click="callback(item)" @mouseenter="setLevel1(n)">
+    <!-- all levels are siblings, as nested backdrop-filters do not blur -->
+    <div class="contextMenu" v-for="(panel, k) in panels" :key="k" :style="panel.style">
+      <div class="item" :class="{ disabled: item.disabled, activated: path[k]?.index === n, separator: item.separator }" v-for="(item, n) in panel.items" :key="n" @click="callback(item)" @mouseenter="setActive(k, n, $event)">
         {{ item.label }}
         <span class="childMenu" v-if="item.items" style="float: right">❯</span>
-      </div>
-      <div class="contextMenu level2" v-if="level2visible" :style="{ top: secondTop, left: secondLeft }">
-        <div class="item" :class="{ disabled: subItem.disabled, activated: this.level2 === m }" v-for="(subItem, m) in level2items" :key="m" @click="callback(subItem)" @mouseenter="setLevel2(m)">
-          {{ subItem.label }}
-        </div>
       </div>
     </div>
   </div>
@@ -25,16 +21,18 @@ export default {
 
   },
   data: () => ({
-    level1: 0,
-    level2: -1,
-    level3: -1,
-    currentLevel: 1
+    // one entry per open level: { index: hovered item, top: its viewport top }
+    path: [],
+    itemHeight: 22
   }),
+  watch: {
+    contextMenu () {
+      this.path = []
+    }
+  },
   methods: {
     close () {
-      this.setLevel1(0)
-      this.setLevel2(-1)
-      this.setLevel3(-1)
+      this.path = []
       this.$store.dispatch('closeContextMenu')
     },
     callback (item) {
@@ -44,44 +42,89 @@ export default {
         item.action()
       }
     },
-    setLevel1 (n) {
-      this.level1 = n
-      this.level2 = -1
-      this.level3 = -1
-    },
-    setLevel2 (n) {
-      this.level2 = n
-      this.level3 = -1
-    },
-    setLevel3 (n) {
-      this.level3 = n
+    setActive (level, index, event) {
+      const el = event.currentTarget
+      if (el.classList.contains('separator')) {
+        return
+      }
+      this.itemHeight = el.offsetHeight || this.itemHeight
+      this.path = [...this.path.slice(0, level), { index, top: el.getBoundingClientRect().top }]
     },
     onKeyDown (e) {
       if (!this.visible) {
         return
       }
+      // handled in the capture phase, so neither OpenSeadragon nor anything else sees keys while the menu is open
       e.preventDefault()
-      e.stopPropagation()
+      e.stopImmediatePropagation()
       if (e.key === 'Escape') {
-        this.$store.dispatch('closeContextMenu')
+        this.close()
+        return
       }
-      if (e.key === 'ArrowDown') {
-        if (this.currentLevel === 1 && this.level1 + 1 < this.contextMenu.items.length) {
-          this.level1 = this.level1 + 1
+
+      const level = Math.max(this.path.length - 1, 0)
+      const items = this.panels[level]?.items || []
+      const current = this.path[level]?.index ?? -1
+      const activate = (lvl, index) => {
+        const el = this.$el.querySelectorAll('.contextMenu')[lvl]?.querySelectorAll('.item')[index]
+        el?.scrollIntoView({ block: 'nearest' })
+        this.path = [...this.path.slice(0, lvl), { index, top: el ? el.getBoundingClientRect().top : 0 }]
+      }
+      const selectable = item => !item.separator && !item.disabled
+      const findFrom = (start, step) => {
+        for (let i = start; i >= 0 && i < items.length; i += step) {
+          if (selectable(items[i])) {
+            return i
+          }
+        }
+        return -1
+      }
+      const enterSubmenu = () => {
+        const sub = items[current]?.items
+        const first = sub ? sub.findIndex(selectable) : -1
+        if (first >= 0) {
+          // the submenu panel is already rendered, as it opens as soon as its parent is active
+          this.$nextTick(() => activate(level + 1, first))
         }
       }
-      if (e.key === 'ArrowUp') {
-        if (this.currentLevel === 1 && this.level1 > 0) {
-          this.level1 = this.level1 - 1
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const step = e.key === 'ArrowDown' ? 1 : -1
+        const next = findFrom(current < 0 ? (step > 0 ? 0 : items.length - 1) : current + step, step)
+        if (next >= 0) {
+          activate(level, next)
         }
+      } else if (e.key === 'ArrowRight') {
+        enterSubmenu()
+      } else if (e.key === 'ArrowLeft') {
+        if (this.path.length > 1) {
+          this.path = this.path.slice(0, -1)
+        }
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        const item = items[current]
+        if (item?.items) {
+          enterSubmenu()
+        } else if (item) {
+          this.callback(item)
+        }
+      }
+    },
+    swallowKey (e) {
+      if (this.visible) {
+        e.preventDefault()
+        e.stopImmediatePropagation()
       }
     }
   },
   mounted () {
-    window.addEventListener('keydown', this.onKeyDown)
+    window.addEventListener('keydown', this.onKeyDown, true)
+    window.addEventListener('keypress', this.swallowKey, true)
+    window.addEventListener('keyup', this.swallowKey, true)
   },
   beforeUnmount () {
-    window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('keydown', this.onKeyDown, true)
+    window.removeEventListener('keypress', this.swallowKey, true)
+    window.removeEventListener('keyup', this.swallowKey, true)
   },
   computed: {
     visible () {
@@ -90,48 +133,48 @@ export default {
     contextMenu () {
       return this.$store.getters.contextMenu
     },
-    level2visible () {
-      return this.contextMenu?.items[this.level1]?.items
-    },
-    level2items () {
-      return this.contextMenu?.items[this.level1]?.items
-    },
-    left () {
-      let x = this.contextMenu?.pos?.x
+    /**
+     * the currently open menu levels with their screen positions.
+     * The first level opens to the right of the pointer (or to the left, if there is no room);
+     * each submenu opens in the direction of its parent, switching sides if it would leave the window,
+     * and is aligned to the hovered item but kept inside the window vertically.
+     */
+    panels () {
+      const WIDTH = 300
+      const OVERLAP = 5
+      const MARGIN = 10
+      const winW = window.innerWidth
+      const winH = window.innerHeight
+      const heightOf = items => items.reduce((sum, item) => sum + (item.separator ? 9 : this.itemHeight), 11)
+      const clampTop = (top, items) => Math.max(MARGIN, Math.min(top, winH - heightOf(items) - MARGIN))
 
-      if (!x) {
-        x = 10
+      let items = this.contextMenu?.items || []
+      let x = (this.contextMenu?.pos?.x || 10) + 10
+      let dir = 1
+      if (x + WIDTH > winW) {
+        x -= WIDTH + 20
+        dir = -1
       }
+      let top = clampTop(this.contextMenu?.pos?.y || 0, items)
 
-      x = x + 10
-
-      if (x + 300 > window.innerWidth) {
-        x = x - 320
+      const panels = []
+      for (let level = 0; ; level++) {
+        panels.push({ items, style: { top: top + 'px', left: x + 'px', maxHeight: (winH - 2 * MARGIN) + 'px' } })
+        const entry = this.path[level]
+        const next = entry && items[entry.index]?.items
+        if (!next) {
+          break
+        }
+        let nextX = x + dir * (WIDTH - OVERLAP)
+        if (nextX < 0 || nextX + WIDTH > winW) {
+          dir = -dir
+          nextX = x + dir * (WIDTH - OVERLAP)
+        }
+        x = Math.max(0, Math.min(nextX, winW - WIDTH))
+        top = clampTop(entry.top - 5, next)
+        items = next
       }
-      return x + 'px'
-    },
-    top () {
-      return this.contextMenu?.pos?.y + 'px'
-    },
-    secondLeft () {
-      let x = parseInt(this.left)
-
-      if (parseInt(x + 300 + 295) > window.innerWidth) {
-        x = -295
-      } else {
-        x = 295
-      }
-
-      return x + 'px'
-    },
-    secondTop () {
-      const cm = document.querySelector('.contextMenu')
-      const act = document.querySelectorAll('.contextMenu .item.level1')[this.level1]
-
-      const yBase = cm.getBoundingClientRect().top
-      const y = act.getBoundingClientRect().top - yBase - 5
-
-      return y + 'px'
+      return panels
     }
   }
 }
@@ -160,12 +203,7 @@ export default {
     padding: 5px 5px;
     width: 300px;
     backdrop-filter: blur(10px);
-
-    .level2 {
-      position: absolute;
-      left: -330px;
-      top: 0;
-    }
+    overflow-y: auto;
 
     .item {
       padding: 3px 10px;
@@ -186,6 +224,15 @@ export default {
         &:hover {
           background-color: unset;
         }
+      }
+
+      &.separator {
+        height: 0;
+        padding: 0;
+        margin: 4px 0;
+        border-top: .5px solid #888888;
+        cursor: default;
+        pointer-events: none;
       }
 
       .childMenu {

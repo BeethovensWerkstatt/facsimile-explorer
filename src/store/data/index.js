@@ -3,7 +3,7 @@ import { getXUUID, uuid } from '@/tools/uuid.js'
 import OpenSeadragon from 'openseadragon'
 // import { rotatePoint, getOuterBoundingRect } from '@/tools/trigonometry.js'
 import { getOsdRects } from '@/tools/facsimileHelpers.js'
-import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, prepareDtForRendering } from '@/tools/mei.js'
+import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans, getEmptyPage, generateDiplomaticElement, generateStandaloneDiplomaticElement, standaloneDtTypes, prepareDtForRendering } from '@/tools/mei.js'
 import { render } from 'thulemeier'
 import { rotatePoint } from '@/tools/trigonometry'
 import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
@@ -1814,6 +1814,86 @@ const dataModule = {
 
       await dispatch('setActiveDiploTransElementId', diplomaticElement.getAttribute('xml:id'))
       dispatch('diploTransClear', false)
+    },
+
+    /**
+     * transcribes a single shape as a DT element of the given type without a corresponding AT element.
+     * The element is placed on the staff closest to the shape; only the DT is modified.
+     * @param {*} param0
+     * @param {*} param1 typeId: id of an entry in standaloneDtTypes; shape: the clicked SVG path
+     */
+    async diploTranscribe_withoutAT ({ getters, dispatch }, { typeId, shape }) {
+      const type = standaloneDtTypes.find(t => t.id === typeId)
+      const dtPath = getters.currentWzDtPath
+      const dtDoc = getters.documentByPath(dtPath)?.cloneNode(true)
+      const rects = getters.osdRects
+      const rastrums = getters.rastrumsOnCurrentPage
+      if (!type || !dtDoc || !shape) {
+        return false
+      }
+
+      const rbox = shape.getBBox()
+      const centerY = rbox.y + rbox.height / 2
+
+      // find the staff whose rastrum is closest to the shape
+      let nearest = null
+      dtDoc.querySelectorAll('system staffDef').forEach(staffDef => {
+        const rastrum = rastrums.find(r => r.id === staffDef.getAttribute('decls')?.split('#')[1])
+        if (!rastrum) {
+          return
+        }
+        const dist = Math.max(rastrum.px.y - centerY, centerY - (rastrum.px.y + rastrum.px.h), 0)
+        if (!nearest || dist < nearest.dist) {
+          nearest = { dist, rastrum, staffDef }
+        }
+      })
+      if (!nearest) {
+        console.warn('diploTranscribe_withoutAT: no staff found!')
+        return false
+      }
+
+      const { rastrum, staffDef } = nearest
+      const staffN = staffDef.getAttribute('n')
+      const system = staffDef.closest('system')
+      const diploSection = system.querySelector('section')
+      const diploLayer = diploSection.querySelector('staff[n="' + staffN + '"] layer')
+      const topRastrumId = system.querySelector('staffDef[n="1"]').getAttribute('decls').split('#')[1]
+      const topRastrum = rastrums.find(r => r.id === topRastrumId)
+
+      // same coordinate logic as in diploTranscribe: x relative to the staff's rastrum, y relative to the system's top rastrum
+      const mmX = parseFloat(((rbox.x - rastrum.px.x) / rects.ratio).toFixed(1))
+      const unrotatedPoint = { x: mmX, y: parseFloat(((rbox.y / rects.ratio) + +rects.image.y - topRastrum.y).toFixed(1)) }
+      const rotatedPoint = rotatePoint(unrotatedPoint, { x: rastrum.x, y: rastrum.y }, rastrum.rotate)
+      const bbox = {
+        mm: {
+          x: parseFloat(rotatedPoint.x.toFixed(1)),
+          y: parseFloat(rotatedPoint.y.toFixed(1)),
+          w: parseFloat((rbox.width / rects.ratio).toFixed(1)),
+          h: parseFloat((rbox.height / rects.ratio).toFixed(1))
+        }
+      }
+      bbox.vu = { h: 8 / rastrum.h * bbox.mm.h }
+
+      const svgPath = '../svg/' + getters.currentSvgPath.split('/').splice(-1)[0]
+      const element = generateStandaloneDiplomaticElement(type, [shape], bbox, svgPath, staffN)
+
+      if (type.control) {
+        diploSection.appendChild(element)
+      } else {
+        const next = Array.from(diploLayer.children).find(child => child.hasAttribute('x') && parseFloat(child.getAttribute('x')) > mmX)
+        diploLayer.insertBefore(element, next || null)
+      }
+
+      const dtDoc2 = new DOMParser().parseFromString(new XMLSerializer().serializeToString(dtDoc), 'application/xml')
+      await dispatch('loadDocumentIntoStore', { path: dtPath, dom: dtDoc2 })
+      await dispatch('logChange', {
+        path: dtPath,
+        baseMessage: 'transcribe shape as ' + type.name + ' without AnnotTrans at ',
+        param: dtPath.split('/').splice(-1)[0],
+        xmlIDs: [diploSection.getAttribute('xml:id')],
+        isNewDocument: false
+      })
+      await dispatch('setActiveDiploTransElementId', element.getAttribute('xml:id'))
     },
 
     /**
