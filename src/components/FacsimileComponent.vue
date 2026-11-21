@@ -621,9 +621,10 @@ export default {
      * @return {[type]} [description]
      */
     renderGrid () {
-      this.$refs.container.querySelectorAll('.grid').forEach(overlay => {
+      this.gridOverlays.forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
+      this.gridOverlays = []
 
       if (!this.showGrid) {
         return null
@@ -672,6 +673,7 @@ export default {
           width = 0.2
         }
 
+        this.gridOverlays.push(element)
         this.viewer.addOverlay({
           element,
           location: new OpenSeadragon.Point(parseInt(i) - width / 2, verticalStart),
@@ -703,6 +705,7 @@ export default {
           height = 0.2
         }
 
+        this.gridOverlays.push(element)
         this.viewer.addOverlay({
           element,
           location: new OpenSeadragon.Point(horizontalStart, parseInt(i) - height / 2),
@@ -731,7 +734,7 @@ export default {
         return null
       }
 
-      const existingOverlay = this.$refs.container.querySelector('.svgContainer.shapes')
+      const existingOverlay = this.registeredOverlay('shapes')
 
       if (existingOverlay !== null) {
         const oldActive = existingOverlay.querySelector('.activeWritingZone')
@@ -741,6 +744,7 @@ export default {
         }
 
         this.viewer.removeOverlay(existingOverlay)
+        delete this.overlays.shapes
       }
 
       if (!svg.documentElement) {
@@ -762,6 +766,7 @@ export default {
       svgClone.setAttribute('style', 'transform: rotate(' + (rects.rotation * -1) + 'deg); transform-origin: top left;')
 
       svgContainer.append(svgClone)
+      this.overlays.shapes = svgContainer
 
       this.viewer.addOverlay({
         element: svgContainer,
@@ -1263,16 +1268,15 @@ export default {
       const systems = this.$store.getters.rastrumsOnCurrentPage
       const activeSystemId = this.$store.getters.activeSystemId
 
-      const renderedSystems = this.$refs.container.querySelectorAll('.system.overlay')
-      const renderedIDs = []
-
-      renderedSystems.forEach(rs => {
-        renderedIDs.push(rs.getAttribute('data-id'))
-        const hit = systems.find(s => s.id === rs.getAttribute('data-id'))
+      Object.keys(this.overlays).filter(key => key.startsWith('system:')).forEach(key => {
+        const rs = this.registeredOverlay(key)
+        const hit = rs && systems.find(s => 'system:' + s.id === key)
         if (!hit) {
-          const rotatedSystem = rs.querySelector('.rotatedSystem')
-          rotatedSystem.removeEventListener('click', this.systemClickListener)
-          this.viewer.removeOverlay(rs)
+          if (rs) {
+            rs.querySelector('.rotatedSystem').removeEventListener('click', this.systemClickListener)
+            this.viewer.removeOverlay(rs)
+          }
+          delete this.overlays[key]
         } else {
           const overlay = this.viewer.getOverlayById(rs)
           const rotatedSystem = rs.querySelector('.rotatedSystem')
@@ -1290,7 +1294,7 @@ export default {
       })
 
       systems.forEach(s => {
-        if (renderedIDs.indexOf(s.id) === -1) {
+        if (!this.overlays['system:' + s.id]) {
           const element = document.createElement('div')
           element.classList.add('system')
           element.classList.add('overlay')
@@ -1306,6 +1310,7 @@ export default {
 
           const location = new OpenSeadragon.Rect(s.x, s.y, s.w, s.h)
 
+          this.overlays['system:' + s.id] = element
           this.viewer.addOverlay({
             element,
             location,
@@ -1378,10 +1383,9 @@ export default {
 
       if (!this.type || this.type !== 'diploTrans') {
         // the media fragment as stored in the data
-        const existingImage = this.$refs.container.querySelector('.overlay.imageBorder')
         const imageLocation = new OpenSeadragon.Rect(rects.image.x, rects.image.y, rects.image.w, rects.image.h)
 
-        if (!existingImage) {
+        const { element: imageBorder } = this.placeOverlay('imageBorder', imageLocation, () => {
           const element = document.createElement('div')
           element.classList.add('overlay')
           element.classList.add('imageBorder')
@@ -1389,24 +1393,15 @@ export default {
           const innerRot = document.createElement('div')
           innerRot.classList.add('rotatedBox')
           innerRot.classList.add('overlay')
-          innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
           element.append(innerRot)
-
-          this.viewer.addOverlay({
-            element,
-            location: imageLocation // ,
-            // rotationMode: centerPos.rotationMode
-          })
-        } else {
-          this.viewer.updateOverlay(existingImage, imageLocation)
-          existingImage.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
-        }
+          return element
+        })
+        imageBorder.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
 
         // the media fragment as stored in the data
-        const existingMediaFrag = this.$refs.container.querySelector('.overlay.pageBorder.mediaFragment')
         const mediaFragLocation = new OpenSeadragon.Rect(rects.mediaFrag.x, rects.mediaFrag.y, rects.mediaFrag.w, rects.mediaFrag.h)
 
-        if (!existingMediaFrag) {
+        const { element: mediaFragment } = this.placeOverlay('mediaFragment', mediaFragLocation, () => {
           const element = document.createElement('div')
           element.classList.add('overlay')
           element.classList.add('pageBorder')
@@ -1415,25 +1410,16 @@ export default {
           const innerRot = document.createElement('div')
           innerRot.classList.add('rotatedBox')
           innerRot.classList.add('overlay')
-          innerRot.style.transform = 'rotate(' + invertedRot + 'deg)'
           element.append(innerRot)
-
-          this.viewer.addOverlay({
-            element,
-            location: mediaFragLocation // ,
-            // rotationMode: centerPos.rotationMode
-          })
-        } else {
-          this.viewer.updateOverlay(existingMediaFrag, mediaFragLocation)
-          existingMediaFrag.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
-        }
+          return element
+        })
+        mediaFragment.querySelector('.rotatedBox').style.transform = 'rotate(' + invertedRot + 'deg)'
       }
 
       // get innermost rectangle
-      const existingPageOverlay = this.$refs.container.querySelector('.overlay.pageBorder.actualPage')
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
 
-      if (!existingPageOverlay) {
+      this.placeOverlay('actualPage', pageLocation, () => {
         const element = document.createElement('div')
         element.classList.add('overlay')
         if (this.type && this.type === 'diploTrans') {
@@ -1442,15 +1428,8 @@ export default {
           element.classList.add('pageBorder')
         }
         element.classList.add('actualPage')
-
-        this.viewer.addOverlay({
-          element,
-          location: pageLocation //,
-          // rotationMode: innerPos.rotationMode
-        })
-      } else {
-        this.viewer.updateOverlay(existingPageOverlay, pageLocation)
-      }
+        return element
+      })
     },
 
     /**
@@ -1475,14 +1454,15 @@ export default {
 
       const rects = getOsdRects(page)
 
-      const existingPageOverlay = this.$refs.container.querySelector('.overlay.emptyStaves')
       const pageLocation = new OpenSeadragon.Rect(rects.page.x, rects.page.y, rects.page.w, rects.page.h)
+      const existingPageOverlay = this.registeredOverlay('emptyStaves')
 
       if (!existingPageOverlay) {
         const element = document.createElement('div')
         element.classList.add('overlay')
         element.classList.add('emptyStaves')
         element.append(bg)
+        this.overlays.emptyStaves = element
 
         this.viewer.addOverlay({
           element,
@@ -1494,6 +1474,38 @@ export default {
         // the background changes with page features, so it needs to be replaced
         existingPageOverlay.replaceChildren(bg)
       }
+    },
+
+    /**
+     * returns the overlay element registered under a key, if OpenSeadragon still knows it. Overlays are registered
+     * synchronously when added, as OpenSeadragon only attaches them to the DOM later, so a DOM query for existing
+     * overlays would miss them and render calls that overlap would pile up overlays.
+     * @param {string} key the key the overlay was registered with
+     * @returns {HTMLElement|null}
+     */
+    registeredOverlay (key) {
+      const element = this.overlays[key]
+      return element && this.viewer.getOverlayById(element) ? element : null
+    },
+
+    /**
+     * adds the overlay registered under a key, or moves the existing one to the given location
+     * @param {string} key the key to register the overlay with
+     * @param {OpenSeadragon.Rect} location where to place the overlay
+     * @param {Function} createElement creates the element of the overlay, called only if there is none yet
+     * @param {Object} [options] further options for addOverlay (e.g. placement, rotationMode)
+     * @returns {{element: HTMLElement, created: boolean}}
+     */
+    placeOverlay (key, location, createElement, options = {}) {
+      const existing = this.registeredOverlay(key)
+      if (existing) {
+        this.viewer.updateOverlay(existing, location, options.placement)
+        return { element: existing, created: false }
+      }
+      const element = createElement()
+      this.overlays[key] = element
+      this.viewer.addOverlay({ element, location, ...options })
+      return { element, created: true }
     },
 
     /**
@@ -1524,14 +1536,11 @@ export default {
         return null
       }
 
-      const existingOverlays = this.$refs.container.querySelectorAll('.overlay.diploTrans')
-
-      existingOverlays.forEach(overlay => {
-        const needsRendering = dtArr.findIndex(dt => dt.wzDetails.diploTrans === overlay.getAttribute('data-diploTrans')) !== -1
-
-        if (!needsRendering) {
-          // console.log('removing overlay for ' + overlay.getAttribute('data-diploTrans'))
-          this.viewer.removeOverlay(overlay)
+      // remove overlays of writing zones that are no longer rendered
+      Object.keys(this.overlays).filter(key => key.startsWith('dt:')).forEach(key => {
+        if (dtArr.findIndex(dt => 'dt:' + dt.wzDetails.id === key) === -1) {
+          this.viewer.removeOverlay(this.overlays[key])
+          delete this.overlays[key]
         }
       })
 
@@ -1539,8 +1548,13 @@ export default {
         if (obj.dt) {
           const draftId = obj.dt.querySelector('draft').getAttribute('xml:id')
           const renderedDiplo = await this.renderDiploTrans(obj.dt, draftId)
+          if (!renderedDiplo) {
+            return null
+          }
 
-          const existingOverlay = [...existingOverlays].find(overlay => overlay.getAttribute('data-diploTrans') === obj.wzDetails.diploTrans)
+          // looked up only after rendering, so that calls overlapping each other see each others overlays
+          const key = 'dt:' + obj.wzDetails.id
+          const existingOverlay = this.registeredOverlay(key)
           const activeWritingZone = this.$store.getters.activeWritingZone
           // const svgForCurrentPage = this.$store.getters.svgForCurrentPage
 
@@ -1554,6 +1568,7 @@ export default {
             element.setAttribute('data-diploTrans', obj.wzDetails.id)
             element.setAttribute('data-filePath', obj.wzDetails.diploTrans)
             element.append(renderedDiplo)
+            this.overlays[key] = element
 
             /* cleanUpDiplomaticTranscript(, obj.dt, {
               rastrumsOnCurrentPage,
@@ -1573,9 +1588,8 @@ export default {
               // rotationMode: innerPos.rotationMode
             })
           } else {
-            // console.log('There already is an overlay for ' + dt.wzDetails.diploTrans)
             // TODO: renderedDiplo is newly created, so we need to cleanUp again???
-            existingOverlay.replaceChild(renderedDiplo)
+            existingOverlay.replaceChildren(renderedDiplo)
             const location = pageLocation // new OpenSeadragon.Rect(x, y, w, h)
             if (obj.wzDetails.id === activeWritingZone) {
               existingOverlay.classList.add('activeDiploTrans')
@@ -1622,9 +1636,14 @@ export default {
       document.querySelectorAll('.overlay, .grid').forEach(overlay => {
         this.viewer.removeOverlay(overlay)
       })
+      this.overlays = {}
+      this.gridOverlays = []
     }
   },
   created () {
+    // overlays added to OpenSeadragon by this component, by key; see registeredOverlay()
+    this.overlays = {}
+    this.gridOverlays = []
     // console.log('FacsimileComponent:created()')
     this.$watch(
       () => this.$route.query,
