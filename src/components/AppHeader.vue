@@ -40,6 +40,9 @@
           <router-link :to="getRouterLinkTarget('diplo')" active-class="active">Diplomatic Transcripts</router-link>
           <!-- <a href="#" :class="{active: explorerTab === 'diplo'}" @click.stop.prevent="openTab('diplo')">Diplomatic Transcripts</a>-->
         </li>
+        <li class="tab-item">
+          <router-link :to="getRouterLinkTarget('annotations')" active-class="active">Annotations</router-link>
+        </li>
       </ul>
     </div>
   </div>

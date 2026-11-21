@@ -74,9 +74,11 @@ import DiploTabMenu from '@/components/DiploTabMenu.vue'
 import fileDownload from 'js-file-download'
 // import { base64dom, dom2base64 } from '@/tools/github'
 import { prepareDtForRendering } from '@/tools/mei'
+import transcriptLoading from '@/mixins/transcriptLoading.js'
 
 export default {
   name: 'DiploTab',
+  mixins: [transcriptLoading],
   components: {
     MainStage,
     SideBar,
@@ -93,88 +95,6 @@ export default {
   methods: {
     toggleSidebar () {
       this.$store.dispatch('toggleDiploTabSidebar')
-    },
-    verifySvgAvailable () {
-      const svgPath = this.$store.getters.currentSvgPath
-      const svg = this.$store.getters.svgForCurrentPage
-      if (svgPath !== null && !svg) {
-        this.$store.dispatch('loadSvgFile', {
-          path: svgPath
-        })
-      }
-    },
-    verifyAnnotTransLoaded () {
-      const atPath = this.$store.getters.currentWzAtPath
-      const at = this.$store.getters.annotatedTranscriptForCurrentWzPrepared
-      if (this.$store.getters.availableAnnotatedTranscripts.indexOf(atPath) !== -1 && !at) {
-        this.$store.dispatch('loadXmlFile', {
-          path: atPath
-        })
-      }
-
-      if (atPath && !at) {
-        const atSymlinkForCurrentWz = this.$store.getters.resolvedAtSymlinkForCurrentWz
-        if (atSymlinkForCurrentWz !== null) {
-          const symlinkedDom = this.$store.getters.documentByPath(atSymlinkForCurrentWz)
-          if (!symlinkedDom) {
-            this.$store.dispatch('loadXmlFile', {
-              path: atSymlinkForCurrentWz
-            })
-          }
-        }
-      }
-    },
-    async verifyDiploTransLoaded () {
-      // console.log('142----- verifyDiploTransLoaded() -----')
-      // const dtPage = await this.diplomaticTranscriptsOnCurrentPage
-      // console.log('142 diplomaticTranscriptsOnCurrentPage', dtPage)
-
-      // const dtOnPage = await this.$store.getters.diplomaticTranscriptsOnCurrentPage
-      const availableDiplomaticTranscripts = this.$store.getters.availableDiplomaticTranscripts
-
-      if (!this.$store.getters.currentSvgPath) {
-        return false
-      }
-
-      const refPath = this.$store.getters.currentSvgPath.slice(0, -4).replace('/svg/', '/diplomaticTranscripts/') + '_wz'
-      const arr = availableDiplomaticTranscripts.filter((path) => path.startsWith(refPath))
-
-      arr.forEach((path) => {
-        const callback = async () => {
-          // console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
-        }
-        const dt = this.$store.getters.documentByPath(path)
-        if (!dt) {
-          // console.log('142 … going for ' + path)
-          this.$store.dispatch('loadXmlFile', { path, callback })
-        }
-      })
-
-      /* console.log('142 docPath', docPath)
-
-      console.log('142 dtOnPage', dtOnPage)
-      console.log('142 this.$store.getters.availableDiplomaticTranscripts', availableDiplomaticTranscripts)
-
-      for (const dt of dtOnPage) {
-        const path = dt.wzDetails.diploTrans
-        if (availableDiplomaticTranscripts.indexOf(path) !== -1) {
-          // console.log(' … going for ' + path)
-          const callback = async () => {
-            const arr = await this.diplomaticTranscriptsOnCurrentPage // this.$store.getters.diplomaticTranscriptsOnCurrentPage
-            console.warn('142 received callback from verifyDiploTransLoaded() for ' + path, arr)
-          }
-          console.log('142 … going for ' + path)
-          this.$store.dispatch('loadXmlFile', { path, callback })
-        }
-      } */
-      /*
-        if (this.$store.getters.availableDiplomaticTranscripts.indexOf(dtPath) !== -1 && !dt) {
-          console.log(' … going for ' + dtPath)
-          this.$store.dispatch('loadXmlFile', {
-            path: dtPath
-          })
-        }
-      */
     },
     initializeDiploTrans () {
       // this.$store.dispatch('initializeDiploTrans')
@@ -257,40 +177,13 @@ export default {
     }
   },
   created () {
-    this.unwatchSvgVerification = this.$store.watch((state, getters) => getters.currentSvgPath,
-      (newPath, oldPath) => {
-        this.verifySvgAvailable()
-      })
-
-    this.unwatchAnnotTransVerification = this.$store.watch((state, getters) => getters.currentWzAtPath,
-      (newPath, oldPath) => {
-        this.verifyAnnotTransLoaded()
-      })
-
-    this.unwatchAtSymlinkVerification = this.$store.watch((state, getters) => getters.resolvedAtSymlinkForCurrentWz,
-      (newPath, oldPath) => {
-        this.verifyAnnotTransLoaded()
-      })
-
-    this.unwatchDiploTransVerification = this.$store.watch((state, getters) => getters.diplomaticTranscriptsOnCurrentPage,
-      (newArr, oldArr) => {
-        this.verifyDiploTransLoaded()
-      })
-
     this.unwatchDiploActivations = this.$store.watch((state, getters) => [getters.diploTransActivationsInShapes, getters.diploTransActivationsInAnnotTrans],
       ([newShapes, newAnnotated], [oldShapes, oldAnnotated]) => {
         // console.log('selected shapes:', newShapes.target)
         this.autoTranscribe(newShapes, oldShapes, newAnnotated, oldAnnotated)
       })
-
-    this.verifySvgAvailable()
-    this.verifyAnnotTransLoaded()
-    this.verifyDiploTransLoaded()
   },
   beforeUnmount () {
-    this.unwatchSvgVerification()
-    this.unwatchAnnotTransVerification()
-    this.unwatchDiploTransVerification()
     this.unwatchDiploActivations()
   }
 }

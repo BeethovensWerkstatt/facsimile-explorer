@@ -7,6 +7,7 @@ import { convertRectUnits, sortRastrumsByVerticalPosition, initializeDiploTrans,
 import { render } from 'thulemeier'
 import { rotatePoint } from '@/tools/trigonometry'
 import { prepareAtDomForRendering } from '@/tools/annotatedTranscripts.js'
+import { createAnnotationDom, plistTargets, relativePath } from '@/tools/annotations.js'
 // import { getRectFromFragment } from '@/tools/trigonometry.js'
 // import { Base64 } from 'js-base64'
 
@@ -2093,6 +2094,109 @@ const dataModule = {
     },
 
     /**
+     * creates an annotation for the current writing zone, linking to its AT or DT. The file is named after
+     * page and writing zone, and stored in the folder of the annotation author.
+     * @param {*} param0
+     * @param {*} param1 link: 'at' or 'dt', the transcript the annotation refers to
+     */
+    async createAnnotation ({ getters, dispatch, commit }, { link }) {
+      const wz = getters.currentWritingZoneObject
+      if (!wz || getters.currentWzAnnotation) {
+        return false
+      }
+
+      // siglum and page numbers follow the reconstruction that is opened (NK), not the source the page comes from
+      const siglum = getters.documentByPath(getters.filepath)?.querySelector('titleStmt title[type="abbreviated"]')?.textContent.trim() || 'NK'
+      const pageLabel = String(getters.currentPageInfo.label).padStart(2, '0')
+      const prefix = siglum + pageLabel + '-' + String(wz.index + 1).padStart(2, '0')
+      const root = getters.config.annotations?.root || 'data/annots'
+      const id = 'a' + uuid()
+      const path = root + '/' + siglum + '/' + prefix + '_' + id + '.xml'
+      const dom = createAnnotationDom({
+        id,
+        plist: relativePath(path, link === 'dt' ? wz.diploTrans : wz.annotTrans),
+        date: new Date().toISOString().split('T')[0]
+      })
+
+      commit('ADD_AVAILABLE_ANNOTATION', path)
+      await dispatch('loadDocumentIntoStore', { path, dom })
+      await dispatch('logChange', { path, baseMessage: 'add annotation ', param: path.split('/').pop(), xmlIDs: [], isNewDocument: true })
+    },
+
+    /**
+     * sets heading and text of an annotation
+     * @param {*} param0
+     * @param {*} param1 path: path of the annotation; title: the heading; paragraphs: the text as array of
+     * paragraphs, each an array of segments, which are either { text } or { ref: target, text } for a link
+     */
+    async updateAnnotation ({ getters, dispatch }, { path, title, paragraphs }) {
+      const dom = getters.documentByPath(path)?.cloneNode(true)
+      const annot = dom?.documentElement
+      if (!annot) {
+        return false
+      }
+
+      annot.querySelector('head title').textContent = title
+      annot.querySelectorAll('p').forEach(p => p.remove())
+      const createElement = name => dom.createElementNS(annot.namespaceURI, name)
+      ;(paragraphs.length ? paragraphs : [[]]).forEach(segments => {
+        const p = createElement('p')
+        segments.forEach(segment => {
+          if (segment.ref === undefined) {
+            p.appendChild(dom.createTextNode(segment.text))
+          } else {
+            const ref = createElement('ref')
+            if (segment.ref) {
+              ref.setAttribute('target', segment.ref)
+            }
+            ref.textContent = segment.text
+            p.appendChild(ref)
+          }
+        })
+        annot.appendChild(p)
+      })
+
+      await dispatch('loadDocumentIntoStore', { path, dom })
+      await dispatch('logChange', {
+        path,
+        baseMessage: 'edit annotation ',
+        param: path.split('/').pop(),
+        xmlIDs: [annot.getAttribute('xml:id')],
+        isNewDocument: false
+      })
+    },
+
+    /**
+     * switches the annotation of the current writing zone between its AT and its DT. Entries of @plist
+     * pointing to other writing zones are left untouched.
+     * @param {*} param0
+     * @param {*} param1 link: 'at' or 'dt'
+     */
+    async setAnnotationLink ({ getters, dispatch }, { link }) {
+      const wz = getters.currentWritingZoneObject
+      const path = getters.currentWzAnnotation?.path
+      const dom = path && getters.documentByPath(path)?.cloneNode(true)
+      if (!wz || !dom) {
+        return false
+      }
+
+      const annot = dom.documentElement
+      const own = [wz.annotTrans, wz.diploTrans]
+      const refs = annot.getAttribute('plist').trim().split(/\s+/)
+      const targets = plistTargets(path, annot.getAttribute('plist'))
+      annot.setAttribute('plist', refs.map((ref, i) => own.includes(targets[i]) ? relativePath(path, link === 'dt' ? wz.diploTrans : wz.annotTrans) : ref).join(' '))
+
+      await dispatch('loadDocumentIntoStore', { path, dom })
+      await dispatch('logChange', {
+        path,
+        baseMessage: 'change link of annotation ',
+        param: path.split('/').pop(),
+        xmlIDs: [annot.getAttribute('xml:id')],
+        isNewDocument: false
+      })
+    },
+
+    /**
      * sets shapes of the current active element
      * @param {*} param0
      * @param {*} shapes
@@ -3827,6 +3931,36 @@ const dataModule = {
       // console.log('found elem:\n', elem)
 
       return serializer.serializeToString(elem)
+    },
+
+    /**
+     * the annotations of a writing zone. @plist of an annotation may list several transcripts, each
+     * of them the AT or the DT of a writing zone.
+     * @param {*} state
+     * @param {*} getters
+     * @returns a function returning an array of { path, links }, where links tells if the AT, the DT or both are referenced
+     */
+    annotationsForWz: (state, getters) => (wz) => {
+      if (!wz) {
+        return []
+      }
+      const targets = { at: wz.annotTrans, dt: wz.diploTrans }
+      return getters.availableAnnotations.flatMap(path => {
+        const plist = getters.documentByPath(path)?.documentElement.getAttribute('plist')
+        const refs = plist ? plistTargets(path, plist) : []
+        const links = Object.keys(targets).filter(kind => refs.includes(targets[kind]))
+        return links.length ? [{ path, links }] : []
+      })
+    },
+
+    /**
+     * the annotation of the current writing zone (the first one, in case of several), if any
+     * @param {*} state
+     * @param {*} getters
+     * @returns { path, links } or null
+     */
+    currentWzAnnotation: (state, getters) => {
+      return getters.annotationsForWz(getters.currentWritingZoneObject)[0] || null
     },
 
     /**

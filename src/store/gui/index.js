@@ -88,6 +88,8 @@ const guiModule = {
     },
     diploTransOsdBounds: null,
     activeDiploTransElementId: null,
+    annotationPicking: false, // if true, clicks on AT / DT elements are collected as link targets of an annotation
+    annotationPick: null, // the last element picked: { kind: 'at' | 'dt', id, n }
     lockXml: false, // activate read only ranges in XmlEditor
     contextMenu: null,
     pitchClarificationLetterMode: false // if true, only allows to write pitch clarification letters in diplomatic transcripts
@@ -144,7 +146,7 @@ const guiModule = {
      * @param {[type]} val    [description]
      */
     SET_EXPLORER_TAB (state, val) {
-      const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo']
+      const allowedTabs = ['home', 'pages', 'zones', 'annot', 'diplo', 'annotations']
       if (allowedTabs.indexOf(val) !== -1) {
         state.explorerTab = val
         state.diploTransBounds = null
@@ -444,6 +446,18 @@ const guiModule = {
      */
     SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID (state, id) {
       state.activeDiploTransElementId = id
+    },
+    /**
+     * sets whether clicks on AT / DT elements are collected as link targets of an annotation
+     */
+    SET_ANNOTATION_PICKING (state, picking) {
+      state.annotationPicking = picking
+    },
+    /**
+     * registers an element picked as link target of an annotation
+     */
+    SET_ANNOTATION_PICK (state, { kind, id }) {
+      state.annotationPick = { kind, id, n: (state.annotationPick?.n || 0) + 1 }
     },
     /**
      * activates read only ranges in XmlEditor
@@ -802,6 +816,20 @@ const guiModule = {
     setActiveDiploTransElementId ({ commit }, id) {
       commit('SET_XML_READONLY_LOCK', false)
       commit('SET_ACTIVE_DIPLO_TRANS_ELEMENT_ID', id)
+    },
+    /**
+     * switches the collection of link targets for annotations on or off
+     * @param {*} picking
+     */
+    setAnnotationPicking ({ commit }, picking) {
+      commit('SET_ANNOTATION_PICKING', picking)
+    },
+    /**
+     * reports an element of the AT or DT that was clicked while collecting link targets
+     * @param {*} param1 kind: 'at' or 'dt'; id: xml:id of the element
+     */
+    pickAnnotationTarget ({ commit }, { kind, id }) {
+      commit('SET_ANNOTATION_PICK', { kind, id })
     },
     /**
      * activate readonly ranges in XmlEditor
@@ -1228,6 +1256,10 @@ const guiModule = {
     activeDiploTransElementId: (state) => {
       return state.activeDiploTransElementId
     },
+
+    annotationPicking: (state) => state.annotationPicking,
+
+    annotationPick: (state) => state.annotationPick,
 
     /**
      * returns all IDs linked to the active DT element

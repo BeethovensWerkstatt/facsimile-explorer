@@ -95,6 +95,31 @@
           </span>
         </div>
       </template>
+      <template v-else-if="p === activePage && this.purpose === 'annotations'">
+        <div
+          class="wz"
+          :class="{ active: wz.id === activeWritingZone }"
+          v-for="(wz, w) in writingZonesOnActivePage"
+          :key="w"
+          @click="selectWritingZone(wz)"
+          :title="'AT: ' + wz.annotTrans + '\nDT: ' + wz.diploTrans"
+        >
+          <span class="zoneNumber">WZ {{w + 1}}</span>
+          <span class="previewFrame" :style="{width: getPreviewWidth(page)}" @click="showWzPreview(page, wz)">
+            <span class="actualPreview" :style="wzPageDimensions(page, wz.xywh)"></span>
+          </span>
+          <span class="hasTrans float-right">
+            <template v-if="annotationsForWz(wz).length > 0">
+              <span class="desc">Anno-<br/>tations</span>
+              <span class="annotationCount" :title="annotationsForWz(wz).map(a => a.path).join('\n')">{{ annotationsForWz(wz).length }}</span>
+            </template>
+            <template v-else>
+              <span class="desc">not<br/>annot.</span>
+              <i class="icon icon-stop" title="Writing Zone without Annotation"></i>
+            </template>
+          </span>
+        </div>
+      </template>
     </div>
 
   </div>
@@ -193,7 +218,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts', 'availableDiplomaticTranscripts', 'availableAtSymlinks']),
+    ...mapGetters(['activeWritingZone', 'availableAnnotatedTranscripts', 'availableDiplomaticTranscripts', 'availableAtSymlinks', 'annotationsForWz']),
     activePage () {
       return this.$store.getters.currentPageZeroBased
     },
@@ -313,6 +338,17 @@ export default {
 
       i.icon-stop, i.icon-link {
         color: lighten($darkFontColor, 40%);
+      }
+
+      .annotationCount {
+        display: inline-block;
+        min-width: .9rem;
+        font-size: .7rem;
+        font-weight: 700;
+        text-align: center;
+        position: relative;
+        top: -3px;
+        color: darken($darkFontColor, 10%);
       }
 
       .desc {

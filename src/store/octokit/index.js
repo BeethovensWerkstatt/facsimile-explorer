@@ -28,6 +28,7 @@ const state = {
   availableAnnotatedTranscripts: [],
   availableDiplomaticTranscripts: [],
   availableAtSymlinks: [],
+  availableAnnotations: [],
   documents: {},
   // TODO rename / move to store.gui?
   filepath: undefined, // path of selected file
@@ -69,6 +70,7 @@ const getters = {
   availableAnnotatedTranscripts: state => state.availableAnnotatedTranscripts,
   availableDiplomaticTranscripts: state => state.availableDiplomaticTranscripts,
   availableAtSymlinks: state => state.availableAtSymlinks,
+  availableAnnotations: state => state.availableAnnotations,
   // getCommit: (state, getters) => (sha) => getters.octokit.
 
   proposedCommitMessage: state => {
@@ -181,6 +183,14 @@ const mutations = {
   ADD_AVAILABLE_DIPLOMATIC_TRANSCRIPT (state, diplomaticTranscript) {
     if (state.availableDiplomaticTranscripts.indexOf(diplomaticTranscript) === -1) {
       state.availableDiplomaticTranscripts.push(diplomaticTranscript)
+    }
+  },
+  SET_AVAILABLE_ANNOTATIONS (state, annotations) {
+    state.availableAnnotations = annotations
+  },
+  ADD_AVAILABLE_ANNOTATION (state, annotation) {
+    if (state.availableAnnotations.indexOf(annotation) === -1) {
+      state.availableAnnotations.push(annotation)
     }
   },
   SET_CONTENT_DATA (state, { repo, owner, ref, path, name, sha, doc }) {
@@ -727,8 +737,9 @@ const actions = {
         baseMessages.push(change.baseMessage)
       }
 
-      const fileChange = fileStore[path] ? fileStore[path] : { xmlIDs: [], isNewDocument: true }
-      fileStore[path] = { ...fileChange, xmlIDs: [...fileChange.xmlIDs, ...change.xmlIDs], isNewDocument: fileChange.isNewDocument && change.isNewDocument }
+      // a file created since the last commit is new, no matter how often it was edited afterwards
+      const fileChange = fileStore[path] ? fileStore[path] : { xmlIDs: [], isNewDocument: false }
+      fileStore[path] = { ...fileChange, xmlIDs: [...fileChange.xmlIDs, ...change.xmlIDs], isNewDocument: fileChange.isNewDocument || change.isNewDocument }
     })
     for (const path in fileStore) {
       const xmlIDs = fileStore[path].xmlIDs
@@ -903,6 +914,26 @@ const actions = {
     commit('SET_AVAILABLE_ANNOTATED_TRANSCRIPTS', annotatedTranscripts)
     commit('SET_AVAILABLE_AT_SYMLINKS', atSymlinks)
     commit('SET_AVAILABLE_DIPLOMATIC_TRANSCRIPTS', diplomaticTranscripts)
+
+    // annotations live in one folder per author, e.g. data/annots/NK/
+    const annotations = []
+    try {
+      const annotsFolder = await root.getFile(getters.config.annotations?.root || 'data/annots')
+      for (const author of await annotsFolder.folder) {
+        if (author.type === 'dir' || author.type === 'tree') {
+          for (const annotation of await author.folder) {
+            if (annotation.name.endsWith('.xml')) {
+              annotations.push(annotation.path)
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Octokit: no annotations found', err)
+    }
+    commit('SET_AVAILABLE_ANNOTATIONS', annotations)
+    // annotations are not part of a source, but needed to indicate which writing zones are annotated
+    annotations.forEach(path => dispatch('loadXmlFile', { path }))
     // TODO: this is a replacement for the commit above. This is in the data module
     commit('SET_DOCUMENTNAME_PATH_MAPPING', sourcefiles)
     // build a Promise to wait for loading of all sources

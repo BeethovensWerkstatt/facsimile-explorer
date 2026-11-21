@@ -6,6 +6,9 @@
     "default": "data/sources/Notirungsbuch_K/Notirungsbuch_K.xml"
   },
   "root": "data/sources",
+  "annotations": {
+    "root": "data/annots"
+  },
   "app": {
     "version": "0.2.1" 
   }

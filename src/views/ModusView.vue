@@ -12,6 +12,7 @@
   <ZonesTab v-else-if="explorerTab === 'zones'"/>
   <AnnotTab v-else-if="explorerTab === 'annot'"/>
   <DiploTab v-else-if="explorerTab === 'diplo'"/>
+  <AnnotationsTab v-else-if="explorerTab === 'annotations'"/>
 </template>
 
 <script>
@@ -23,6 +24,7 @@ import PagesTab from '@/components/PagesTab.vue'
 import ZonesTab from '@/components/ZonesTab.vue'
 import AnnotTab from '@/components/AnnotTab.vue'
 import DiploTab from '@/components/DiploTab.vue'
+import AnnotationsTab from '@/components/AnnotationsTab.vue'
 import ContextMenu from '@/components/shared/ContextMenu.vue'
 
 export default {
@@ -35,7 +37,8 @@ export default {
     PagesTab,
     ZonesTab,
     AnnotTab,
-    DiploTab
+    DiploTab,
+    AnnotationsTab
   },
   created () {
     console.log('ModusView:created()')

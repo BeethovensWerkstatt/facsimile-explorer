@@ -64,12 +64,20 @@ export default {
     },
 
     /**
+     * tabs showing facsimile, annotated and diplomatic transcript side by side, with synchronized viewers
+     * @return {boolean}
+     */
+    isDiploLikeTab () {
+      return ['diplo', 'annotations'].indexOf(this.$store.getters.explorerTab) !== -1
+    },
+
+    /**
      * in which tabs of the FX shall we render svg shapes?
      * @return {[type]} [description]
      */
     showSvg () {
       const tab = this.$store.getters.explorerTab
-      const validTabs = ['pages', 'zones', 'annot', 'diplo']
+      const validTabs = ['pages', 'zones', 'annot', 'diplo', 'annotations']
       return validTabs.indexOf(tab) !== -1 && (!this.type || this.type !== 'diploTrans')
     },
 
@@ -103,7 +111,7 @@ export default {
       if (tab === 'pages') {
         return true
       }
-      if (tab === 'diplo' && this.type === 'diploTrans') {
+      if (this.isDiploLikeTab && this.type === 'diploTrans') {
         return true
       }
       return false
@@ -114,9 +122,7 @@ export default {
      * @return {[type]} [description]
      */
     showRenderedStafflines () {
-      const tab = this.$store.getters.explorerTab
-      const validTabs = ['diplo']
-      return validTabs.indexOf(tab) !== -1 && this.type === 'diploTrans'
+      return this.isDiploLikeTab && this.type === 'diploTrans'
     },
     activeBezier () {
       const name = this.$store.getters.activeDiploTransElementName
@@ -162,6 +168,16 @@ export default {
       click.page = clickedPagePos
       // }
 
+      // while link targets for an annotation are collected, clicks on the DT only pick an element
+      if (this.$store.getters.annotationPicking) {
+        const picked = click.target.closest('.diploTrans') && click.target.closest(CSSselectables)
+        if (picked) {
+          // as when selecting DT elements, chords are picked instead of their notes
+          const element = picked.matches('.note') && picked.closest('.chord') ? picked.closest('.chord') : picked
+          this.$store.dispatch('pickAnnotationTarget', { kind: 'dt', id: element.getAttribute('data-id') })
+        }
+        return
+      }
       // check for click to svg shape
       if (click.target.localName === 'path' || click.target.localName === 'polygon') {
         // console.log('clicked on shape ' + click.target.id + ' – this.type: ' + this.type)
@@ -1670,7 +1686,7 @@ export default {
     })
 
     this.viewer.addHandler('viewport-change', (data) => {
-      if (this.explorerTab === 'diplo') {
+      if (this.isDiploLikeTab) {
         const viewer = data.eventSource
         const bounds = viewer.viewport.getBounds(false)
 
@@ -1717,7 +1733,7 @@ export default {
           this.renderPageBackground()
         }
       })
-    if (this.explorerTab === 'diplo') {
+    if (this.isDiploLikeTab) {
       this.unwatchDiploTransOsdBounds = this.$store.watch(
         (state, getters) => getters.diploTransOsdBounds,
         (newObj, oldObj) => {
@@ -1790,7 +1806,7 @@ export default {
       this.unwatchPageBackground()
       this.unwatchGrid()
       // TODO watch/unwatch on diplo tab ...
-      if (this.explorerTab === 'diplo') {
+      if (this.isDiploLikeTab) {
         this.unwatchDiploTransOsdBounds()
         if (typeof unwatchDiploTranscriptsOnCurrentPage === 'function') {
           this.unwatchDiploTranscriptsOnCurrentPage()

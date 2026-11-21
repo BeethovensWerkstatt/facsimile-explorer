@@ -107,6 +107,16 @@ export default {
       els.forEach((elm) => elm.addEventListener('click', this.clickListener)) */
     },
     async clickListener (e) {
+      // while link targets for an annotation are collected, clicks only pick an element
+      if (this.$store.getters.annotationPicking) {
+        const picked = e.target.closest(CSSselectables)
+        if (picked) {
+          const isDot = picked.getAttribute('data-class') === 'dots'
+          const id = (isDot ? picked.closest('.note, .rest') : picked).getAttribute('data-id')
+          this.$store.dispatch('pickAnnotationTarget', { kind: 'at', id })
+        }
+        return
+      }
       const target = e.target.closest(CSSselectables)
       if (target !== null) {
         const name = target.getAttribute('data-class')
