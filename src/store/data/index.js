@@ -26,10 +26,10 @@ const serializer = new XMLSerializer()
  * calculates the geometry of a page feature's zone from its (rendered) shapes
  * @param {string[]} shapeIds IDs of the SVG shapes
  * @param {*} page details of the current page
- * @param {number} ratio pixels per mm
+ * @param {*} rects the osdRects of the current page, giving pixels per mm and the position of the image on the page
  * @returns geometry as expected by setPageFeatureZoneGeometry(), or null if no shape is rendered
  */
-const pageFeatureGeometry = (shapeIds, page, ratio) => {
+const pageFeatureGeometry = (shapeIds, page, rects) => {
   // SVG coordinates are image pixels, so the bbox of the shapes directly gives the IIIF region
   const boxes = shapeIds.map(id => document.querySelector('path[id="' + id + '"]')?.getBBox()).filter(Boolean)
   if (boxes.length === 0) {
@@ -40,10 +40,16 @@ const pageFeatureGeometry = (shapeIds, page, ratio) => {
   const w = Math.min(Math.ceil(Math.max(...boxes.map(b => b.x + b.width))), page.width) - x
   const h = Math.min(Math.ceil(Math.max(...boxes.map(b => b.y + b.height))), page.height) - y
   const region = [x, y, w, h]
+  const mm = v => parseFloat(v.toFixed(1))
   return {
     region,
     image: page.uri.split('#')[0].replace(/\/$/, '') + '/' + region.join(',') + '/full/0/default.jpg',
-    mm: { width: parseFloat((w / ratio).toFixed(1)), height: parseFloat((h / ratio).toFixed(1)) }
+    mm: {
+      width: mm(w / rects.ratio),
+      height: mm(h / rects.ratio),
+      leftMargin: mm(x / rects.ratio + rects.image.x),
+      topMargin: mm(y / rects.ratio + rects.image.y)
+    }
   }
 }
 
@@ -1962,7 +1968,7 @@ const dataModule = {
       }
 
       // SVG coordinates are image pixels, so the shape's bbox directly gives the IIIF region
-      const geometry = pageFeatureGeometry([shape.id], page, getters.osdRects.ratio)
+      const geometry = pageFeatureGeometry([shape.id], page, getters.osdRects)
       if (!geometry) {
         return false
       }
@@ -2068,7 +2074,7 @@ const dataModule = {
       if (!remove) {
         refs.push(svgTarget + '#' + shape.id)
       }
-      const geometry = pageFeatureGeometry(refs.map(ref => ref.split('#')[1]), page, getters.osdRects.ratio)
+      const geometry = pageFeatureGeometry(refs.map(ref => ref.split('#')[1]), page, getters.osdRects)
       if (!geometry) {
         return false
       }

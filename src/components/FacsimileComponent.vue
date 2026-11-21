@@ -1491,6 +1491,8 @@ export default {
         })
       } else {
         this.viewer.updateOverlay(existingPageOverlay, pageLocation)
+        // the background changes with page features, so it needs to be replaced
+        existingPageOverlay.replaceChildren(bg)
       }
     },
 
@@ -1690,6 +1692,12 @@ export default {
       ([newArr, newId], [oldArr, oldId]) => {
         this.renderSystems()
       })
+    this.unwatchPageBackground = this.$store.watch((state, getters) => getters.emptyPageWithRastrums,
+      () => {
+        if (this.showRenderedStafflines && this.viewer?.world.getItemCount() > 0) {
+          this.renderPageBackground()
+        }
+      })
     if (this.explorerTab === 'diplo') {
       this.unwatchDiploTransOsdBounds = this.$store.watch(
         (state, getters) => getters.diploTransOsdBounds,
@@ -1760,6 +1768,7 @@ export default {
       this.unwatchTileSource()
       this.unwatchSVG()
       this.unwatchSystems()
+      this.unwatchPageBackground()
       this.unwatchGrid()
       // TODO watch/unwatch on diplo tab ...
       if (this.explorerTab === 'diplo') {

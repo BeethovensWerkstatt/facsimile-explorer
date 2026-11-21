@@ -1089,6 +1089,20 @@ export async function getEmptyPage (mei, surfaceId) {
   template.querySelector('layoutDesc').appendChild(layout.cloneNode(true))
   template.querySelector('physDesc').prepend(foliaDesc.cloneNode(true))
 
+  // the elements describing page features (plateNum, annot) are referenced by the zones of the surface
+  const physDesc = template.querySelector('physDesc')
+  const addDesc = template.createElementNS('http://www.music-encoding.org/ns/mei', 'addDesc')
+  const featureElements = [...mei.querySelectorAll('plateNum, annot')]
+  surface.querySelectorAll('zone[type][data]').forEach(zone => {
+    const element = featureElements.find(elem => elem.getAttribute('xml:id') === zone.getAttribute('data').substring(1))
+    if (element) {
+      (element.localName === 'annot' ? addDesc : physDesc).appendChild(element.cloneNode(true))
+    }
+  })
+  if (addDesc.hasChildNodes()) {
+    physDesc.appendChild(addDesc)
+  }
+
   return template
 }
 
@@ -1646,9 +1660,9 @@ export const addPageFeatureZone = (surface, container, { type, shapeRef, geometr
 
 /**
  * (re)sets position and size of a page feature's zone: the pixel corners of the zone, a <graphic> with the
- * IIIF link to the image region, and a <figDesc> with the <dimensions> in mm
+ * IIIF link to the image region, and a <figDesc> with the <dimensions> in mm, including the margins to the page's edges
  * @param {*} zone the <zone>
- * @param {*} geometry { region: [x, y, w, h] in image pixels, image: IIIF URL, mm: { width, height } }
+ * @param {*} geometry { region: [x, y, w, h] in image pixels, image: IIIF URL, mm: { width, height, leftMargin, topMargin } }
  */
 export const setPageFeatureZoneGeometry = (zone, { region: [x, y, w, h], image, mm }) => {
   Object.entries({ ulx: x, uly: y, lrx: x + w, lry: y + h }).forEach(([att, value]) => zone.setAttribute(att, value))
@@ -1658,6 +1672,12 @@ export const setPageFeatureZoneGeometry = (zone, { region: [x, y, w, h], image, 
   dimensions.setAttribute('unit', 'mm')
   appendNewElement(dimensions, 'height').textContent = mm.height
   appendNewElement(dimensions, 'width').textContent = mm.width
+  ;['leftMargin', 'topMargin'].forEach(form => {
+    const dim = appendNewElement(dimensions, 'dim')
+    dim.setAttribute('form', form)
+    dim.setAttribute('unit', 'mm')
+    dim.setAttribute('quantity', mm[form])
+  })
 }
 
 /**
